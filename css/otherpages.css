@@ -8,26 +8,30 @@ html {
 }
 
 body {
-    background-color: transparent;
-    color: #40ff00;
+    /* Uses Space Blue for the page environment fallback */
+    background-color: #070f15; 
+    /* Main body text set to crisp Cyber Blue */
+    color: #2dccff;
     text-shadow:
-    0 0 5px #91ff6cd3,
-    0 0 10px #58ff21d2,
-    0 0 15px #40ff0093;
+    0 0 5px rgba(45, 204, 255, 0.8),
+    0 0 10px rgba(45, 204, 255, 0.5),
+    0 0 15px rgba(45, 204, 255, 0.3);
     font-family: 'JetBrainsMono', monospace;
 }
 
 button {
-    background-color: black;
-    color: #5EFD28;
+    /* Pure dark canvas background to contrast the text glow */
+    background-color: #000000;
+    color: #2dccff;
     text-shadow:
-    0 0 10px #58ff21,
-    0 0 15px #40ff00;
+    0 0 10px rgba(45, 204, 255, 0.9),
+    0 0 15px rgba(45, 204, 255, 0.6);
     box-shadow:
-    0 0 10px #58ff21bd,
-    0 0 15px #40ff008a;
+    0 0 10px rgba(45, 204, 255, 0.5),
+    0 0 15px rgba(45, 204, 255, 0.2);
     border: none;
-    outline: 2px solid #00FF00;
+    /* Clean Cyber Blue structural wiring border */
+    outline: 2px solid #2dccff;
     height: 6vh;
     width: 10vw;
     border-radius: 10px;
@@ -35,10 +39,11 @@ button {
 }
 
 button:hover {
-    outline: 3px solid #00b600;
+    /* Deep cosmic blue border transition on hover to simulate pressing */
+    outline: 3px solid #1f4277; 
     text-shadow:
-    0 0 10px #32c600,
-    0 0 15px #228000;
+    0 0 10px rgba(31, 66, 120, 0.9),
+    0 0 15px rgba(31, 66, 120, 0.6);
 }
 
 input, textarea, [contenteditable] {
@@ -75,7 +80,8 @@ body::-webkit-scrollbar-track {
 }
 
 body::-webkit-scrollbar-thumb {
-    background-color: #40ff0084;
+    /* Scroll runner styled with semi-transparent Cyber Blue */
+    background-color: rgba(45, 204, 255, 0.4);
     border-radius: 10px;
 }
 

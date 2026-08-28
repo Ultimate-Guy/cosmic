@@ -118,8 +118,8 @@
                 return new URL(url, window.location.href).href;
             }
 
-            function gameUrl(path) {
-                return normalizeUrl('../../' + path);
+            function gameUrl(game) {
+                return normalizeUrl('../../' + game.path + (game.entry || ''));
             }
 
             function openGame(url) {
@@ -142,7 +142,7 @@
                 card.dataset.name = game.name.toLowerCase();
                 if (game.image) {
                     const thumb = document.createElement('img');
-                    thumb.src = gameUrl(game.image);
+                    thumb.src = gameUrl({path: game.image});
                     thumb.alt = '';
                     thumb.draggable = false;
                     thumb.className = 'game-thumb';
@@ -162,13 +162,13 @@
                 playBtn.className = 'play-btn';
                 playBtn.textContent = 'Play';
                 playBtn.addEventListener('click', () => {
-                    localStorage.setItem('lastPlayedGame', gameUrl(game.path));
-                    openGame(gameUrl(game.path));
+                    localStorage.setItem('lastPlayedGame', gameUrl(game));
+                    openGame(gameUrl(game));
                 });
                 const blankBtn = document.createElement('button');
                 blankBtn.className = 'blank-btn';
                 blankBtn.textContent = 'About Blank';
-                blankBtn.addEventListener('click', () => openGameBlank(gameUrl(game.path)));
+                blankBtn.addEventListener('click', () => openGameBlank(gameUrl(game)));
                 actions.append(playBtn, blankBtn);
                 card.append(name, actions);
                 return card;

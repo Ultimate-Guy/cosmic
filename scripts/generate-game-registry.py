@@ -47,6 +47,16 @@ def choose_image(folder, metadata):
     return images[0] if images else None
 
 
+def choose_entry(folder, metadata):
+    configured_entry = metadata.get("entry")
+    if not configured_entry:
+        return None
+    entry_path = (folder / configured_entry).resolve()
+    if folder.resolve() not in entry_path.parents or not entry_path.is_file():
+        raise FileNotFoundError(f"Entry file does not exist in {folder}: {configured_entry}")
+    return configured_entry.replace("\\", "/")
+
+
 def registry_path(path):
     return path.relative_to(ROOT).as_posix() + "/"
 
@@ -59,10 +69,13 @@ def main():
                 continue
             metadata = read_metadata(folder)
             image = choose_image(folder, metadata)
+            entry = choose_entry(folder, metadata)
             game = {
                 "name": metadata.get("title", display_name(folder.name)),
                 "path": registry_path(folder),
             }
+            if entry:
+                game["entry"] = entry
             if image:
                 game["image"] = registry_path(image).rstrip("/")
             games.append(game)

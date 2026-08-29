@@ -25,12 +25,12 @@ jobs:
         with:
           fetch-depth: 0 
 
-      # FIX 1: Sync BEFORE running the Python script
+      # FIX: Sync BEFORE running the Python script
       - name: Sync with Remote
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # Pull the latest changes while the workspace is still empty/clean
+          # This pulls changes while the workspace is still clean
           git pull --rebase origin master
 
       - name: Setup Python
@@ -38,7 +38,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      # FIX 2: Now run the script on a clean, up-to-date workspace
+      # Now run the script on a clean, up-to-date workspace
       - name: Generate game registry
         run: python3 scripts/generate-game-registry.py
 

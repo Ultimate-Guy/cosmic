@@ -12,6 +12,7 @@
             --bg-dark: #070f15;
             --card-bg: rgba(13, 26, 33, 0.85);
             --border: rgba(58, 204, 255, 0.4);
+            --text: #8fecff;
         }
 
         * { box-sizing: border-box; }
@@ -19,50 +20,46 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background: var(--bg-dark);
-            /* Space Starfield Background */
+            background-color: var(--bg-dark);
+            /* Space Theme Starfield */
             background-image: 
                 radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
-                radial-gradient(white, rgba(255,255,255,.1) 1px, transparent 30px);
-            background-size: 550px 550px, 350px 350px;
-            color: #8fecff;
+                radial-gradient(white, rgba(255,255,255,.1) 1px, transparent 30px),
+                radial-gradient(white, rgba(255,255,255,.05) 2px, transparent 40px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            color: var(--text);
             font-family: Arial, sans-serif;
             overflow-x: hidden;
         }
 
-        /* Floating Buttons (Top Corners) */
-        .floating-nav {
+        /* Floating Navigation (No Topbar) */
+        .nav-container {
             position: fixed;
             top: 20px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            z-index: 1000; /* Stays above the game loader */
         }
-        .top-left { left: 20px; }
-        .top-right { right: 20px; }
+        .nav-left { left: 20px; }
+        .nav-right { right: 20px; }
 
         .in-game-button {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
             cursor: pointer;
-            padding: 8px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: 0.3s;
             color: var(--accent);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
+            transition: 0.3s ease;
+            font-weight: bold;
         }
         .in-game-button:hover { background: var(--accent); color: #000; transform: scale(1.1); }
-        .in-game-button svg { width: 15px; height: 15px; }
+        .in-game-button svg { width: 16px; height: 16px; }
 
-        /* Settings Text Button */
-        #settings-trigger { font-weight: bold; padding: 10px 20px; }
-
-        /* Game Grid - Fixed Overlapping */
-        #main-content { padding: 100px 40px 40px; }
+        /* Main Game Grid - Fixed Overlapping */
+        #main-content { padding: 80px 40px 40px; }
         #gamesgrid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
@@ -77,37 +74,51 @@
             padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            text-align: center;
+            gap: 8px;
+            transition: 0.3s;
         }
+        .game-card:hover { border-color: var(--accent); box-shadow: 0 0 15px rgba(45, 204, 255, 0.2); }
 
         .game-thumb { width: 100%; aspect-ratio: 1/1; border-radius: 10px; object-fit: cover; }
-        .game-thumb-placeholder { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 10px; display: grid; place-items: center; font-size: 0.8rem; }
+        .game-thumb-placeholder { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 10px; display: grid; place-items: center; font-size: 0.75rem; color: var(--accent); text-align: center; padding: 5px; }
 
-        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .play-btn { background: var(--accent); color: #000; border: none; padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .game-title { font-size: 0.85rem; font-weight: bold; text-align: center; margin: 4px 0; }
 
-        /* Full Screen Game Loader */
+        /* Smaller Play & Cloak Buttons */
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .action-btn { 
+            height: 32px; border-radius: 6px; border: none; font-size: 0.75rem; 
+            font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .play-btn { background: var(--accent); color: #031721; }
+        .cloak-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .action-btn:hover { opacity: 0.8; transform: translateY(-2px); }
+
+        /* Full Screen Game Loader Section */
         #page-loader {
             position: fixed; inset: 0; background: #000;
             display: none; z-index: 500;
         }
         #page-loader iframe { width: 100%; height: 100%; border: none; }
 
-        /* Settings Modal (Glaxyias Inspired) */
+        /* Settings Modal */
         #settings-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
             display: none; place-items: center; z-index: 2000;
         }
-        .modal-content { background: var(--card-bg); border: 1px solid var(--border); padding: 30px; border-radius: 20px; width: 400px; }
-        .option { margin-bottom: 20px; }
-        input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: var(--accent); border-radius: 5px; }
+        .modal-content { 
+            background: var(--card-bg); border: 1px solid var(--border); 
+            padding: 30px; border-radius: 20px; width: min(400px, 90%); 
+        }
+        .modal-content h3 { color: var(--accent); margin-top: 0; }
+        .option { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: var(--accent); border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <!-- Top Left Home Button (Always visible) -->
-    <div class="floating-nav top-left">
+    <!-- Top Left Home Button (Based on your snippet) -->
+    <div class="nav-container nav-left">
         <button id="gameButton" class="in-game-button" onclick="goHome()">
             <svg viewBox="0 0 320 512"><path fill="currentColor" d="M34.52 239.03L228.87 44.69c9.37-9.37 24.57-9.37 33.94 0l22.67 22.67c9.36 9.36 9.37 24.52.04 33.9L131.49 256l154.02 154.75c9.34 9.38 9.32 24.54-.04 33.9l-22.67 22.67c-9.37 9.37-24.57 9.37-33.94 0L34.52 272.97c-9.37-9.37-9.37-24.57 0-33.94z"></path></svg>
             <img src="../../imgs/cosmic.png" width="30" height="30" alt="Logo" />
@@ -115,91 +126,107 @@
     </div>
 
     <!-- Top Right Settings Button -->
-    <div class="floating-nav top-right">
-        <button id="settings-trigger" class="in-game-button" onclick="toggleSettings()">
+    <div class="nav-container nav-right">
+        <button class="in-game-button" onclick="toggleSettings()">
             <i class="fas fa-cog"></i> Settings
         </button>
     </div>
 
+    <!-- Game Grid Content -->
     <main id="main-content">
         <div id="gamesgrid">
-            <p id="loading">Scanning Cosmic Registry...</p>
+            <p id="loading">Connecting to Cosmic Registry...</p>
         </div>
     </main>
 
+    <!-- Full Screen Loader (Based on your snippet) -->
     <section id="page-loader">
         <iframe id="game-iframe"></iframe>
     </section>
 
-    <!-- Settings Modal -->
+    <!-- Settings Modal (Glaxyias Panic System) -->
     <div id="settings-modal">
         <div class="modal-content">
-            <h3>Panic & Privacy</h3>
+            <h3>System Settings</h3>
             <div class="option">
-                <label>Panic Key</label>
-                <input type="text" id="panic-key" placeholder="e.g. \" maxlength="1" />
+                <label>Panic Key (e.g. \ )</label>
+                <input type="text" id="panic-key" placeholder="Enter key..." maxlength="1" />
             </div>
             <div class="option">
                 <label>Panic URL</label>
                 <input type="text" id="panic-url" placeholder="https://classroom.google.com" />
             </div>
-            <button class="play-btn" style="width:100%" onclick="toggleSettings()">Save & Close</button>
+            <div class="option">
+                <label>Tab Masking</label>
+                <button class="play-btn action-btn" style="height:40px; margin-bottom:5px" onclick="maskTab('Google Classroom', 'https://ssl.gstatic.com/classroom/favicon.png')">Classroom Mask</button>
+                <button class="play-btn action-btn" style="height:40px" onclick="maskTab('Google', 'https://www.google.com/favicon.ico')">Google Mask</button>
+            </div>
+            <button class="play-btn action-btn" style="width:100%; height:45px; margin-top:10px;" onclick="toggleSettings()">Save Changes</button>
         </div>
     </div>
 
     <script>
-        // Core Logic
+        // Toggle from game back to menu
         function goHome() {
             document.getElementById('page-loader').style.display = 'none';
             document.getElementById('game-iframe').src = '';
             document.getElementById('main-content').style.display = 'block';
         }
 
+        // Settings Modal Toggle
         function toggleSettings() {
-            const m = document.getElementById('settings-modal');
-            m.style.display = m.style.display === 'grid' ? 'none' : 'grid';
+            const modal = document.getElementById('settings-modal');
+            modal.style.display = modal.style.display === 'grid' ? 'none' : 'grid';
         }
 
-        // Panic Redirect (Glaxyias style)
+        // Glaxyias Panic & Masking Logic
+        function maskTab(title, icon) {
+            document.title = title;
+            let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon'; link.rel = 'shortcut icon'; link.href = icon;
+            document.getElementsByTagName('head').appendChild(link);
+        }
+
         window.addEventListener('keydown', (e) => {
             const key = document.getElementById('panic-key').value || '\\';
             const url = document.getElementById('panic-url').value || 'https://classroom.google.com';
             if (e.key === key) window.location.replace(url);
         });
 
-        // Registry Loading [1, 2]
+        // Dynamic Registry Implementation [From Cosmic Sources]
         function normalizeUrl(url) { return new URL(url, window.location.href).href; }
         function gameUrl(game) { return normalizeUrl('../../' + game.path + (game.entry || '')); }
-
-        fetch('games.json')
-            .then(res => res.json())
-            .then(games => {
-                const grid = document.getElementById('gamesgrid');
-                document.getElementById('loading').remove();
-                games.forEach(game => {
-                    const card = document.createElement('div');
-                    card.className = 'game-card';
-                    
-                    const finalUrl = gameUrl(game);
-                    const imgUrl = game.image ? gameUrl({path: game.image}) : null;
-
-                    card.innerHTML = `
-                        ${imgUrl ? `<img src="${imgUrl}" class="game-thumb">` : `<div class="game-thumb-placeholder">${game.name}</div>`}
-                        <div style="font-weight:bold; font-size:0.9rem">${game.name}</div>
-                        <div class="card-actions">
-                            <button class="play-btn" onclick="launch('${finalUrl}')">Play</button>
-                            <button class="play-btn" style="background:none; border:1px solid var(--accent); color:var(--accent)" onclick="window.open('${finalUrl}', '_blank')">Tab</button>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
-            });
 
         function launch(url) {
             document.getElementById('main-content').style.display = 'none';
             document.getElementById('page-loader').style.display = 'block';
             document.getElementById('game-iframe').src = url;
         }
+
+        fetch('games.json')
+            .then(res => res.json())
+            .then(games => {
+                const grid = document.getElementById('gamesgrid');
+                document.getElementById('loading').remove();
+                
+                games.forEach(game => {
+                    const card = document.createElement('article');
+                    card.className = 'game-card';
+                    
+                    const finalUrl = gameUrl(game);
+                    const imgUrl = game.image ? gameUrl({path: game.image}) : null;
+
+                    card.innerHTML = `
+                        ${imgUrl ? `<img src="${imgUrl}" class="game-thumb" alt="">` : `<div class="game-thumb-placeholder">${game.name}</div>`}
+                        <div class="game-title">${game.name}</div>
+                        <div class="card-actions">
+                            <button class="action-btn play-btn" onclick="launch('${finalUrl}')">Play</button>
+                            <button class="action-btn cloak-btn" onclick="window.open('${finalUrl}', '_blank')">Tab</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            });
     </script>
 </body>
 </html>

@@ -10,12 +10,20 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
-      background: #070f15; /* Kept original color */
-      color: #8fecff;      /* Kept original color */
+      /* Base background color from original sources */
+      background-color: #070f15; 
+      /* CSS Starfield Implementation */
+      background-image: 
+        radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+        radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+        radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
+      background-size: 550px 550px, 350px 350px, 250px 250px;
+      background-position: 0 0, 40px 60px, 130px 270px;
+      color: #8fecff;
       font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
     }
 
-    /* Updated container to take up the full screen */
     .full-screen-container {
       flex: 1;
       display: flex;
@@ -23,17 +31,21 @@
       justify-content: center;
       align-items: center;
       padding: 40px;
-      background: #0d1a21; /* Kept original card background */
+      /* Slightly transparent background so stars show through */
+      background: rgba(13, 26, 33, 0.85); 
       text-align: center;
+      width: 100%;
     }
 
     /* Big font for the top welcome message */
     h1 {
       margin: 0 0 20px;
-      font-size: 5rem; /* Massive font size */
+      font-size: 5rem;
       text-transform: uppercase;
       letter-spacing: 4px;
-      color: #3accff; /* Brighter accent from your card border */
+      color: #3accff;
+      /* Subtle glow to match space theme */
+      text-shadow: 0 0 20px rgba(58, 204, 255, 0.6);
     }
 
     p {
@@ -51,17 +63,17 @@
       max-width: 1000px;
     }
 
-    /* Buttons are now way bigger */
+    /* Buttons remain way bigger */
     button {
       flex: 1;
       min-width: 300px;
-      height: 120px; /* Way bigger height */
+      height: 120px;
       padding: 0 40px;
       border: 2px solid #3accff66;
       border-radius: 20px;
-      background: #2dccff; /* Kept original color */
-      color: #031721;      /* Kept original color */
-      font-size: 2rem;    /* Bigger text inside buttons */
+      background: #2dccff;
+      color: #031721;
+      font-size: 2rem;
       font-weight: 800;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -70,14 +82,14 @@
     button:hover {
       background: #60dcff;
       transform: scale(1.05);
-      box-shadow: 0 0 30px #2dccff66;
+      box-shadow: 0 0 30px rgba(45, 204, 255, 0.4);
     }
 
     /* Bigger "continue without cloak" link */
     .link {
       display: block;
       margin-top: 50px;
-      font-size: 2rem; /* Much bigger link text */
+      font-size: 2rem;
       color: #8fecff;
       text-decoration: none;
       font-weight: bold;

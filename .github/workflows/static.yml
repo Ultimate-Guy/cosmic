@@ -23,23 +23,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Fetch all history so it can merge changes if you push twice quickly
           fetch-depth: 0 
+
+      # FIX 1: Sync BEFORE running the Python script
+      - name: Sync with Remote
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # Pull the latest changes while the workspace is still empty/clean
+          git pull --rebase origin master
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      # FIX 2: Now run the script on a clean, up-to-date workspace
       - name: Generate game registry
         run: python3 scripts/generate-game-registry.py
-
-      # NEW FIX: This pulls any changes you made while the script was running
-      - name: Sync with Remote
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin master
 
       - name: Commit games.json changes
         uses: stefanzweifel/git-auto-commit-action@v5

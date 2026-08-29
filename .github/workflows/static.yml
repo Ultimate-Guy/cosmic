@@ -3,15 +3,13 @@ name: Deploy static content to Pages
 on:
   push:
     branches: ["master"]
-    # Triggers when anything in the lessons folder changes (new folder, new image, etc.)
     paths:
       - 'pages/lessons/**'
       - 'scripts/generate-game-registry.py'
-
   workflow_dispatch:
 
 permissions:
-  contents: write # Essential for the bot to "type" the code into games.json
+  contents: write
   pages: write
   id-token: write
 
@@ -24,17 +22,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Fetch all history so it can merge changes if you push twice quickly
+          fetch-depth: 0 
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 1. Runs your script to scan folders and create the JSON
       - name: Generate game registry
         run: python3 scripts/generate-game-registry.py
 
-      # 2. Automatically commits the new games.json back to your repo
+      # NEW FIX: This pulls any changes you made while the script was running
+      - name: Sync with Remote
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin master
+
       - name: Commit games.json changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:

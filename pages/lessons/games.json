@@ -1,17 +1,17 @@
 [
   {
-    "name": "Brotato",
-    "path": "pages/lessons/Brotato"
-    "image": "pages/lessons/Brotato/images (23).jpg"
-  },
-  {
-    "name": "Escape Road 3",
-    "path": "pages/lessons/Escape Road 3/",
-    "image": "pages/lessons/Escape Road 3/images (7).jpg"
-  },
-  {
     "name": "Basket Random",
-    "path": "pages/lessons/Basket Random/",
-    "image": "pages/lessons/Basket Random/img/image (5).jpg"
+    "path": "pages/lessons/Basket%20Random/",
+    "image": "pages/lessons/Basket%20Random/images%20%285%29.jpg"
   },
+  {
+    "name": "Brotato",
+    "path": "pages/lessons/Brotato/",
+    "image": "pages/lessons/Brotato/images%20%2823%29.jpg"
+  },
+  {
+    "name": "Ragdoll Drop",
+    "path": "pages/lessons/Ragdoll%20Drop/",
+    "image": "pages/lessons/Ragdoll%20Drop/images%20%283%29.jpg"
+  }
 ]

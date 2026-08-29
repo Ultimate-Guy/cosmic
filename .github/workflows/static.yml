@@ -1,17 +1,21 @@
 name: Deploy static content to Pages
 
 on:
+  # Triggers on every push to master, including UI changes and new game folders
   push:
     branches: ["master"]
-    paths:
-      - 'pages/lessons/**'
-      - 'scripts/generate-game-registry.py'
+  
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write # Allows the bot to "type" changes into games.json
   pages: write
   id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -23,14 +27,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0 # Fetches full history to make syncing easier
 
-      # FIX: Sync BEFORE running the Python script
+      # 1. Sync BEFORE running the Python script to avoid Exit Code 128
       - name: Sync with Remote
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # This pulls changes while the workspace is still clean
           git pull --rebase origin master
 
       - name: Setup Python
@@ -38,10 +41,11 @@ jobs:
         with:
           python-version: '3.11'
 
-      # Now run the script on a clean, up-to-date workspace
+      # 2. Run your registry script
       - name: Generate game registry
         run: python3 scripts/generate-game-registry.py
 
+      # 3. Save games.json changes back to your repo automatically
       - name: Commit games.json changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:

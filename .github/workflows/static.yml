@@ -15,7 +15,8 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  # FIXED: Changed to true to cancel older deployments and speed up the site update
+  cancel-in-progress: true 
 
 jobs:
   deploy:

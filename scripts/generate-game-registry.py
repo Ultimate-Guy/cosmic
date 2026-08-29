@@ -3,6 +3,7 @@
 
 import json
 import re
+import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,6 +16,7 @@ EXCLUDED_FOLDERS = {"img"}
 def display_name(folder_name):
     words = re.sub(r"([a-z])([A-Z])", r"\1 \2", folder_name)
     words = re.sub(r"[_-]+", " ", words).strip()
+    words = re.sub(r"\s+", " ", words)
     return words.title() or "Untitled Game"
 
 
@@ -54,11 +56,26 @@ def choose_entry(folder, metadata):
     entry_path = (folder / configured_entry).resolve()
     if folder.resolve() not in entry_path.parents or not entry_path.is_file():
         raise FileNotFoundError(f"Entry file does not exist in {folder}: {configured_entry}")
-    return configured_entry.replace("\\", "/")
+    return urllib.parse.quote(configured_entry.replace("\\", "/"), safe="/")
 
 
 def registry_path(path):
-    return path.relative_to(ROOT).as_posix() + "/"
+    relative = path.relative_to(ROOT).as_posix()
+    return urllib.parse.quote(relative, safe="/") + "/"
+
+
+def build_game(folder, metadata):
+    image = choose_image(folder, metadata)
+    entry = choose_entry(folder, metadata)
+    game = {
+        "name": metadata.get("title", display_name(folder.name)),
+        "path": registry_path(folder),
+    }
+    if entry:
+        game["entry"] = entry
+    if image:
+        game["image"] = registry_path(image).rstrip("/")
+    return game
 
 
 def main():
@@ -67,17 +84,9 @@ def main():
         for folder in sorted(path for path in LESSONS_DIR.iterdir() if path.is_dir()):
             if folder.name.lower() in EXCLUDED_FOLDERS:
                 continue
+
             metadata = read_metadata(folder)
-            image = choose_image(folder, metadata)
-            entry = choose_entry(folder, metadata)
-            game = {
-                "name": metadata.get("title", display_name(folder.name)),
-                "path": registry_path(folder),
-            }
-            if entry:
-                game["entry"] = entry
-            if image:
-                game["image"] = registry_path(image).rstrip("/")
+            game = build_game(folder, metadata)
             games.append(game)
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)

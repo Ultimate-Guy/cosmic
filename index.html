@@ -7,72 +7,105 @@
   <style>
     body {
       margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      background: #070f15;
-      color: #8fecff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #070f15; /* Kept original color */
+      color: #8fecff;      /* Kept original color */
       font-family: Arial, Helvetica, sans-serif;
     }
-    .card {
-      width: min(520px, 92vw);
-      padding: 28px;
-      border: 1px solid #3accff66;
-      border-radius: 18px;
-      background: #0d1a21;
-      box-shadow: 0 12px 40px #0008;
+
+    /* Updated container to take up the full screen */
+    .full-screen-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      background: #0d1a21; /* Kept original card background */
       text-align: center;
     }
+
+    /* Big font for the top welcome message */
     h1 {
-      margin: 0 0 10px;
-      font-size: 2rem;
+      margin: 0 0 20px;
+      font-size: 5rem; /* Massive font size */
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: #3accff; /* Brighter accent from your card border */
     }
+
     p {
-      margin: 0 0 18px;
+      margin: 0 0 40px;
+      font-size: 1.5rem;
       opacity: .9;
     }
+
     .btn-group {
       display: flex;
-      gap: 12px;
+      gap: 24px;
       justify-content: center;
       flex-wrap: wrap;
+      width: 100%;
+      max-width: 1000px;
     }
+
+    /* Buttons are now way bigger */
     button {
-      height: 48px;
-      padding: 0 26px;
-      border: 0;
-      border-radius: 999px;
-      background: #2dccff;
-      color: #031721;
-      font-weight: 700;
+      flex: 1;
+      min-width: 300px;
+      height: 120px; /* Way bigger height */
+      padding: 0 40px;
+      border: 2px solid #3accff66;
+      border-radius: 20px;
+      background: #2dccff; /* Kept original color */
+      color: #031721;      /* Kept original color */
+      font-size: 2rem;    /* Bigger text inside buttons */
+      font-weight: 800;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.3s ease;
     }
+
     button:hover {
       background: #60dcff;
+      transform: scale(1.05);
+      box-shadow: 0 0 30px #2dccff66;
     }
+
+    /* Bigger "continue without cloak" link */
     .link {
       display: block;
-      margin-top: 14px;
+      margin-top: 50px;
+      font-size: 2rem; /* Much bigger link text */
       color: #8fecff;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.2s;
+    }
+
+    .link:hover {
+      color: #ffffff;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <main class="card">
-    <h1>Cosmic</h1>
+  <main class="full-screen-container">
+    <h1>Welcome to Cosmic</h1>
     <p>Launch site in cloak mode</p>
+    
     <div class="btn-group">
       <button id="launchBlank">About:Blank Cloak</button>
       <button id="launchBlob">Blob Cloak</button>
     </div>
+
     <a class="link" href="pages/lessons/lessons.html">Open without cloak</a>
   </main>
 
   <script>
     const targetPath = 'pages/lessons/lessons.html';
 
-    // Generates the raw HTML structure used inside the cloaking containers
     function getCloakHTML(targetUrl) {
       return `<!DOCTYPE html>
 <html>
@@ -90,31 +123,23 @@
 </html>`;
     }
 
-    // 1. About:Blank Cloaking
     document.getElementById('launchBlank').addEventListener('click', () => {
       const target = new URL(targetPath, window.location.href).href;
       const win = window.open('about:blank', '_blank');
       if (!win) return;
-      
       win.document.open();
       win.document.write(getCloakHTML(target));
       win.document.close();
-      
       window.location.replace('https://www.google.com');
     });
 
-    // 2. Blob URL Cloaking
     document.getElementById('launchBlob').addEventListener('click', () => {
       const target = new URL(targetPath, window.location.href).href;
       const htmlContent = getCloakHTML(target);
-      
-      // Create a blob containing the HTML document and generate a unique blob:// URL
       const blob = new Blob([htmlContent], { type: 'text/html' });
       const blobUrl = URL.createObjectURL(blob);
-      
       const win = window.open(blobUrl, '_blank');
       if (!win) return;
-      
       window.location.replace('https://www.google.com');
     });
   </script>

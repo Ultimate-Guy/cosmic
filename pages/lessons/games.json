@@ -266,6 +266,10 @@
     "path": "pages/lessons/Car%20Crash%203/"
   },
   {
+    "name": "Car King Arena",
+    "path": "pages/lessons/Car%20King%20Arena/"
+  },
+  {
     "name": "Ninja Obby",
     "path": "pages/lessons/Ninja%20Obby/",
     "image": "pages/lessons/Ninja%20Obby/images%20%282%29.jpg"

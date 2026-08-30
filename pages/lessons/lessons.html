@@ -21,6 +21,7 @@
             margin: 0;
             min-height: 100vh;
             background-color: var(--bg-dark);
+            /* Space Starfield */
             background-image: 
                 radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
                 radial-gradient(white, rgba(255,255,255,.1) 1px, transparent 30px);
@@ -30,11 +31,11 @@
             overflow-x: hidden;
         }
 
-        /* --- Top Bar: Centered Title & Logo --- */
+        /* --- Centered Top Bar --- */
         #top-bar {
             display: flex;
             align-items: center;
-            justify-content: center; /* Centers the title */
+            justify-content: center; 
             padding: 20px 40px;
             background: rgba(13, 26, 33, 0.9);
             border-bottom: 1px solid var(--border);
@@ -45,7 +46,7 @@
         .brand { display: flex; align-items: center; gap: 15px; }
         .brand h1 {
             margin: 0;
-            font-size: 3.5rem;
+            font-size: 3rem;
             text-transform: uppercase;
             letter-spacing: 4px;
             color: var(--accent);
@@ -60,10 +61,10 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             color: var(--accent);
-            padding: 8px 16px;
+            padding: 6px 14px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.9rem; /* Smaller than title */
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -78,7 +79,7 @@
             left: 20px;
             z-index: 1000;
             display: none;
-            background: transparent;
+            background: rgba(13, 26, 33, 0.8);
             border: 1.5px solid var(--accent);
             border-radius: 6px;
             padding: 6px 12px;
@@ -88,7 +89,7 @@
             backdrop-filter: blur(5px);
         }
 
-        /* --- Main Content & Fixed Grid --- */
+        /* --- Grid Layout --- */
         #main-content { padding: 40px; }
         #gamesgrid { 
             display: grid; 
@@ -99,45 +100,44 @@
         
         .game-card { 
             background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: 16px; padding: 12px; display: flex;
-            flex-direction: column; gap: 8px; transition: 0.3s;
+            border-radius: 16px; padding: 10px; display: flex;
+            flex-direction: column; gap: 6px; 
         }
-        .game-card:hover { transform: translateY(-5px); border-color: var(--accent); }
 
         .game-thumb { width: 100%; aspect-ratio: 1/1; border-radius: 10px; object-fit: cover; }
-        .game-thumb-placeholder { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 10px; display: grid; place-items: center; color: var(--accent); text-align: center; font-size: 0.7rem; }
+        .game-thumb-placeholder { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 10px; display: grid; place-items: center; text-align: center; font-size: 0.7rem; color: var(--accent); }
 
-        .game-title { font-weight: bold; font-size: 0.85rem; text-align: center; margin: 5px 0; }
+        .game-title { font-weight: bold; font-size: 0.8rem; text-align: center; margin: 2px 0; }
 
-        /* --- Re-added Action Buttons --- */
-        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        /* --- Small Action Buttons --- */
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .action-btn { 
-            height: 34px; border-radius: 8px; border: none; font-weight: bold; 
-            cursor: pointer; font-size: 0.75rem; 
+            height: 28px; /* Fixed too big issue */
+            border-radius: 6px; border: none; font-weight: bold; 
+            cursor: pointer; font-size: 0.65rem; 
         }
         .play-btn { background: var(--accent); color: #000; }
         .blank-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
 
-        /* --- Full Screen Game Loader --- */
+        /* --- Full Screen Loader --- */
         #page-loader { position: fixed; inset: 0; background: #000; display: none; z-index: 500; }
-        #page-loader iframe { width: 100%; height: 100%; border: none; }
+        #page-loader iframe { width: 100%; height: 100%; border: none; display: block; }
 
-        /* --- Condensed Settings Modal --- */
+        /* --- Settings Modal --- */
         #settings-modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.95);
             display: none; place-items: center; z-index: 2000;
         }
-        .modal-content { background: var(--card-bg); border: 1px solid var(--border); padding: 30px; border-radius: 20px; width: 400px; }
-        .modal-content h3 { margin-top: 0; color: var(--accent); }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--border); padding: 25px; border-radius: 20px; width: 380px; }
         .setting-item { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-        input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: var(--accent); border-radius: 8px; }
+        input { width: 100%; padding: 8px; background: #000; border: 1px solid var(--border); color: var(--accent); border-radius: 6px; }
     </style>
 </head>
 <body>
 
     <header id="top-bar">
         <div class="brand">
-            <img src="../../imgs/cosmic.png" width="50" height="50" alt="Logo" />
+            <img src="../../imgs/cosmic.png" width="45" height="45" alt="Logo" />
             <h1>Cosmic</h1>
         </div>
         <button class="settings-trigger" onclick="toggleSettings()">
@@ -145,52 +145,56 @@
         </button>
     </header>
 
-    <button id="back-home-btn" onclick="goHome()">
-        ← Home
-    </button>
+    <button id="back-home-btn" onclick="goHome()">← Home</button>
 
     <main id="main-content">
         <div id="gamesgrid">
-            <p id="loading">Connecting to Registry...</p>
+            <p id="loading">Scanning Galactic Registry...</p>
         </div>
     </main>
 
     <section id="page-loader">
-        <iframe id="game-iframe"></iframe>
+        <iframe id="game-iframe" allowfullscreen></iframe>
     </section>
 
-    <!-- Unified Settings Pop-up -->
+    <!-- Settings Modal -->
     <div id="settings-modal">
         <div class="modal-content">
-            <h3>Cosmic Settings</h3>
+            <h3 style="color:var(--accent); margin-top:0;">Cosmic Settings</h3>
             <div class="setting-item">
                 <label>Panic Key</label>
-                <input type="text" id="panic-key" placeholder="Default: \" maxlength="1" />
+                <input type="text" id="panic-key" placeholder="e.g. \" maxlength="1" />
             </div>
             <div class="setting-item">
                 <label>Panic URL</label>
                 <input type="text" id="panic-url" placeholder="https://classroom.google.com" />
             </div>
             <div class="setting-item">
-                <label>Tab Cloaking</label>
-                <button class="play-btn action-btn" style="height:38px; margin-bottom:5px" onclick="mask('Google Classroom', 'https://ssl.gstatic.com/classroom/favicon.png')">Mask as Classroom</button>
-                <button class="play-btn action-btn" style="height:38px" onclick="mask('Google', 'https://www.google.com/favicon.ico')">Mask as Google</button>
+                <label>Privacy Mask</label>
+                <button class="play-btn action-btn" style="height:36px; margin-bottom:4px" onclick="mask('Google Classroom', 'https://ssl.gstatic.com/classroom/favicon.png')">Classroom</button>
+                <button class="play-btn action-btn" style="height:36px" onclick="mask('Google', 'https://www.google.com/favicon.ico')">Google</button>
             </div>
-            <button class="play-btn action-btn" style="width:100%; height:45px; margin-top:10px" onclick="toggleSettings()">Save & Close</button>
+            <button class="play-btn action-btn" style="width:100%; height:40px; margin-top:10px" onclick="toggleSettings()">Save</button>
         </div>
     </div>
 
     <script>
-        // Fix for "Games aren't loading": Using robust pathing
-        function normalizeUrl(url) { return new URL(url, window.location.href).href; }
-        function gameUrl(game) { return normalizeUrl('../../' + game.path + (game.entry || '')); }
+        // Pathing logic to fix "Games aren't loading" and "Black screen"
+        function getBaseUrl() {
+            return window.location.origin + window.location.pathname.replace('lessons.html', '');
+        }
 
-        function launch(url) {
+        function launch(path, entry) {
+            // Resolve absolute path from root to ensure iframe finds files
+            const fullUrl = new URL('../../' + path + (entry || 'index.html'), window.location.href).href;
+            
             document.getElementById('top-bar').style.display = 'none';
             document.getElementById('main-content').style.display = 'none';
             document.getElementById('page-loader').style.display = 'block';
             document.getElementById('back-home-btn').style.display = 'block';
-            document.getElementById('game-iframe').src = url;
+            
+            const frame = document.getElementById('game-iframe');
+            frame.src = fullUrl;
         }
 
         function goHome() {
@@ -206,7 +210,6 @@
             m.style.display = m.style.display === 'grid' ? 'none' : 'grid';
         }
 
-        // Functional Settings Logic
         function mask(title, icon) {
             document.title = title;
             let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
@@ -220,14 +223,15 @@
             if (e.key === pk) window.location.replace(pu);
         });
 
-        function openBlank(url) {
+        function openBlank(path, entry) {
+            const url = new URL('../../' + path + (entry || 'index.html'), window.location.href).href;
             const win = window.open('about:blank', '_blank');
             if (!win) return;
-            win.document.write('<!DOCTYPE html><html><body style="margin:0;background:#000;"><iframe src="'+url+'" style="border:none;width:100vw;height:100vh;" allowfullscreen></iframe></body></html>');
+            win.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;"><iframe src="${url}" style="border:none;width:100vw;height:100vh;" allowfullscreen></iframe></body></html>`);
             win.document.close();
         }
 
-        // Correct fetch for Local Registry
+        // Fetch local registry
         fetch('games.json')
             .then(res => res.json())
             .then(games => {
@@ -236,20 +240,22 @@
                 games.forEach(game => {
                     const card = document.createElement('article');
                     card.className = 'game-card';
-                    const finalUrl = gameUrl(game);
-                    const imgUrl = game.image ? gameUrl({path: game.image}) : null;
+                    
+                    // Correctly handle relative image path [2]
+                    const imgUrl = game.image ? new URL('../../' + game.path + game.image, window.location.href).href : null;
 
                     card.innerHTML = `
                         ${imgUrl ? `<img src="${imgUrl}" class="game-thumb">` : `<div class="game-thumb-placeholder">${game.name}</div>`}
                         <div class="game-title">${game.name}</div>
                         <div class="card-actions">
-                            <button class="action-btn play-btn" onclick="launch('${finalUrl}')">Play</button>
-                            <button class="action-btn blank-btn" onclick="openBlank('${finalUrl}')">Blank</button>
+                            <button class="action-btn play-btn" onclick="launch('${game.path}', '${game.entry || ''}')">Play</button>
+                            <button class="action-btn blank-btn" onclick="openBlank('${game.path}', '${game.entry || ''}')">Blank</button>
                         </div>
                     `;
                     grid.appendChild(card);
                 });
-            });
+            })
+            .catch(() => { document.getElementById('loading').textContent = "Registry connection lost."; });
     </script>
 </body>
 </html>

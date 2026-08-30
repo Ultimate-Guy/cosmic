@@ -217,6 +217,10 @@
     "path": "pages/lessons/Beach%20Boxing%20Simulator/"
   },
   {
+    "name": "Block Blast",
+    "path": "pages/lessons/Block%20Blast/"
+  },
+  {
     "name": "Brotato",
     "path": "pages/lessons/Brotato/",
     "image": "pages/lessons/Brotato/images%20%2823%29.jpg"

@@ -68,6 +68,10 @@
     "path": "pages/lessons/A%20Day%20In%20The%20Office/"
   },
   {
+    "name": "Advent Neon",
+    "path": "pages/lessons/Advent%20Neon/"
+  },
+  {
     "name": "Basket Random",
     "path": "pages/lessons/Basket%20Random/",
     "image": "pages/lessons/Basket%20Random/images%20%285%29.jpg"

@@ -217,6 +217,10 @@
     "path": "pages/lessons/Beach%20Boxing%20Simulator/"
   },
   {
+    "name": "Bit Planes",
+    "path": "pages/lessons/Bit%20Planes/"
+  },
+  {
     "name": "Block Blast",
     "path": "pages/lessons/Block%20Blast/"
   },

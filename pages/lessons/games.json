@@ -144,6 +144,10 @@
     "path": "pages/lessons/Animal%20Crossing/"
   },
   {
+    "name": "Aquapark.Io",
+    "path": "pages/lessons/Aquapark.io/"
+  },
+  {
     "name": "Basket Random",
     "path": "pages/lessons/Basket%20Random/",
     "image": "pages/lessons/Basket%20Random/images%20%285%29.jpg"

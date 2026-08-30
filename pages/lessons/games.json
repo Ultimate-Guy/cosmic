@@ -213,6 +213,10 @@
     "path": "pages/lessons/Battle%20Simulator/"
   },
   {
+    "name": "Beach Boxing Simulator",
+    "path": "pages/lessons/Beach%20Boxing%20Simulator/"
+  },
+  {
     "name": "Brotato",
     "path": "pages/lessons/Brotato/",
     "image": "pages/lessons/Brotato/images%20%2823%29.jpg"

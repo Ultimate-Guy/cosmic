@@ -7,24 +7,25 @@
     <link rel="stylesheet" href="../../css/fontawesome.css"/>
     <link rel="stylesheet" href="../../css/otherpages.css"/>
     <style>
-        /* --- Original Style Specs --- */
         :root { 
             --card-bg: rgba(6, 20, 16, 0.76); 
             --card-border: rgba(110, 255, 201, 0.42); 
-            --card-hover: rgba(127, 255, 212, 0.16); 
             --accent: #2dccff;
+            --text: #8fecff;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             min-height: 100vh;
             background: #070f15;
-            color: #8fecff;
+            color: var(--text);
             font-family: Arial, sans-serif;
             overflow-x: hidden;
         }
 
-        /* --- Centered Top Bar with Logo --- */
+        /* --- Top Bar: Centered Branding --- */
         #top-bar {
             display: flex;
             align-items: center;
@@ -34,37 +35,69 @@
             border-bottom: 1px solid var(--card-border);
             position: relative;
         }
-        .brand { display: flex; align-items: center; gap: 12px; }
-        .brand h1 { margin: 0; font-size: 2.8rem; letter-spacing: 5px; color: var(--accent); text-transform: uppercase; }
 
+        .brand { display: flex; align-items: center; gap: 15px; }
+        .brand h1 { 
+            margin: 0; 
+            font-size: 2.8rem; 
+            text-transform: uppercase; 
+            letter-spacing: 5px; 
+            color: var(--accent); 
+        }
+
+        /* --- Settings Gear (Top Right) --- */
         .settings-trigger {
-            position: absolute; right: 30px; background: transparent; 
-            border: 1px solid var(--card-border); color: var(--accent);
-            padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+            position: absolute;
+            right: 40px;
+            background: transparent;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--accent);
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* --- Floating Home Button (Glaxyias Style) --- */
+        /* --- Floating Home Button (In-Game Only) --- */
         #back-home-btn {
-            position: fixed; top: 15px; left: 15px; z-index: 1000;
-            display: none; background: transparent; border: 1.5px solid var(--accent);
-            border-radius: 6px; padding: 5px 10px; color: var(--accent);
-            font-weight: bold; cursor: pointer; font-size: 0.8rem;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            display: none;
+            background: rgba(13, 26, 33, 0.8);
+            border: 2px solid var(--accent);
+            border-radius: 6px;
+            padding: 6px 14px;
+            color: var(--accent);
+            font-weight: bold;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
         }
 
-        /* --- Original Grid Specs --- */
+        /* --- Grid & Cards (Original Specs) --- */
         #main-content { padding: 40px; }
         #gamesgrid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
-            gap: 14px; width: 100%;
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
+            gap: 14px; 
+            width: 100%;
         }
+        
         .game-card { 
             display: flex; flex-direction: column; gap: 8px; padding: 10px; 
             border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); 
         }
-        .game-thumb { width: 100%; aspect-ratio: 1/1; border-radius: 12px; object-fit: cover; }
-        .game-title { font-size: 0.85rem; text-align: center; min-height: 2.2em; display: grid; place-items: center; }
 
-        /* --- Restored Original Button Sizes --- */
+        .game-thumb { width: 100%; aspect-ratio: 1/1; border-radius: 12px; object-fit: cover; }
+        .game-thumb-placeholder { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 12px; display: grid; place-items: center; text-align: center; font-size: 0.75rem; color: var(--accent); }
+
+        .game-title { font-size: 0.85rem; text-align: center; min-height: 2.2em; display: grid; place-items: center; font-weight: bold; }
+
+        /* --- Play & Blank Buttons (Original Sizes) --- */
         .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .play-btn, .blank-btn { 
             width: 100%; height: 36px; font-size: 0.72rem; 
@@ -73,54 +106,68 @@
         .play-btn { background: var(--accent); color: #031721; border: none; }
         .blank-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
 
-        /* --- Full Screen Loader --- */
+        /* --- Full Screen Game Loader --- */
         #page-loader { position: fixed; inset: 0; background: #000; display: none; z-index: 500; }
-        #page-loader iframe { width: 100%; height: 100%; border: none; }
+        #page-loader iframe { width: 100%; height: 100%; border: none; display: block; }
 
         /* --- Settings Modal --- */
         #settings-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
             display: none; place-items: center; z-index: 2000;
         }
-        .modal-content { background: #0d1a21; border: 1px solid var(--card-border); padding: 25px; border-radius: 15px; width: 350px; }
-        input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--card-border); color: var(--accent); border-radius: 8px; margin: 10px 0; }
+        .modal-content { background: #0d1a21; border: 1px solid var(--card-border); padding: 30px; border-radius: 20px; width: 380px; }
+        .setting-item { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--card-border); color: var(--accent); border-radius: 8px; }
     </style>
 </head>
 <body>
 
     <header id="top-bar">
         <div class="brand">
-            <img src="../../imgs/cosmic.png" width="40" height="40" alt="Logo" />
+            <img src="../../imgs/cosmic.png" width="45" height="45" alt="Logo" />
             <h1>Cosmic</h1>
         </div>
-        <button class="settings-trigger" onclick="toggleSettings()">Settings</button>
+        <button class="settings-trigger" onclick="toggleSettings()">
+            <i class="fas fa-cog"></i> Settings
+        </button>
     </header>
 
+    <!-- Floating Home Button (Matches Glaxyias Style) -->
     <button id="back-home-btn" onclick="goHome()">← Home</button>
 
     <main id="main-content">
-        <div id="gamesgrid"><p id="loading">Loading games...</p></div>
+        <div id="gamesgrid">
+            <p id="loading">Connecting to Cosmic Registry...</p>
+        </div>
     </main>
 
-    <section id="page-loader"><iframe id="game-iframe" allowfullscreen></iframe></section>
+    <section id="page-loader">
+        <iframe id="game-iframe" allowfullscreen></iframe>
+    </section>
 
-    <!-- Settings Modal (Functional) -->
+    <!-- Settings Modal -->
     <div id="settings-modal">
         <div class="modal-content">
             <h3 style="color:var(--accent); margin-top:0;">Cosmic Settings</h3>
-            <label>Panic Key</label>
-            <input type="text" id="panic-key" placeholder="Default: \" maxlength="1" />
-            <label>Panic URL</label>
-            <input type="text" id="panic-url" placeholder="https://classroom.google.com" />
-            <label>Tab Masking</label>
-            <button class="play-btn" style="height:38px; width:100%; margin-bottom:5px" onclick="mask('Google Classroom', 'https://ssl.gstatic.com/classroom/favicon.png')">Classroom</button>
-            <button class="play-btn" style="height:38px; width:100%" onclick="mask('Google', 'https://www.google.com/favicon.ico')">Google</button>
-            <button class="play-btn" style="width:100%; height:45px; margin-top:15px" onclick="toggleSettings()">Save & Close</button>
+            <div class="setting-item">
+                <label>Panic Key (e.g. \ )</label>
+                <input type="text" id="panic-key" placeholder="Enter key..." maxlength="1" />
+            </div>
+            <div class="setting-item">
+                <label>Panic URL</label>
+                <input type="text" id="panic-url" placeholder="https://classroom.google.com" />
+            </div>
+            <div class="setting-item">
+                <label>Privacy Masking</label>
+                <button class="play-btn" style="height:40px; margin-bottom:5px" onclick="mask('Google Classroom', 'https://ssl.gstatic.com/classroom/favicon.png')">Mask as Classroom</button>
+                <button class="play-btn" style="height:40px" onclick="mask('Google', 'https://www.google.com/favicon.ico')">Mask as Google</button>
+            </div>
+            <button class="play-btn" style="width:100%; height:45px; margin-top:10px" onclick="toggleSettings()">Save & Close</button>
         </div>
     </div>
 
     <script>
-        // --- Original Pathing & Loading Logic ---
+        // --- Core Pathing Logic (Restored from Original Source) ---
         function normalizeUrl(url) { return new URL(url, window.location.href).href; }
         function gameUrl(game) { return normalizeUrl('../../' + game.path + (game.entry || '')); }
 
@@ -129,7 +176,10 @@
             document.getElementById('main-content').style.display = 'none';
             document.getElementById('page-loader').style.display = 'block';
             document.getElementById('back-home-btn').style.display = 'block';
+            
+            // Set the iframe source exactly like the original redirect
             document.getElementById('game-iframe').src = url;
+            localStorage.setItem('lastPlayedGame', url);
         }
 
         function goHome() {
@@ -140,38 +190,39 @@
             document.getElementById('game-iframe').src = '';
         }
 
-        function openBlank(url) {
-            const win = window.open('about:blank', '_blank');
-            if (!win) return;
-            win.document.write('<!DOCTYPE html><html><body style="margin:0;background:#000;"><iframe src="'+url+'" style="border:none;width:100vw;height:100vh;" allowfullscreen></iframe></body></html>');
-            win.document.close();
-        }
-
-        // --- Settings Functionality ---
         function toggleSettings() {
             const m = document.getElementById('settings-modal');
             m.style.display = m.style.display === 'grid' ? 'none' : 'grid';
         }
 
-        function mask(t, i) {
-            document.title = t;
+        function mask(title, icon) {
+            document.title = title;
             let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-            link.type = 'image/x-icon'; link.rel = 'shortcut icon'; link.href = i;
+            link.type = 'image/x-icon'; link.rel = 'shortcut icon'; link.href = icon;
             document.getElementsByTagName('head').appendChild(link);
         }
 
         window.addEventListener('keydown', (e) => {
-            const pk = document.getElementById('panic-key').value || '\\';
-            const pu = document.getElementById('panic-url').value || 'https://classroom.google.com';
-            if (e.key === pk) window.location.replace(pu);
+            const key = document.getElementById('panic-key').value || '\\';
+            const url = document.getElementById('panic-url').value || 'https://classroom.google.com';
+            if (e.key === key) window.location.replace(url);
         });
 
-        // --- Original Registry Fetch ---
+        function openBlank(url) {
+            const win = window.open('about:blank', '_blank');
+            if (!win) return;
+            win.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;"><iframe src="${url}" style="border:none;width:100vw;height:100vh;" allowfullscreen></iframe></body></html>`);
+            win.document.close();
+            localStorage.setItem('lastPlayedGame', url);
+        }
+
+        // --- Fetch and Build Grid ---
         fetch('games.json')
             .then(res => res.json())
             .then(games => {
                 const grid = document.getElementById('gamesgrid');
                 document.getElementById('loading').remove();
+                
                 games.forEach(game => {
                     const card = document.createElement('article');
                     card.className = 'game-card';

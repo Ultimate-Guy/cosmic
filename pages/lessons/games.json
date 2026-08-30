@@ -124,6 +124,10 @@
     "path": "pages/lessons/Angry%20Birds/"
   },
   {
+    "name": "Angry Birds 2",
+    "path": "pages/lessons/Angry%20Birds%202/"
+  },
+  {
     "name": "Basket Random",
     "path": "pages/lessons/Basket%20Random/",
     "image": "pages/lessons/Basket%20Random/images%20%285%29.jpg"

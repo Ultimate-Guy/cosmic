@@ -24,6 +24,10 @@
     "path": "pages/lessons/2D%20Shooting/"
   },
   {
+    "name": "2Doom",
+    "path": "pages/lessons/2Doom/"
+  },
+  {
     "name": "4Th And Goal",
     "path": "pages/lessons/4th%20And%20Goal/"
   },

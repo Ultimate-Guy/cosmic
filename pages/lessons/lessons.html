@@ -7,115 +7,80 @@
     <link rel="stylesheet" href="../../css/fontawesome.css"/>
     <link rel="stylesheet" href="../../css/otherpages.css"/>
     <style>
+        /* 1. ORIGINAL CSS VARIABLES & LAYOUT (Restored to normal size) */
         :root { 
-            --accent: #2dccff;
-            --card-border: rgba(45, 204, 255, 0.42); /* Blue outlines from screenshot [1] */
-            --bg: #070f15;
+            --card-bg: rgba(6, 20, 16, 0.76); 
+            --accent: #2dccff; /* Blue neon from screenshot */
+            --card-border: rgba(45, 204, 255, 0.42); 
+            --card-hover: rgba(127, 255, 212, 0.16); 
         }
 
-        body {
-            margin: 0;
-            background: var(--bg);
-            color: #8fecff;
-            font-family: Arial, sans-serif;
-            overflow: hidden; /* Prevent scrolling until unlocked */
-        }
+        #gamesgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; margin-bottom: 0; align-items: stretch; }
+        .game-card { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(6px); box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+        .game-thumb { width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; object-fit: cover; }
+        .game-title { font-size: 0.85rem; line-height: 1.2; text-align: center; min-height: 2.2em; display: grid; place-items: center; }
+        
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        /* RESTORED: Original 36px button height */
+        .play-btn, .blank-btn { width: 100%; height: 36px; font-size: 0.72rem; border-radius: 999px; cursor: pointer; font-weight: bold; }
+        .play-btn { background: var(--accent); color: #031721; border: none; }
+        .blank-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
 
-        /* --- Password Gate (Hidden after login) --- */
-        #password-gate {
-            position: fixed; inset: 0; background: var(--bg);
-            display: grid; place-items: center; z-index: 9999;
-        }
-        .password-card {
-            background: rgba(6, 20, 16, 0.8);
-            border: 2px solid var(--card-border);
-            border-radius: 20px; padding: 35px; width: 380px; text-align: center;
-        }
-        .pass-input-container { margin: 25px 0; display: flex; gap: 10px; }
-        .pass-input-container input {
-            flex-grow: 1; background: #000; border: 1px solid var(--card-border);
-            color: var(--accent); padding: 12px; border-radius: 8px; outline: none;
-        }
-        .gate-btn {
-            background: var(--accent); color: #000; border: none;
-            border-radius: 8px; cursor: pointer; font-weight: bold; padding: 0 15px;
-        }
-        .toggle-btn { background: rgba(45, 204, 255, 0.1); color: var(--accent); border: 1px solid var(--card-border); width: 45px; }
-
-        /* --- Top Bar (Centered Branding) --- */
-        #top-bar {
-            display: flex; align-items: center; justify-content: center;
-            padding: 15px 40px; background: rgba(13, 26, 33, 0.95);
-            border-bottom: 1px solid var(--card-border); position: relative;
-        }
-        .brand { display: flex; align-items: center; gap: 15px; }
-        .brand h1 { 
-            margin: 0; font-size: 2.8rem; text-transform: uppercase; 
-            letter-spacing: 5px; color: var(--accent); text-shadow: 0 0 10px var(--accent);
-        }
-        .settings-trigger {
-            position: absolute; right: 40px; background: transparent; 
-            border: 1px solid var(--card-border); color: var(--accent);
-            padding: 8px 16px; border-radius: 8px; cursor: pointer;
-        }
-
-        /* --- Hide Site Content until Unlocked --- */
-        #site-content { display: none; }
-
-        /* --- Original Styles (Untouched) --- */
         #gamesearchform { display: flex; justify-content: center; margin: 25px 0; }
-        #gamesearchinput { 
-            background: rgba(0,0,0,0.4); color: var(--accent); padding: 0 20px; 
-            height: 50px; border: 1px solid var(--card-border); border-radius: 50px; width: min(420px, 90vw); 
-        }
-        #gamesgrid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
-            gap: 15px; padding: 0 40px 40px; 
-        }
-        /* Card outlines updated to blue to match screenshot [1] */
-        .game-card { 
-            border: 1px solid var(--card-border); border-radius: 16px; 
-            padding: 10px; background: rgba(6, 20, 16, 0.76);
-        }
+        #gamesearchinput { background: rgba(0,0,0,0.4); color: var(--accent); padding: 0 20px; height: 50px; border: 1px solid var(--card-border); border-radius: 50px; width: min(420px, 90vw); outline: none; }
+
+        /* 2. PASSWORD GATE & TOP BAR CSS (Added Layers) */
+        #password-gate { position: fixed; inset: 0; background: #070f15; display: grid; place-items: center; z-index: 9999; }
+        .password-card { background: rgba(6, 20, 16, 0.8); border: 2px solid var(--card-border); border-radius: 20px; padding: 35px; width: 380px; text-align: center; }
+        .pass-input-container { margin: 25px 0; display: flex; gap: 10px; }
+        .pass-input-container input { flex-grow: 1; background: #000; border: 1px solid var(--card-border); color: var(--accent); padding: 12px; border-radius: 8px; outline: none; }
+        
+        #top-bar { display: flex; align-items: center; justify-content: center; padding: 15px 40px; background: rgba(13, 26, 33, 0.95); border-bottom: 1px solid var(--card-border); position: relative; }
+        .brand { display: flex; align-items: center; gap: 15px; }
+        .brand h1 { margin: 0; font-size: 2.8rem; text-transform: uppercase; letter-spacing: 5px; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+        .settings-trigger { position: absolute; right: 40px; background: transparent; border: 1px solid var(--card-border); color: var(--accent); padding: 8px 16px; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- Password Gate -->
+    <!-- PASSWORD GATE -->
     <div id="password-gate">
         <div class="password-card">
-            <h2 style="color:var(--accent); letter-spacing:2px;">COSMIC ACCESS</h2>
+            <h2 style="color:var(--accent); letter-spacing:2px;">COSMIC ENTRY</h2>
             <div class="pass-input-container">
                 <input type="password" id="pass-field" placeholder="Enter Password..." />
-                <button class="toggle-btn" onclick="togglePass()"><i id="eye-icon" class="fas fa-eye"></i></button>
-                <button class="gate-btn" onclick="checkPass()">Enter</button>
+                <button class="blank-btn" style="width: 45px;" onclick="togglePass()"><i id="eye-icon" class="fas fa-eye"></i></button>
+                <button class="play-btn" style="width: 80px;" onclick="checkPass()">Enter</button>
             </div>
-            <p id="error-msg" style="color: #ff4d4d; font-size: 0.8rem; display: none;">Access Denied.</p>
+            <p id="error-msg" style="color: #ff4d4d; font-size: 0.8rem; display: none;">Invalid Access Code.</p>
         </div>
     </div>
 
-    <!-- Main Site Content -->
-    <div id="site-content">
+    <!-- MAIN SITE CONTENT (Hidden until unlocked) -->
+    <div id="site-content" style="display:none;">
+        
         <header id="top-bar">
             <div class="brand">
                 <img src="../../imgs/cosmic.png" width="45" height="45" alt="Logo" />
                 <h1>Cosmic</h1>
             </div>
-            <button class="settings-trigger">Settings</button>
+            <button class="settings-trigger" onclick="alert('Settings coming soon!')">Settings</button>
         </header>
 
         <main>
             <form id="gamesearchform" onsubmit="return false;">
-                <input id="gamesearchinput" type="text" placeholder="Search Cosmic games..." />
+                <input id="gamesearchinput" autocomplete="off" type="text" placeholder="Search Cosmic games..." />
             </form>
+
             <div id="gamesgrid">
-                <p id="loading">Connecting...</p>
+                <p id="loading">Connecting to Registry...</p>
+                <p id="no-results" style="display:none; grid-column: 1/-1; text-align: center;">No results...</p>
             </div>
         </main>
     </div>
 
     <script>
-        // --- Password Logic ---
+        // 1. PASSWORD LOGIC
         function togglePass() {
             const f = document.getElementById('pass-field');
             const i = document.getElementById('eye-icon');
@@ -124,36 +89,70 @@
         }
 
         function checkPass() {
-            // Placeholder for secret injection
             if (document.getElementById('pass-field').value === "PASSWORD_PLACEHOLDER") {
                 document.getElementById('password-gate').style.display = 'none';
                 document.getElementById('site-content').style.display = 'block';
                 document.body.style.overflow = 'auto';
-                loadGames(); // Start original loading logic
+                loadRegistry(); // Start loading the original games
             } else {
                 document.getElementById('error-msg').style.display = 'block';
             }
         }
+        document.getElementById('pass-field').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPass(); });
 
-        // --- Original Loading Logic (RE-LOCKED) ---
+        // 2. ORIGINAL GAME LOADING & SEARCH LOGIC (Restored)
+        const searchInput = document.getElementById('gamesearchinput');
+        const grid = document.getElementById('gamesgrid');
+        const noResults = document.getElementById('no-results');
+        let cards = [];
+
         function normalizeUrl(url) { return new URL(url, window.location.href).href; }
         function gameUrl(game) { return normalizeUrl('../../' + game.path + (game.entry || '')); }
 
-        function loadGames() {
+        function openBlank(url) {
+            const win = window.open('about:blank', '_blank');
+            if (win) {
+                win.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;"><iframe src="${url}" style="border:none;width:100vw;height:100vh;" allowfullscreen></iframe></body></html>`);
+                win.document.close();
+            }
+        }
+
+        function loadRegistry() {
             fetch('games.json')
                 .then(res => res.json())
                 .then(games => {
-                    const grid = document.getElementById('gamesgrid');
                     document.getElementById('loading').remove();
                     games.forEach(game => {
                         const card = document.createElement('article');
                         card.className = 'game-card';
-                        // Add your original card innerHTML here exactly as it was
-                        card.innerHTML = `<div class="game-title">${game.name}</div><button class="gate-btn" style="width:100%; height:36px; margin-top:10px;" onclick="window.location.href='${gameUrl(game)}'">Play</button>`;
+                        const url = gameUrl(game);
+                        const thumbPath = game.image ? gameUrl({path: game.image}) : '';
+
+                        card.innerHTML = `
+                            ${game.image ? `<img src="${thumbPath}" class="game-thumb" alt="">` : '<div class="game-thumb" style="background:#000; display:grid; place-items:center;">No Image</div>'}
+                            <div class="game-title">${game.name}</div>
+                            <div class="card-actions">
+                                <button class="play-btn" onclick="window.location.href='${url}'">Play</button>
+                                <button class="blank-btn" onclick="openBlank('${url}')">Blank</button>
+                            </div>
+                        `;
                         grid.appendChild(card);
+                        cards.push({ element: card, name: game.name.toLowerCase() });
                     });
                 });
         }
+
+        // Search listener (Kept original logic)
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            let matches = 0;
+            cards.forEach(c => {
+                const show = c.name.includes(val);
+                c.element.style.display = show ? 'flex' : 'none';
+                if (show) matches++;
+            });
+            noResults.style.display = matches === 0 ? 'block' : 'none';
+        });
     </script>
 </body>
 </html>

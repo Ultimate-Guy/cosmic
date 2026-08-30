@@ -168,6 +168,10 @@
     "path": "pages/lessons/Bad%20Piggies/"
   },
   {
+    "name": "Bad Time Simulator",
+    "path": "pages/lessons/Bad%20Time%20Simulator/"
+  },
+  {
     "name": "Basket Random",
     "path": "pages/lessons/Basket%20Random/",
     "image": "pages/lessons/Basket%20Random/images%20%285%29.jpg"

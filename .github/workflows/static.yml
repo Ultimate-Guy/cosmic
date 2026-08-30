@@ -1,4 +1,4 @@
-name: Deploy static content to Pages
+name: Deploy static content to pages
 
 on:
   push:
@@ -12,7 +12,6 @@ permissions:
 
 concurrency:
   group: "pages"
-  # Kills old builds immediately so your newest game additions go live first.
   cancel-in-progress: true 
 
 jobs:
@@ -23,7 +22,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # LIGHTNING SPEED: Only fetches the latest commit [Conversation History].
           fetch-depth: 1 
 
       - name: Sync with Remote
@@ -32,7 +30,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin master
 
-      # NEW: Injects your GitHub Secret into the HTML before deployment [16, Conversation History]
+      # INJECT PASSWORD (Uses your secret to unlock the gate)
       - name: Inject Game Password
         run: |
           sed -i 's/PASSWORD_PLACEHOLDER/${{ secrets.PASSWORD_FOR_GAMES_UNLOCK }}/g' pages/lessons/lessons.html
@@ -43,7 +41,6 @@ jobs:
           python-version: '3.11'
 
       - name: Generate game registry
-        # Scans your folders and builds the games.json registry [1, 2].
         run: python3 scripts/generate-game-registry.py
 
       - name: Commit changes safely
@@ -51,7 +48,6 @@ jobs:
         with:
           commit_message: "Automated update of games.json [skip ci]"
           file_pattern: 'pages/lessons/games.json'
-          # Ensures the workflow doesn't fail if no new games were added [Conversation History].
           skip_dirty_check: false
           skip_fetch: true
 

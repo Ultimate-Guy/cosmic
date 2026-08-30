@@ -196,6 +196,10 @@
     "path": "pages/lessons/Baseball%20Bros/"
   },
   {
+    "name": "Basket Battle",
+    "path": "pages/lessons/Basket%20Battle/"
+  },
+  {
     "name": "Basket Random",
     "path": "pages/lessons/Basket%20Random/",
     "image": "pages/lessons/Basket%20Random/images%20%285%29.jpg"

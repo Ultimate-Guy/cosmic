@@ -12,18 +12,19 @@ permissions:
 
 concurrency:
   group: "pages"
+  # This is critical: it cancels any old builds so your newest games go live first.
   cancel-in-progress: true 
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5 
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Shallow fetch for speed
-          fetch-depth: 2 
+          # LIGHTNING SPEED: Only fetches the latest commit, not the whole history.
+          fetch-depth: 1 
 
       - name: Sync with Remote
         run: |
@@ -35,17 +36,19 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          # FIXED: Removed 'cache: pip' because you don't have a requirements.txt file
 
       - name: Generate game registry
+        # Scans your folders and builds the games.json registry.
         run: python3 scripts/generate-game-registry.py
 
-      - name: Commit games.json changes
+      - name: Commit changes safely
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Automated update of games.json [skip ci]"
           file_pattern: 'pages/lessons/games.json'
-          skip_dirty_check: true 
+          # FIXED: These settings ensure the workflow doesn't fail if there's nothing to commit.
+          skip_dirty_check: false
+          skip_fetch: true
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

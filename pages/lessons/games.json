@@ -156,6 +156,10 @@
     "path": "pages/lessons/Backrooms/"
   },
   {
+    "name": "Backrooms 2D",
+    "path": "pages/lessons/Backrooms%202D/"
+  },
+  {
     "name": "Basket Random",
     "path": "pages/lessons/Basket%20Random/",
     "image": "pages/lessons/Basket%20Random/images%20%285%29.jpg"

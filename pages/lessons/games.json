@@ -96,6 +96,10 @@
     "path": "pages/lessons/Alien%20Sky%20Invasion/"
   },
   {
+    "name": "Allocation",
+    "path": "pages/lessons/Allocation/"
+  },
+  {
     "name": "Basket Random",
     "path": "pages/lessons/Basket%20Random/",
     "image": "pages/lessons/Basket%20Random/images%20%285%29.jpg"

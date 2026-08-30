@@ -1,36 +1,30 @@
 name: Deploy static content to Pages
 
 on:
-  # Triggers on every push to master, including UI changes and new game folders
   push:
     branches: ["master"]
-  
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 permissions:
-  contents: write # Allows the bot to "type" changes into games.json
+  contents: write 
   pages: write
   id-token: write
 
 concurrency:
   group: "pages"
-  # FIXED: Changed to true to cancel older deployments and speed up the site update
+  # This kills any old versions of the site currently trying to deploy 
+  # so the newest version goes to the front of the line immediately.
   cancel-in-progress: true 
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetches full history to make syncing easier
+          fetch-depth: 0 
 
-      # 1. Sync BEFORE running the Python script to avoid Exit Code 128
       - name: Sync with Remote
         run: |
           git config --global user.name "github-actions[bot]"
@@ -42,11 +36,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 2. Run your registry script
       - name: Generate game registry
         run: python3 scripts/generate-game-registry.py
 
-      # 3. Save games.json changes back to your repo automatically
       - name: Commit games.json changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
@@ -62,6 +54,13 @@ jobs:
         with:
           path: '.'
 
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5

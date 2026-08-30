@@ -32,6 +32,10 @@
     "path": "pages/lessons/3D%20Pinball%20Space%20Cadet/"
   },
   {
+    "name": "3Dash",
+    "path": "pages/lessons/3Dash/"
+  },
+  {
     "name": "4Th And Goal",
     "path": "pages/lessons/4th%20And%20Goal/"
   },

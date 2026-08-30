@@ -209,6 +209,10 @@
     "path": "pages/lessons/Battle%20Karts/"
   },
   {
+    "name": "Battle Simulator",
+    "path": "pages/lessons/Battle%20Simulator/"
+  },
+  {
     "name": "Brotato",
     "path": "pages/lessons/Brotato/",
     "image": "pages/lessons/Brotato/images%20%2823%29.jpg"

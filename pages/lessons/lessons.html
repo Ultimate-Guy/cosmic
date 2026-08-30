@@ -7,119 +7,73 @@
     <link rel="stylesheet" href="../../css/fontawesome.css"/>
     <link rel="stylesheet" href="../../css/otherpages.css"/>
     <style>
+        /* --- Original Style Specs --- */
         :root { 
+            --card-bg: rgba(6, 20, 16, 0.76); 
+            --card-border: rgba(110, 255, 201, 0.42); 
+            --card-hover: rgba(127, 255, 212, 0.16); 
             --accent: #2dccff;
-            --bg-dark: #070f15;
-            --card-bg: rgba(13, 26, 33, 0.85);
-            --border: rgba(58, 204, 255, 0.4);
-            --text: #8fecff;
         }
-
-        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             min-height: 100vh;
-            background-color: var(--bg-dark);
-            /* Space Theme Background */
-            background-image: 
-                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
-                radial-gradient(white, rgba(255,255,255,.1) 1px, transparent 30px);
-            background-size: 550px 550px, 350px 350px;
-            color: var(--text);
+            background: #070f15;
+            color: #8fecff;
             font-family: Arial, sans-serif;
             overflow-x: hidden;
         }
 
-        /* --- Centered Top Bar --- */
+        /* --- Centered Top Bar with Logo --- */
         #top-bar {
             display: flex;
             align-items: center;
-            justify-content: center; /* Centers the Logo + Cosmic */
+            justify-content: center;
             padding: 15px 40px;
             background: rgba(13, 26, 33, 0.9);
-            border-bottom: 1px solid var(--border);
-            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
             position: relative;
         }
-
         .brand { display: flex; align-items: center; gap: 12px; }
-        .brand h1 {
-            margin: 0;
-            font-size: 2.8rem;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            color: var(--accent);
-            text-shadow: 0 0 15px rgba(45, 204, 255, 0.5);
-        }
+        .brand h1 { margin: 0; font-size: 2.8rem; letter-spacing: 5px; color: var(--accent); text-transform: uppercase; }
 
-        /* --- Settings Trigger (Right Side) --- */
         .settings-trigger {
-            position: absolute;
-            right: 30px;
-            background: none;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--accent);
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            position: absolute; right: 30px; background: transparent; 
+            border: 1px solid var(--card-border); color: var(--accent);
+            padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
         }
-        .settings-trigger:hover { background: rgba(45, 204, 255, 0.2); }
 
         /* --- Floating Home Button (Glaxyias Style) --- */
         #back-home-btn {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1000;
-            display: none; /* Only visible in-game */
-            background: transparent;
-            border: 1.5px solid var(--accent);
-            border-radius: 6px;
-            padding: 5px 10px;
-            color: var(--accent);
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.85rem;
-            backdrop-filter: blur(5px);
+            position: fixed; top: 15px; left: 15px; z-index: 1000;
+            display: none; background: transparent; border: 1.5px solid var(--accent);
+            border-radius: 6px; padding: 5px 10px; color: var(--accent);
+            font-weight: bold; cursor: pointer; font-size: 0.8rem;
         }
-        #back-home-btn:hover { background: var(--accent); color: #000; }
 
-        /* --- Grid & Cards --- */
+        /* --- Original Grid Specs --- */
         #main-content { padding: 40px; }
         #gamesgrid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
-            gap: 15px; 
-            width: 100%;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
+            gap: 14px; width: 100%;
         }
-        
         .game-card { 
-            background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: 12px; padding: 10px; display: flex;
-            flex-direction: column; gap: 5px; text-align: center;
+            display: flex; flex-direction: column; gap: 8px; padding: 10px; 
+            border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); 
         }
+        .game-thumb { width: 100%; aspect-ratio: 1/1; border-radius: 12px; object-fit: cover; }
+        .game-title { font-size: 0.85rem; text-align: center; min-height: 2.2em; display: grid; place-items: center; }
 
-        .game-thumb { width: 100%; aspect-ratio: 1/1; border-radius: 10px; object-fit: cover; }
-        .game-thumb-placeholder { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 10px; display: grid; place-items: center; color: var(--accent); font-size: 0.7rem; }
-
-        .game-title { font-weight: bold; font-size: 0.75rem; margin: 4px 0; }
-
-        /* --- Small Buttons (Fixed) --- */
-        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .action-btn { 
-            height: 24px; /* Very small as requested */
-            border-radius: 5px; border: none; font-weight: bold; 
-            cursor: pointer; font-size: 0.65rem; 
+        /* --- Restored Original Button Sizes --- */
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .play-btn, .blank-btn { 
+            width: 100%; height: 36px; font-size: 0.72rem; 
+            border-radius: 999px; padding: 0; font-weight: bold; cursor: pointer;
         }
-        .play-btn { background: var(--accent); color: #000; }
+        .play-btn { background: var(--accent); color: #031721; border: none; }
         .blank-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
 
-        /* --- Full Screen Game Loader --- */
+        /* --- Full Screen Loader --- */
         #page-loader { position: fixed; inset: 0; background: #000; display: none; z-index: 500; }
         #page-loader iframe { width: 100%; height: 100%; border: none; }
 
@@ -128,8 +82,8 @@
             position: fixed; inset: 0; background: rgba(0,0,0,0.9);
             display: none; place-items: center; z-index: 2000;
         }
-        .modal-content { background: var(--card-bg); border: 1px solid var(--border); padding: 25px; border-radius: 15px; width: 350px; }
-        input { width: 100%; padding: 8px; background: #000; border: 1px solid var(--border); color: var(--accent); border-radius: 6px; margin: 8px 0; }
+        .modal-content { background: #0d1a21; border: 1px solid var(--card-border); padding: 25px; border-radius: 15px; width: 350px; }
+        input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--card-border); color: var(--accent); border-radius: 8px; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -139,24 +93,18 @@
             <img src="../../imgs/cosmic.png" width="40" height="40" alt="Logo" />
             <h1>Cosmic</h1>
         </div>
-        <button class="settings-trigger" onclick="toggleSettings()">
-            <i class="fas fa-cog"></i> Settings
-        </button>
+        <button class="settings-trigger" onclick="toggleSettings()">Settings</button>
     </header>
 
     <button id="back-home-btn" onclick="goHome()">← Home</button>
 
     <main id="main-content">
-        <div id="gamesgrid">
-            <p id="loading">Scanning Galactic Registry...</p>
-        </div>
+        <div id="gamesgrid"><p id="loading">Loading games...</p></div>
     </main>
 
-    <section id="page-loader">
-        <iframe id="game-iframe" allowfullscreen></iframe>
-    </section>
+    <section id="page-loader"><iframe id="game-iframe" allowfullscreen></iframe></section>
 
-    <!-- Settings Modal -->
+    <!-- Settings Modal (Functional) -->
     <div id="settings-modal">
         <div class="modal-content">
             <h3 style="color:var(--accent); margin-top:0;">Cosmic Settings</h3>
@@ -164,15 +112,15 @@
             <input type="text" id="panic-key" placeholder="Default: \" maxlength="1" />
             <label>Panic URL</label>
             <input type="text" id="panic-url" placeholder="https://classroom.google.com" />
-            <label>Tab Mask</label>
-            <button class="play-btn action-btn" style="height:35px; width:100%; margin-bottom:5px" onclick="mask('Google Classroom', 'https://ssl.gstatic.com/classroom/favicon.png')">Classroom</button>
-            <button class="play-btn action-btn" style="height:35px; width:100%" onclick="mask('Google', 'https://www.google.com/favicon.ico')">Google</button>
-            <button class="play-btn action-btn" style="width:100%; height:40px; margin-top:15px" onclick="toggleSettings()">Save</button>
+            <label>Tab Masking</label>
+            <button class="play-btn" style="height:38px; width:100%; margin-bottom:5px" onclick="mask('Google Classroom', 'https://ssl.gstatic.com/classroom/favicon.png')">Classroom</button>
+            <button class="play-btn" style="height:38px; width:100%" onclick="mask('Google', 'https://www.google.com/favicon.ico')">Google</button>
+            <button class="play-btn" style="width:100%; height:45px; margin-top:15px" onclick="toggleSettings()">Save & Close</button>
         </div>
     </div>
 
     <script>
-        // --- Original Loading Logic [RECONSTRUCTED FROM YOUR CHUNKS] ---
+        // --- Original Pathing & Loading Logic ---
         function normalizeUrl(url) { return new URL(url, window.location.href).href; }
         function gameUrl(game) { return normalizeUrl('../../' + game.path + (game.entry || '')); }
 
@@ -192,6 +140,14 @@
             document.getElementById('game-iframe').src = '';
         }
 
+        function openBlank(url) {
+            const win = window.open('about:blank', '_blank');
+            if (!win) return;
+            win.document.write('<!DOCTYPE html><html><body style="margin:0;background:#000;"><iframe src="'+url+'" style="border:none;width:100vw;height:100vh;" allowfullscreen></iframe></body></html>');
+            win.document.close();
+        }
+
+        // --- Settings Functionality ---
         function toggleSettings() {
             const m = document.getElementById('settings-modal');
             m.style.display = m.style.display === 'grid' ? 'none' : 'grid';
@@ -210,14 +166,7 @@
             if (e.key === pk) window.location.replace(pu);
         });
 
-        // Use the original About Blank logic
-        function openBlank(url) {
-            const win = window.open('about:blank', '_blank');
-            if (!win) return;
-            win.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;"><iframe src="${url}" style="border:none;width:100vw;height:100vh;" allowfullscreen></iframe></body></html>`);
-            win.document.close();
-        }
-
+        // --- Original Registry Fetch ---
         fetch('games.json')
             .then(res => res.json())
             .then(games => {
@@ -233,8 +182,8 @@
                         ${imgPath ? `<img src="${imgPath}" class="game-thumb">` : `<div class="game-thumb-placeholder">${game.name}</div>`}
                         <div class="game-title">${game.name}</div>
                         <div class="card-actions">
-                            <button class="action-btn play-btn" onclick="launch('${finalUrl}')">Play</button>
-                            <button class="action-btn blank-btn" onclick="openBlank('${finalUrl}')">Blank</button>
+                            <button class="play-btn" onclick="launch('${finalUrl}')">Play</button>
+                            <button class="blank-btn" onclick="openBlank('${finalUrl}')">Blank</button>
                         </div>
                     `;
                     grid.appendChild(card);

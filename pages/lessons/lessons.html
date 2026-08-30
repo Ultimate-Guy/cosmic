@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <title>Learn Calculus</title>
     <meta charset="UTF-8"/>
@@ -7,202 +7,104 @@
     <link rel="stylesheet" href="../../css/fontawesome.css"/>
     <link rel="stylesheet" href="../../css/otherpages.css"/>
     <style>
-        :root { 
-            --card-bg: rgba(6, 20, 16, 0.76); 
-            --card-border: rgba(45, 204, 255, 0.42); /* Blue outlines as requested */
-            --accent: #2dccff;
-            --text: #8fecff;
-        }
-
-        body {
-            margin: 0; min-height: 100vh; background: #070f15;
-            color: var(--text); font-family: Arial, sans-serif; overflow: hidden;
-        }
-
-        /* --- Password Gate UI --- */
-        #password-gate {
-            position: fixed; inset: 0; background: #070f15;
-            display: grid; place-items: center; z-index: 9999;
-        }
-        .password-card {
-            background: var(--card-bg); border: 2px solid var(--card-border);
-            border-radius: 20px; padding: 35px; width: 380px; text-align: center;
-        }
-        .pass-input-container { margin: 25px 0; display: flex; gap: 10px; }
-        .pass-input-container input {
-            flex-grow: 1; background: #000; border: 1px solid var(--card-border);
-            color: var(--accent); padding: 12px; border-radius: 8px; outline: none;
-        }
-        .toggle-btn, .enter-btn {
-            background: var(--accent); color: #000; border: none;
-            border-radius: 8px; cursor: pointer; font-weight: bold; display: grid; place-items: center;
-        }
-        .toggle-btn { width: 45px; background: rgba(45, 204, 255, 0.1); color: var(--accent); border: 1px solid var(--card-border); }
-
-        /* --- Centered Top Bar --- */
-        #top-bar {
-            display: flex; align-items: center; justify-content: center;
-            padding: 15px 40px; background: rgba(13, 26, 33, 0.95);
-            border-bottom: 1px solid var(--card-border); position: relative; z-index: 100;
-        }
-        .brand { display: flex; align-items: center; gap: 15px; }
-        .brand h1 { margin: 0; font-size: 2.8rem; text-transform: uppercase; letter-spacing: 5px; color: var(--accent); }
-        .settings-trigger {
-            position: absolute; right: 40px; background: transparent; 
-            border: 1px solid var(--card-border); color: var(--accent);
-            padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;
-        }
-
-        /* --- Restore Original Game Grid & Cards --- */
-        #site-content { display: none; }
-        #gamesearchform { display: flex; justify-content: center; margin: 25px 0; }
-        #gamesearchinput { 
-            background: rgba(0,0,0,0.4); color: var(--accent); padding: 0 20px; 
-            height: 50px; border: 1px solid var(--card-border); border-radius: 50px; width: min(420px, 90vw); 
-        }
-        #gamesgrid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
-            gap: 14px; padding: 0 40px 40px; 
-        }
-        .game-card { 
-            display: flex; flex-direction: column; gap: 8px; padding: 10px; 
-            border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); 
-        }
-        .game-thumb { width: 100%; aspect-ratio: 1/1; border-radius: 12px; object-fit: cover; }
-        .game-title { font-size: 0.85rem; text-align: center; min-height: 2.2em; display: grid; place-items: center; }
-        
+        :root { --card-bg: rgba(6, 20, 16, 0.76); --card-border: rgba(110, 255, 201, 0.42); --card-hover: rgba(127, 255, 212, 0.16); }
+        #gamesgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; margin-bottom: 0; align-items: stretch; }
+        .game-card { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(6px); box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+        .game-card:hover { background: linear-gradient(180deg, var(--card-bg), var(--card-hover)); }
+        .game-thumb, .game-thumb-placeholder { width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; }
+        .game-thumb { object-fit: cover; }
+        .game-thumb-placeholder { display: grid; place-items: center; padding: 12px; box-sizing: border-box; background: rgba(0, 0, 0, 0.3); color: #2dccff; text-align: center; }
+        .game-title { font-size: 0.85rem; line-height: 1.2; text-align: center; min-height: 2.2em; display: grid; place-items: center; }
         .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        /* RESTORED: Original button size (36px height) and width */
-        .play-btn, .blank-btn { width: 100%; height: 36px; font-size: 0.72rem; border-radius: 999px; cursor: pointer; font-weight: bold; }
-        .play-btn { background: var(--accent); color: #031721; border: none; }
-        .blank-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
-
-        #page-loader { position: fixed; inset: 0; background: #000; display: none; z-index: 500; }
-        #page-loader iframe { width: 100%; height: 100%; border: none; }
+        .play-btn, .blank-btn { width: 100%; height: 36px; font-size: 0.72rem; border-radius: 999px; padding: 0; }
+        #gamesearchform { display: flex; justify-content: center; margin-bottom: 18px; }
+        #gamesearchinput { background: rgba(0,0,0,0.4); color: #2dccff; font-family: inherit; padding: 0 17px; height: 48px; outline: 2px solid #070f15; border: none; border-radius: 50px; width: min(420px, 90vw); }
+        input::placeholder { color: #2dccff; }
+        #no-results { grid-column: 1 / -1; text-align: center; }
     </style>
 </head>
 <body>
-
-    <div id="password-gate">
-        <div class="password-card">
-            <h2 style="color:var(--accent); text-transform:uppercase;">Cosmic Entry</h2>
-            <div class="pass-input-container">
-                <input type="password" id="pass-field" placeholder="Enter Password..." />
-                <button class="toggle-btn" onclick="togglePass()"><i id="eye-icon" class="fas fa-eye"></i></button>
-                <button class="enter-btn" style="padding: 0 15px;" onclick="checkPass()">Enter</button>
-            </div>
-            <p id="error-msg" style="color: #ff4d4d; font-size: 0.8rem; display: none;">Invalid Access Code.</p>
-        </div>
+    <form id="gamesearchform" class="flex-center" onsubmit="return false;">
+        <input id="gamesearchinput" autocomplete="off" type="text" placeholder="Search games" />
+    </form>
+    <div id="gamesgrid">
+        <p id="loading">Loading games...</p>
+        <p id="no-results">No results...</p>
     </div>
-
-    <div id="site-content">
-        <header id="top-bar">
-            <div class="brand">
-                <img src="../../imgs/cosmic.png" width="45" height="45" alt="Logo" />
-                <h1>Cosmic</h1>
-            </div>
-            <button class="settings-trigger">Settings</button>
-        </header>
-        <main id="main-content">
-            <form id="gamesearchform" onsubmit="return false;"><input id="gamesearchinput" type="text" placeholder="Search Cosmic games..." /></form>
-            <div id="gamesgrid">
-                <p id="loading">Connecting to Registry...</p>
-                <p id="no-results" style="display:none; grid-column: 1/-1; text-align: center;">No matches.</p>
-            </div>
-        </main>
-    </div>
-
-    <section id="page-loader"><iframe id="game-iframe" allowfullscreen></iframe></section>
-
     <script>
-        // --- Password Logic ---
-        function togglePass() {
-            const f = document.getElementById('pass-field');
-            const i = document.getElementById('eye-icon');
-            f.type = (f.type === "password") ? "text" : "password";
-            i.className = (f.type === "password") ? "fas fa-eye" : "fas fa-eye-slash";
-        }
-        function checkPass() {
-            if (document.getElementById('pass-field').value === "PASSWORD_PLACEHOLDER") {
-                document.getElementById('password-gate').style.display = 'none';
-                document.getElementById('site-content').style.display = 'block';
-                document.body.style.overflow = 'auto';
-                loadRegistry();
-            } else { document.getElementById('error-msg').style.display = 'block'; }
-        }
-        document.getElementById('pass-field').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPass(); });
+        const searchInput = document.getElementById('gamesearchinput');
+        const grid = document.getElementById('gamesgrid');
+        const loading = document.getElementById('loading');
+        const noResults = document.getElementById('no-results');
+        let cards = [];
 
-        // --- RESTORED ORIGINAL LOADING LOGIC ---
+        noResults.style.display = 'none';
         function normalizeUrl(url) { return new URL(url, window.location.href).href; }
         function gameUrl(game) { return normalizeUrl('../../' + game.path + (game.entry || '')); }
-
-        function launch(url) {
-            document.getElementById('top-bar').style.display = 'none';
-            document.getElementById('main-content').style.display = 'none';
-            document.getElementById('page-loader').style.display = 'block';
-            document.getElementById('game-iframe').src = url;
-        }
-
-        function openBlank(url) {
+        function openGame(url) { window.location.href = normalizeUrl(url); }
+        function openGameBlank(url) {
+            const target = normalizeUrl(url);
             const win = window.open('about:blank', '_blank');
-            if (win) {
-                win.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;"><iframe src="${url}" style="border:none;width:100vw;height:100vh;" allowfullscreen></iframe></body></html>`);
-                win.document.close();
-            }
+            if (!win) return;
+            win.document.open();
+            win.document.write('<!DOCTYPE html><html><head><style>*{margin:0;padding:0;overflow:hidden;}html,body{width:100%;height:100%;background:black;}iframe{border:0;width:100%;height:100%;display:block;}</style></head><body><iframe allowfullscreen src="' + target + '"></iframe></body></html>');
+            win.document.close();
+            localStorage.setItem('lastPlayedGame', target);
         }
-
         function createCard(game) {
             const card = document.createElement('article');
             card.className = 'game-card';
-            const finalUrl = gameUrl(game);
-
-            // Reverting to the 'document.createElement' method you said worked perfectly
+            card.dataset.name = game.name.toLowerCase();
             if (game.image) {
                 const thumb = document.createElement('img');
                 thumb.src = gameUrl({path: game.image});
+                thumb.alt = '';
+                thumb.draggable = false;
                 thumb.className = 'game-thumb';
                 card.appendChild(thumb);
             } else {
                 const placeholder = document.createElement('div');
-                placeholder.className = 'game-thumb';
-                placeholder.style.background = '#000';
-                placeholder.style.display = 'grid';
-                placeholder.style.placeItems = 'center';
-                placeholder.textContent = 'No Image';
+                placeholder.className = 'game-thumb-placeholder';
+                placeholder.textContent = game.name;
                 card.appendChild(placeholder);
             }
-
             const name = document.createElement('div');
             name.className = 'game-title';
             name.textContent = game.name;
-
             const actions = document.createElement('div');
             actions.className = 'card-actions';
-
             const playBtn = document.createElement('button');
             playBtn.className = 'play-btn';
             playBtn.textContent = 'Play';
-            playBtn.onclick = () => launch(finalUrl);
-
+            playBtn.addEventListener('click', () => { localStorage.setItem('lastPlayedGame', gameUrl(game)); openGame(gameUrl(game)); });
             const blankBtn = document.createElement('button');
             blankBtn.className = 'blank-btn';
-            blankBtn.textContent = 'Blank';
-            blankBtn.onclick = () => openBlank(finalUrl);
-
+            blankBtn.textContent = 'About Blank';
+            blankBtn.addEventListener('click', () => openGameBlank(gameUrl(game)));
             actions.append(playBtn, blankBtn);
             card.append(name, actions);
             return card;
         }
-
-        function loadRegistry() {
-            const grid = document.getElementById('gamesgrid');
-            fetch('games.json')
-                .then(res => res.json())
-                .then(games => {
-                    document.getElementById('loading').remove();
-                    games.forEach(game => grid.appendChild(createCard(game)));
-                });
+        function filterGames() {
+            const query = searchInput.value.trim().toLowerCase();
+            let visibleCount = 0;
+            cards.forEach(card => {
+                const matches = !query || card.dataset.name.includes(query);
+                card.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
+            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
         }
+        searchInput.addEventListener('input', filterGames);
+        fetch('games.json')
+            .then(response => { if (!response.ok) throw new Error('Registry request failed'); return response.json(); })
+            .then(games => {
+                loading.remove();
+                games.forEach(game => grid.insertBefore(createCard(game), noResults));
+                cards = Array.from(grid.querySelectorAll('.game-card'));
+                filterGames();
+            })
+            .catch(() => { loading.textContent = 'Games could not be loaded.'; });
     </script>
 </body>
 </html>

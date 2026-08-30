@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Learn Calculus</title>
     <meta charset="UTF-8"/>
@@ -7,104 +7,214 @@
     <link rel="stylesheet" href="../../css/fontawesome.css"/>
     <link rel="stylesheet" href="../../css/otherpages.css"/>
     <style>
-        :root { --card-bg: rgba(6, 20, 16, 0.76); --card-border: rgba(110, 255, 201, 0.42); --card-hover: rgba(127, 255, 212, 0.16); }
-        #gamesgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; margin-bottom: 0; align-items: stretch; }
-        .game-card { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(6px); box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
-        .game-card:hover { background: linear-gradient(180deg, var(--card-bg), var(--card-hover)); }
-        .game-thumb, .game-thumb-placeholder { width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; }
-        .game-thumb { object-fit: cover; }
-        .game-thumb-placeholder { display: grid; place-items: center; padding: 12px; box-sizing: border-box; background: rgba(0, 0, 0, 0.3); color: #2dccff; text-align: center; }
-        .game-title { font-size: 0.85rem; line-height: 1.2; text-align: center; min-height: 2.2em; display: grid; place-items: center; }
-        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .play-btn, .blank-btn { width: 100%; height: 36px; font-size: 0.72rem; border-radius: 999px; padding: 0; }
-        #gamesearchform { display: flex; justify-content: center; margin-bottom: 18px; }
-        #gamesearchinput { background: rgba(0,0,0,0.4); color: #2dccff; font-family: inherit; padding: 0 17px; height: 48px; outline: 2px solid #070f15; border: none; border-radius: 50px; width: min(420px, 90vw); }
-        input::placeholder { color: #2dccff; }
-        #no-results { grid-column: 1 / -1; text-align: center; }
+        :root { 
+            --accent: #2dccff;
+            --bg-dark: #070f15;
+            --card-bg: rgba(13, 26, 33, 0.85);
+            --border: rgba(58, 204, 255, 0.4);
+            --text: #8fecff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: var(--bg-dark);
+            /* Space Theme Starfield */
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255,255,255,.1) 1px, transparent 30px);
+            background-size: 550px 550px, 350px 350px;
+            color: var(--text);
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- Top Bar --- */
+        #top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(13, 26, 33, 0.9);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        #top-bar h1 {
+            margin: 0;
+            font-size: 3rem; /* Big Cosmic Font */
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--accent);
+            text-shadow: 0 0 15px rgba(45, 204, 255, 0.6);
+        }
+
+        .settings-nav { display: flex; gap: 20px; }
+        .settings-btn { 
+            background: none; border: none; color: var(--accent); 
+            font-weight: bold; cursor: pointer; font-size: 1rem; 
+        }
+        .settings-btn:hover { color: #fff; text-decoration: underline; }
+
+        /* --- Floating Home Button (Glaxyias Style) --- */
+        #back-home-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            display: none; /* Only shows during gameplay */
+            background: transparent;
+            border: 2px solid var(--accent); /* Blue border as requested */
+            border-radius: 8px;
+            padding: 8px 15px;
+            color: var(--accent);
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: none;
+            backdrop-filter: blur(5px);
+        }
+        #back-home-btn:hover { background: var(--accent); color: #000; }
+
+        /* --- Main Content & Grid --- */
+        #main-content { padding: 40px; }
+        #gamesgrid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+            gap: 20px; 
+        }
+        
+        .game-card { 
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 16px; padding: 12px; display: flex;
+            flex-direction: column; gap: 8px; text-align: center;
+        }
+
+        .game-thumb { width: 100%; aspect-ratio: 1/1; border-radius: 10px; object-fit: cover; }
+        .game-thumb-placeholder { width: 100%; aspect-ratio: 1/1; background: #000; border-radius: 10px; display: grid; place-items: center; color: var(--accent); font-size: 0.8rem; }
+
+        .play-btn { 
+            background: var(--accent); color: #000; border: none; padding: 10px; 
+            border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: auto;
+        }
+
+        /* --- Full Screen Game Loader --- */
+        #page-loader {
+            position: fixed; inset: 0; background: #000;
+            display: none; z-index: 500;
+        }
+        #page-loader iframe { width: 100%; height: 100%; border: none; }
+
+        /* --- Settings Modal --- */
+        #settings-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            display: none; place-items: center; z-index: 2000;
+        }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--border); padding: 30px; border-radius: 20px; width: 400px; }
+        input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: var(--accent); border-radius: 5px; margin: 10px 0; }
     </style>
 </head>
 <body>
-    <form id="gamesearchform" class="flex-center" onsubmit="return false;">
-        <input id="gamesearchinput" autocomplete="off" type="text" placeholder="Search games" />
-    </form>
-    <div id="gamesgrid">
-        <p id="loading">Loading games...</p>
-        <p id="no-results">No results...</p>
-    </div>
-    <script>
-        const searchInput = document.getElementById('gamesearchinput');
-        const grid = document.getElementById('gamesgrid');
-        const loading = document.getElementById('loading');
-        const noResults = document.getElementById('no-results');
-        let cards = [];
 
-        noResults.style.display = 'none';
+    <!-- Top Bar with Big Title and Settings Triggers -->
+    <header id="top-bar">
+        <h1>Cosmic</h1>
+        <nav class="settings-nav">
+            <button class="settings-btn" onclick="toggleSettings()">Panic Settings</button>
+            <button class="settings-btn" onclick="maskTab('Google Classroom', 'https://ssl.gstatic.com/classroom/favicon.png')">Classroom Mask</button>
+            <button class="settings-btn" onclick="maskTab('Google', 'https://www.google.com/favicon.ico')">Google Mask</button>
+        </nav>
+    </header>
+
+    <!-- Floating Home Button (Visible when playing) -->
+    <button id="back-home-btn" onclick="goHome()">
+        ← Home
+    </button>
+
+    <main id="main-content">
+        <div id="gamesgrid">
+            <p id="loading">Syncing Registry...</p>
+        </div>
+    </main>
+
+    <section id="page-loader">
+        <iframe id="game-iframe"></iframe>
+    </section>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal">
+        <div class="modal-content">
+            <h3 style="color:var(--accent); margin-top:0;">Panic Override</h3>
+            <label>Panic Key</label>
+            <input type="text" id="panic-key" placeholder="e.g. \" maxlength="1" />
+            <label>Panic URL</label>
+            <input type="text" id="panic-url" placeholder="https://classroom.google.com" />
+            <button class="play-btn" style="width:100%" onclick="toggleSettings()">Save & Close</button>
+        </div>
+    </div>
+
+    <script>
+        // UI Navigation Logic
+        function launch(url) {
+            document.getElementById('top-bar').style.display = 'none';      // Hide Top Bar
+            document.getElementById('main-content').style.display = 'none'; // Hide Grid
+            document.getElementById('page-loader').style.display = 'block'; // Show Game
+            document.getElementById('back-home-btn').style.display = 'block'; // Show Floating Home
+            document.getElementById('game-iframe').src = url;
+        }
+
+        function goHome() {
+            document.getElementById('top-bar').style.display = 'flex';      // Show Top Bar
+            document.getElementById('main-content').style.display = 'block'; // Show Grid
+            document.getElementById('page-loader').style.display = 'none';   // Hide Game
+            document.getElementById('back-home-btn').style.display = 'none'; // Hide Floating Home
+            document.getElementById('game-iframe').src = '';
+        }
+
+        function toggleSettings() {
+            const m = document.getElementById('settings-modal');
+            m.style.display = m.style.display === 'grid' ? 'none' : 'grid';
+        }
+
+        // Privacy Logic (Glaxyias Inspired)
+        function maskTab(title, icon) {
+            document.title = title;
+            let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon'; link.rel = 'shortcut icon'; link.href = icon;
+            document.getElementsByTagName('head').appendChild(link);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            const key = document.getElementById('panic-key').value || '\\';
+            const url = document.getElementById('panic-url').value || 'https://classroom.google.com';
+            if (e.key === key) window.location.replace(url);
+        });
+
+        // Cosmic Registry Implementation [1, 2]
         function normalizeUrl(url) { return new URL(url, window.location.href).href; }
         function gameUrl(game) { return normalizeUrl('../../' + game.path + (game.entry || '')); }
-        function openGame(url) { window.location.href = normalizeUrl(url); }
-        function openGameBlank(url) {
-            const target = normalizeUrl(url);
-            const win = window.open('about:blank', '_blank');
-            if (!win) return;
-            win.document.open();
-            win.document.write('<!DOCTYPE html><html><head><style>*{margin:0;padding:0;overflow:hidden;}html,body{width:100%;height:100%;background:black;}iframe{border:0;width:100%;height:100%;display:block;}</style></head><body><iframe allowfullscreen src="' + target + '"></iframe></body></html>');
-            win.document.close();
-            localStorage.setItem('lastPlayedGame', target);
-        }
-        function createCard(game) {
-            const card = document.createElement('article');
-            card.className = 'game-card';
-            card.dataset.name = game.name.toLowerCase();
-            if (game.image) {
-                const thumb = document.createElement('img');
-                thumb.src = gameUrl({path: game.image});
-                thumb.alt = '';
-                thumb.draggable = false;
-                thumb.className = 'game-thumb';
-                card.appendChild(thumb);
-            } else {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'game-thumb-placeholder';
-                placeholder.textContent = game.name;
-                card.appendChild(placeholder);
-            }
-            const name = document.createElement('div');
-            name.className = 'game-title';
-            name.textContent = game.name;
-            const actions = document.createElement('div');
-            actions.className = 'card-actions';
-            const playBtn = document.createElement('button');
-            playBtn.className = 'play-btn';
-            playBtn.textContent = 'Play';
-            playBtn.addEventListener('click', () => { localStorage.setItem('lastPlayedGame', gameUrl(game)); openGame(gameUrl(game)); });
-            const blankBtn = document.createElement('button');
-            blankBtn.className = 'blank-btn';
-            blankBtn.textContent = 'About Blank';
-            blankBtn.addEventListener('click', () => openGameBlank(gameUrl(game)));
-            actions.append(playBtn, blankBtn);
-            card.append(name, actions);
-            return card;
-        }
-        function filterGames() {
-            const query = searchInput.value.trim().toLowerCase();
-            let visibleCount = 0;
-            cards.forEach(card => {
-                const matches = !query || card.dataset.name.includes(query);
-                card.style.display = matches ? '' : 'none';
-                if (matches) visibleCount++;
-            });
-            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-        }
-        searchInput.addEventListener('input', filterGames);
+
         fetch('games.json')
-            .then(response => { if (!response.ok) throw new Error('Registry request failed'); return response.json(); })
+            .then(res => res.json())
             .then(games => {
-                loading.remove();
-                games.forEach(game => grid.insertBefore(createCard(game), noResults));
-                cards = Array.from(grid.querySelectorAll('.game-card'));
-                filterGames();
-            })
-            .catch(() => { loading.textContent = 'Games could not be loaded.'; });
+                const grid = document.getElementById('gamesgrid');
+                document.getElementById('loading').remove();
+                games.forEach(game => {
+                    const card = document.createElement('article');
+                    card.className = 'game-card';
+                    const finalUrl = gameUrl(game);
+                    const imgUrl = game.image ? gameUrl({path: game.image}) : null;
+
+                    card.innerHTML = `
+                        ${imgUrl ? `<img src="${imgUrl}" class="game-thumb">` : `<div class="game-thumb-placeholder">${game.name}</div>`}
+                        <div style="font-weight:bold; font-size:0.9rem">${game.name}</div>
+                        <button class="play-btn" onclick="launch('${finalUrl}')">Play</button>
+                    `;
+                    grid.appendChild(card);
+                });
+            });
     </script>
 </body>
 </html>

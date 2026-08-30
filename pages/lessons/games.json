@@ -307,6 +307,10 @@
     "image": "pages/lessons/Ninja%20Obby/images%20%282%29.jpg"
   },
   {
+    "name": "Super Liquid Soccer",
+    "path": "pages/lessons/Super%20Liquid%20Soccer/"
+  },
+  {
     "name": "Ultrakill",
     "path": "pages/lessons/Ultrakill/"
   }

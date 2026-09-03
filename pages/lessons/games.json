@@ -68,6 +68,10 @@
     "path": "pages/lessons/A%20Day%20In%20The%20Office/"
   },
   {
+    "name": "Ai",
+    "path": "pages/lessons/AI/"
+  },
+  {
     "name": "Advent Neon",
     "path": "pages/lessons/Advent%20Neon/"
   },

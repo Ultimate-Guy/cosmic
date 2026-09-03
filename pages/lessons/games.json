@@ -311,6 +311,10 @@
     "image": "pages/lessons/Ninja%20Obby/images%20%282%29.jpg"
   },
   {
+    "name": "Ragdoll Archers",
+    "path": "pages/lessons/Ragdoll%20Archers/"
+  },
+  {
     "name": "Ragdoll Drop",
     "path": "pages/lessons/Ragdoll%20Drop/"
   },

@@ -319,6 +319,10 @@
     "path": "pages/lessons/Ragdoll%20Drop/"
   },
   {
+    "name": "Ragdoll Hit",
+    "path": "pages/lessons/Ragdoll%20Hit/"
+  },
+  {
     "name": "Super Liquid Soccer",
     "path": "pages/lessons/Super%20Liquid%20Soccer/"
   },

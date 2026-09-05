@@ -1,1 +1,6 @@
-
+{
+  "name": "Gust Browser",
+  "description": "A cool chill browser",
+  "path": "./gust/",
+  "entry": "index.html"
+}

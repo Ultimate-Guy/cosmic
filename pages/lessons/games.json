@@ -310,6 +310,10 @@
     "path": "pages/lessons/Demolition%20Derby%20Crash%20Racing/"
   },
   {
+    "name": "Getaway Shootout",
+    "path": "pages/lessons/Getaway%20Shootout/"
+  },
+  {
     "name": "Github Search",
     "path": "pages/lessons/Github%20Search/"
   },

@@ -7,10 +7,9 @@
     <link rel="stylesheet" href="../../css/fontawesome.css"/>
     <link rel="stylesheet" href="../../css/otherpages.css"/>
     <style>
-        /* 1. ORIGINAL CSS VARIABLES & LAYOUT (Restored to normal size) */
         :root { 
             --card-bg: rgba(6, 20, 16, 0.76); 
-            --accent: #2dccff; /* Blue neon from screenshot */
+            --accent: #2dccff;
             --card-border: rgba(45, 204, 255, 0.42); 
             --card-hover: rgba(127, 255, 212, 0.16); 
         }
@@ -19,31 +18,32 @@
         .game-card { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(6px); box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
         .game-thumb { width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; object-fit: cover; }
         .game-title { font-size: 0.85rem; line-height: 1.2; text-align: center; min-height: 2.2em; display: grid; place-items: center; }
-        
         .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        /* RESTORED: Original 36px button height */
         .play-btn, .blank-btn { width: 100%; height: 36px; font-size: 0.72rem; border-radius: 999px; cursor: pointer; font-weight: bold; }
         .play-btn { background: var(--accent); color: #031721; border: none; }
         .blank-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
-
         #gamesearchform { display: flex; justify-content: center; margin: 25px 0; }
         #gamesearchinput { background: rgba(0,0,0,0.4); color: var(--accent); padding: 0 20px; height: 50px; border: 1px solid var(--card-border); border-radius: 50px; width: min(420px, 90vw); outline: none; }
-
-        /* 2. PASSWORD GATE & TOP BAR CSS (Added Layers) */
         #password-gate { position: fixed; inset: 0; background: #070f15; display: grid; place-items: center; z-index: 9999; }
         .password-card { background: rgba(6, 20, 16, 0.8); border: 2px solid var(--card-border); border-radius: 20px; padding: 35px; width: 380px; text-align: center; }
         .pass-input-container { margin: 25px 0; display: flex; gap: 10px; }
         .pass-input-container input { flex-grow: 1; background: #000; border: 1px solid var(--card-border); color: var(--accent); padding: 12px; border-radius: 8px; outline: none; }
-        
         #top-bar { display: flex; align-items: center; justify-content: center; padding: 15px 40px; background: rgba(13, 26, 33, 0.95); border-bottom: 1px solid var(--card-border); position: relative; }
         .brand { display: flex; align-items: center; gap: 15px; }
         .brand h1 { margin: 0; font-size: 2.8rem; text-transform: uppercase; letter-spacing: 5px; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
-        .settings-trigger { position: absolute; right: 40px; background: transparent; border: 1px solid var(--card-border); color: var(--accent); padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+        .nav-links { position: absolute; right: 40px; display: flex; gap: 10px; align-items: center; }
+        .settings-trigger, .apps-trigger { background: transparent; border: 1px solid var(--card-border); color: var(--accent); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+        .settings-trigger:hover, .apps-trigger:hover { background: rgba(45, 204, 255, .12); }
+        @media (max-width: 600px) {
+            #top-bar { padding: 12px 16px; }
+            .brand h1 { font-size: 2rem; }
+            .nav-links { right: 16px; gap: 6px; }
+            .settings-trigger, .apps-trigger { padding: 7px 10px; font-size: 0.8rem; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- PASSWORD GATE -->
     <div id="password-gate">
         <div class="password-card">
             <h2 style="color:var(--accent); letter-spacing:2px;">COSMIC ENTRY</h2>
@@ -56,15 +56,16 @@
         </div>
     </div>
 
-    <!-- MAIN SITE CONTENT (Hidden until unlocked) -->
     <div id="site-content" style="display:none;">
-        
         <header id="top-bar">
             <div class="brand">
                 <img src="../../imgs/cosmic.png" width="45" height="45" alt="Logo" />
                 <h1>Cosmic</h1>
             </div>
-            <button class="settings-trigger" onclick="alert('Settings coming soon!')">Settings</button>
+            <div class="nav-links">
+                <button class="apps-trigger" onclick="window.location.href='apps/apps.html'">Apps</button>
+                <button class="settings-trigger" onclick="alert('Settings coming soon!')">Settings</button>
+            </div>
         </header>
 
         <main>
@@ -80,7 +81,6 @@
     </div>
 
     <script>
-        // 1. PASSWORD LOGIC
         function togglePass() {
             const f = document.getElementById('pass-field');
             const i = document.getElementById('eye-icon');
@@ -93,14 +93,13 @@
                 document.getElementById('password-gate').style.display = 'none';
                 document.getElementById('site-content').style.display = 'block';
                 document.body.style.overflow = 'auto';
-                loadRegistry(); // Start loading the original games
+                loadRegistry();
             } else {
                 document.getElementById('error-msg').style.display = 'block';
             }
         }
         document.getElementById('pass-field').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPass(); });
 
-        // 2. ORIGINAL GAME LOADING & SEARCH LOGIC (Restored)
         const searchInput = document.getElementById('gamesearchinput');
         const grid = document.getElementById('gamesgrid');
         const noResults = document.getElementById('no-results');
@@ -127,7 +126,6 @@
                         card.className = 'game-card';
                         const url = gameUrl(game);
                         const thumbPath = game.image ? gameUrl({path: game.image}) : '';
-
                         card.innerHTML = `
                             ${game.image ? `<img src="${thumbPath}" class="game-thumb" alt="">` : '<div class="game-thumb" style="background:#000; display:grid; place-items:center;">No Image</div>'}
                             <div class="game-title">${game.name}</div>
@@ -142,7 +140,6 @@
                 });
         }
 
-        // Search listener (Kept original logic)
         searchInput.addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             let matches = 0;

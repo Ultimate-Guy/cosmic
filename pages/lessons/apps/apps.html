@@ -3,68 +3,705 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Cosmic Apps</title>
+
     <link rel="stylesheet" href="../../../css/fontawesome.css" />
     <link rel="stylesheet" href="../../../css/otherpages.css" />
+
     <style>
         :root {
-            --card-bg: rgba(6, 20, 16, 0.76);
+            --bg: #050b12;
+            --surface: rgba(10, 23, 32, 0.78);
+            --surface-hover: rgba(15, 34, 47, 0.92);
+
             --accent: #2dccff;
-            --card-border: rgba(45, 204, 255, 0.42);
+            --accent-soft: rgba(45, 204, 255, 0.14);
+            --border: rgba(45, 204, 255, 0.28);
+
+            --text: #f2f7fa;
+            --muted: #8da2ad;
         }
-        * { box-sizing: border-box; }
-        body { margin: 0; min-height: 100vh; background: #070f15; color: #f0f4f8; font-family: system-ui, sans-serif; }
-        #top-bar { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 15px 40px; background: rgba(13, 26, 33, .95); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 10; }
-        .brand { margin-right: auto; display: flex; align-items: center; gap: 12px; }
-        .brand img { width: 45px; height: 45px; }
-        .brand h1 { margin: 0; font-size: 2rem; letter-spacing: 4px; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
-        .nav-btn { background: transparent; border: 1px solid var(--card-border); color: var(--accent); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; }
-        .nav-btn:hover { background: rgba(45, 204, 255, .12); }
-        main { padding: 25px 40px 50px; }
-        #appsgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
-        .app-card { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
-        .app-title { min-height: 2.4em; display: grid; place-items: center; text-align: center; font-weight: 700; }
-        .open-btn { width: 100%; height: 38px; border: none; border-radius: 999px; background: var(--accent); color: #031721; cursor: pointer; font-weight: 800; }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            color: var(--text);
+            font-family:
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at 20% 10%,
+                    rgba(45, 204, 255, 0.09),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 80% 80%,
+                    rgba(45, 120, 255, 0.07),
+                    transparent 35%
+                ),
+                var(--bg);
+        }
+
+        /* =========================
+           TOP BAR
+        ========================= */
+
+        #top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+            padding: 13px 40px;
+
+            background: rgba(5, 12, 18, 0.88);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            margin-right: auto;
+        }
+
+        .brand img {
+            width: 44px;
+            height: 44px;
+
+            object-fit: contain;
+
+            filter:
+                drop-shadow(0 0 8px rgba(45, 204, 255, 0.35));
+
+            transition: transform 0.25s ease;
+        }
+
+        .brand:hover img {
+            transform: rotate(-5deg) scale(1.05);
+        }
+
+        .brand h1 {
+            margin: 0;
+
+            color: var(--accent);
+
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+
+            text-shadow:
+                0 0 10px rgba(45, 204, 255, 0.55);
+        }
+
+        .nav-btn {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+
+            padding: 9px 16px;
+
+            color: var(--accent);
+            background: transparent;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-soft);
+            border-color: rgba(45, 204, 255, 0.6);
+
+            transform: translateY(-1px);
+        }
+
+        .nav-btn:focus-visible,
+        .open-btn:focus-visible,
+        .search-input:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        main {
+            width: min(1400px, 100%);
+
+            margin: 0 auto;
+            padding: 45px 40px 70px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+            margin: 0 0 8px;
+
+            font-size: clamp(2rem, 4vw, 3rem);
+            letter-spacing: -1px;
+        }
+
+        .page-header p {
+            margin: 0;
+
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        /* =========================
+           SEARCH
+        ========================= */
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+
+            margin-bottom: 25px;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+
+            padding: 13px 16px 13px 43px;
+
+            border: 1px solid var(--border);
+            border-radius: 12px;
+
+            color: var(--text);
+            background: rgba(8, 20, 29, 0.8);
+
+            font-size: 1rem;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+
+            box-shadow:
+                0 0 0 3px rgba(45, 204, 255, 0.08);
+        }
+
+        .search-input::placeholder {
+            color: #71858f;
+        }
+
+        /* =========================
+           APP GRID
+        ========================= */
+
+        #appsgrid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fill, minmax(210px, 1fr));
+
+            gap: 18px;
+        }
+
+        .app-card {
+            position: relative;
+
+            display: flex;
+            flex-direction: column;
+
+            min-height: 190px;
+
+            padding: 20px;
+
+            overflow: hidden;
+
+            border: 1px solid var(--border);
+            border-radius: 18px;
+
+            background: var(--surface);
+
+            box-shadow:
+                0 12px 35px rgba(0, 0, 0, 0.28);
+
+            cursor: pointer;
+
+            transition:
+                transform 0.22s ease,
+                border-color 0.22s ease,
+                background 0.22s ease,
+                box-shadow 0.22s ease;
+        }
+
+        .app-card::before {
+            content: "";
+
+            position: absolute;
+
+            width: 120px;
+            height: 120px;
+
+            right: -55px;
+            top: -55px;
+
+            border-radius: 50%;
+
+            background: rgba(45, 204, 255, 0.12);
+
+            filter: blur(5px);
+
+            transition: transform 0.3s ease;
+        }
+
+        .app-card:hover {
+            transform: translateY(-6px);
+
+            background: var(--surface-hover);
+
+            border-color: rgba(45, 204, 255, 0.65);
+
+            box-shadow:
+                0 18px 45px rgba(0, 0, 0, 0.38),
+                0 0 25px rgba(45, 204, 255, 0.08);
+        }
+
+        .app-card:hover::before {
+            transform: scale(1.5);
+        }
+
+        .app-icon {
+            position: relative;
+            z-index: 1;
+
+            display: grid;
+            place-items: center;
+
+            width: 58px;
+            height: 58px;
+
+            margin-bottom: 18px;
+
+            border: 1px solid var(--border);
+            border-radius: 15px;
+
+            color: var(--accent);
+            background: var(--accent-soft);
+
+            font-size: 1.4rem;
+
+            box-shadow:
+                inset 0 0 20px rgba(45, 204, 255, 0.04);
+        }
+
+        .app-title {
+            position: relative;
+            z-index: 1;
+
+            margin-bottom: 6px;
+
+            font-size: 1.08rem;
+            font-weight: 750;
+
+            overflow-wrap: anywhere;
+        }
+
+        .app-description {
+            position: relative;
+            z-index: 1;
+
+            flex: 1;
+
+            margin-bottom: 18px;
+
+            color: var(--muted);
+
+            font-size: 0.88rem;
+            line-height: 1.45;
+        }
+
+        .open-btn {
+            position: relative;
+            z-index: 2;
+
+            width: 100%;
+            height: 40px;
+
+            border: 0;
+            border-radius: 10px;
+
+            color: #031721;
+            background: var(--accent);
+
+            font-weight: 800;
+
+            cursor: pointer;
+
+            transition:
+                filter 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .open-btn:hover {
+            filter: brightness(1.08);
+        }
+
+        .open-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* =========================
+           STATES
+        ========================= */
+
+        .state {
+            grid-column: 1 / -1;
+
+            padding: 50px 20px;
+
+            text-align: center;
+
+            color: var(--muted);
+        }
+
+        .state i {
+            display: block;
+
+            margin-bottom: 15px;
+
+            color: var(--accent);
+
+            font-size: 2rem;
+        }
+
+        .state.error i {
+            color: #ff6b6b;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 700px) {
+            #top-bar {
+                padding: 11px 16px;
+            }
+
+            .brand h1 {
+                font-size: 1.4rem;
+                letter-spacing: 3px;
+            }
+
+            .brand img {
+                width: 38px;
+                height: 38px;
+            }
+
+            .nav-btn {
+                padding: 8px 11px;
+                font-size: 0.85rem;
+            }
+
+            main {
+                padding: 30px 16px 50px;
+            }
+
+            #appsgrid {
+                grid-template-columns:
+                    repeat(auto-fill, minmax(160px, 1fr));
+
+                gap: 12px;
+            }
+
+            .app-card {
+                min-height: 175px;
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .brand h1 {
+                display: none;
+            }
+
+            .toolbar {
+                display: block;
+            }
+
+            #appsgrid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
+
 <body>
+
     <header id="top-bar">
+
         <div class="brand">
-            <img src="../../../imgs/cosmic.png" alt="Cosmic" />
+            <img
+                src="../../../imgs/cosmic.png"
+                alt="Cosmic logo"
+            />
+
             <h1>Cosmic</h1>
         </div>
-        <button class="nav-btn" onclick="window.location.href='../lessons.html'">Games</button>
-        <button class="nav-btn" onclick="alert('Settings coming soon!')">Settings</button>
+
+        <button
+            class="nav-btn"
+            type="button"
+            onclick="window.location.href='../lessons.html'"
+        >
+            Games
+        </button>
+
+        <button
+            class="nav-btn"
+            type="button"
+            onclick="alert('Settings coming soon!')"
+        >
+            Settings
+        </button>
+
     </header>
+
     <main>
-        <div id="appsgrid"><p id="loading">Connecting to App Registry...</p></div>
+
+        <section class="page-header">
+            <h2>Apps</h2>
+            <p>Explore the apps available in Cosmic.</p>
+        </section>
+
+        <div class="toolbar">
+
+            <div class="search-wrapper">
+                <span class="search-icon">
+                    <i class="fas fa-search"></i>
+                </span>
+
+                <input
+                    id="search"
+                    class="search-input"
+                    type="search"
+                    placeholder="Search apps..."
+                    autocomplete="off"
+                    aria-label="Search apps"
+                />
+            </div>
+
+        </div>
+
+        <section
+            id="appsgrid"
+            aria-live="polite"
+        >
+            <div class="state">
+                <i class="fas fa-circle-notch fa-spin"></i>
+                Connecting to App Registry...
+            </div>
+        </section>
+
     </main>
+
     <script>
+        const grid = document.getElementById("appsgrid");
+        const search = document.getElementById("search");
+
+        let apps = [];
+
         function appUrl(app) {
-            return new URL(app.path + (app.entry || ''), window.location.href).href;
+            if (!app || !app.path) {
+                throw new Error("App is missing a path.");
+            }
+
+            return new URL(
+                app.path + (app.entry || ""),
+                window.location.href
+            ).href;
         }
-        fetch('apps.json')
-            .then(res => {
-                if (!res.ok) throw new Error('Could not load apps.json');
-                return res.json();
-            })
-            .then(apps => {
-                const grid = document.getElementById('appsgrid');
-                grid.innerHTML = '';
-                apps.forEach(app => {
-                    const card = document.createElement('article');
-                    card.className = 'app-card';
-                    const url = appUrl(app);
-                    card.innerHTML = `<div class="app-title"></div><button class="open-btn">Open</button>`;
-                    card.querySelector('.app-title').textContent = app.name;
-                    card.querySelector('.open-btn').addEventListener('click', () => { window.location.href = url; });
-                    grid.appendChild(card);
+
+        function renderApps(list) {
+            grid.innerHTML = "";
+
+            if (!list.length) {
+                grid.innerHTML = `
+                    <div class="state">
+                        <i class="fas fa-search"></i>
+                        No apps found.
+                    </div>
+                `;
+
+                return;
+            }
+
+            list.forEach((app, index) => {
+                const card = document.createElement("article");
+
+                card.className = "app-card";
+                card.tabIndex = 0;
+
+                const icon = document.createElement("div");
+                icon.className = "app-icon";
+
+                icon.innerHTML =
+                    `<i class="${app.icon || "fas fa-cube"}"></i>`;
+
+                const title = document.createElement("div");
+                title.className = "app-title";
+                title.textContent = app.name || "Unnamed App";
+
+                const description = document.createElement("div");
+                description.className = "app-description";
+                description.textContent =
+                    app.description || "Open this app in Cosmic.";
+
+                const button = document.createElement("button");
+
+                button.className = "open-btn";
+                button.type = "button";
+                button.textContent = "Open";
+
+                const openApp = () => {
+                    try {
+                        window.location.href = appUrl(app);
+                    } catch (error) {
+                        console.error(error);
+
+                        alert("This app could not be opened.");
+                    }
+                };
+
+                button.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    openApp();
                 });
-                if (!apps.length) grid.innerHTML = '<p>No apps have been added yet.</p>';
-            })
-            .catch(error => {
-                document.getElementById('appsgrid').innerHTML = `<p>App Registry error: ${error.message}</p>`;
+
+                card.addEventListener("click", openApp);
+
+                card.addEventListener("keydown", (event) => {
+                    if (
+                        event.key === "Enter" ||
+                        event.key === " "
+                    ) {
+                        event.preventDefault();
+                        openApp();
+                    }
+                });
+
+                card.appendChild(icon);
+                card.appendChild(title);
+                card.appendChild(description);
+                card.appendChild(button);
+
+                grid.appendChild(card);
             });
+        }
+
+        async function loadApps() {
+            try {
+                const response = await fetch("apps.json", {
+                    cache: "no-cache"
+                });
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Registry returned ${response.status}`
+                    );
+                }
+
+                const data = await response.json();
+
+                if (!Array.isArray(data)) {
+                    throw new Error(
+                        "apps.json must contain an array."
+                    );
+                }
+
+                apps = data;
+
+                renderApps(apps);
+
+            } catch (error) {
+                console.error("Cosmic App Registry:", error);
+
+                grid.innerHTML = `
+                    <div class="state error">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        <strong>Could not load the App Registry.</strong>
+                        <br>
+                        Please try refreshing the page.
+                    </div>
+                `;
+            }
+        }
+
+        search.addEventListener("input", () => {
+            const query = search.value
+                .trim()
+                .toLowerCase();
+
+            const filtered = apps.filter((app) => {
+                const name =
+                    String(app.name || "").toLowerCase();
+
+                const description =
+                    String(app.description || "").toLowerCase();
+
+                return (
+                    name.includes(query) ||
+                    description.includes(query)
+                );
+            });
+
+            renderApps(filtered);
+        });
+
+        loadApps();
     </script>
+
 </body>
 </html>
+```

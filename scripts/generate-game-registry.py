@@ -28,7 +28,7 @@ GAME_NAV='''
     })();
   </script>
 '''
-# Load by absolute URL derived from the current page so games with a <base> tag still get the engine.
+# Resolve against the actual page URL so a game's <base> tag cannot redirect this script to a CDN.
 SETTINGS_SCRIPT='''<script id="cosmic-settings-engine-loader">\n(()=>{const s=document.createElement('script');s.id='cosmic-settings-engine';s.src=new URL('../../../settings/settings-engine.js',window.location.href).href;document.head.appendChild(s);})();\n</script>\n'''
 
 def display_name(folder_name):
@@ -67,8 +67,8 @@ def add_game_navigation(folder):
     index=folder/'index.html'
     if not index.is_file():return
     text=index.read_text(encoding='utf-8')
-    # Remove any older generated settings loader and restore one robust loader.
-    text=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?">.*?</script>\s*', '\n', text, count=1, flags=re.DOTALL)
+    # Remove every previous generated engine tag/loader, including old src-based versions.
+    text=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?"[^>]*>.*?</script>\s*', '\n', text, flags=re.DOTALL)
     if '</head>' in text:text=text.replace('</head>',SETTINGS_SCRIPT+'</head>',1)
     else:text=SETTINGS_SCRIPT+text
     # Always restore the generated Home control if a game page lost it.

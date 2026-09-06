@@ -81,6 +81,14 @@
     </div>
 
     <script>
+        const unlockKey = 'cosmic-games-unlocked';
+
+        function showGames() {
+            document.getElementById('password-gate').style.display = 'none';
+            document.getElementById('site-content').style.display = 'block';
+            document.body.style.overflow = 'auto';
+        }
+
         function togglePass() {
             const f = document.getElementById('pass-field');
             const i = document.getElementById('eye-icon');
@@ -90,9 +98,8 @@
 
         function checkPass() {
             if (document.getElementById('pass-field').value === "PASSWORD_PLACEHOLDER") {
-                document.getElementById('password-gate').style.display = 'none';
-                document.getElementById('site-content').style.display = 'block';
-                document.body.style.overflow = 'auto';
+                sessionStorage.setItem(unlockKey, 'true');
+                showGames();
                 loadRegistry();
             } else {
                 document.getElementById('error-msg').style.display = 'block';
@@ -120,7 +127,8 @@
             fetch('games.json')
                 .then(res => res.json())
                 .then(games => {
-                    document.getElementById('loading').remove();
+                    const loading = document.getElementById('loading');
+                    if (loading) loading.remove();
                     games.forEach(game => {
                         const card = document.createElement('article');
                         card.className = 'game-card';
@@ -138,6 +146,11 @@
                         cards.push({ element: card, name: game.name.toLowerCase() });
                     });
                 });
+        }
+
+        if (sessionStorage.getItem(unlockKey) === 'true') {
+            showGames();
+            loadRegistry();
         }
 
         searchInput.addEventListener('input', (e) => {

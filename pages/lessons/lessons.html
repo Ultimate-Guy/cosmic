@@ -34,11 +34,18 @@
         .nav-links { position: absolute; right: 40px; display: flex; gap: 10px; align-items: center; }
         .settings-trigger, .apps-trigger { background: transparent; border: 1px solid var(--card-border); color: var(--accent); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; }
         .settings-trigger:hover, .apps-trigger:hover { background: rgba(45, 204, 255, .12); }
+
+        /* Updates popup */
+        #updates-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(5px); z-index: 10000; }
+        #updates-frame { width: min(680px, 94vw); height: min(560px, 84vh); border: none; border-radius: 20px; background: transparent; box-shadow: 0 20px 70px rgba(0,0,0,.6); }
+        #close-updates { position: absolute; top: 18px; right: 22px; width: 42px; height: 42px; border: 1px solid var(--card-border); border-radius: 50%; background: rgba(13, 26, 33, .96); color: var(--accent); font-size: 25px; line-height: 1; cursor: pointer; z-index: 10001; }
+        #close-updates:hover { background: rgba(45, 204, 255, .14); }
         @media (max-width: 600px) {
             #top-bar { padding: 12px 16px; }
             .brand h1 { font-size: 2rem; }
             .nav-links { right: 16px; gap: 6px; }
             .settings-trigger, .apps-trigger { padding: 7px 10px; font-size: 0.8rem; }
+            #close-updates { top: 10px; right: 10px; }
         }
     </style>
 </head>
@@ -80,6 +87,11 @@
         </main>
     </div>
 
+    <div id="updates-overlay" role="dialog" aria-modal="true" aria-label="Cosmic Updates">
+        <button id="close-updates" type="button" aria-label="Close updates">×</button>
+        <iframe id="updates-frame" src="updates.html" title="Cosmic Updates"></iframe>
+    </div>
+
     <script>
         const unlockKey = 'cosmic-games-unlocked';
 
@@ -89,6 +101,18 @@
             document.body.style.overflow = 'auto';
         }
 
+        function showUpdates() {
+            document.getElementById('updates-overlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeUpdates() {
+            document.getElementById('updates-overlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        document.getElementById('close-updates').addEventListener('click', closeUpdates);
+
         function togglePass() {
             const f = document.getElementById('pass-field');
             const i = document.getElementById('eye-icon');
@@ -96,11 +120,16 @@
             i.className = (f.type === "password") ? "fas fa-eye" : "fas fa-eye-slash";
         }
 
+        function unlockAndShowUpdates() {
+            sessionStorage.setItem(unlockKey, 'true');
+            showGames();
+            loadRegistry();
+            showUpdates();
+        }
+
         function checkPass() {
             if (document.getElementById('pass-field').value === "PASSWORD_PLACEHOLDER") {
-                sessionStorage.setItem(unlockKey, 'true');
-                showGames();
-                loadRegistry();
+                unlockAndShowUpdates();
             } else {
                 document.getElementById('error-msg').style.display = 'block';
             }
@@ -151,6 +180,7 @@
         if (sessionStorage.getItem(unlockKey) === 'true') {
             showGames();
             loadRegistry();
+            showUpdates();
         }
 
         searchInput.addEventListener('input', (e) => {

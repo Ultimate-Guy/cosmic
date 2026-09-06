@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 LESSONS_DIR = ROOT / "pages" / "lessons"
 OUTPUT = LESSONS_DIR / "games.json"
 IMAGE_EXTENSIONS = {".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"}
-EXCLUDED_FOLDERS = {"img"}
+# These are site sections, not games.
+EXCLUDED_FOLDERS = {"img", "apps"}
 
 GAME_NAV = '''
   <style id="cosmic-game-nav-style">

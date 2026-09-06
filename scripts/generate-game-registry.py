@@ -21,49 +21,105 @@ GAME_NAV='''
   <button id="cosmic-home-button" type="button" aria-label="Return to Cosmic games">← Home</button>
   <script>
     (()=>{
-      const button=document.getElementById('cosmic-home-button');
-      if(!button)return;
-      const originalParent=button.parentNode;
+      function install(){
+        if(window.__cosmicFullscreenGuardInstalled)return;
+        window.__cosmicFullscreenGuardInstalled=true;
 
-      const moveIntoFullscreen=()=>{
-        const fullscreenElement=document.fullscreenElement;
-        if(!fullscreenElement){
-          button.classList.remove('cosmic-fullscreen-home');
-          if(button.parentNode!==originalParent)originalParent.appendChild(button);
-          return;
-        }
+        const addHome=()=>{
+          let button=document.getElementById('cosmic-home-button');
+          if(!button&&document.body){
+            button=document.createElement('button');
+            button.id='cosmic-home-button';
+            button.type='button';
+            button.setAttribute('aria-label','Return to Cosmic games');
+            button.textContent='← Home';
+            document.body.appendChild(button);
+            button.addEventListener('click',()=>{
+              const target=new URL('../lessons.html',window.location.href);
+              try{window.top.location.assign(target.href);}catch{window.location.assign(target.href);}
+            });
+          }
+          return button;
+        };
 
-        // A fullscreen element is the only part of the document guaranteed to
-        // remain visible. Put Home inside it so game fullscreen cannot cover it.
-        if(fullscreenElement===button||button.contains(fullscreenElement))return;
-        if(fullscreenElement.tagName==='IFRAME'){
-          // Cross-origin iframe documents cannot be edited by the parent page.
-          // Instead, fullscreen a same-page shell containing the iframe.
-          const shell=document.createElement('div');
+        const addStyle=()=>{
+          if(document.getElementById('cosmic-game-nav-style'))return;
+          const style=document.createElement('style');
+          style.id='cosmic-game-nav-style';
+          style.textContent='#cosmic-home-button{position:fixed;top:12px;left:12px;z-index:2147483647;padding:6px 11px;border:1px solid rgba(45,204,255,.42);border-radius:9px;background:rgba(13,26,33,.92);color:#2dccff;font:700 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);backdrop-filter:blur(8px);pointer-events:auto}#cosmic-home-button:hover{background:rgba(45,204,255,.14)}#cosmic-home-button.cosmic-fullscreen-home{position:absolute;top:12px;left:12px}';
+          (document.head||document.documentElement).appendChild(style);
+        };
+
+        const ensureShell=()=>{
+          let shell=document.getElementById('cosmic-fullscreen-shell');
+          if(shell&&shell.isConnected)return shell;
+          if(!document.body)return null;
+          shell=document.createElement('div');
           shell.id='cosmic-fullscreen-shell';
-          shell.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;background:#000;z-index:2147483646;overflow:hidden;';
-          const iframe=fullscreenElement;
-          const parent=iframe.parentNode;
-          if(!parent)return;
-          parent.insertBefore(shell,iframe);
-          shell.appendChild(iframe);
-          shell.appendChild(button);
-          button.classList.add('cosmic-fullscreen-home');
-          document.exitFullscreen().then(()=>shell.requestFullscreen()).catch(()=>{});
-          return;
-        }
+          shell.style.cssText='width:100%;height:100%;position:relative;overflow:hidden;';
+          while(document.body.firstChild) shell.appendChild(document.body.firstChild);
+          document.body.appendChild(shell);
+          return shell;
+        };
 
-        fullscreenElement.appendChild(button);
-        button.classList.add('cosmic-fullscreen-home');
-      };
+        const exitCleanup=()=>{
+          const shell=document.getElementById('cosmic-fullscreen-shell');
+          if(!shell||document.fullscreenElement)return;
+          while(shell.firstChild)document.body.appendChild(shell.firstChild);
+          shell.remove();
+          const button=document.getElementById('cosmic-home-button');
+          if(button)button.classList.remove('cosmic-fullscreen-home');
+        };
 
-      document.addEventListener('fullscreenchange',moveIntoFullscreen);
-      moveIntoFullscreen();
+        const patchFullscreen=()=>{
+          ['requestFullscreen','webkitRequestFullscreen','webkitRequestFullScreen','mozRequestFullScreen','msRequestFullscreen'].forEach(name=>{
+            const proto=Element.prototype;
+            const native=proto[name];
+            const marker='__cosmicPatched_'+name;
+            if(typeof native!=='function'||proto[marker])return;
+            proto[marker]=true;
+            proto[name]=function(options){
+              if(this.id==='cosmic-fullscreen-shell')return native.call(this,options);
+              const shell=ensureShell();
+              if(!shell)return native.call(this,options);
+              const button=addHome();
+              if(button&&button.parentNode!==shell)shell.appendChild(button);
+              button&&button.classList.add('cosmic-fullscreen-home');
+              return native.call(shell,options);
+            };
+          });
+        };
 
-      button.addEventListener('click',()=>{
-        const target=new URL('../lessons.html',window.location.href);
-        try{window.top.location.assign(target.href);}catch{window.location.assign(target.href);}
-      });
+        addStyle();
+        if(document.body)addHome();else document.addEventListener('DOMContentLoaded',addHome,{once:true});
+        patchFullscreen();
+        document.addEventListener('fullscreenchange',()=>{
+          const button=document.getElementById('cosmic-home-button');
+          const fs=document.fullscreenElement;
+          if(fs){
+            if(button&&fs.id==='cosmic-fullscreen-shell'){
+              fs.appendChild(button);
+              button.classList.add('cosmic-fullscreen-home');
+            }
+          }else exitCleanup();
+        });
+      }
+
+      install();
+      const originalWrite=Document.prototype.write;
+      if(!Document.prototype.__cosmicWritePatched){
+        Document.prototype.__cosmicWritePatched=true;
+        const persistent='('+install.toString()+')();';
+        Document.prototype.write=function(...args){
+          let html=args.join('');
+          if(/<html[\\s>]/i.test(html)){
+            const script='<script id="cosmic-fullscreen-guard">'+persistent.replace(/<\\/script/gi,'<\\\\/script')+'<\\/script>';
+            if(/<head[\\s>]/i.test(html))html=html.replace(/<head[\\s>]/i,m=>m+script);
+            else html=script+html;
+          }
+          return originalWrite.call(this,html);
+        };
+      }
     })();
   </script>
 '''

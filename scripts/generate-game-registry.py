@@ -16,12 +16,50 @@ GAME_NAV='''
   <style id="cosmic-game-nav-style">
     #cosmic-home-button{position:fixed;top:12px;left:12px;z-index:2147483647;padding:6px 11px;border:1px solid rgba(45,204,255,.42);border-radius:9px;background:rgba(13,26,33,.92);color:#2dccff;font:700 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);backdrop-filter:blur(8px);pointer-events:auto}
     #cosmic-home-button:hover{background:rgba(45,204,255,.14)}
+    #cosmic-home-button.cosmic-fullscreen-home{position:absolute;top:12px;left:12px}
   </style>
   <button id="cosmic-home-button" type="button" aria-label="Return to Cosmic games">← Home</button>
   <script>
     (()=>{
       const button=document.getElementById('cosmic-home-button');
       if(!button)return;
+      const originalParent=button.parentNode;
+
+      const moveIntoFullscreen=()=>{
+        const fullscreenElement=document.fullscreenElement;
+        if(!fullscreenElement){
+          button.classList.remove('cosmic-fullscreen-home');
+          if(button.parentNode!==originalParent)originalParent.appendChild(button);
+          return;
+        }
+
+        // A fullscreen element is the only part of the document guaranteed to
+        // remain visible. Put Home inside it so game fullscreen cannot cover it.
+        if(fullscreenElement===button||button.contains(fullscreenElement))return;
+        if(fullscreenElement.tagName==='IFRAME'){
+          // Cross-origin iframe documents cannot be edited by the parent page.
+          // Instead, fullscreen a same-page shell containing the iframe.
+          const shell=document.createElement('div');
+          shell.id='cosmic-fullscreen-shell';
+          shell.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;background:#000;z-index:2147483646;overflow:hidden;';
+          const iframe=fullscreenElement;
+          const parent=iframe.parentNode;
+          if(!parent)return;
+          parent.insertBefore(shell,iframe);
+          shell.appendChild(iframe);
+          shell.appendChild(button);
+          button.classList.add('cosmic-fullscreen-home');
+          document.exitFullscreen().then(()=>shell.requestFullscreen()).catch(()=>{});
+          return;
+        }
+
+        fullscreenElement.appendChild(button);
+        button.classList.add('cosmic-fullscreen-home');
+      };
+
+      document.addEventListener('fullscreenchange',moveIntoFullscreen);
+      moveIntoFullscreen();
+
       button.addEventListener('click',()=>{
         const target=new URL('../lessons.html',window.location.href);
         try{window.top.location.assign(target.href);}catch{window.location.assign(target.href);}

@@ -28,7 +28,8 @@ GAME_NAV='''
     })();
   </script>
 '''
-SETTINGS_SCRIPT='<script id="cosmic-settings-engine" src="../../../settings/settings-engine.js"></script>\n'
+# Load by absolute URL derived from the current page so games with a <base> tag still get the engine.
+SETTINGS_SCRIPT='''<script id="cosmic-settings-engine-loader">\n(()=>{const s=document.createElement('script');s.id='cosmic-settings-engine';s.src=new URL('../../../settings/settings-engine.js',window.location.href).href;document.head.appendChild(s);})();\n</script>\n'''
 
 def display_name(folder_name):
     words=re.sub(r'([a-z])([A-Z])',r'\1 \2',folder_name)
@@ -66,9 +67,10 @@ def add_game_navigation(folder):
     index=folder/'index.html'
     if not index.is_file():return
     text=index.read_text(encoding='utf-8')
-    if 'id="cosmic-settings-engine"' not in text:
-        if '</head>' in text:text=text.replace('</head>',SETTINGS_SCRIPT+'</head>',1)
-        else:text=SETTINGS_SCRIPT+text
+    # Remove any older generated settings loader and restore one robust loader.
+    text=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?">.*?</script>\s*', '\n', text, count=1, flags=re.DOTALL)
+    if '</head>' in text:text=text.replace('</head>',SETTINGS_SCRIPT+'</head>',1)
+    else:text=SETTINGS_SCRIPT+text
     # Always restore the generated Home control if a game page lost it.
     text=re.sub(r'\s*<style id="cosmic-game-nav-style">.*?</style>\s*<button id="cosmic-home-button".*?</button>\s*<script>.*?</script>\s*', '\n', text, count=1, flags=re.DOTALL)
     if '</body>' in text:text=text.replace('</body>',GAME_NAV+'\n</body>',1)

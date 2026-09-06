@@ -46,16 +46,17 @@
     <div id="password-gate"><div class="password-card"><h2 style="color:var(--accent); letter-spacing:2px;">COSMIC ENTRY</h2><div class="pass-input-container"><input type="password" id="pass-field" placeholder="Enter Password..." /><button class="blank-btn" style="width: 45px;" onclick="togglePass()"><i id="eye-icon" class="fas fa-eye"></i></button><button class="play-btn" style="width: 80px;" onclick="checkPass()">Enter</button></div><p id="error-msg" style="color: #ff4d4d; font-size: 0.8rem; display: none;">Invalid Access Code.</p></div></div>
     <div id="site-content" style="display:none;"><header id="top-bar"><div class="brand"><img src="../../imgs/cosmic.png" width="45" height="45" alt="Logo" /><h1>Cosmic</h1></div><div class="nav-links"><button class="apps-trigger" onclick="window.location.href='../../apps/apps.html'">Apps</button><button class="settings-trigger" onclick="window.location.href='../../settings/settings.html'">Settings</button></div></header><main><form id="gamesearchform" onsubmit="return false;"><input id="gamesearchinput" autocomplete="off" type="text" placeholder="Search Cosmic games..." /></form><div id="gamesgrid"><p id="loading">Connecting to Registry...</p><p id="no-results" style="display:none; grid-column: 1/-1; text-align: center;">No results...</p></div></main></div>
     <div id="updates-overlay" role="dialog" aria-modal="true" aria-label="Cosmic Updates"><button id="close-updates" type="button" aria-label="Close updates">×</button><div id="updates-panel">
-        <!-- COSMIC_UPDATES_CONTENT_START --><h1>Updates</h1><div class="update"><strong>Welcome to Cosmic!</strong><br />Now I've added an in-game button that lets you return back to all of the games instead of opening the tab again. I'm also adding new games like Ragdoll Archers, Ragdoll Soccer, Bacon May Die, and more. Settings is goated now!</div><div class="update"><strong>Games:</strong><br />New games and improvements may be added regularly. Check back here to see what changed.</div><div class="update"><strong>Tip:</strong><br />Close this update window with the X in the top-right corner to continue to the games.</div><section class="general-section"><h2>General</h2><ul class="general-list"><li>Cosmic is continuously being updated with new content and improvements.</li><li>Use the Games section to browse and launch available games.</li><li>Use the Apps section to access available Cosmic apps.</li><li>If something does not work correctly, try refreshing the page.</li></ul></section><!-- COSMIC_UPDATES_CONTENT_END -->
+        <h1>Updates</h1><div class="update"><strong>Welcome to Cosmic!</strong><br />Now I've added an in-game button that lets you return back to all of the games instead of opening the tab again. I'm also adding new games like Ragdoll Archers, Ragdoll Soccer, Bacon May Die, and more. Settings is goated now!</div><div class="update"><strong>Games:</strong><br />New games and improvements may be added regularly. Check back here to see what changed.</div><div class="update"><strong>Tip:</strong><br />Actually use the cloak. Don't really use the blob one but use the about blank cloak. Close this update window with the X in the top-right corner to continue to the games.</div><section class="general-section"><h2>General</h2><ul class="general-list"><li>Cosmic is continuously being updated with new content and improvements.</li><li>Use the Games section to browse and launch available games.</li><li>Use the Apps section to access available Cosmic apps.</li><li>If something does not work correctly, try refreshing the page.</li></ul></section>
     </div></div>
     <script>
         const unlockKey='cosmic-games-unlocked';
-        const updatesVersion='cbd85920e3342e4ed4049ea5067a198cb274bacb';
-        const updatesSessionKey='cosmic-updates-shown-'+updatesVersion;
+        const updatesSeenHashKey='cosmic-updates-seen-hash';
+        const updatesSource='updates.html';
         const searchInput=document.getElementById('gamesearchinput');
         const grid=document.getElementById('gamesgrid');
         const noResults=document.getElementById('no-results');
         let cards=[];
+        let currentUpdatesHash='';
 
         function showGames(){
             const gate=document.getElementById('password-gate');
@@ -65,19 +66,50 @@
             document.body.style.overflow='auto';
         }
 
-        function showUpdatesOncePerSession(){
-            if(sessionStorage.getItem(updatesSessionKey)==='true')return;
+        async function hashText(text){
+            if(window.crypto&&crypto.subtle){
+                const data=new TextEncoder().encode(text);
+                const digest=await crypto.subtle.digest('SHA-256',data);
+                return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
+            }
+            let hash=0;for(let i=0;i<text.length;i++)hash=((hash<<5)-hash)+text.charCodeAt(i)|0;return String(hash);
+        }
+
+        async function loadUpdatesSource(){
+            try{
+                const response=await fetch(updatesSource+'?v='+Date.now(),{cache:'no-store'});
+                if(!response.ok)throw new Error('Updates request failed: '+response.status);
+                const html=await response.text();
+                const doc=new DOMParser().parseFromString(html,'text/html');
+                const sourceCard=doc.querySelector('.updates-card');
+                if(!sourceCard)throw new Error('Updates source card not found');
+                const content=sourceCard.innerHTML.trim();
+                if(!content)throw new Error('Updates source is empty');
+                document.getElementById('updates-panel').innerHTML=content;
+                currentUpdatesHash=await hashText(content);
+                return true;
+            }catch(error){
+                console.warn('Cosmic updates source could not be loaded; using embedded fallback.',error);
+                currentUpdatesHash=await hashText(document.getElementById('updates-panel').innerHTML);
+                return false;
+            }
+        }
+
+        async function showUpdatesIfChanged(){
+            await loadUpdatesSource();
+            const seen=sessionStorage.getItem(updatesSeenHashKey);
+            if(seen===currentUpdatesHash)return;
             const overlay=document.getElementById('updates-overlay');
             if(!overlay)return;
             overlay.style.display='flex';
             document.body.style.overflow='hidden';
-            sessionStorage.setItem(updatesSessionKey,'true');
         }
 
         function closeUpdates(){
             const overlay=document.getElementById('updates-overlay');
             if(overlay)overlay.style.display='none';
             document.body.style.overflow='auto';
+            if(currentUpdatesHash)sessionStorage.setItem(updatesSeenHashKey,currentUpdatesHash);
         }
 
         document.getElementById('close-updates').addEventListener('click',closeUpdates);
@@ -88,11 +120,11 @@
             i.className=f.type==='password'?'fas fa-eye':'fas fa-eye-slash';
         }
 
-        function unlockAndShowUpdates(){
+        async function unlockAndShowUpdates(){
             sessionStorage.setItem(unlockKey,'true');
             showGames();
             loadRegistry();
-            showUpdatesOncePerSession();
+            await showUpdatesIfChanged();
         }
 
         function checkPass(){
@@ -107,10 +139,7 @@
         }
 
         document.getElementById('pass-field').addEventListener('keydown',e=>{
-            if(e.key==='Enter'){
-                e.preventDefault();
-                checkPass();
-            }
+            if(e.key==='Enter'){e.preventDefault();checkPass();}
         });
 
         function normalizeUrl(url){return new URL(url,window.location.href).href;}
@@ -125,45 +154,27 @@
         }
 
         function loadRegistry(){
-            fetch('games.json', {cache:'no-store'})
-                .then(res=>{
-                    if(!res.ok)throw new Error('Registry request failed: '+res.status);
-                    return res.json();
-                })
-                .then(games=>{
-                    const loading=document.getElementById('loading');
-                    if(loading)loading.remove();
-                    games.forEach(game=>{
-                        const card=document.createElement('article');
-                        card.className='game-card';
-                        const url=gameUrl(game),thumbPath=game.image?gameUrl({path:game.image}):'';
-                        card.innerHTML=`${game.image?`<img src="${thumbPath}" class="game-thumb" alt="">`:'<div class="game-thumb" style="background:#000;display:grid;place-items:center;">No Image</div>'}<div class="game-title">${game.name}</div><div class="card-actions"><button class="play-btn" onclick="window.location.href='${url}'">Play</button><button class="blank-btn" onclick="openBlank('${url}')">Blank</button></div>`;
-                        grid.appendChild(card);
-                        cards.push({element:card,name:game.name.toLowerCase()});
-                    });
-                    noResults.style.display=games.length?'none':'block';
-                })
-                .catch(error=>{
-                    const loading=document.getElementById('loading');
-                    if(loading)loading.textContent='Could not load the game registry. Please refresh.';
-                    console.error('Cosmic registry error:',error);
+            fetch('games.json',{cache:'no-store'}).then(res=>{if(!res.ok)throw new Error('Registry request failed: '+res.status);return res.json();}).then(games=>{
+                const loading=document.getElementById('loading');if(loading)loading.remove();
+                games.forEach(game=>{
+                    const card=document.createElement('article');card.className='game-card';
+                    const url=gameUrl(game),thumbPath=game.image?gameUrl({path:game.image}):'';
+                    card.innerHTML=`${game.image?`<img src="${thumbPath}" class="game-thumb" alt="">`:'<div class="game-thumb" style="background:#000;display:grid;place-items:center;">No Image</div>'}<div class="game-title">${game.name}</div><div class="card-actions"><button class="play-btn" onclick="window.location.href='${url}'">Play</button><button class="blank-btn" onclick="openBlank('${url}')">Blank</button></div>`;
+                    grid.appendChild(card);cards.push({element:card,name:game.name.toLowerCase()});
                 });
+                noResults.style.display=games.length?'none':'block';
+            }).catch(error=>{const loading=document.getElementById('loading');if(loading)loading.textContent='Could not load the game registry. Please refresh.';console.error('Cosmic registry error:',error);});
         }
 
         if(sessionStorage.getItem(unlockKey)==='true'){
             showGames();
             loadRegistry();
-            showUpdatesOncePerSession();
+            showUpdatesIfChanged();
         }
 
         searchInput.addEventListener('input',e=>{
-            const val=e.target.value.toLowerCase();
-            let matches=0;
-            cards.forEach(c=>{
-                const show=c.name.includes(val);
-                c.element.style.display=show?'flex':'none';
-                if(show)matches++;
-            });
+            const val=e.target.value.toLowerCase();let matches=0;
+            cards.forEach(c=>{const show=c.name.includes(val);c.element.style.display=show?'flex':'none';if(show)matches++;});
             noResults.style.display=matches===0&&cards.length?'block':'none';
         });
     </script>

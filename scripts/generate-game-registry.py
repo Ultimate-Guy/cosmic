@@ -4,23 +4,37 @@ import json
 import re
 import urllib.parse
 from pathlib import Path
+
 ROOT=Path(__file__).resolve().parents[1]
 LESSONS_DIR=ROOT/'pages'/'lessons'
 OUTPUT=LESSONS_DIR/'games.json'
 IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}
 EXCLUDED_FOLDERS={'img','apps'}
+
 GAME_NAV='''
   <style id="cosmic-game-nav-style">
-    #cosmic-home-button{position:fixed;top:12px;left:12px;z-index:99999;padding:6px 11px;border:1px solid rgba(45,204,255,.42);border-radius:9px;background:rgba(13,26,33,.92);color:#2dccff;font:700 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);backdrop-filter:blur(8px)}
+    #cosmic-home-button{position:fixed;top:12px;left:12px;z-index:2147483647;padding:6px 11px;border:1px solid rgba(45,204,255,.42);border-radius:9px;background:rgba(13,26,33,.92);color:#2dccff;font:700 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);backdrop-filter:blur(8px);pointer-events:auto}
     #cosmic-home-button:hover{background:rgba(45,204,255,.14)}
   </style>
   <button id="cosmic-home-button" type="button" aria-label="Return to Cosmic games">← Home</button>
-  <script>document.getElementById("cosmic-home-button").addEventListener("click",()=>{window.location.href=new URL("../lessons.html",window.location.href).href;});</script>
+  <script>
+    (()=>{
+      const button=document.getElementById('cosmic-home-button');
+      if(!button)return;
+      button.addEventListener('click',()=>{
+        const target=new URL('../lessons.html',window.location.href);
+        window.location.assign(target.href);
+      });
+    })();
+  </script>
 '''
 SETTINGS_SCRIPT='<script id="cosmic-settings-engine" src="../../../settings/settings-engine.js"></script>\n'
 
 def display_name(folder_name):
-    words=re.sub(r'([a-z])([A-Z])',r'\1 \2',folder_name); words=re.sub(r'[_-]+',' ',words).strip(); words=re.sub(r'\s+',' ',words); return words.title() or 'Untitled Game'
+    words=re.sub(r'([a-z])([A-Z])',r'\1 \2',folder_name)
+    words=re.sub(r'[_-]+',' ',words).strip()
+    words=re.sub(r'\s+',' ',words)
+    return words.title() or 'Untitled Game'
 
 def read_metadata(folder):
     metadata_path=next((path for path in folder.iterdir() if path.name.lower()=='game.json'),None)
@@ -55,9 +69,10 @@ def add_game_navigation(folder):
     if 'id="cosmic-settings-engine"' not in text:
         if '</head>' in text:text=text.replace('</head>',SETTINGS_SCRIPT+'</head>',1)
         else:text=SETTINGS_SCRIPT+text
-    if 'id="cosmic-home-button"' not in text:
-        if '</body>' in text:text=text.replace('</body>',GAME_NAV+'\n</body>',1)
-        else:text+=GAME_NAV
+    # Always restore the generated Home control if a game page lost it.
+    text=re.sub(r'\s*<style id="cosmic-game-nav-style">.*?</style>\s*<button id="cosmic-home-button".*?</button>\s*<script>.*?</script>\s*', '\n', text, count=1, flags=re.DOTALL)
+    if '</body>' in text:text=text.replace('</body>',GAME_NAV+'\n</body>',1)
+    else:text+=GAME_NAV
     index.write_text(text,encoding='utf-8')
 
 def build_game(folder,metadata):

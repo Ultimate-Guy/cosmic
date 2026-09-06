@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cosmic Apps</title>
+    <link rel="stylesheet" href="../css/fontawesome.css" />
+    <link rel="stylesheet" href="../css/otherpages.css" />
+    <style>
+        :root { --bg:#050b12; --surface:rgba(10,23,32,.78); --accent:#2dccff; --soft:rgba(45,204,255,.14); --border:rgba(45,204,255,.28); --text:#f2f7fa; --muted:#8da2ad; }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; color:var(--text); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(circle at 20% 10%,rgba(45,204,255,.09),transparent 30%),radial-gradient(circle at 80% 80%,rgba(45,120,255,.07),transparent 35%),var(--bg); }
+        #top-bar { position:sticky; top:0; z-index:100; display:flex; align-items:center; gap:10px; padding:13px 40px; background:rgba(5,12,18,.88); backdrop-filter:blur(18px); border-bottom:1px solid var(--border); }
+        .brand { display:flex; align-items:center; gap:12px; margin-right:auto; }
+        .brand img { width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 0 8px rgba(45,204,255,.35)); }
+        .brand h1 { margin:0; color:var(--accent); font-size:1.8rem; font-weight:800; letter-spacing:4px; text-shadow:0 0 10px rgba(45,204,255,.55); }
+        .nav-btn { border:1px solid var(--border); border-radius:10px; padding:9px 16px; color:var(--accent); background:transparent; font-weight:700; cursor:pointer; }
+        .nav-btn:hover { background:var(--soft); }
+        main { width:min(1400px,100%); margin:0 auto; padding:45px 40px 70px; }
+        .page-header { margin-bottom:30px; }
+        .page-header h2 { margin:0 0 8px; font-size:clamp(2rem,4vw,3rem); }
+        .page-header p { margin:0; color:var(--muted); }
+        .toolbar { display:flex; margin-bottom:25px; }
+        .search-input { width:100%; padding:13px 16px; border:1px solid var(--border); border-radius:12px; color:var(--text); background:rgba(8,20,29,.8); font-size:1rem; outline:none; }
+        .search-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(45,204,255,.08); }
+        #appsgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:18px; }
+        .app-card { display:flex; flex-direction:column; min-height:190px; padding:20px; border:1px solid var(--border); border-radius:18px; background:var(--surface); box-shadow:0 12px 35px rgba(0,0,0,.28); }
+        .app-icon { display:grid; place-items:center; width:58px; height:58px; margin-bottom:18px; border:1px solid var(--border); border-radius:15px; color:var(--accent); background:var(--soft); font-size:1.4rem; }
+        .app-title { margin-bottom:6px; font-size:1.08rem; font-weight:750; }
+        .app-description { flex:1; margin-bottom:18px; color:var(--muted); font-size:.88rem; line-height:1.45; }
+        .open-btn { width:100%; height:40px; border:0; border-radius:10px; color:#031721; background:var(--accent); font-weight:800; cursor:pointer; }
+        .state { grid-column:1/-1; padding:50px 20px; text-align:center; color:var(--muted); }
+        .state i { display:block; margin-bottom:15px; color:var(--accent); font-size:2rem; }
+        @media (max-width:700px) { #top-bar{padding:11px 16px}.brand h1{font-size:1.4rem;letter-spacing:3px}.brand img{width:38px;height:38px}.nav-btn{padding:8px 11px;font-size:.85rem}main{padding:30px 16px 50px}#appsgrid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px} }
+        @media (max-width:430px) { .brand h1{display:none} #appsgrid{grid-template-columns:1fr} }
+    </style>
+</head>
+<body>
+<header id="top-bar">
+    <div class="brand"><img src="../imgs/cosmic.png" alt="Cosmic logo" /><h1>Cosmic</h1></div>
+    <button class="nav-btn" type="button" onclick="window.location.href='../pages/lessons/lessons.html'">Games</button>
+    <button class="nav-btn" type="button" onclick="alert('Settings coming soon!')">Settings</button>
+</header>
+<main>
+    <section class="page-header"><h2>Apps</h2><p>Explore the apps available in Cosmic.</p></section>
+    <div class="toolbar"><input id="search" class="search-input" type="search" placeholder="Search apps..." autocomplete="off" aria-label="Search apps" /></div>
+    <section id="appsgrid" aria-live="polite"><div class="state"><i class="fas fa-circle-notch fa-spin"></i>Connecting to App Registry...</div></section>
+</main>
+<script>
+    const grid = document.getElementById('appsgrid');
+    const search = document.getElementById('search');
+    let apps = [];
+
+    function appUrl(app) {
+        if (!app || !app.path) throw new Error('App is missing a path.');
+        return new URL(app.path + (app.entry || ''), window.location.href).href;
+    }
+
+    function renderApps(list) {
+        grid.innerHTML = '';
+        if (!list.length) {
+            grid.innerHTML = '<div class="state"><i class="fas fa-cube"></i>No apps are currently registered.</div>';
+            return;
+        }
+        list.forEach(app => {
+            const card = document.createElement('article');
+            card.className = 'app-card';
+            const icon = document.createElement('div');
+            icon.className = 'app-icon';
+            icon.innerHTML = `<i class="${app.icon || 'fas fa-cube'}"></i>`;
+            const title = document.createElement('div');
+            title.className = 'app-title';
+            title.textContent = app.name || 'Unnamed App';
+            const description = document.createElement('div');
+            description.className = 'app-description';
+            description.textContent = app.description || 'Open this app in Cosmic.';
+            const button = document.createElement('button');
+            button.className = 'open-btn';
+            button.type = 'button';
+            button.textContent = 'Open';
+            button.addEventListener('click', () => {
+                try { window.location.href = appUrl(app); }
+                catch (error) { console.error(error); alert('This app could not be opened.'); }
+            });
+            card.append(icon, title, description, button);
+            grid.appendChild(card);
+        });
+    }
+
+    async function loadApps() {
+        try {
+            const response = await fetch('apps.json', { cache:'no-cache' });
+            if (!response.ok) throw new Error(`Registry returned ${response.status}`);
+            const data = await response.json();
+            if (!Array.isArray(data)) throw new Error('apps.json must contain an array.');
+            apps = data;
+            renderApps(apps);
+        } catch (error) {
+            console.error(error);
+            grid.innerHTML = '<div class="state"><i class="fas fa-triangle-exclamation"></i>Could not load the App Registry.</div>';
+        }
+    }
+
+    search.addEventListener('input', () => {
+        const value = search.value.toLowerCase().trim();
+        renderApps(apps.filter(app => `${app.name || ''} ${app.description || ''}`.toLowerCase().includes(value)));
+    });
+
+    loadApps();
+</script>
+</body>
+</html>

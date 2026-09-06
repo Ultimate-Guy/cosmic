@@ -48,42 +48,44 @@
 
     <div id="updates-overlay" role="dialog" aria-modal="true" aria-label="Cosmic Updates">
         <button id="close-updates" type="button" aria-label="Close updates">×</button>
-        <div id="updates-panel"></div>
+        <div id="updates-panel">
+            <!-- Keep this content in sync with pages/lessons/updates.html. -->
+            <h1>Updates</h1>
+            <div class="update">
+                <strong>Welcome to Cosmic!</strong><br />
+                Now I've added an in-game button that lets you return back to all of the games instead of opening the tab again. I'm also adding new games like Ragdoll Archers, Ragdoll Soccer, Bacon May Die, and more. Thats it for now!
+            </div>
+            <div class="update">
+                <strong>Games:</strong><br />
+                New games and improvements may be added regularly. Check back here to see what changed.
+            </div>
+            <div class="update">
+                <strong>Tip:</strong><br />
+                Close this update window with the X in the top-right corner to continue to the games.
+            </div>
+            <section class="general-section">
+                <h2>General</h2>
+                <ul class="general-list">
+                    <li>Cosmic is continuously being updated with new content and improvements.</li>
+                    <li>Use the Games section to browse and launch available games.</li>
+                    <li>Use the Apps section to access available Cosmic apps.</li>
+                    <li>If something does not work correctly, try refreshing the page.</li>
+                </ul>
+            </section>
+        </div>
     </div>
 
     <script>
         const unlockKey = 'cosmic-games-unlocked';
-        const updatesSeenKey = 'cosmic-updates-seen-v2';
+        const updatesSeenKey = 'cosmic-updates-seen-v3';
 
         function showGames() { document.getElementById('password-gate').style.display = 'none'; document.getElementById('site-content').style.display = 'block'; document.body.style.overflow = 'auto'; }
 
-        async function showUpdatesOnce() {
+        function showUpdatesOnce() {
             if (localStorage.getItem(updatesSeenKey) === 'true') return;
-
-            const overlay = document.getElementById('updates-overlay');
-            const panel = document.getElementById('updates-panel');
-            const closeButton = document.getElementById('close-updates');
-            overlay.style.display = 'flex';
+            localStorage.setItem(updatesSeenKey, 'true');
+            document.getElementById('updates-overlay').style.display = 'flex';
             document.body.style.overflow = 'hidden';
-
-            try {
-                const response = await fetch(new URL('updates.html', window.location.href).href, { cache: 'no-store' });
-                if (!response.ok) throw new Error(`Updates returned ${response.status}`);
-                const html = await response.text();
-                const doc = new DOMParser().parseFromString(html, 'text/html');
-
-                panel.innerHTML = doc.body.innerHTML;
-                const updateStyles = Array.from(doc.querySelectorAll('style')).map(style => style.textContent).join('\n');
-                const style = document.createElement('style');
-                style.id = 'cosmic-updates-loaded-style';
-                style.textContent = updateStyles;
-                document.head.appendChild(style);
-
-                localStorage.setItem(updatesSeenKey, 'true');
-            } catch (error) {
-                console.error('Could not load updates:', error);
-                panel.innerHTML = '<h1>Updates</h1><div class="update"><strong>Cosmic Updates</strong><br>Could not load the updates right now. Please refresh and try again.</div>';
-            }
         }
 
         function closeUpdates() { document.getElementById('updates-overlay').style.display = 'none'; document.body.style.overflow = 'auto'; }

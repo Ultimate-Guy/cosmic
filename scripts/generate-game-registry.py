@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 LESSONS_DIR=ROOT/'pages'/'lessons'
 OUTPUT=LESSONS_DIR/'games.json'
+LESSONS_PAGE=LESSONS_DIR/'lessons.html'
 IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}
 EXCLUDED_FOLDERS={'img','apps'}
 
@@ -23,7 +24,7 @@ GAME_NAV='''
       if(!button)return;
       button.addEventListener('click',()=>{
         const target=new URL('../lessons.html',window.location.href);
-        window.location.assign(target.href);
+        try{window.top.location.assign(target.href);}catch{window.location.assign(target.href);}
       });
     })();
   </script>
@@ -63,6 +64,22 @@ def registry_path(path):
     relative=path.relative_to(ROOT).as_posix()
     return urllib.parse.quote(relative,safe='/')+'/'
 
+def fix_updates_flow():
+    if not LESSONS_PAGE.is_file():return
+    text=LESSONS_PAGE.read_text(encoding='utf-8')
+    old="""        if(sessionStorage.getItem(unlockKey)==='true'){
+            showGames();
+            loadRegistry();
+            showUpdatesIfChanged();
+        }"""
+    new="""        if(sessionStorage.getItem(unlockKey)==='true'){
+            showGames();
+            loadRegistry();
+        }"""
+    if old in text:
+        text=text.replace(old,new,1)
+        LESSONS_PAGE.write_text(text,encoding='utf-8')
+
 def add_game_navigation(folder):
     index=folder/'index.html'
     if not index.is_file():return
@@ -83,6 +100,7 @@ def build_game(folder,metadata):
     return game
 
 def main():
+    fix_updates_flow()
     games=[]
     if LESSONS_DIR.is_dir():
         for folder in sorted(path for path in LESSONS_DIR.iterdir() if path.is_dir()):

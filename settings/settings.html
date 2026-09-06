@@ -1,86 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cosmic Settings</title>
-  <link rel="stylesheet" href="../css/fontawesome.css">
-  <link rel="stylesheet" href="settings.css">
-  <script src="settings-engine.js"></script>
+  <link rel="stylesheet" href="../css/fontawesome.css"><link rel="stylesheet" href="settings.css"><script src="settings-engine.js"></script>
 </head>
 <body>
-  <main class="settings-shell">
-    <header class="settings-header">
-      <div>
-        <p class="eyebrow">COSMIC</p>
-        <h1>Settings</h1>
-        <p>Customize Cosmic on this browser. Your choices are saved locally.</p>
-      </div>
-      <button class="nav-button" id="backButton"><i class="fas fa-arrow-left"></i> Back</button>
-    </header>
-
-    <section class="setting-section">
-      <div class="section-heading"><i class="fas fa-palette"></i><div><h2>Appearance</h2><p>Choose the colors and atmosphere used by Cosmic.</p></div></div>
-      <div id="themeGrid" class="theme-grid"></div>
-    </section>
-
-    <section class="setting-section">
-      <div class="section-heading"><i class="fas fa-image"></i><div><h2>Background</h2><p>Use a custom image and optionally enable the interactive background effect.</p></div></div>
-      <label class="switch-row"><span><strong>Interactive background</strong><small>Moves the background glow toward your pointer.</small></span><input id="interactiveBgToggle" type="checkbox"><span class="switch"></span></label>
-      <div class="file-row">
-        <label class="file-button"><i class="fas fa-upload"></i> Choose background image<input id="bgImageInput" type="file" accept="image/*"></label>
-        <button id="clearBgImageBtn" class="secondary-button" type="button">Clear image</button>
-      </div>
-      <div id="bgImagePreview" class="bg-preview hidden"></div>
-      <small class="hint">Images are stored locally in your browser and are limited to about 2.5 MB.</small>
-    </section>
-
-    <section class="setting-section">
-      <div class="section-heading"><i class="fas fa-wand-magic-sparkles"></i><div><h2>Interface</h2><p>Control visual effects across Cosmic.</p></div></div>
-      <label class="switch-row"><span><strong>UI animations</strong><small>Enable transitions and animated visual effects.</small></span><input id="animToggle" type="checkbox"><span class="switch"></span></label>
-      <label class="switch-row"><span><strong>Study cloak</strong><small>Show or hide the site's educational loading/cloak screen when supported.</small></span><input id="studyCloakToggle" type="checkbox"><span class="switch"></span></label>
-    </section>
-
-    <section class="setting-section">
-      <div class="section-heading"><i class="fas fa-music"></i><div><h2>Music</h2><p>Save your preferred background-music settings for pages that provide Cosmic music.</p></div></div>
-      <label class="switch-row"><span><strong>Enable background music</strong></span><input id="musicEnable" type="checkbox"><span class="switch"></span></label>
-      <label class="switch-row"><span><strong>Mute</strong></span><input id="musicMute" type="checkbox"><span class="switch"></span></label>
-      <label class="range-row"><span>Volume <b id="musicVolumeLabel">35%</b></span><input id="musicVolume" type="range" min="0" max="100" value="35"></label>
-      <p class="hint">These settings are saved now and can be used by any future Cosmic music player.</p>
-    </section>
-
-    <section class="setting-section">
-      <div class="section-heading"><i class="fas fa-mask-face"></i><div><h2>Tab Cloak</h2><p>Choose the saved browser-tab appearance preference.</p></div></div>
-      <select id="cloakSelect" class="select-input">
-        <option value="none">None</option>
-        <option value="google">Google</option>
-        <option value="classroom">Google Classroom</option>
-        <option value="canvas">Canvas</option>
-        <option value="drive">Google Drive</option>
-      </select>
-      <p class="hint">This stores the preference locally. Cosmic pages can use it when a cloak system is available.</p>
-    </section>
-
-    <section class="setting-section">
-      <div class="section-heading"><i class="fas fa-bolt"></i><div><h2>Panic Shortcut</h2><p>Choose a keyboard key and destination for a quick navigation shortcut.</p></div></div>
-      <div class="two-column">
-        <label>Shortcut key<input id="panicKeyInput" class="text-input" type="text" readonly placeholder="Press a key"></label>
-        <label>Destination URL<input id="panicUrlInput" class="text-input" type="url" placeholder="https://example.com"></label>
-      </div>
-      <p class="hint">The shortcut only navigates to the URL you choose. It does not hide or delete browser history.</p>
-    </section>
-
-    <section class="setting-section danger-section">
-      <div class="section-heading"><i class="fas fa-trash"></i><div><h2>Data</h2><p>Remove Cosmic preferences stored in this browser.</p></div></div>
-      <button id="clearDataBtn" class="danger-button" type="button">Wipe Cosmic Settings</button>
-      <p class="hint">This resets themes, background preferences, music preferences, and other Cosmic local settings. It does not delete your files.</p>
-    </section>
-
-    <section class="setting-section about-section">
-      <div class="section-heading"><i class="fas fa-circle-info"></i><div><h2>About Cosmic</h2><p>Local settings are stored with browser localStorage. No account is required.</p></div></div>
-      <p class="about-text">Cosmic settings are designed to work on both GitHub Pages and Cloudflare by using browser-local preferences and relative site paths.</p>
-    </section>
-  </main>
-  <script src="settings.js"></script>
-</body>
-</html>
+<main class="settings-shell">
+<header class="settings-header"><div><p class="eyebrow">COSMIC</p><h1>Settings</h1><p>Customize Cosmic on this browser. Your choices are saved locally.</p></div><button class="nav-button" id="backButton"><i class="fas fa-arrow-left"></i> Back</button></header>
+<section class="setting-section"><div class="section-heading"><i class="fas fa-palette"></i><div><h2>Appearance</h2><p>Choose the colors and atmosphere used by Cosmic.</p></div></div><div id="themeGrid" class="theme-grid"></div></section>
+<section class="setting-section"><div class="section-heading"><i class="fas fa-image"></i><div><h2>Background</h2><p>Use a custom image and optionally enable the interactive background effect.</p></div></div><label class="switch-row"><span><strong>Interactive background</strong><small>Moves the background glow toward your pointer.</small></span><input id="interactiveBgToggle" type="checkbox"><span class="switch"></span></label><div class="file-row"><label class="file-button"><i class="fas fa-upload"></i> Choose background image<input id="bgImageInput" type="file" accept="image/*"></label><button id="clearBgImageBtn" class="secondary-button" type="button">Clear image</button></div><div id="bgImagePreview" class="bg-preview hidden"></div><small class="hint">Images are stored locally in your browser and are limited to about 2.5 MB.</small></section>
+<section class="setting-section"><div class="section-heading"><i class="fas fa-crosshairs"></i><div><h2>Custom Crosshair</h2><p>Choose the on-screen crosshair style. Saved in this browser.</p></div></div><select id="crosshair-style-select" class="select-input"><option value="original">Original Cyan HUD</option><option value="cyan-hud">Cyan HUD</option><option value="red-reticle">Red Reticle</option><option value="gold-lock">Gold Lock</option><option value="minimal-dot">Minimal Dot</option><option value="neon-pulse">Neon Pulse</option><option value="mono-sharp">Mono Sharp</option><option value="purple-tactical">Purple Tactical</option><option value="none">None (System Cursor)</option></select></section>
+<section class="setting-section"><div class="section-heading"><i class="fas fa-wand-magic-sparkles"></i><div><h2>Interface</h2><p>Control visual effects across Cosmic.</p></div></div><label class="switch-row"><span><strong>UI animations</strong><small>Enable transitions and animated visual effects.</small></span><input id="animToggle" type="checkbox"><span class="switch"></span></label><label class="switch-row"><span><strong>Study cloak</strong><small>Show or hide the educational loading/cloak screen when supported.</small></span><input id="studyCloakToggle" type="checkbox"><span class="switch"></span></label></section>
+<section class="setting-section"><div class="section-heading"><i class="fas fa-music"></i><div><h2>Background Music</h2><p>Save music preferences and an optional uploaded MP3.</p></div></div><label class="switch-row"><span><strong>Enable background music</strong></span><input id="musicEnable" type="checkbox"><span class="switch"></span></label><label class="switch-row"><span><strong>Mute</strong></span><input id="musicMute" type="checkbox"><span class="switch"></span></label><label class="range-row"><span>Volume <b id="musicVolumeLabel">35%</b></span><input id="musicVolume" type="range" min="0" max="100" value="35"></label><div class="two-column music-extra"><label>Track<select id="musicTrack" class="select-input"><option value="library-default">Cosmic default</option><option value="custom">Uploaded track</option></select></label><label>Upload MP3<input id="musicUpload" class="text-input" type="file" accept="audio/mpeg,audio/mp3,.mp3"></label></div><p id="musicStatus" class="hint">No audio file is bundled with Cosmic yet. Uploading an MP3 stores it in this browser for later use.</p></section>
+<section class="setting-section"><div class="section-heading"><i class="fas fa-mask-face"></i><div><h2>Tab Cloak</h2><p>Choose the saved browser-tab appearance preference.</p></div></div><select id="cloakSelect" class="select-input"><option value="none">None</option><option value="google">Google Search</option><option value="classroom">Google Classroom</option><option value="canvas">Canvas</option><option value="drive">Google Drive</option></select><p class="hint">This stores the preference locally. Cosmic pages can use it when a cloak system is available.</p></section>
+<section class="setting-section"><div class="section-heading"><i class="fas fa-bolt"></i><div><h2>Panic Shortcut</h2><p>Choose a keyboard key and destination for a quick navigation shortcut.</p></div></div><div class="two-column"><label>Shortcut key<input id="panicKeyInput" class="text-input" type="text" readonly placeholder="Press a key"></label><label>Destination URL<input id="panicUrlInput" class="text-input" type="url" placeholder="https://example.com"></label></div><p class="hint">The shortcut only navigates to the URL you choose. It does not hide or delete browser history.</p></section>
+<section class="setting-section danger-section"><div class="section-heading"><i class="fas fa-trash"></i><div><h2>Data</h2><p>Remove Cosmic preferences stored in this browser.</p></div></div><button id="clearDataBtn" class="danger-button" type="button">Wipe Cosmic Settings</button><p class="hint">This resets themes, background preferences, music preferences, and other Cosmic local settings. It does not delete your files.</p></section>
+<section class="setting-section about-section"><div class="section-heading"><i class="fas fa-circle-info"></i><div><h2>About Cosmic</h2><p>Local settings are stored with browser localStorage. No account is required.</p></div></div><p class="about-text">Cosmic settings are designed to work on both GitHub Pages and Cloudflare by using browser-local preferences and relative site paths.</p></section>
+</main><script src="settings.js"></script></body></html>

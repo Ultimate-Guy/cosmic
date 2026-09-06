@@ -56,6 +56,26 @@
         .update strong {
             color: var(--accent);
         }
+
+        /* General information is kept separate from temporary updates. */
+        .general-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(45, 204, 255, 0.25);
+        }
+
+        .general-section h2 {
+            margin: 0 0 12px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            font-size: 1.15rem;
+        }
+
+        .general-list {
+            margin: 0;
+            padding-left: 22px;
+            line-height: 1.7;
+        }
     </style>
 </head>
 <body>
@@ -83,6 +103,23 @@
             <strong>Tip:</strong><br />
             Close this update window with the X in the top-right corner to continue to the games.
         </div>
+
+        <!--
+            ==============================
+            GENERAL INFO
+            This section is for information that usually does not change often.
+            Edit the list below whenever you need to explain how Cosmic works.
+            ==============================
+        -->
+        <section class="general-section">
+            <h2>General</h2>
+            <ul class="general-list">
+                <li>Cosmic is continuously being updated with new content and improvements.</li>
+                <li>Use the Games section to browse and launch available games.</li>
+                <li>Use the Apps section to access available Cosmic apps.</li>
+                <li>If something does not work correctly, try refreshing the page.</li>
+            </ul>
+        </section>
     </main>
 </body>
 </html>

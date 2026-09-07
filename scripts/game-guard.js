@@ -1,21 +1,28 @@
 (() => {
   'use strict';
 
-  const HOME_URL = 'https://ultimate-guy.github.io/cosmic/pages/lessons/lessons.html';
-  const GUARD_URL = 'https://ultimate-guy.github.io/cosmic/scripts/game-guard.js?v=guard';
+  const GUARD_URL = 'https://ultimate-guy.github.io/cosmic/scripts/game-guard.js?v=guard3';
   const STYLE_ID = 'cosmic-game-guard-style';
   const BUTTON_ID = 'cosmic-home-button';
+
+  function getHomeUrl() {
+    const marker = '/pages/lessons/';
+    const path = window.location.pathname || '';
+    const markerIndex = path.indexOf(marker);
+    const prefix = markerIndex >= 0 ? path.slice(0, markerIndex) : (window.location.hostname.endsWith('github.io') ? '/cosmic' : '');
+    return window.location.origin + prefix + marker + 'lessons.html';
+  }
 
   function addStyle() {
     if (document.getElementById(STYLE_ID)) return;
     const style = document.createElement('style');
     style.id = STYLE_ID;
-    style.textContent = `#${BUTTON_ID}{position:fixed!important;top:12px!important;left:12px!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;padding:7px 12px!important;border:1px solid rgba(45,204,255,.55)!important;border-radius:9px!important;background:rgba(13,26,33,.95)!important;color:#2dccff!important;font:700 13px system-ui,sans-serif!important;cursor:pointer!important;box-shadow:0 4px 14px rgba(0,0,0,.35)!important}#${BUTTON_ID}:hover{background:rgba(45,204,255,.18)!important}`;
+    style.textContent = `#${BUTTON_ID}{position:fixed!important;top:12px!important;left:12px!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;padding:7px 12px!important;border:1px solid rgba(45,204,255,.55)!important;border-radius:9px!important;background:rgba(13,26,33,.95)!important;color:#2dccff!important;font:700 13px system-ui,sans-serif!important;cursor:pointer!important;box-shadow:0 4px 14px rgba(0,0,0,.35)!important}`;
     (document.head || document.documentElement).appendChild(style);
   }
 
   function goHome() {
-    window.top.location.assign(HOME_URL);
+    window.top.location.assign(getHomeUrl());
   }
 
   function ensureButton() {
@@ -29,9 +36,8 @@
       button.textContent = '← Home';
       button.addEventListener('click', goHome);
       document.body.appendChild(button);
-    } else if (!button.onclick) {
-      button.onclick = goHome;
     }
+    button.onclick = goHome;
     return button;
   }
 

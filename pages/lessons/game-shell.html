@@ -33,10 +33,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
   let url;
   try{url=new URL(game,location.href);}catch(e){location.replace(home);return;}
 
-  // GitHub Pages is hosted under /cosmic, while the Cloudflare Worker can serve
-  // the game files from the site root. On github.io, use the Worker for the
-  // actual game so games containing root-relative asset URLs still work.
+  // GitHub Pages is hosted under /cosmic, while the Cloudflare Worker serves
+  // the same repository from its root. Strip the GitHub Pages project prefix
+  // before sending the actual game URL to the Worker.
   if(location.hostname.endsWith('.github.io') && url.hostname===location.hostname){
+    if(prefix && url.pathname.startsWith(prefix+'/')){
+      url.pathname=url.pathname.slice(prefix.length);
+    } else if(prefix && url.pathname===prefix){
+      url.pathname='/';
+    }
     url.hostname='cosmicv2.v75ultimate.workers.dev';
     url.protocol='https:';
   }

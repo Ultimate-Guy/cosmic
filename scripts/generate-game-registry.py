@@ -12,8 +12,8 @@ LESSONS_PAGE=LESSONS_DIR/'lessons.html'
 IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}
 EXCLUDED_FOLDERS={'img','apps'}
 
-GAME_GUARD='<script id="cosmic-game-guard-loader" src="https://ultimate-guy.github.io/cosmic/scripts/game-guard.js?v=guard"></script>\n'
-SETTINGS_SCRIPT='<script id="cosmic-settings-engine-loader">(()=>{const s=document.createElement(\'script\');s.id=\'cosmic-settings-engine\';s.src=\'https://ultimate-guy.github.io/cosmic/settings/settings-engine.js?v=engine\';document.head.appendChild(s);})();</script>\n'
+GAME_GUARD='<script id="cosmic-game-guard-loader" src="https://ultimate-guy.github.io/cosmic/scripts/game-guard.js?v=guard2"></script>\n'
+SETTINGS_SCRIPT='<script id="cosmic-settings-engine-loader">(()=>{const s=document.createElement(\'script\');s.id=\'cosmic-settings-engine\';s.src=\'https://ultimate-guy.github.io/cosmic/settings/settings-engine.js?v=engine2\';document.head.appendChild(s);})();</script>\n'
 
 def display_name(folder_name):
     words=re.sub(r'([a-z])([A-Z])',r'\1 \2',folder_name)

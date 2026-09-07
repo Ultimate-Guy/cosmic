@@ -12,10 +12,9 @@ LESSONS_PAGE=LESSONS_DIR/'lessons.html'
 IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}
 EXCLUDED_FOLDERS={'img','apps'}
 
-# Absolute URL because individual games may have their own <base> tags.
-# guard4 is a cache-buster so every generated game receives the current guard.
-GAME_GUARD='<script id="cosmic-game-guard-loader" src="https://ultimate-guy.github.io/cosmic/scripts/game-guard.js?v=guard4"></script>\n'
-SETTINGS_SCRIPT='<script id="cosmic-settings-engine-loader">(()=>{const s=document.createElement(\'script\');s.id=\'cosmic-settings-engine\';s.src=\'https://ultimate-guy.github.io/cosmic/settings/settings-engine.js?v=engine\';document.head.appendChild(s);})();</script>\n'
+# Resolve shared scripts from the host serving the game. This works on both
+# GitHub Pages (/cosmic) and a workers.dev root deployment.
+GAME_BOOTSTRAP="""<script id=\"cosmic-game-guard-loader\">(()=>{const m='/pages/lessons/';const p=location.pathname;const i=p.indexOf(m);const root=i>=0?location.origin+p.slice(0,i):location.origin;const load=(id,path)=>{if(document.getElementById(id))return;const s=document.createElement('script');s.id=id;s.src=root+path;s.async=false;(document.head||document.documentElement).appendChild(s)};load('cosmic-game-guard','/scripts/game-guard.js?v=guard5');load('cosmic-settings-engine','/settings/settings-engine.js?v=engine5')})();</script>\n"""
 
 def display_name(folder_name):
     words=re.sub(r'([a-z])([A-Z])',r'\1 \2',folder_name)
@@ -71,8 +70,9 @@ def add_game_navigation(folder):
     if not index.is_file():return
     text=index.read_text(encoding='utf-8')
     text=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
-    text=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*></script>\s*','\n',text,flags=re.DOTALL)
-    injection=GAME_GUARD+SETTINGS_SCRIPT
+    text=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
+    text=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
+    injection=GAME_BOOTSTRAP
     if '</head>' in text:text=text.replace('</head>',injection+'</head>',1)
     elif '<body' in text:text=text.replace('<body',injection+'<body',1)
     else:text=injection+text

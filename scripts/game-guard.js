@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const HOME_URL = new URL('../lessons.html', window.location.href).href;
+  const HOME_URL = 'https://ultimate-guy.github.io/cosmic/pages/lessons/lessons.html';
   const GUARD_URL = 'https://ultimate-guy.github.io/cosmic/scripts/game-guard.js?v=guard';
   const STYLE_ID = 'cosmic-game-guard-style';
   const BUTTON_ID = 'cosmic-home-button';
@@ -51,28 +51,30 @@
     addStyle();
     ensureButton();
     patchFullscreen();
-
-    document.addEventListener('fullscreenchange', () => {
-      addStyle();
-      const button = ensureButton();
-      if (button) {
-        button.style.setProperty('display', 'block', 'important');
-        button.style.setProperty('visibility', 'visible', 'important');
-        button.style.setProperty('opacity', '1', 'important');
-        button.style.setProperty('z-index', '2147483647', 'important');
-      }
-    });
+    if (!document.__cosmicFullscreenListenerInstalled) {
+      document.__cosmicFullscreenListenerInstalled = true;
+      document.addEventListener('fullscreenchange', () => {
+        addStyle();
+        const button = ensureButton();
+        if (button) {
+          button.style.setProperty('display', 'block', 'important');
+          button.style.setProperty('visibility', 'visible', 'important');
+          button.style.setProperty('opacity', '1', 'important');
+          button.style.setProperty('z-index', '2147483647', 'important');
+        }
+      });
+    }
   }
 
-  // Games such as Smash Karts call document.open()/document.write() and replace
-  // the entire document. Keep our guard alive by injecting it into replacement HTML.
+  // Patch document.write immediately. Smash Karts uses document.open()/write()
+  // later and replaces the entire document.
   if (!Document.prototype.__cosmicWriteGuardPatched) {
     Document.prototype.__cosmicWriteGuardPatched = true;
     const nativeWrite = Document.prototype.write;
     Document.prototype.write = function (...args) {
       let html = args.join('');
       if (/<html(?:\s|>)/i.test(html) && !html.includes('cosmic-game-guard-reinject')) {
-        const reinject = `<script id="cosmic-game-guard-reinject" src="${GUARD_URL}"><\/script>`;
+        const reinject = `<script id="cosmic-game-guard-reinject" src="${GUARD_URL}"><\\/script>`;
         if (/<head(?:\s|>)/i.test(html)) {
           html = html.replace(/<head(?:\s|>)/i, match => match + reinject);
         } else {

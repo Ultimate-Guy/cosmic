@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write 
+  contents: write
   pages: write
   id-token: write
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true 
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1 
+          fetch-depth: 1
 
       - name: Sync with Remote
         run: |
@@ -30,7 +30,6 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin master
 
-      # INJECT PASSWORD (Uses your secret to unlock the gate)
       - name: Inject Game Password
         run: |
           sed -i 's/PASSWORD_PLACEHOLDER/${{ secrets.PASSWORD_FOR_GAMES_UNLOCK }}/g' pages/lessons/lessons.html
@@ -40,14 +39,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Generate game registry
+      - name: Generate game registry and clean legacy injections
         run: python3 scripts/generate-game-registry.py
 
-      - name: Commit changes safely
+      - name: Commit generated registry and game cleanup
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Automated update of games.json [skip ci]"
-          file_pattern: 'pages/lessons/games.json'
+          commit_message: "Clean legacy game injections and update registry [skip ci]"
+          file_pattern: 'pages/lessons/**'
           skip_dirty_check: false
           skip_fetch: true
 

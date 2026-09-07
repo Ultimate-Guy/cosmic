@@ -1,8 +1,11 @@
 (() => {
   'use strict';
 
-  const HOME_URL = 'https://ultimate-guy.github.io/cosmic/pages/lessons/lessons.html';
-  const GUARD_URL = 'https://ultimate-guy.github.io/cosmic/scripts/game-guard.js?v=guard2';
+  // Always return to Cosmic's Games page, while preserving the site's current
+  // host (important if Cosmic is being accessed through a custom/cloaked host).
+  const HOME_PATH = '/cosmic/pages/lessons/lessons.html';
+  const HOME_URL = 'https://ultimate-guy.github.io' + HOME_PATH;
+  const GUARD_URL = 'https://ultimate-guy.github.io/cosmic/scripts/game-guard.js?v=guard3';
   const STYLE_ID = 'cosmic-game-guard-style';
   const BUTTON_ID = 'cosmic-home-button';
 
@@ -15,8 +18,18 @@
   }
 
   function goHome(event) {
-    if (event) event.stopPropagation();
-    window.top.location.assign(HOME_URL);
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    }
+    // Use the known Cosmic Pages URL instead of a relative URL so game <base>
+    // tags cannot redirect the button to a CDN or another page.
+    try {
+      window.top.location.assign(HOME_URL);
+    } catch (_) {
+      window.location.assign(HOME_URL);
+    }
   }
 
   function makeButton() {
@@ -64,8 +77,6 @@
         addStyle();
         const fullscreenElement = document.fullscreenElement;
         if (fullscreenElement && fullscreenElement.nodeType === 1 && fullscreenElement !== document.documentElement) {
-          // Put the button inside the actual fullscreen container when possible.
-          // We do not monkey-patch requestFullscreen, so game fullscreen behavior stays native.
           ensureButton(fullscreenElement);
         } else {
           ensureButton();

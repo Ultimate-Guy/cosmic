@@ -74,7 +74,7 @@
         function closeUpdates(){document.getElementById('updates-overlay').style.display='none';document.body.style.overflow='auto';}
         document.getElementById('close-updates').addEventListener('click',closeUpdates);
         function togglePass(){const f=document.getElementById('pass-field'),i=document.getElementById('eye-icon');f.type=f.type==='password'?'text':'password';i.className=f.type==='password'?'fas fa-eye':'fas fa-eye-slash';}
-        function checkPass(){const field=document.getElementById('pass-field'),error=document.getElementById('error-msg');if(field.value==='PASSWORD_PLACEHOLDER'){error.style.display='none';unlockAndShowUpdates();}else error.style.display='block';}
+        function checkPass(){const field=document.getElementById('pass-field'),error=document.getElementById('error-msg');if(field.value==='cosmicisthegoat'){error.style.display='none';unlockAndShowUpdates();}else error.style.display='block';}
         document.getElementById('pass-field').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPass();}});
         function normalizeUrl(url){return new URL(url,window.location.href).href;}
         function gameUrl(game){return normalizeUrl('../../'+game.path+(game.entry||''));}

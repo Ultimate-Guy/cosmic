@@ -49,7 +49,10 @@
         const grid=document.getElementById('gamesgrid');
         const noResults=document.getElementById('no-results');
         let cards=[];
+        const SESSION_KEY='cosmicGamesUnlocked';
+        const RETURN_KEY='cosmicReturnFromGame';
 
+        function isUnlocked(){try{return sessionStorage.getItem(SESSION_KEY)==='1';}catch(e){return false;}}
         function showGames(){document.getElementById('password-gate').style.display='none';document.getElementById('site-content').style.display='block';document.body.style.overflow='auto';}
         async function loadUpdatesSource(){
             try{
@@ -65,6 +68,7 @@
             }catch(error){console.warn('Cosmic updates source unavailable; embedded fallback remains active.',error);}
         }
         async function unlockAndShowUpdates(){
+            try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}
             showGames();
             loadRegistry();
             await loadUpdatesSource();
@@ -87,8 +91,9 @@
             }).catch(error=>{document.getElementById('loading').textContent='Could not load the game registry. Please refresh.';console.error('Cosmic registry error:',error);});
         }
 
-        document.getElementById('password-gate').style.display='grid';
-        document.getElementById('site-content').style.display='none';
+        const returningFromGame=(()=>{try{const value=sessionStorage.getItem(RETURN_KEY);sessionStorage.removeItem(RETURN_KEY);return value==='1';}catch(e){return false;}})();
+        if(isUnlocked() || returningFromGame){showGames();if(!isUnlocked()){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}}loadRegistry();}
+        else {document.getElementById('password-gate').style.display='grid';document.getElementById('site-content').style.display='none';}
         searchInput.addEventListener('input',e=>{const val=e.target.value.toLowerCase();let matches=0;cards.forEach(c=>{const show=c.name.includes(val);c.element.style.display=show?'flex':'none';if(show)matches++;});noResults.style.display=matches===0&&cards.length?'block':'none';});
     </script>
 </body>

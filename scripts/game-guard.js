@@ -1,13 +1,21 @@
 (() => {
   'use strict';
 
-  // Always return to Cosmic's Games page, while preserving the site's current
-  // host (important if Cosmic is being accessed through a custom/cloaked host).
-  const HOME_PATH = '/cosmic/pages/lessons/lessons.html';
-  const HOME_URL = 'https://ultimate-guy.github.io' + HOME_PATH;
-  const GUARD_URL = 'https://ultimate-guy.github.io/cosmic/scripts/game-guard.js?v=guard3';
+  // Build the Games URL from the page the game is actually running on.
+  // This keeps a custom/Cloudflare host instead of forcing GitHub Pages.
+  const GUARD_URL = new URL('/cosmic/scripts/game-guard.js?v=guard4', window.location.origin).href;
   const STYLE_ID = 'cosmic-game-guard-style';
   const BUTTON_ID = 'cosmic-home-button';
+
+  function getHomeUrl() {
+    const current = new URL(window.location.href);
+    const marker = '/pages/lessons/';
+    const index = current.pathname.indexOf(marker);
+    if (index !== -1) {
+      return new URL(current.pathname.slice(0, index) + '/pages/lessons/lessons.html', current.origin).href;
+    }
+    return new URL('/cosmic/pages/lessons/lessons.html', current.origin).href;
+  }
 
   function addStyle() {
     if (document.getElementById(STYLE_ID)) return;
@@ -23,12 +31,11 @@
       event.stopPropagation();
       if (event.stopImmediatePropagation) event.stopImmediatePropagation();
     }
-    // Use the known Cosmic Pages URL instead of a relative URL so game <base>
-    // tags cannot redirect the button to a CDN or another page.
+    const homeUrl = getHomeUrl();
     try {
-      window.top.location.assign(HOME_URL);
+      window.top.location.assign(homeUrl);
     } catch (_) {
-      window.location.assign(HOME_URL);
+      window.location.assign(homeUrl);
     }
   }
 

@@ -51,6 +51,7 @@
         let cards=[];
         const SESSION_KEY='cosmicGamesUnlocked';
         const RETURN_KEY='cosmicReturnFromGame';
+        const WORKER_ORIGIN='https://cosmicv2.v75ultimate.workers.dev';
 
         function isUnlocked(){try{return sessionStorage.getItem(SESSION_KEY)==='1';}catch(e){return false;}}
         function showGames(){document.getElementById('password-gate').style.display='none';document.getElementById('site-content').style.display='block';document.body.style.overflow='auto';}
@@ -81,9 +82,27 @@
         function checkPass(){const field=document.getElementById('pass-field'),error=document.getElementById('error-msg');if(field.value==='cosmicisthegoat'){error.style.display='none';unlockAndShowUpdates();}else error.style.display='block';}
         document.getElementById('pass-field').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPass();}});
         function normalizeUrl(url){return new URL(url,window.location.href).href;}
-        function gameUrl(game){return normalizeUrl('../../'+game.path+(game.entry||''));}
-        function shellUrl(game){return normalizeUrl('game-shell.html?game='+encodeURIComponent(gameUrl(game)));}
-        function openBlank(url){const win=window.open('about:blank','_blank');if(win){win.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000"><iframe src="${url}" style="border:none;width:100vw;height:100vh" allowfullscreen></iframe></body></html>`);win.document.close();}}
+        function gameUrl(game){
+            const localUrl=normalizeUrl('../../'+game.path+(game.entry||''));
+            if(window.location.hostname.endsWith('.github.io')){
+                const url=new URL(localUrl);
+                const marker='/pages/lessons/';
+                const index=url.pathname.indexOf(marker);
+                if(index>=0){
+                    url.pathname=url.pathname.slice(index);
+                    url.hostname=new URL(WORKER_ORIGIN).hostname;
+                    url.protocol='https:';
+                    url.port='';
+                    return url.href;
+                }
+            }
+            return localUrl;
+        }
+        function shellUrl(game){
+            const target=gameUrl(game);
+            return normalizeUrl('game-shell.html?game='+encodeURIComponent(target));
+        }
+        function openBlank(url){const win=window.open('about:blank','_blank');if(win){win.location.href=url;}}
         function loadRegistry(){
             fetch('games.json?nocache='+Date.now(),{cache:'no-store'}).then(res=>{if(!res.ok)throw new Error('Registry request failed: '+res.status);return res.json();}).then(games=>{
                 document.getElementById('loading')?.remove();

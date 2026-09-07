@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the lessons game registry and inject shared navigation/settings."""
+"""Generate the lessons game registry without modifying individual games."""
 import json
 import re
 import urllib.parse
@@ -11,10 +11,6 @@ OUTPUT=LESSONS_DIR/'games.json'
 LESSONS_PAGE=LESSONS_DIR/'lessons.html'
 IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}
 EXCLUDED_FOLDERS={'img','apps'}
-
-# Resolve shared scripts from the host serving the game. This works on both
-# GitHub Pages (/cosmic) and a workers.dev root deployment.
-GAME_BOOTSTRAP="""<script id=\"cosmic-game-guard-loader\">(()=>{const m='/pages/lessons/';const p=location.pathname;const i=p.indexOf(m);const root=i>=0?location.origin+p.slice(0,i):location.origin;const load=(id,path)=>{if(document.getElementById(id))return;const s=document.createElement('script');s.id=id;s.src=root+path;s.async=false;(document.head||document.documentElement).appendChild(s)};load('cosmic-game-guard','/scripts/game-guard.js?v=guard5');load('cosmic-settings-engine','/settings/settings-engine.js?v=engine5')})();</script>\n"""
 
 def display_name(folder_name):
     words=re.sub(r'([a-z])([A-Z])',r'\1 \2',folder_name)
@@ -65,19 +61,6 @@ def fix_updates_flow():
         text=text.replace(old,new,1)
         LESSONS_PAGE.write_text(text,encoding='utf-8')
 
-def add_game_navigation(folder):
-    index=folder/'index.html'
-    if not index.is_file():return
-    text=index.read_text(encoding='utf-8')
-    text=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
-    text=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
-    text=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
-    injection=GAME_BOOTSTRAP
-    if '</head>' in text:text=text.replace('</head>',injection+'</head>',1)
-    elif '<body' in text:text=text.replace('<body',injection+'<body',1)
-    else:text=injection+text
-    index.write_text(text,encoding='utf-8')
-
 def build_game(folder,metadata):
     image=choose_image(folder,metadata);entry=choose_entry(folder,metadata)
     game={'name':metadata.get('title',display_name(folder.name)),'path':registry_path(folder)}
@@ -92,10 +75,11 @@ def main():
         for folder in sorted(path for path in LESSONS_DIR.iterdir() if path.is_dir()):
             if folder.name.lower() in EXCLUDED_FOLDERS:continue
             metadata=read_metadata(folder)
-            add_game_navigation(folder)
+            # Game pages stay untouched so their original scripts work on
+            # GitHub Pages and workers.dev. Shared navigation lives in the launcher.
             games.append(build_game(folder,metadata))
     OUTPUT.parent.mkdir(parents=True,exist_ok=True)
     OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8')
-    print(f'Generated {len(games)} game entries and injected navigation/settings')
+    print(f'Generated {len(games)} game entries; game files were not modified')
 
 if __name__=='__main__':main()

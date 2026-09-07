@@ -19,15 +19,28 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
   const marker='/pages/lessons/';
   const path=location.pathname||'';
   const index=path.indexOf(marker);
-  const root=index>=0?location.origin+path.slice(0,index):location.origin;
-  const home=root+marker+'lessons.html';
-  document.getElementById('home').addEventListener('click',function(){location.assign(home);});
+  const prefix=index>=0?path.slice(0,index):(location.hostname.endsWith('.github.io')?'/cosmic':'');
+  const home=location.origin+prefix+marker+'lessons.html';
+  document.getElementById('home').addEventListener('click',function(){
+    try{sessionStorage.setItem('cosmicReturnFromGame','1');}catch(e){}
+    location.assign(home);
+  });
+
   const params=new URLSearchParams(location.search);
   const game=params.get('game');
   if(!game){location.replace(home);return;}
+
   let url;
-  try{url=new URL(game,location.href).href;}catch(e){location.replace(home);return;}
-  document.getElementById('game').src=url;
+  try{url=new URL(game,location.href);}catch(e){location.replace(home);return;}
+
+  // GitHub Pages is hosted under /cosmic, while the Cloudflare Worker can serve
+  // the game files from the site root. On github.io, use the Worker for the
+  // actual game so games containing root-relative asset URLs still work.
+  if(location.hostname.endsWith('.github.io') && url.hostname===location.hostname){
+    url.hostname='cosmicv2.v75ultimate.workers.dev';
+    url.protocol='https:';
+  }
+  document.getElementById('game').src=url.href;
 })();
 </script>
 </body>

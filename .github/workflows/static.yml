@@ -50,13 +50,48 @@ jobs:
           skip_dirty_check: false
           skip_fetch: true
 
+      - name: Prepare GitHub Pages files
+        run: |
+          rm -rf _site
+          mkdir -p _site
+          cp -a ./. _site/
+          rm -rf _site/.git _site/.github _site/.gitignore _site/_site
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('_site/pages/lessons')
+          prefix = '/cosmic/'
+          if not root.exists():
+              raise SystemExit('Missing Pages lessons directory')
+
+          # GitHub Pages is served from /cosmic, so game pages that contain
+          # root-relative resource URLs need those URLs to stay inside the
+          # project. This only changes the Pages build copy; the Cloudflare
+          # files in the repository are left untouched.
+          patterns = [
+              (re.compile(r'(["\'])/(?!/|cosmic/|https?://)'), r'\1/cosmic/'),
+              (re.compile(r'url\(/(?!/|cosmic/)'), 'url(/cosmic/'),
+          ]
+          changed = 0
+          for page in root.glob('*/index.html'):
+              text = page.read_text(encoding='utf-8')
+              original = text
+              for pattern, replacement in patterns:
+                  text = pattern.sub(replacement, text)
+              if text != original:
+                  page.write_text(text, encoding='utf-8')
+                  changed += 1
+          print(f'Rewrote root-relative game resources in {changed} Pages game pages')
+          PY
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
 
   deploy:
     needs: build

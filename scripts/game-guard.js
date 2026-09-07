@@ -1,21 +1,10 @@
 (() => {
   'use strict';
 
-  // Build the Games URL from the page the game is actually running on.
-  // This keeps a custom/Cloudflare host instead of forcing GitHub Pages.
-  const GUARD_URL = new URL('/cosmic/scripts/game-guard.js?v=guard4', window.location.origin).href;
+  const HOME_URL = 'https://ultimate-guy.github.io/cosmic/pages/lessons/lessons.html';
+  const GUARD_URL = 'https://ultimate-guy.github.io/cosmic/scripts/game-guard.js?v=guard2';
   const STYLE_ID = 'cosmic-game-guard-style';
   const BUTTON_ID = 'cosmic-home-button';
-
-  function getHomeUrl() {
-    const current = new URL(window.location.href);
-    const marker = '/pages/lessons/';
-    const index = current.pathname.indexOf(marker);
-    if (index !== -1) {
-      return new URL(current.pathname.slice(0, index) + '/pages/lessons/lessons.html', current.origin).href;
-    }
-    return new URL('/cosmic/pages/lessons/lessons.html', current.origin).href;
-  }
 
   function addStyle() {
     if (document.getElementById(STYLE_ID)) return;
@@ -26,17 +15,8 @@
   }
 
   function goHome(event) {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-    }
-    const homeUrl = getHomeUrl();
-    try {
-      window.top.location.assign(homeUrl);
-    } catch (_) {
-      window.location.assign(homeUrl);
-    }
+    if (event) event.stopPropagation();
+    window.top.location.assign(HOME_URL);
   }
 
   function makeButton() {
@@ -84,6 +64,8 @@
         addStyle();
         const fullscreenElement = document.fullscreenElement;
         if (fullscreenElement && fullscreenElement.nodeType === 1 && fullscreenElement !== document.documentElement) {
+          // Put the button inside the actual fullscreen container when possible.
+          // We do not monkey-patch requestFullscreen, so game fullscreen behavior stays native.
           ensureButton(fullscreenElement);
         } else {
           ensureButton();

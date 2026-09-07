@@ -47,8 +47,7 @@
     <div id="site-content" style="display:none;"><header id="top-bar"><div class="brand"><img src="../../imgs/cosmic.png" width="45" height="45" alt="Logo" /><h1>Cosmic</h1></div><div class="nav-links"><button class="apps-trigger" onclick="window.location.href='../../apps/apps.html'">Apps</button><button class="settings-trigger" onclick="window.location.href='../../settings/settings.html'">Settings</button></div></header><main><form id="gamesearchform" onsubmit="return false;"><input id="gamesearchinput" autocomplete="off" type="text" placeholder="Search Cosmic games..." /></form><div id="gamesgrid"><p id="loading">Connecting to Registry...</p><p id="no-results" style="display:none;grid-column:1/-1;text-align:center;">No results...</p></div></main></div>
     <div id="updates-overlay" role="dialog" aria-modal="true" aria-label="Cosmic Updates"><button id="close-updates" type="button" aria-label="Close updates">×</button><div id="updates-panel"><h1>Updates</h1><div class="update"><strong>Welcome to Cosmic!</strong><br />Cosmic now has an in-game Home button for returning to the games list, plus new games and improved Settings.</div><div class="update"><strong>Games:</strong><br />New games and improvements may be added regularly. Check back here to see what changed.</div><div class="update"><strong>Tip:</strong><br />Use the cloak settings when appropriate. Close this update window with the X in the top-right corner to continue.</div><section class="general-section"><h2>General</h2><ul class="general-list"><li>Cosmic is continuously being updated with new content and improvements.</li><li>Use the Games section to browse and launch available games.</li><li>Use the Apps section to access available Cosmic apps.</li><li>If something does not work correctly, try refreshing the page.</li></ul></section></div></div>
     <script>
-        const unlockKey='cosmic-games-unlocked-v2';
-        const updatesSeenHashKey='cosmic-updates-seen-hash-v2';
+        const unlockKey='cosmic-games-unlocked-v3';
         const updatesSource='updates.html';
         const searchInput=document.getElementById('gamesearchinput');
         const grid=document.getElementById('gamesgrid');
@@ -95,8 +94,6 @@
 
         async function showUpdatesAfterUnlock(){
             await loadUpdatesSource();
-            const seen=sessionStorage.getItem(updatesSeenHashKey);
-            if(seen===currentUpdatesHash)return;
             const overlay=document.getElementById('updates-overlay');
             if(!overlay)return;
             overlay.style.display='flex';
@@ -107,7 +104,6 @@
             const overlay=document.getElementById('updates-overlay');
             if(overlay)overlay.style.display='none';
             document.body.style.overflow='auto';
-            if(currentUpdatesHash)sessionStorage.setItem(updatesSeenHashKey,currentUpdatesHash);
         }
 
         document.getElementById('close-updates').addEventListener('click',closeUpdates);
@@ -165,10 +161,11 @@
             }).catch(error=>{const loading=document.getElementById('loading');if(loading)loading.textContent='Could not load the game registry. Please refresh.';console.error('Cosmic registry error:',error);});
         }
 
-        if(sessionStorage.getItem(unlockKey)==='true'){
-            showGames();
-            loadRegistry();
-        }
+        // Every time this page is opened, start locked. sessionStorage is intentionally
+        // not used to skip the gate, so returning to/reopening the Games page always
+        // requires the password and then shows the Updates popup.
+        showGames();
+        document.getElementById('site-content').style.display='none';
 
         searchInput.addEventListener('input',e=>{
             const val=e.target.value.toLowerCase();let matches=0;

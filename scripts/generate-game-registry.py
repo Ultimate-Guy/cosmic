@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the lessons game registry without modifying individual games."""
+"""Generate the lessons game registry and clean legacy injected game scripts."""
 import json
 import re
 import urllib.parse
@@ -61,6 +61,16 @@ def fix_updates_flow():
         text=text.replace(old,new,1)
         LESSONS_PAGE.write_text(text,encoding='utf-8')
 
+def clean_game_page(folder):
+    """Remove legacy guard/settings injections that can break game runtimes."""
+    index=folder/'index.html'
+    if not index.is_file():return
+    text=index.read_text(encoding='utf-8')
+    cleaned=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
+    cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
+    cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
+    if cleaned!=text:index.write_text(cleaned,encoding='utf-8')
+
 def build_game(folder,metadata):
     image=choose_image(folder,metadata);entry=choose_entry(folder,metadata)
     game={'name':metadata.get('title',display_name(folder.name)),'path':registry_path(folder)}
@@ -75,11 +85,10 @@ def main():
         for folder in sorted(path for path in LESSONS_DIR.iterdir() if path.is_dir()):
             if folder.name.lower() in EXCLUDED_FOLDERS:continue
             metadata=read_metadata(folder)
-            # Game pages stay untouched so their original scripts work on
-            # GitHub Pages and workers.dev. Shared navigation lives in the launcher.
+            clean_game_page(folder)
             games.append(build_game(folder,metadata))
     OUTPUT.parent.mkdir(parents=True,exist_ok=True)
     OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8')
-    print(f'Generated {len(games)} game entries; game files were not modified')
+    print(f'Generated {len(games)} game entries and removed legacy injected scripts')
 
 if __name__=='__main__':main()

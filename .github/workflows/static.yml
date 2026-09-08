@@ -80,6 +80,7 @@ jobs:
           css_root = re.compile(r'url\((?![\"\']?//)(?![\"\']?/cosmic/)')
           guard_src = '/cosmic/scripts/game-guard.js?v=pages'
           guard_tag = f'<script id="cosmic-pages-game-guard" src="{guard_src}"></script>'
+          smash_guard = '''<script>(function(){\nconst HOME=location.origin+(location.pathname.split('/pages/lessons/')[0]||'/cosmic')+'/pages/lessons/lessons.html';\nfunction add(){if(!document.documentElement)return;let b=document.getElementById('cosmic-smash-home');if(!b){b=document.createElement('button');b.id='cosmic-smash-home';b.type='button';b.textContent='← Home';b.onclick=function(){location.href=HOME};(document.body||document.documentElement).appendChild(b)}b.style.cssText='position:fixed!important;top:12px!important;left:12px!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;padding:8px 14px!important;border:2px solid #2dccff!important;border-radius:10px!important;background:#0d1a21!important;color:#2dccff!important;font:700 14px system-ui,sans-serif!important;cursor:pointer!important;box-shadow:0 4px 16px rgba(0,0,0,.55)!important'}\nadd();new MutationObserver(add).observe(document.documentElement,{childList:true,subtree:true});})();</script>'''
 
           changed_files = 0
           changed_games = 0
@@ -89,6 +90,7 @@ jobs:
               if not game_dir.is_dir() or game_dir.name in {'apps'}:
                   continue
               game_changed = False
+              is_smash = game_dir.name.lower() == 'smash karts (may not work at school)'
               for path in game_dir.rglob('*'):
                   if not path.is_file() or path.suffix.lower() not in text_extensions:
                       continue
@@ -101,15 +103,21 @@ jobs:
                   text = quoted_root.sub(r'\1/cosmic/', text)
                   text = css_root.sub('url(/cosmic/', text)
 
-                  # The Pages game shell now opens games top-level. Add the
-                  # existing Home guard to every Pages game entry without
-                  # changing the repository/source copy used by Cloudflare.
-                  if path.name.lower() == 'index.html' and 'cosmic-pages-game-guard' not in text:
-                      if re.search(r'</head>', text, flags=re.IGNORECASE):
-                          text = re.sub(r'</head>', guard_tag + '</head>', text, count=1, flags=re.IGNORECASE)
-                      else:
-                          text = guard_tag + text
-                      guard_injected += 1
+                  if path.name.lower() == 'index.html':
+                      if is_smash:
+                          # Smash Karts rebuilds its whole document with document.write.
+                          # Do not load the generic guard before that replacement: the
+                          # generic Document.write/fullscreen hooks can interfere with
+                          # its Unity bootstrap. Add a Pages-only Home button after its
+                          # document.close() instead, with no source/Cloudflare change.
+                          if 'cosmic-smash-home' not in text and 'document.close()' in text:
+                              text = text.replace('document.close()', 'document.close();' + smash_guard, 1)
+                      elif 'cosmic-pages-game-guard' not in text:
+                          if re.search(r'</head>', text, flags=re.IGNORECASE):
+                              text = re.sub(r'</head>', guard_tag + '</head>', text, count=1, flags=re.IGNORECASE)
+                          else:
+                              text = guard_tag + text
+                          guard_injected += 1
 
                   if text != original:
                       path.write_text(text, encoding='utf-8')
@@ -120,7 +128,7 @@ jobs:
                   changed_games += 1
 
           print(f'Rewrote Pages resources in {changed_files} files across {changed_games} games')
-          print(f'Injected Pages Home guard into {guard_injected} game entry pages')
+          print(f'Injected generic Pages Home guard into {guard_injected} game entry pages')
           PY
 
       - name: Setup Pages

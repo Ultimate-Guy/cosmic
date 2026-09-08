@@ -33,15 +33,25 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
 
   try{
     const url=new URL(game,location.href);
-    // The games list currently supplies the Worker URL for GitHub Pages too.
-    // Convert that target back to the Pages copy so the game iframe remains
-    // same-origin. The Pages build rewrites root-relative game assets to /cosmic.
-    if(location.hostname.endsWith('.github.io') && url.hostname===workerHost){
-      url.hostname=location.hostname;
-      url.protocol=location.protocol;
-      url.port=location.port;
-      if(!url.pathname.startsWith('/cosmic/'))url.pathname='/cosmic'+(url.pathname.startsWith('/')?'':'/')+url.pathname;
+
+    // GitHub Pages must run the game as the top-level page. This avoids
+    // cross-origin iframe restrictions and lets the game use its normal
+    // fullscreen/WebGL behavior. The Pages build adds the Home guard to the
+    // game page separately. Cloudflare keeps the existing iframe shell.
+    if(location.hostname.endsWith('.github.io')){
+      if(url.hostname===workerHost){
+        url.hostname=location.hostname;
+        url.protocol=location.protocol;
+        url.port=location.port;
+      }
+      if(!url.pathname.startsWith('/cosmic/')){
+        url.pathname='/cosmic'+(url.pathname.startsWith('/')?'':'/')+url.pathname;
+      }
+      location.replace(url.href);
+      return;
     }
+
+    // Cloudflare keeps the original iframe behavior unchanged.
     document.getElementById('game').src=url.href;
   }catch(e){location.replace(home);}
 })();

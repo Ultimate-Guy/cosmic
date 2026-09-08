@@ -49,16 +49,24 @@
     button.style.setProperty('z-index', '2147483647', 'important');
   }
 
-  function patchFullscreen() {
-    const proto = Element.prototype;
-    const native = proto.requestFullscreen;
-    if (typeof native !== 'function' || proto.__cosmicHomeFullscreenPatched) return;
-    proto.__cosmicHomeFullscreenPatched = true;
-    proto.requestFullscreen = function(options) {
+  function patchFullscreenMethod(proto, name) {
+    if (!proto || typeof proto[name] !== 'function' || proto[name]['__cosmicWrapped']) return;
+    const native = proto[name];
+    const wrapped = function(options) {
       const root = document.documentElement;
       if (root && this !== root) return native.call(root, options);
       return native.call(this, options);
     };
+    wrapped.__cosmicWrapped = true;
+    proto[name] = wrapped;
+  }
+
+  function patchFullscreen() {
+    patchFullscreenMethod(Element.prototype, 'requestFullscreen');
+    patchFullscreenMethod(Element.prototype, 'webkitRequestFullscreen');
+    patchFullscreenMethod(Element.prototype, 'webkitRequestFullScreen');
+    patchFullscreenMethod(Element.prototype, 'mozRequestFullScreen');
+    patchFullscreenMethod(Element.prototype, 'msRequestFullscreen');
   }
 
   function install() {
@@ -71,6 +79,9 @@
     if (!document.__cosmicFullscreenListenerInstalled) {
       document.__cosmicFullscreenListenerInstalled = true;
       document.addEventListener('fullscreenchange', ensureButton);
+      document.addEventListener('webkitfullscreenchange', ensureButton);
+      document.addEventListener('mozfullscreenchange', ensureButton);
+      document.addEventListener('MSFullscreenChange', ensureButton);
     }
   }
 

@@ -55,8 +55,8 @@ jobs:
           rm -rf _site
           mkdir -p _site
 
-          # Stage a separate Pages-only copy. Do not use `cp -a . _site` here:
-          # that attempts to copy _site into itself and makes the build fail.
+          # Stage a separate Pages-only copy. Never modify the source files used
+          # by the Cloudflare site.
           rsync -a \
             --exclude='_site/' \
             --exclude='.git/' \
@@ -72,24 +72,21 @@ jobs:
           if not root.exists():
               raise SystemExit('Missing Pages lessons directory')
 
-          # GitHub Pages is served from /cosmic. Keep the Cloudflare/source copy
-          # completely untouched and only adapt the Pages deployment copy.
-          #
-          # Some games put root-relative asset URLs directly in HTML, while
-          # others put them in local JS/CSS files. Rewrite both so a game loaded
-          # from /cosmic/pages/lessons/<game>/ can still resolve /assets, /js,
-          # /css, /imgs, etc. inside the GitHub Pages project.
+          # GitHub Pages is served from /cosmic. Adapt only the deployment copy.
           text_extensions = {
               '.html', '.htm', '.js', '.mjs', '.cjs', '.css', '.json', '.svg'
           }
           quoted_root = re.compile(r'(["\'])/(?!/|cosmic/|https?://)')
           css_root = re.compile(r'url\((?![\"\']?//)(?![\"\']?/cosmic/)')
+          guard_src = '/cosmic/scripts/game-guard.js?v=pages'
+          guard_tag = f'<script id="cosmic-pages-game-guard" src="{guard_src}"></script>'
 
           changed_files = 0
           changed_games = 0
+          guard_injected = 0
 
           for game_dir in root.iterdir():
-              if not game_dir.is_dir():
+              if not game_dir.is_dir() or game_dir.name in {'apps'}:
                   continue
               game_changed = False
               for path in game_dir.rglob('*'):
@@ -104,6 +101,16 @@ jobs:
                   text = quoted_root.sub(r'\1/cosmic/', text)
                   text = css_root.sub('url(/cosmic/', text)
 
+                  # The Pages game shell now opens games top-level. Add the
+                  # existing Home guard to every Pages game entry without
+                  # changing the repository/source copy used by Cloudflare.
+                  if path.name.lower() == 'index.html' and 'cosmic-pages-game-guard' not in text:
+                      if re.search(r'</head>', text, flags=re.IGNORECASE):
+                          text = re.sub(r'</head>', guard_tag + '</head>', text, count=1, flags=re.IGNORECASE)
+                      else:
+                          text = guard_tag + text
+                      guard_injected += 1
+
                   if text != original:
                       path.write_text(text, encoding='utf-8')
                       changed_files += 1
@@ -112,7 +119,8 @@ jobs:
               if game_changed:
                   changed_games += 1
 
-          print(f'Rewrote root-relative game resources in {changed_files} files across {changed_games} games')
+          print(f'Rewrote Pages resources in {changed_files} files across {changed_games} games')
+          print(f'Injected Pages Home guard into {guard_injected} game entry pages')
           PY
 
       - name: Setup Pages

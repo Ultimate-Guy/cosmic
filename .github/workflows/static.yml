@@ -54,35 +54,65 @@ jobs:
         run: |
           rm -rf _site
           mkdir -p _site
-          cp -a ./. _site/
-          rm -rf _site/.git _site/.github _site/.gitignore _site/_site
+
+          # Stage a separate Pages-only copy. Do not use `cp -a . _site` here:
+          # that attempts to copy _site into itself and makes the build fail.
+          rsync -a \
+            --exclude='_site/' \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.gitignore' \
+            ./ _site/
+
           python3 - <<'PY'
           from pathlib import Path
           import re
 
           root = Path('_site/pages/lessons')
-          prefix = '/cosmic/'
           if not root.exists():
               raise SystemExit('Missing Pages lessons directory')
 
-          # GitHub Pages is served from /cosmic, so game pages that contain
-          # root-relative resource URLs need those URLs to stay inside the
-          # project. This only changes the Pages build copy; the Cloudflare
-          # files in the repository are left untouched.
-          patterns = [
-              (re.compile(r'(["\'])/(?!/|cosmic/|https?://)'), r'\1/cosmic/'),
-              (re.compile(r'url\(/(?!/|cosmic/)'), 'url(/cosmic/'),
-          ]
-          changed = 0
-          for page in root.glob('*/index.html'):
-              text = page.read_text(encoding='utf-8')
-              original = text
-              for pattern, replacement in patterns:
-                  text = pattern.sub(replacement, text)
-              if text != original:
-                  page.write_text(text, encoding='utf-8')
-                  changed += 1
-          print(f'Rewrote root-relative game resources in {changed} Pages game pages')
+          # GitHub Pages is served from /cosmic. Keep the Cloudflare/source copy
+          # completely untouched and only adapt the Pages deployment copy.
+          #
+          # Some games put root-relative asset URLs directly in HTML, while
+          # others put them in local JS/CSS files. Rewrite both so a game loaded
+          # from /cosmic/pages/lessons/<game>/ can still resolve /assets, /js,
+          # /css, /imgs, etc. inside the GitHub Pages project.
+          text_extensions = {
+              '.html', '.htm', '.js', '.mjs', '.cjs', '.css', '.json', '.svg'
+          }
+          quoted_root = re.compile(r'(["\'])/(?!/|cosmic/|https?://)')
+          css_root = re.compile(r'url\((?![\"\']?//)(?![\"\']?/cosmic/)')
+
+          changed_files = 0
+          changed_games = 0
+
+          for game_dir in root.iterdir():
+              if not game_dir.is_dir():
+                  continue
+              game_changed = False
+              for path in game_dir.rglob('*'):
+                  if not path.is_file() or path.suffix.lower() not in text_extensions:
+                      continue
+                  try:
+                      text = path.read_text(encoding='utf-8')
+                  except UnicodeDecodeError:
+                      continue
+
+                  original = text
+                  text = quoted_root.sub(r'\1/cosmic/', text)
+                  text = css_root.sub('url(/cosmic/', text)
+
+                  if text != original:
+                      path.write_text(text, encoding='utf-8')
+                      changed_files += 1
+                      game_changed = True
+
+              if game_changed:
+                  changed_games += 1
+
+          print(f'Rewrote root-relative game resources in {changed_files} files across {changed_games} games')
           PY
 
       - name: Setup Pages

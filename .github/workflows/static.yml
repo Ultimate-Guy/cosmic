@@ -67,26 +67,34 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
+          import json
 
           root = Path('_site/pages/lessons')
           if not root.exists():
               raise SystemExit('Missing Pages lessons directory')
 
-          # GitHub Pages is served from /cosmic. Only rewrite real HTML resource
-          # attributes and CSS url() values. Never run the old broad quote-based
-          # replacement over JavaScript source: that can corrupt strings such as
-          # path parsing code (which is what broke Smash Karts).
-          text_extensions = {
-              '.html', '.htm', '.css', '.svg'
-          }
+          # GitHub Pages is served from /cosmic. Only rewrite real HTML/CSS
+          # resource attributes. Do NOT rewrite JavaScript source strings.
+          text_extensions = {'.html', '.htm', '.css', '.svg'}
           html_root = re.compile(
               r'(\b(?:src|href|action|poster|data-src|data-url)\s*=\s*["\'])/(?!/|cosmic/|https?://)',
               re.IGNORECASE
           )
           css_root = re.compile(r'url\((?!["\']?//)(?!["\']?/cosmic/)')
+
           guard_src = '/cosmic/scripts/game-guard.js?v=pages'
           guard_tag = f'<script id="cosmic-pages-game-guard" src="{guard_src}"></script>'
-          smash_guard = '''<script>(function(){const HOME=location.origin+(location.pathname.split('/pages/lessons/')[0]||'/cosmic')+'/pages/lessons/lessons.html';function add(){if(!document.documentElement)return;let b=document.getElementById('cosmic-smash-home');if(!b){b=document.createElement('button');b.id='cosmic-smash-home';b.type='button';b.textContent='← Home';b.onclick=function(){location.href=HOME};(document.body||document.documentElement).appendChild(b)}b.style.cssText='position:fixed!important;top:12px!important;left:12px!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;padding:8px 14px!important;border:2px solid #2dccff!important;border-radius:10px!important;background:#0d1a21!important;color:#2dccff!important;font:700 14px system-ui,sans-serif!important;cursor:pointer!important;box-shadow:0 4px 16px rgba(0,0,0,.55)!important'}add();new MutationObserver(add).observe(document.documentElement,{childList:true,subtree:true});})();</script>'''
+
+          # This is intentionally tiny and is inserted at the end of normal game
+          # documents, so it cannot interfere with their startup scripts.
+          normal_guard = '''<script id="cosmic-pages-home-inline">(function(){function home(){var p=location.pathname,m='/pages/lessons/',i=p.indexOf(m),u=location.origin+(i>=0?p.slice(0,i):'/cosmic')+m+'lessons.html';return u}function add(){if(!document.documentElement)return;var b=document.getElementById('cosmic-pages-home-inline-button');if(!b){b=document.createElement('button');b.id='cosmic-pages-home-inline-button';b.type='button';b.textContent='← Home';b.onclick=function(){location.href=home()};(document.body||document.documentElement).appendChild(b)}b.style.cssText='position:fixed!important;top:12px!important;left:12px!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;padding:8px 14px!important;border:2px solid #2dccff!important;border-radius:10px!important;background:#0d1a21!important;color:#2dccff!important;font:700 14px system-ui,sans-serif!important;cursor:pointer!important;box-shadow:0 4px 16px rgba(0,0,0,.55)!important'}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add,{once:true});else add();})();</script>'''
+
+          # Smash Karts uses document.open()/document.write() to replace the
+          # entire page. Its Home control must therefore be part of the HTML
+          # string that Smash itself writes, not injected before document.write.
+          smash_guard = '''<script>(function(){function home(){var p=location.pathname,m='/pages/lessons/',i=p.indexOf(m);return location.origin+(i>=0?p.slice(0,i):'/cosmic')+m+'lessons.html'}function add(){if(!document.documentElement)return;var b=document.getElementById('cosmic-smash-home');if(!b){b=document.createElement('button');b.id='cosmic-smash-home';b.type='button';b.textContent='← Home';b.onclick=function(){location.href=home()};(document.body||document.documentElement).appendChild(b)}b.style.cssText='position:fixed!important;top:12px!important;left:12px!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;padding:8px 14px!important;border:2px solid #2dccff!important;border-radius:10px!important;background:#0d1a21!important;color:#2dccff!important;font:700 14px system-ui,sans-serif!important;cursor:pointer!important;box-shadow:0 4px 16px rgba(0,0,0,.55)!important'}add();})();</script>'''
+          # Escape it for the JavaScript string used by document.write.
+          smash_guard_literal = json.dumps(smash_guard)[1:-1].replace('</script>', '<\\/script>')
 
           changed_files = 0
           changed_games = 0
@@ -98,6 +106,7 @@ jobs:
                   continue
               game_changed = False
               is_smash = game_dir.name.lower() == 'smash karts (may not work at school)'
+
               for path in game_dir.rglob('*'):
                   if not path.is_file() or path.suffix.lower() not in text_extensions:
                       continue
@@ -112,19 +121,26 @@ jobs:
 
                   if path.name.lower() == 'index.html':
                       if is_smash:
-                          # Smash Karts writes a completely new HTML document at
-                          # runtime. Do not inject the generic guard into its
-                          # bootstrap. Put a tiny Pages-only button after
-                          # document.close(), when the new document already exists.
-                          if 'cosmic-smash-home' not in text and 'document.close()' in text:
-                              text = text.replace('document.close()', 'document.close();' + smash_guard, 1)
+                          # Remove any older Pages guard we previously injected
+                          # into the source copy of the document-write page.
+                          text = re.sub(r'<script id="cosmic-pages-game-guard"[^>]*></script>', '', text, flags=re.IGNORECASE)
+                          text = re.sub(r'<script id="cosmic-smash-home"[^>]*>.*?</script>', '', text, flags=re.IGNORECASE | re.DOTALL)
+                          text = re.sub(r'<script id="cosmic-smash-home-inline"[^>]*>.*?</script>', '', text, flags=re.IGNORECASE | re.DOTALL)
+
+                          marker = r'\\r\\n<\\/body>\\r\\n<\\/html>");'
+                          if 'cosmic-smash-home' not in text and re.search(marker, text):
+                              text = re.sub(marker, r'\\r\\n' + smash_guard_literal + r'\\r\\n<\\/body>\\r\\n<\\/html>");', text, count=1)
                               smash_fixed += 1
-                      elif 'cosmic-pages-game-guard' not in text:
-                          if re.search(r'</head>', text, flags=re.IGNORECASE):
-                              text = re.sub(r'</head>', guard_tag + '</head>', text, count=1, flags=re.IGNORECASE)
-                          else:
-                              text = guard_tag + text
-                          guard_injected += 1
+                      else:
+                          # Put the guard at the END of the document rather than
+                          # in <head>. This avoids interfering with game loaders.
+                          text = re.sub(r'<script id="cosmic-pages-game-guard"[^>]*></script>', '', text, flags=re.IGNORECASE)
+                          if 'cosmic-pages-home-inline' not in text:
+                              if re.search(r'</body>', text, flags=re.IGNORECASE):
+                                  text = re.sub(r'</body>', normal_guard + '</body>', text, count=1, flags=re.IGNORECASE)
+                              else:
+                                  text += normal_guard
+                              guard_injected += 1
 
                   if text != original:
                       path.write_text(text, encoding='utf-8')
@@ -135,8 +151,8 @@ jobs:
                   changed_games += 1
 
           print(f'Rewrote Pages resources in {changed_files} files across {changed_games} games')
-          print(f'Injected generic Pages Home guard into {guard_injected} game entry pages')
-          print(f'Applied Smash Karts Pages loader fix to {smash_fixed} entry pages')
+          print(f'Injected non-invasive Pages Home button into {guard_injected} normal game pages')
+          print(f'Applied Smash Karts document.write Home fix to {smash_fixed} game pages')
           PY
 
       - name: Setup Pages

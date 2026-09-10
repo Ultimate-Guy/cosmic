@@ -3,6 +3,10 @@ const ALLOWED_ORIGINS = new Set([
   'https://cosmicv2.v75ultimate.workers.dev'
 ]);
 
+// Cloudflare's build command injects the real admin password here.
+// The placeholder is safe to keep in GitHub until deployment.
+const BUILD_ADMIN_PASSWORD = '__COSMIC_ADMIN_PASSWORD__';
+
 function corsHeaders(request) {
   const origin = request.headers.get('Origin');
   const headers = new Headers({
@@ -42,11 +46,9 @@ async function handleAdminAuth(request, env) {
   }
 
   const password = typeof data?.password === 'string' ? data.password : '';
-
-  // Prefer the dedicated admin secret. Keep the existing game-password secret
-  // as a fallback so older Cloudflare deployments remain functional while the
-  // dedicated secret binding propagates.
-  const expectedPassword = env.COSMIC_ADMIN_PASSWORD || env.PASSWORD_FOR_GAMES_UNLOCK;
+  const expectedPassword = BUILD_ADMIN_PASSWORD !== '__COSMIC_ADMIN_PASSWORD__'
+    ? BUILD_ADMIN_PASSWORD
+    : env.COSMIC_ADMIN_PASSWORD;
 
   if (typeof expectedPassword !== 'string' || expectedPassword.length === 0) {
     return jsonResponse(request, { ok: false, error: 'server-not-configured' }, 500);

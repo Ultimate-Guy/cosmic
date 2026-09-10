@@ -42,7 +42,11 @@ async function handleAdminAuth(request, env) {
   }
 
   const password = typeof data?.password === 'string' ? data.password : '';
-  const expectedPassword = env.COSMIC_ADMIN_PASSWORD;
+
+  // Prefer the dedicated admin secret. Keep the existing game-password secret
+  // as a fallback so older Cloudflare deployments remain functional while the
+  // dedicated secret binding propagates.
+  const expectedPassword = env.COSMIC_ADMIN_PASSWORD || env.PASSWORD_FOR_GAMES_UNLOCK;
 
   if (typeof expectedPassword !== 'string' || expectedPassword.length === 0) {
     return jsonResponse(request, { ok: false, error: 'server-not-configured' }, 500);

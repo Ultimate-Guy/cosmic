@@ -3,9 +3,6 @@
   "name": "cosmicv2",
   "main": "worker.js",
   "compatibility_date": "2026-09-09",
-  "secrets": {
-    "required": ["COSMIC_ADMIN_PASSWORD"]
-  },
   "assets": {
     "directory": ".",
     "binding": "ASSETS",

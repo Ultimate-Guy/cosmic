@@ -3,10 +3,6 @@ const ALLOWED_ORIGINS = new Set([
   'https://cosmicv2.v75ultimate.workers.dev'
 ]);
 
-// The Cloudflare build replaces this placeholder with the configured secret.
-// The real password is never committed to GitHub.
-const BUILD_ADMIN_PASSWORD = 'PASSWORD_PLACEHOLDER_ADMIN';
-
 function corsHeaders(request) {
   const origin = request.headers.get('Origin');
   const headers = new Headers({
@@ -46,9 +42,7 @@ async function handleAdminAuth(request, env) {
   }
 
   const password = typeof data?.password === 'string' ? data.password : '';
-  const expectedPassword = BUILD_ADMIN_PASSWORD !== 'PASSWORD_PLACEHOLDER_ADMIN'
-    ? BUILD_ADMIN_PASSWORD
-    : env.COSMIC_ADMIN_PASSWORD;
+  const expectedPassword = env.COSMIC_ADMIN_PASSWORD;
 
   if (typeof expectedPassword !== 'string' || expectedPassword.length === 0) {
     return jsonResponse(request, { ok: false, error: 'server-not-configured' }, 500);

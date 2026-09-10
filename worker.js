@@ -3,6 +3,10 @@ const ALLOWED_ORIGINS = new Set([
   'https://cosmicv2.v75ultimate.workers.dev'
 ]);
 
+// This placeholder is replaced during the Cloudflare build using the
+// COSMIC_ADMIN_PASSWORD build secret. The password never lives in GitHub.
+const BUILD_ADMIN_PASSWORD = '__COSMIC_ADMIN_PASSWORD__';
+
 function corsHeaders(request) {
   const origin = request.headers.get('Origin');
   const headers = new Headers({
@@ -34,12 +38,6 @@ async function handleAdminAuth(request, env) {
     return jsonResponse(request, { ok: false }, 405);
   }
 
-  if (!env.COSMIC_ADMIN_PASSWORD) {
-    // Never expose the secret or its value. This only indicates a server setup
-    // problem so it can be diagnosed from the Worker logs/dashboard.
-    return jsonResponse(request, { ok: false }, 500);
-  }
-
   let data;
   try {
     data = await request.json();
@@ -48,8 +46,20 @@ async function handleAdminAuth(request, env) {
   }
 
   const password = typeof data?.password === 'string' ? data.password : '';
+
+  // The normal Cosmic Entry password is injected into the GitHub Pages build.
+  // We use the same basic idea for the Cloudflare Worker: the admin password
+  // is supplied as a Cloudflare Build Secret and injected only during deploy.
+  const expectedPassword = BUILD_ADMIN_PASSWORD !== '__COSMIC_ADMIN_PASSWORD__'
+    ? BUILD_ADMIN_PASSWORD
+    : env.COSMIC_ADMIN_PASSWORD;
+
+  if (!expectedPassword) {
+    return jsonResponse(request, { ok: false, error: 'server-not-configured' }, 500);
+  }
+
   return jsonResponse(request, {
-    ok: password === env.COSMIC_ADMIN_PASSWORD
+    ok: password === expectedPassword
   });
 }
 

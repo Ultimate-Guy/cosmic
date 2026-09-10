@@ -13,21 +13,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Create Worker secrets file
-        env:
-          COSMIC_ADMIN_PASSWORD: ${{ secrets.COSMIC_ADMIN_PASSWORD }}
-        run: |
-          set -eu
-          test -n "$COSMIC_ADMIN_PASSWORD"
-          printf 'COSMIC_ADMIN_PASSWORD=%s\n' "$COSMIC_ADMIN_PASSWORD" > .wrangler-deploy-secrets.env
-
       - name: Deploy Worker and upload runtime secret
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --secrets-file .wrangler-deploy-secrets.env
-
-      - name: Remove temporary secrets file
-        if: always()
-        run: rm -f .wrangler-deploy-secrets.env
+          wranglerVersion: "4"
+          secrets: |
+            COSMIC_ADMIN_PASSWORD
+        env:
+          COSMIC_ADMIN_PASSWORD: ${{ secrets.COSMIC_ADMIN_PASSWORD }}

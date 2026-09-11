@@ -19,7 +19,7 @@
     </div>
   </header>
   <main class="youtube-shell">
-    <section class="page-heading"><p class="eyebrow">COSMIC MEDIA</p><h2>YouTube Watcher</h2><p>Search YouTube, watch videos, and browse Shorts inside Cosmic.</p></section>
+    <section class="page-heading"><p class="eyebrow">COSMIC MEDIA</p><h2>YouTube Watcher</h2><p>Search YouTube, watch videos, browse Shorts, and play your own offline files inside Cosmic.</p></section>
     <section class="youtube-search">
       <div class="search-row"><input id="searchInput" class="search-input" type="search" autocomplete="off" placeholder="Search YouTube..." aria-label="Search YouTube"><button id="searchBtn" class="search-button" type="button"><i class="fas fa-search"></i> Search</button></div>
       <p id="searchStatus" class="search-status" aria-live="polite"></p>
@@ -28,7 +28,7 @@
       <div class="results-heading"><h3>Search Results</h3><span id="resultCount"></span></div>
       <div id="searchResults" class="results-grid"></div>
     </section>
-    <section class="mode-switch" aria-label="YouTube mode"><button id="watchModeBtn" class="mode-btn active" type="button"><i class="fab fa-youtube"></i> Videos</button><button id="shortsModeBtn" class="mode-btn" type="button"><i class="fas fa-mobile-screen-button"></i> Shorts</button></section>
+    <section class="mode-switch" aria-label="YouTube mode"><button id="watchModeBtn" class="mode-btn active" type="button"><i class="fab fa-youtube"></i> Videos</button><button id="shortsModeBtn" class="mode-btn" type="button"><i class="fas fa-mobile-screen-button"></i> Shorts</button><button id="offlineModeBtn" class="mode-btn" type="button"><i class="fas fa-hard-drive"></i> Offline</button></section>
     <section id="watchPanel" class="media-panel">
       <div class="panel-title"><div><h3>Watch a video</h3><p>Paste a YouTube video, youtu.be, or Shorts URL.</p></div><button id="clearVideosBtn" class="small-action" type="button">Clear all</button></div>
       <div class="url-row"><input id="videoUrlInput" class="url-input" type="url" autocomplete="off" placeholder="Paste a YouTube URL..."><button id="loadVideoBtn" class="primary-action" type="button"><i class="fas fa-play"></i> Watch</button></div>
@@ -36,11 +36,18 @@
       <div id="videoEmpty" class="empty-state"><i class="fab fa-youtube"></i><strong>No videos open</strong><span>Search above or paste a YouTube URL to start watching.</span></div>
     </section>
     <section id="shortsPanel" class="media-panel hidden">
-      <div class="panel-title"><div><h3>Shorts</h3><p>Add Shorts URLs and move through them with the buttons or arrow keys.</p></div><button id="clearShortsBtn" class="small-action" type="button">Clear Shorts</button></div>
-      <div class="url-row"><input id="shortUrlInput" class="url-input" type="url" autocomplete="off" placeholder="Paste a YouTube Shorts URL..."><button id="addShortBtn" class="primary-action" type="button"><i class="fas fa-plus"></i> Add</button></div>
+      <div class="panel-title"><div><h3>Shorts Doom Scroll</h3><p>Add one Short, then use the full-screen vertical feed to scroll through a generated Shorts queue.</p></div><button id="clearShortsBtn" class="small-action" type="button">Clear Shorts</button></div>
+      <div class="url-row"><input id="shortUrlInput" class="url-input" type="url" autocomplete="off" placeholder="Paste one YouTube Shorts URL..."><button id="addShortBtn" class="primary-action" type="button"><i class="fas fa-plus"></i> Start feed</button></div>
       <p id="shortMessage" class="message" aria-live="polite"></p>
-      <div class="shorts-stage"><button id="prevShortBtn" class="short-nav" type="button" aria-label="Previous Short">↑</button><div id="shortPlayer" class="short-player empty-short"><div class="empty-short-content"><i class="fas fa-mobile-screen-button"></i><strong>No Shorts loaded</strong><span>Add a Shorts URL above.</span></div></div><button id="nextShortBtn" class="short-nav" type="button" aria-label="Next Short">↓</button></div>
-      <div id="shortCounter" class="short-counter">0 Shorts</div><div id="shortDots" class="short-dots" aria-label="Shorts in queue"></div>
+      <div id="shortFeed" class="short-feed"><div class="short-feed-empty"><i class="fas fa-mobile-screen-button"></i><strong>No Shorts feed yet</strong><span>Paste one Short above to start.</span></div></div>
+      <div id="shortCounter" class="short-counter">0 Shorts</div>
+    </section>
+    <section id="offlinePanel" class="media-panel hidden">
+      <div class="panel-title"><div><h3>Offline video library</h3><p>Drop a video file here or choose one from your device. Files stay on this device so you can play them without internet.</p></div><button id="clearOfflineBtn" class="small-action" type="button">Clear library</button></div>
+      <div id="offlineDropZone" class="offline-drop-zone" tabindex="0"><i class="fas fa-cloud-arrow-up"></i><strong>Drag &amp; drop a video here</strong><span>or click to choose a video file</span><input id="offlineFileInput" type="file" accept="video/*" multiple hidden><button id="offlineChooseBtn" class="primary-action" type="button">Choose files</button></div>
+      <p id="offlineMessage" class="message" aria-live="polite"></p>
+      <div id="offlineList" class="offline-list"></div>
+      <div id="offlineEmpty" class="empty-state"><i class="fas fa-hard-drive"></i><strong>No offline videos</strong><span>Save a video file on your device, then add it here.</span></div>
     </section>
   </main>
   <script src="youtube.js"></script>

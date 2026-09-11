@@ -19,7 +19,7 @@
     </div>
   </header>
   <main class="youtube-shell">
-    <section class="page-heading"><p class="eyebrow">COSMIC MEDIA</p><h2>YouTube Watcher</h2><p>Search YouTube, watch videos, browse Shorts, and play your own offline files inside Cosmic.</p></section>
+    <section class="page-heading"><p class="eyebrow">COSMIC MEDIA</p><h2>YouTube Watcher</h2><p>Search YouTube, watch videos, browse Shorts, and keep videos in your Cosmic library.</p></section>
     <section class="youtube-search">
       <div class="search-row"><input id="searchInput" class="search-input" type="search" autocomplete="off" placeholder="Search YouTube..." aria-label="Search YouTube"><button id="searchBtn" class="search-button" type="button"><i class="fas fa-search"></i> Search</button></div>
       <p id="searchStatus" class="search-status" aria-live="polite"></p>
@@ -43,11 +43,17 @@
       <div id="shortCounter" class="short-counter">0 Shorts</div>
     </section>
     <section id="offlinePanel" class="media-panel hidden">
-      <div class="panel-title"><div><h3>Offline video library</h3><p>Drop a video file here or choose one from your device. Files stay on this device so you can play them without internet.</p></div><button id="clearOfflineBtn" class="small-action" type="button">Clear library</button></div>
-      <div id="offlineDropZone" class="offline-drop-zone" tabindex="0"><i class="fas fa-cloud-arrow-up"></i><strong>Drag &amp; drop a video here</strong><span>or click to choose a video file</span><input id="offlineFileInput" type="file" accept="video/*" multiple hidden><button id="offlineChooseBtn" class="primary-action" type="button">Choose files</button></div>
+      <div class="panel-title"><div><h3>Offline library</h3><p>Keep YouTube picks here for quick access, and store real video files for playback without internet.</p></div><button id="clearOfflineBtn" class="small-action" type="button">Clear library</button></div>
+      <div class="saved-youtube-section">
+        <div class="saved-heading"><div><h4>Saved from YouTube</h4><p>These are saved video links and thumbnails. YouTube videos still need internet to play.</p></div><span id="savedYoutubeCount">0 saved</span></div>
+        <div id="savedYoutubeList" class="saved-youtube-list"></div>
+        <div id="savedYoutubeEmpty" class="saved-empty"><i class="fab fa-youtube"></i><span>No YouTube videos saved yet.</span><small>Use <strong>Save to Offline</strong> on a search result.</small></div>
+      </div>
+      <div class="offline-divider"><span>LOCAL FILES</span></div>
+      <div class="offline-drop-zone" id="offlineDropZone" tabindex="0"><i class="fas fa-cloud-arrow-up"></i><strong>Drag &amp; drop a video here</strong><span>or click to choose a video file</span><input id="offlineFileInput" type="file" accept="video/*" multiple hidden><button id="offlineChooseBtn" class="primary-action" type="button">Choose files</button></div>
       <p id="offlineMessage" class="message" aria-live="polite"></p>
       <div id="offlineList" class="offline-list"></div>
-      <div id="offlineEmpty" class="empty-state"><i class="fas fa-hard-drive"></i><strong>No offline videos</strong><span>Save a video file on your device, then add it here.</span></div>
+      <div id="offlineEmpty" class="empty-state"><i class="fas fa-hard-drive"></i><strong>No local offline videos</strong><span>Add a video file from your device to play it without internet.</span></div>
     </section>
   </main>
   <script src="youtube.js"></script>

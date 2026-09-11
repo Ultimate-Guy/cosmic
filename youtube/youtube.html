@@ -19,13 +19,21 @@
     </div>
   </header>
   <main class="youtube-shell">
-    <section class="page-heading"><p class="eyebrow">COSMIC MEDIA</p><h2>YouTube Watcher</h2><p>Watch YouTube videos and Shorts inside a Cosmic-styled player.</p></section>
+    <section class="page-heading"><p class="eyebrow">COSMIC MEDIA</p><h2>YouTube Watcher</h2><p>Search YouTube, watch videos, and browse Shorts inside Cosmic.</p></section>
+    <section class="youtube-search">
+      <div class="search-row"><input id="searchInput" class="search-input" type="search" autocomplete="off" placeholder="Search YouTube..." aria-label="Search YouTube"><button id="searchBtn" class="search-button" type="button"><i class="fas fa-search"></i> Search</button></div>
+      <p id="searchStatus" class="search-status" aria-live="polite"></p>
+    </section>
+    <section id="searchResultsSection" class="results-section hidden">
+      <div class="results-heading"><h3>Search Results</h3><span id="resultCount"></span></div>
+      <div id="searchResults" class="results-grid"></div>
+    </section>
     <section class="mode-switch" aria-label="YouTube mode"><button id="watchModeBtn" class="mode-btn active" type="button"><i class="fab fa-youtube"></i> Videos</button><button id="shortsModeBtn" class="mode-btn" type="button"><i class="fas fa-mobile-screen-button"></i> Shorts</button></section>
     <section id="watchPanel" class="media-panel">
       <div class="panel-title"><div><h3>Watch a video</h3><p>Paste a YouTube video, youtu.be, or Shorts URL.</p></div><button id="clearVideosBtn" class="small-action" type="button">Clear all</button></div>
       <div class="url-row"><input id="videoUrlInput" class="url-input" type="url" autocomplete="off" placeholder="Paste a YouTube URL..."><button id="loadVideoBtn" class="primary-action" type="button"><i class="fas fa-play"></i> Watch</button></div>
       <p id="videoMessage" class="message" aria-live="polite"></p><div id="videoList" class="video-list"></div>
-      <div id="videoEmpty" class="empty-state"><i class="fab fa-youtube"></i><strong>No videos open</strong><span>Paste a YouTube URL above to start watching.</span></div>
+      <div id="videoEmpty" class="empty-state"><i class="fab fa-youtube"></i><strong>No videos open</strong><span>Search above or paste a YouTube URL to start watching.</span></div>
     </section>
     <section id="shortsPanel" class="media-panel hidden">
       <div class="panel-title"><div><h3>Shorts</h3><p>Add Shorts URLs and move through them with the buttons or arrow keys.</p></div><button id="clearShortsBtn" class="small-action" type="button">Clear Shorts</button></div>

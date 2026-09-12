@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "name": "Cosmic AI",
+    "description": "AI chat powered by OpenRouter, styled to match Cosmic.",
+    "path": "https://ultimate-guy.github.io/goated-ai/",
+    "entry": "",
+    "icon": "fas fa-robot"
+  }
+]

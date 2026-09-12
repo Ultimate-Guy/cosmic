@@ -1,0 +1,35 @@
+name: Cosmic validation
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Validate registries
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          for f in [Path('pages/lessons/games.json'), Path('apps/apps.json')]:
+              data=json.loads(f.read_text())
+              assert isinstance(data,list), f'{f} must contain an array'
+              names=[str(x.get('name','')).strip().lower() for x in data]
+              assert all(names), f'{f} contains an item without a name'
+              assert len(names)==len(set(names)), f'{f} contains duplicate names'
+          print('Cosmic registries are valid.')
+          PY
+      - name: Check core files
+        run: |
+          test -f index.html
+          test -f cosmic-hub.html
+          test -f cosmic-hub.css
+          test -f pages/lessons/lessons.html
+          test -f pages/lessons/game-shell.html
+          echo "Core Cosmic files are present."

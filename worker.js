@@ -53,12 +53,58 @@ async function handleAdminAuth(request, env) {
   });
 }
 
+async function handleAI(request, env) {
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders(request) });
+  }
+
+  if (request.method !== 'POST') {
+    return jsonResponse(request, { error: 'Method not allowed' }, 405);
+  }
+
+  const apiKey = env.OPENROUTER_API_KEY;
+  if (typeof apiKey !== 'string' || apiKey.length === 0) {
+    return jsonResponse(request, { error: 'AI server is not configured.' }, 500);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse(request, { error: 'Invalid JSON request.' }, 400);
+  }
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://ultimate-guy.github.io/goated-ai/',
+        'X-Title': 'Cosmic AI'
+      },
+      body: JSON.stringify(body)
+    });
+
+    const text = await response.text();
+    const headers = corsHeaders(request);
+    headers.set('Content-Type', response.headers.get('content-type') || 'application/json; charset=utf-8');
+    return new Response(text, { status: response.status, headers });
+  } catch (error) {
+    return jsonResponse(request, { error: error instanceof Error ? error.message : 'AI request failed.' }, 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
     if (url.pathname === '/api/admin-auth') {
       return handleAdminAuth(request, env);
+    }
+
+    if (url.pathname === '/api/ai') {
+      return handleAI(request, env);
     }
 
     return env.ASSETS.fetch(request);

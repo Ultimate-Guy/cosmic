@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const bgInput=document.getElementById('bgImageInput');
   const bgPreview=document.getElementById('bgImagePreview');
   const savedImage=localStorage.getItem('cosmic-bg-image');
-  function showImage(value){bgPreview.classList.toggle('hidden',!value);if(value)bgPreview.style.backgroundImage=`url("${value}")`;}
+  function showImage(value){bgPreview.classList.toggle('hidden',!value);if(value)bgPreview.style.backgroundImage=`url(\"${value}\")`;}
   showImage(savedImage);
   bgInput.addEventListener('change',()=>{
     const file=bgInput.files&&bgInput.files[0];
@@ -38,10 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!file.type.startsWith('image/')){alert('Please choose an image file.');bgInput.value='';return;}
     if(file.size>2.5*1024*1024){alert('Image is too large. Maximum size is about 2.5 MB.');bgInput.value='';return;}
     const reader=new FileReader();
-    reader.onload=()=>{
-      try{localStorage.setItem('cosmic-bg-image',reader.result);showImage(reader.result);settings.applyBackground();}
-      catch{alert('Could not save the image. Browser storage may be full.');}
-    };
+    reader.onload=()=>{try{localStorage.setItem('cosmic-bg-image',reader.result);showImage(reader.result);settings.applyBackground();}catch{alert('Could not save the image. Browser storage may be full.');}};
     reader.readAsDataURL(file);
   });
   document.getElementById('clearBgImageBtn').addEventListener('click',()=>{localStorage.removeItem('cosmic-bg-image');bgInput.value='';showImage('');settings.applyBackground();});
@@ -80,16 +77,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if(file.size>2.5*1024*1024){alert('MP3 is too large. Maximum size is about 2.5 MB.');musicUpload.value='';return;}
     if(!/audio\/(mpeg|mp3)/.test(file.type)&&!file.name.toLowerCase().endsWith('.mp3')){alert('Please choose an MP3 file.');musicUpload.value='';return;}
     const reader=new FileReader();
-    reader.onload=()=>{
-      try{localStorage.setItem('cosmic-music-custom',reader.result);localStorage.setItem('cosmic-music-track','custom');localStorage.setItem('cosmic-music-enabled','true');musicTrack.value='custom';musicEnable.checked=true;settings.applyMusic();updateMusicStatus();}
-      catch{alert('Could not save the MP3. Browser storage may be full.');}
-    };
+    reader.onload=()=>{try{localStorage.setItem('cosmic-music-custom',reader.result);localStorage.setItem('cosmic-music-track','custom');localStorage.setItem('cosmic-music-enabled','true');musicTrack.value='custom';musicEnable.checked=true;settings.applyMusic();updateMusicStatus();}catch{alert('Could not save the MP3. Browser storage may be full.');}};
     reader.readAsDataURL(file);
   });
 
-  const cloak=document.getElementById('cloakSelect');
-  cloak.value=localStorage.getItem('savedCloak')||'none';
-  cloak.addEventListener('change',()=>{if(cloak.value==='none')localStorage.removeItem('savedCloak');else localStorage.setItem('savedCloak',cloak.value);settings.applyCloak();});
+  const cloakSelect=document.getElementById('cloakSelect');
+  const cloakGrid=document.getElementById('cloakGrid');
+  const cloakPresets=[
+    ['none','None','No tab cloak','fa-ban','#64748b'],
+    ['google','Google Search','Google Search','fa-magnifying-glass','#4285f4'],
+    ['classroom','Google Classroom','Google Classroom','fa-chalkboard','#1967d2'],
+    ['canvas','Canvas','Canvas','fa-layer-group','#e66000'],
+    ['drive','Google Drive','Google Drive','fa-hard-drive','#0f9d58']
+  ];
+  const savedCloak=localStorage.getItem('savedCloak')||'none';
+  cloakSelect.value=cloakPresets.some(p=>p[0]===savedCloak)?savedCloak:'none';
+  cloakPresets.forEach(([id,label,sub,icon,accent])=>{
+    const card=document.createElement('button');
+    card.type='button';card.className='cloak-card';card.dataset.cloak=id;card.setAttribute('role','radio');
+    card.setAttribute('aria-checked',id===cloakSelect.value?'true':'false');
+    card.innerHTML=`<span class="cloak-icon" style="--cloak-accent:${accent}"><i class="fas ${icon}"></i></span><span class="cloak-copy"><strong>${label}</strong><small>${sub}</small></span><span class="cloak-check"><i class="fas fa-check"></i></span>`;
+    card.addEventListener('click',()=>{
+      cloakSelect.value=id;
+      if(id==='none')localStorage.removeItem('savedCloak');else localStorage.setItem('savedCloak',id);
+      cloakGrid.querySelectorAll('.cloak-card').forEach(c=>{const active=c.dataset.cloak===id;c.classList.toggle('active',active);c.setAttribute('aria-checked',active?'true':'false');});
+      settings.applyCloak();
+    });
+    cloakGrid.appendChild(card);
+  });
+  cloakGrid.querySelectorAll('.cloak-card').forEach(c=>c.classList.toggle('active',c.dataset.cloak===cloakSelect.value));
 
   const panicKey=document.getElementById('panicKeyInput'),panicUrl=document.getElementById('panicUrlInput');
   panicKey.value=localStorage.getItem('cosmic-panic-key')||'`';

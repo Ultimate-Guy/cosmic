@@ -49,6 +49,7 @@ jobs:
           rm -rf _site
           mkdir -p _site
           rsync -a --exclude='_site/' --exclude='.git/' --exclude='.github/' --exclude='.gitignore' ./ _site/
+          cp wrangler.jsonc _site/wrangler.jsonc
           python3 - <<'PY'
           from pathlib import Path
           import re, json
@@ -66,8 +67,6 @@ jobs:
           missing=[x for x in required if x not in text]
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
 
-          # Only Cosmic Hub owns the service worker. Strip duplicate registrations
-          # from bundled game/app code in the deployment copy.
           hub=site/'scripts/cosmic-hub.js'
           registration='navigator.serviceWorker.register'
           owners=[]
@@ -112,7 +111,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: '_site'
-          command: deploy
+          command: deploy --config wrangler.jsonc
       - name: Confirm Cloudflare deployment exists
         working-directory: '_site'
         env:
@@ -120,7 +119,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 deployments list --name cosmicv2
+          npx --yes wrangler@4 deployments list --name cosmicv2 --config wrangler.jsonc
           echo 'Cloudflare control-plane deployment confirmed.'
 
   deploy:

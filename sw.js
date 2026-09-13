@@ -1,4 +1,4 @@
-const CACHE = 'cosmic-shell-v2';
+const CACHE = 'cosmic-shell-v3';
 const SHELL = [
   './',
   './offline.html',
@@ -8,6 +8,8 @@ const SHELL = [
   './pages/lessons/games.json',
   './scripts/cosmic-hub.js',
   './scripts/cosmic-pwa.js',
+  './scripts/cosmic-profile-widget.js',
+  './scripts/cosmic-feedback.js',
   './imgs/cosmic.png'
 ];
 self.addEventListener('install', event => {

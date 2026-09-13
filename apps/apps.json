@@ -4,6 +4,9 @@
     "description": "AI chat styled to match Cosmic.",
     "path": "https://ultimate-guy.github.io/goated-ai/",
     "entry": "",
-    "icon": "fas fa-robot"
+    "icon": "fas fa-robot",
+    "category": "AI",
+    "tags": ["ai", "chat", "utility"],
+    "featured": true
   }
 ]

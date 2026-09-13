@@ -17,7 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
           file_pattern: 'pages/lessons/**'
           skip_dirty_check: false
           skip_fetch: true
-      - name: Prepare GitHub Pages files
+      - name: Prepare identical deployment files
         run: |
           rm -rf _site
           mkdir -p _site
@@ -84,6 +84,13 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: '_site'
+      - name: Deploy the exact same build to Cloudflare Worker
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: '_site'
+          command: deploy
   deploy:
     needs: build
     environment:
@@ -94,18 +101,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
-  deploy-worker:
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout latest source
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Deploy Cloudflare Worker
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy

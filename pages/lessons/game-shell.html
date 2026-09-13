@@ -6,8 +6,9 @@
 <title>Cosmic Game</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:system-ui,sans-serif}
-#home{position:fixed;top:12px;left:12px;z-index:2147483647;display:block!important;visibility:visible!important;opacity:1!important;padding:9px 15px;border:2px solid #2dccff;border-radius:10px;background:#0d1a21;color:#2dccff;font:700 14px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.55)}
+#home{position:fixed;top:12px;left:12px;z-index:2147483647;display:block!important;visibility:visible!important;opacity:1!important;padding:9px 15px;border:2px solid #2dccff;border-radius:10px;background:#0d1a21;color:#2dccff;font:700 14px system-ui,sans-serif;cursor:grab;user-select:none;touch-action:none;box-shadow:0 4px 16px rgba(0,0,0,.55)}
 #home:hover{background:#16303b}
+#home:active{cursor:grabbing}
 #game{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
 </style>
 </head>
@@ -22,10 +23,39 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
   const index=path.indexOf(marker);
   const prefix=index>=0?path.slice(0,index):(location.hostname.endsWith('.github.io')?'/cosmic':'');
   const home=location.origin+prefix+marker+'lessons.html';
-  document.getElementById('home').addEventListener('click',function(){
+  const homeButton=document.getElementById('home');
+  homeButton.addEventListener('click',function(){
+    if(homeButton.dataset.dragged==='1'){homeButton.dataset.dragged='0';return;}
     try{sessionStorage.setItem('cosmicReturnFromGame','1');}catch(e){}
     location.assign(home);
   });
+
+  let dragging=false,moved=false,startX=0,startY=0,startLeft=0,startTop=0;
+  homeButton.addEventListener('pointerdown',function(e){
+    if(e.button!==undefined&&e.button!==0)return;
+    const r=homeButton.getBoundingClientRect();
+    dragging=true;moved=false;startX=e.clientX;startY=e.clientY;startLeft=r.left;startTop=r.top;
+    homeButton.style.cursor='grabbing';
+    homeButton.setPointerCapture?.(e.pointerId);
+    e.preventDefault();
+  });
+  homeButton.addEventListener('pointermove',function(e){
+    if(!dragging)return;
+    const dx=e.clientX-startX,dy=e.clientY-startY;
+    if(!moved&&(Math.abs(dx)>4||Math.abs(dy)>4))moved=true;
+    if(moved){
+      homeButton.style.left=Math.max(0,Math.min(window.innerWidth-homeButton.offsetWidth,startLeft+dx))+'px';
+      homeButton.style.top=Math.max(0,Math.min(window.innerHeight-homeButton.offsetHeight,startTop+dy))+'px';
+      e.preventDefault();
+    }
+  });
+  homeButton.addEventListener('pointerup',function(e){
+    if(!dragging)return;
+    dragging=false;homeButton.style.cursor='grab';
+    if(homeButton.releasePointerCapture?.(e.pointerId)&&homeButton.hasPointerCapture?.(e.pointerId))homeButton.releasePointerCapture(e.pointerId);
+    if(moved)homeButton.dataset.dragged='1';
+  });
+  homeButton.addEventListener('pointercancel',function(){dragging=false;homeButton.style.cursor='grab'});
 
   const params=new URLSearchParams(location.search);
   const game=params.get('game');

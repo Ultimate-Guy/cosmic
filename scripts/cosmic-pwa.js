@@ -8,10 +8,9 @@
   };
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;makeButton();});
   window.addEventListener('appinstalled',()=>{deferredPrompt=null;document.getElementById('cosmic-install')?.remove();});
-  if('serviceWorker' in navigator)navigator.serviceWorker.register(base+'sw.js?v=3').catch(()=>{});
   const scripts = [
-    base+'scripts/cosmic-launch-fix.js?v=2',
-    base+'scripts/cosmic-profile-widget.js?v=1'
+    base+'scripts/cosmic-launch-fix.js?v=3',
+    base+'scripts/cosmic-profile-widget.js?v=2'
   ];
   for (const src of scripts) {
     if (!document.querySelector(`script[src="${src}"]`)) {

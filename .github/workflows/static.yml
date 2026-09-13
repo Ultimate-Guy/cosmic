@@ -78,6 +78,33 @@ jobs:
                 elif not smash and 'cosmic-pages-home-inline' not in text: text=re.sub(r'</body>',normal_guard+'</body>',text,count=1,flags=re.I) if re.search(r'</body>',text,re.I) else text+normal_guard
               if text!=original: path.write_text(text,encoding='utf-8')
           PY
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          site=Path('_site')
+          lessons=(site/'pages/lessons/lessons.html').read_text(encoding='utf-8')
+          required=[
+            'cosmic-hub.js?v=3',
+            'cosmic-admin-guard.js?v=3',
+            'cosmic-launch-fix.js?v=3',
+            'cosmic-feedback.js?v=2',
+            'cosmic-profile-widget.js?v=2',
+          ]
+          missing=[x for x in required if x not in lessons]
+          if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
+          registrations=0
+          for p in site.rglob('*'):
+            if p.is_file() and p.suffix.lower() in {'.js','.html','.htm'}:
+              try: registrations += p.read_text(encoding='utf-8').count('navigator.serviceWorker.register')
+              except UnicodeDecodeError: pass
+          if registrations != 1: raise SystemExit(f'Expected exactly one service-worker registration, found {registrations}')
+          sw=(site/'sw.js').read_text(encoding='utf-8')
+          if "cosmic-shell-v5" not in sw or "cache: 'no-store'" not in sw: raise SystemExit('Authoritative sw.js validation failed')
+          if 'cosmic-shell-v1' in sw or 'cosmic-shell-v3' in sw or 'cosmic-shell-v4' in sw: raise SystemExit('Obsolete cache name remains in sw.js')
+          marker={'source_commit':'${{ github.sha }}','profile_widget':'scripts/cosmic-profile-widget.js?v=2','service_worker_cache':'cosmic-shell-v5'}
+          (site/'deployment.json').write_text(json.dumps(marker,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(marker))
+          PY
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
@@ -101,3 +128,29 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+      - name: Verify GitHub Pages and Cloudflare contain this exact build
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+          WORKER_URL: https://cosmicv2.v75ultimate.workers.dev/
+          EXPECTED_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.request
+          expected=os.environ['EXPECTED_COMMIT']
+          urls=[os.environ['PAGES_URL'].rstrip('/')+'/deployment.json',os.environ['WORKER_URL'].rstrip('/')+'/deployment.json']
+          for url in urls:
+              last=None
+              for _ in range(8):
+                  try:
+                      req=urllib.request.Request(url,headers={'Cache-Control':'no-cache'})
+                      with urllib.request.urlopen(req,timeout=20) as r:data=json.load(r)
+                      if data.get('source_commit')==expected:
+                          print(f'VERIFIED {url}: {data}')
+                          break
+                      last=data
+                  except Exception as exc:last=repr(exc)
+                  import time; time.sleep(5)
+              else:
+                  raise SystemExit(f'Deployed build mismatch at {url}. Expected {expected}, got {last}')
+          PY

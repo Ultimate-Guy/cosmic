@@ -75,12 +75,111 @@ function textBase64Url(text) {
   return base64Url(new TextEncoder().encode(text));
 }
 
-function pemToBytes(pem) {
-  const base64 = pem.replace(/-----BEGIN PRIVATE KEY-----/g, '').replace(/-----END PRIVATE KEY-----/g, '').replace(/\s/g, '');
-  const binary = atob(base64);
+function base64ToBytes(value) {
+  const normalized = String(value)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+    .replace(/\s/g, '');
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(normalized)) {
+    throw new Error('Invalid base64 data in GitHub private key.');
+  }
+  const remainder = normalized.length % 4;
+  if (remainder === 1) throw new Error('Invalid base64 length in GitHub private key.');
+  const padded = normalized + '='.repeat((4 - remainder) % 4);
+  const binary = atob(padded);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return bytes;
+}
+
+function pemToBytes(pem) {
+  const normalizedPem = String(pem)
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\r')
+    .trim();
+
+  const isPkcs8 = normalizedPem.includes('-----BEGIN PRIVATE KEY-----');
+  const isPkcs1 = normalizedPem.includes('-----BEGIN RSA PRIVATE KEY-----');
+  if (!isPkcs8 && !isPkcs1) {
+    throw new Error('GITHUB_APP_PRIVATE_KEY must be a GitHub App PEM private key.');
+  }
+
+  const begin = isPkcs1 ? '-----BEGIN RSA PRIVATE KEY-----' : '-----BEGIN PRIVATE KEY-----';
+  const end = isPkcs1 ? '-----END RSA PRIVATE KEY-----' : '-----END PRIVATE KEY-----';
+  const base64 = normalizedPem
+    .replace(begin, '')
+    .replace(end, '')
+    .replace(/\s/g, '');
+
+  return { bytes: base64ToBytes(base64), format: isPkcs1 ? 'pkcs1' : 'pkcs8' };
+}
+
+function readDerLength(bytes, offset) {
+  if (offset >= bytes.length) throw new Error('Invalid DER length in GitHub private key.');
+  const first = bytes[offset++];
+  if (first < 0x80) return { length: first, next: offset };
+  const count = first & 0x7f;
+  if (count === 0 || count > 4 || offset + count > bytes.length) throw new Error('Invalid DER length in GitHub private key.');
+  let length = 0;
+  for (let i = 0; i < count; i++) length = (length << 8) | bytes[offset++];
+  return { length, next: offset };
+}
+
+function readDerElement(bytes, offset) {
+  if (offset >= bytes.length) throw new Error('Invalid DER structure in GitHub private key.');
+  const tag = bytes[offset++];
+  const { length, next } = readDerLength(bytes, offset);
+  if (next + length > bytes.length) throw new Error('Invalid DER structure in GitHub private key.');
+  return { tag, start: offset - 1, valueStart: next, valueEnd: next + length, next: next + length };
+}
+
+function derLength(length) {
+  if (length < 0x80) return new Uint8Array([length]);
+  const parts = [];
+  let n = length;
+  while (n > 0) { parts.unshift(n & 0xff); n >>>= 8; }
+  return new Uint8Array([0x80 | parts.length, ...parts]);
+}
+
+function derSequence(parts) {
+  const length = parts.reduce((sum, part) => sum + part.length, 0);
+  const header = derLength(length);
+  const result = new Uint8Array(1 + header.length + length);
+  result[0] = 0x30;
+  result.set(header, 1);
+  let offset = 1 + header.length;
+  for (const part of parts) { result.set(part, offset); offset += part.length; }
+  return result;
+}
+
+function derInteger(value) {
+  const header = derLength(value.length);
+  return new Uint8Array([0x02, ...header, ...value]);
+}
+
+function pkcs1ToPkcs8(pkcs1) {
+  const outer = readDerElement(pkcs1, 0);
+  if (outer.tag !== 0x30 || outer.next !== pkcs1.length) throw new Error('Invalid RSA private key structure.');
+
+  const integerParts = [];
+  let offset = outer.valueStart;
+  while (offset < outer.valueEnd) {
+    const element = readDerElement(pkcs1, offset);
+    if (element.tag !== 0x02) throw new Error('Invalid RSA private key structure.');
+    integerParts.push(pkcs1.slice(element.start, element.next));
+    offset = element.next;
+  }
+  if (integerParts.length < 9) throw new Error('Invalid RSA private key: expected RSA key parameters.');
+
+  const versionZero = derInteger(new Uint8Array([0x00]));
+  const algorithm = new Uint8Array([
+    0x30, 0x0d,
+    0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01,
+    0x05, 0x00
+  ]);
+  const octetHeader = derLength(pkcs1.length);
+  const privateKeyOctet = new Uint8Array([0x04, ...octetHeader, ...pkcs1]);
+  return derSequence([versionZero, algorithm, privateKeyOctet]);
 }
 
 async function githubAppJwt(env) {
@@ -88,9 +187,11 @@ async function githubAppJwt(env) {
   const privateKeyPem = env.GITHUB_APP_PRIVATE_KEY;
   if (!appId || !privateKeyPem) throw new Error('GitHub App is not configured on the Worker.');
 
+  const parsedKey = pemToBytes(privateKeyPem);
+  const keyBytes = parsedKey.format === 'pkcs1' ? pkcs1ToPkcs8(parsedKey.bytes) : parsedKey.bytes;
   const key = await crypto.subtle.importKey(
     'pkcs8',
-    pemToBytes(privateKeyPem),
+    keyBytes,
     { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
     false,
     ['sign']
@@ -196,15 +297,13 @@ async function handleGithub(request, env) {
       const { response, data } = await githubApi(env, apiPath);
       if (!response.ok) return jsonResponse(request, { error: data.message || 'GitHub request failed.' }, response.status);
       if (Array.isArray(data) || data.type !== 'file' || !data.content) return jsonResponse(request, { error: 'That path is not a readable text file.' }, 400);
-      const content = atob(data.content.replace(/\s/g, ''));
-      const bytes = new Uint8Array(content.length);
-      for (let i = 0; i < content.length; i++) bytes[i] = content.charCodeAt(i);
+      const content = new TextDecoder().decode(base64ToBytes(data.content));
       return jsonResponse(request, {
         full_name: GITHUB_REPO,
         path: filePath,
         sha: data.sha,
         size: data.size,
-        content: new TextDecoder().decode(bytes),
+        content,
         html_url: data.html_url
       });
     }

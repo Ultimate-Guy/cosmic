@@ -1,1 +1,6 @@
-const CACHE='cosmic-shell-v1';const CORE=['/cosmic/cosmic-hub.html','/cosmic/cosmic-hub.css','/cosmic/imgs/cosmic.png','/cosmic/pages/lessons/games.json','/cosmic/apps/apps.json'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==location.origin)return;e.respondWith(caches.match(e.request).then(cached=>cached||fetch(e.request).then(r=>{if(r.ok&&u.pathname.includes('/cosmic/')){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return r}).catch(()=>cached)))});
+// Legacy Cosmic service worker retirement shim.
+// This file is intentionally retained for one release so browsers that previously
+// registered /cosmic-sw.js can activate it and unregister the obsolete worker.
+self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
+self.addEventListener('activate', event => event.waitUntil(self.registration.unregister().then(() => self.clients.claim())));
+self.addEventListener('fetch', event => event.respondWith(fetch(event.request)));

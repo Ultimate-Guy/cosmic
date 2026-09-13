@@ -53,8 +53,6 @@ def fix_updates_flow():
     if old in text:text=text.replace(old,new,1)
     manifest='<link rel="manifest" href="../../manifest.json">'
     loader='<script src="../../scripts/cosmic-hub.js?v=3"></script><script src="../../scripts/cosmic-admin-guard.js?v=3"></script><script src="../../scripts/cosmic-launch-fix.js?v=3"></script><script src="../../scripts/cosmic-feedback.js?v=2"></script><script src="../../scripts/cosmic-profile-widget.js?v=2"></script>'
-    # Always normalize the generated loader versions. Previously this only added the
-    # scripts when absent, so lessons.html could remain permanently stuck on v1.
     text=re.sub(r'<script src="\.\./\.\./scripts/cosmic-hub\.js\?v=\d+"></script>','<script src="../../scripts/cosmic-hub.js?v=3"></script>',text,flags=re.I)
     text=re.sub(r'<script src="\.\./\.\./scripts/cosmic-admin-guard\.js\?v=\d+"></script>','<script src="../../scripts/cosmic-admin-guard.js?v=3"></script>',text,flags=re.I)
     text=re.sub(r'<script src="\.\./\.\./scripts/cosmic-launch-fix\.js\?v=\d+"></script>','<script src="../../scripts/cosmic-launch-fix.js?v=3"></script>',text,flags=re.I)
@@ -64,9 +62,11 @@ def fix_updates_flow():
         if re.search(r'</body>',text,re.I):text=re.sub(r'</body>',manifest+'\n'+loader+'\n</body>',text,count=1,flags=re.I)
         else:text+=manifest+'\n'+loader+'\n'
     elif 'rel="manifest"' not in text:text=re.sub(r'</head>',manifest+'\n</head>',text,count=1,flags=re.I)
-    if 'cosmic-feedback.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-admin-guard\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-feedback.js?v=2"></script>',text,count=1,flags=re.I)
-    if 'cosmic-launch-fix.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-admin-guard\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-launch-fix.js?v=3"></script>',text,count=1,flags=re.I)
-    if 'cosmic-profile-widget.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-launch-fix\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-profile-widget.js?v=2"></script>',text,count=1,flags=re.I)
+    # Add every missing loader independently. Do not require the admin script to exist first.
+    if 'cosmic-admin-guard.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-hub\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-admin-guard.js?v=3"></script>',text,count=1,flags=re.I)
+    if 'cosmic-launch-fix.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-hub\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-launch-fix.js?v=3"></script>',text,count=1,flags=re.I)
+    if 'cosmic-feedback.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-hub\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-feedback.js?v=2"></script>',text,count=1,flags=re.I)
+    if 'cosmic-profile-widget.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-hub\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-profile-widget.js?v=2"></script>',text,count=1,flags=re.I)
     LESSONS_PAGE.write_text(text,encoding='utf-8')
 def clean_game_page(folder):
     index=folder/'index.html'

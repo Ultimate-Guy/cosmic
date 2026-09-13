@@ -74,6 +74,10 @@ def clean_game_page(folder):
     cleaned=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
+    # Game packages sometimes ship their own service-worker registration. Cosmic
+    # owns the only service worker now; replace those calls with resolved promises
+    # so the game code continues without registering another worker.
+    cleaned=cleaned.replace('navigator.serviceWorker.register(', 'Promise.resolve(')
     if cleaned!=text:index.write_text(cleaned,encoding='utf-8')
 def registry_path(path):return urllib.parse.quote(path.relative_to(ROOT).as_posix(),safe='/')+'/'
 def build_game(folder,metadata):

@@ -20,13 +20,82 @@
       style.id = STYLE_ID;
       (document.head || document.documentElement).appendChild(style);
     }
-    style.textContent = `#${BUTTON_ID}{position:fixed!important;top:12px!important;left:12px!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;padding:8px 14px!important;border:2px solid #2dccff!important;border-radius:10px!important;background:#0d1a21!important;color:#2dccff!important;font:700 14px system-ui,sans-serif!important;cursor:pointer!important;box-shadow:0 4px 16px rgba(0,0,0,.55)!important}#${BUTTON_ID}:hover{background:#16303b!important}`;
+    style.textContent = `#${BUTTON_ID}{position:fixed!important;top:12px!important;left:12px!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;padding:8px 14px!important;border:2px solid #2dccff!important;border-radius:10px!important;background:#0d1a21!important;color:#2dccff!important;font:700 14px system-ui,sans-serif!important;cursor:grab!important;user-select:none!important;touch-action:none!important;box-shadow:0 4px 16px rgba(0,0,0,.55)!important}#${BUTTON_ID}:hover{background:#16303b!important}#${BUTTON_ID}:active{cursor:grabbing!important}`;
   }
 
   function goHome(event) {
     if (event) event.preventDefault();
     const home = getHomeUrl();
     try { window.top.location.href = home; } catch (_) { window.location.href = home; }
+  }
+
+  function makeDraggable(button) {
+    if (button.__cosmicDraggable) return;
+    button.__cosmicDraggable = true;
+
+    let dragging = false;
+    let moved = false;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+
+    button.addEventListener('pointerdown', (event) => {
+      if (event.button !== undefined && event.button !== 0) return;
+      const rect = button.getBoundingClientRect();
+      dragging = true;
+      moved = false;
+      startX = event.clientX;
+      startY = event.clientY;
+      startLeft = rect.left;
+      startTop = rect.top;
+      button.style.cursor = 'grabbing';
+      if (button.setPointerCapture) button.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    button.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      if (!moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) moved = true;
+      if (!moved) return;
+
+      const maxLeft = Math.max(0, window.innerWidth - button.offsetWidth);
+      const maxTop = Math.max(0, window.innerHeight - button.offsetHeight);
+      button.style.left = `${Math.max(0, Math.min(maxLeft, startLeft + dx))}px`;
+      button.style.top = `${Math.max(0, Math.min(maxTop, startTop + dy))}px`;
+      event.preventDefault();
+    });
+
+    const endDrag = (event) => {
+      if (!dragging) return;
+      dragging = false;
+      button.style.cursor = 'grab';
+      if (button.releasePointerCapture && button.hasPointerCapture?.(event.pointerId)) {
+        button.releasePointerCapture(event.pointerId);
+      }
+
+      if (!moved) goHome(event);
+      else {
+        // Suppress the synthetic click generated after a drag.
+        button.__cosmicSuppressClick = true;
+        setTimeout(() => { button.__cosmicSuppressClick = false; }, 0);
+      }
+    };
+
+    button.addEventListener('pointerup', endDrag);
+    button.addEventListener('pointercancel', () => {
+      dragging = false;
+      button.style.cursor = 'grab';
+    });
+    button.addEventListener('click', (event) => {
+      if (button.__cosmicSuppressClick) {
+        event.preventDefault();
+        event.stopPropagation();
+        button.__cosmicSuppressClick = false;
+      }
+    }, true);
   }
 
   function ensureButton() {
@@ -39,7 +108,6 @@
       button.type = 'button';
       button.setAttribute('aria-label', 'Return to Cosmic games');
       button.textContent = '← Home';
-      button.addEventListener('click', goHome, true);
     }
     const parent = document.body || document.documentElement;
     if (button.parentNode !== parent) parent.appendChild(button);
@@ -47,6 +115,7 @@
     button.style.setProperty('visibility', 'visible', 'important');
     button.style.setProperty('opacity', '1', 'important');
     button.style.setProperty('z-index', '2147483647', 'important');
+    makeDraggable(button);
   }
 
   function patchFullscreenMethod(proto, name) {

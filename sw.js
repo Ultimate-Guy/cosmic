@@ -1,11 +1,13 @@
-const CACHE = 'cosmic-shell-v1';
+const CACHE = 'cosmic-shell-v2';
 const SHELL = [
   './',
+  './offline.html',
   './apps/apps.html',
   './apps/apps.json',
   './pages/lessons/lessons.html',
   './pages/lessons/games.json',
   './scripts/cosmic-hub.js',
+  './scripts/cosmic-pwa.js',
   './imgs/cosmic.png'
 ];
 self.addEventListener('install', event => {
@@ -23,5 +25,5 @@ self.addEventListener('fetch', event => {
       const copy = response.clone(); caches.open(CACHE).then(c => c.put(event.request, copy)).catch(() => {});
     }
     return response;
-  }).catch(() => caches.match(event.request).then(r => r || caches.match('./'))));
+  }).catch(() => caches.match(event.request).then(r => r || (event.request.mode === 'navigate' ? caches.match('./offline.html') : Response.error()))));
 });

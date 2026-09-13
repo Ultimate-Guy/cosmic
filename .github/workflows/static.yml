@@ -105,15 +105,7 @@ jobs:
           fetch-depth: 1
       - name: Deploy Cloudflare Worker
         uses: cloudflare/wrangler-action@v4
-        env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
-          preCommands: |
-            if [ -z "$OPENROUTER_API_KEY" ]; then
-              echo "GitHub secret OPENROUTER_API_KEY is not configured."
-              exit 1
-            fi
-            printf '%s' "$OPENROUTER_API_KEY" | npx wrangler secret put OPENROUTER_API_KEY --name cosmicv2

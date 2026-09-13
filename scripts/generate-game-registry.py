@@ -41,9 +41,14 @@ def choose_entry(folder,metadata):
     if folder.resolve() not in entry_path.parents or not entry_path.is_file():raise FileNotFoundError(f'Entry file does not exist in {folder}: {configured_entry}')
     return urllib.parse.quote(configured_entry.replace('\\','/'),safe='/')
 
-def registry_path(path):
-    relative=path.relative_to(ROOT).as_posix()
-    return urllib.parse.quote(relative,safe='/')+'/'
+def infer_category(name,metadata):
+    explicit=str(metadata.get('category','')).strip()
+    if explicit:return explicit
+    text=f"{name} {' '.join(map(str,metadata.get('tags',[])))}".lower()
+    if re.search(r'ai|chat|assistant|utility|tool|github|calculator|music|youtube',text):return 'Utility'
+    if re.search(r'puzz|2048|chess|word|sudoku|mahjong|memory|brain',text):return 'Puzzle'
+    if re.search(r'multiplayer|2 player|2-player|among us|basket|soccer|karts|battle|brawl|bros|versus|vs\\.?',text):return 'Multiplayer'
+    return 'Arcade'
 
 def fix_updates_flow():
     if not LESSONS_PAGE.is_file():return
@@ -57,9 +62,15 @@ def fix_updates_flow():
             showGames();
             loadRegistry();
         }"""
-    if old in text:
-        text=text.replace(old,new,1)
-        LESSONS_PAGE.write_text(text,encoding='utf-8')
+    if old in text:text=text.replace(old,new,1)
+    manifest='<link rel="manifest" href="../../manifest.json">'
+    loader='<script src="../../scripts/cosmic-hub.js?v=1"></script>'
+    if 'cosmic-hub.js' not in text:
+        if re.search(r'</body>',text,re.I):text=re.sub(r'</body>',manifest+'\n'+loader+'\n</body>',text,count=1,flags=re.I)
+        else:text+=manifest+'\n'+loader+'\n'
+    elif 'rel="manifest"' not in text:
+        text=re.sub(r'</head>',manifest+'\n</head>',text,count=1,flags=re.I)
+    LESSONS_PAGE.write_text(text,encoding='utf-8')
 
 def clean_game_page(folder):
     """Remove legacy guard/settings injections that can break game runtimes."""
@@ -73,10 +84,17 @@ def clean_game_page(folder):
 
 def build_game(folder,metadata):
     image=choose_image(folder,metadata);entry=choose_entry(folder,metadata)
-    game={'name':metadata.get('title',display_name(folder.name)),'path':registry_path(folder)}
+    name=str(metadata.get('title',display_name(folder.name)))
+    tags=metadata.get('tags',[])
+    if not isinstance(tags,list):tags=[tags]
+    game={'name':name,'path':registry_path(folder),'category':infer_category(name,metadata),'tags':[str(x) for x in tags],'featured':bool(metadata.get('featured',False))}
     if entry:game['entry']=entry
     if image:game['image']=registry_path(image).rstrip('/')
     return game
+
+def registry_path(path):
+    relative=path.relative_to(ROOT).as_posix()
+    return urllib.parse.quote(relative,safe='/')+'/'
 
 def main():
     fix_updates_flow()

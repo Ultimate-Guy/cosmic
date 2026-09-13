@@ -9,4 +9,6 @@
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;makeButton();});
   window.addEventListener('appinstalled',()=>{deferredPrompt=null;document.getElementById('cosmic-install')?.remove();});
   if('serviceWorker' in navigator)navigator.serviceWorker.register(base+'sw.js').catch(()=>{});
+  const launchFix=base+'scripts/cosmic-launch-fix.js?v=1';
+  if(!document.querySelector(`script[src="${launchFix}"]`)){const s=document.createElement('script');s.src=launchFix;document.head.appendChild(s);}
 })();

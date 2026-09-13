@@ -13,11 +13,15 @@
     window.open(url.href, '_blank', 'noopener');
   }
 
+  function itemNameFromDetail() {
+    const modal = document.getElementById('cosmic-detail');
+    const nameEl = modal?.querySelector('.cosmic-stat b');
+    return nameEl?.textContent.trim() || '';
+  }
+
   function addReportButton(modal) {
     if (!modal || modal.dataset.cosmicFeedbackAdded) return;
-    const nameEl = modal.querySelector('.cosmic-stat b');
-    if (!nameEl) return;
-    const name = nameEl.textContent.trim();
+    const name = itemNameFromDetail();
     if (!name) return;
     const button = document.createElement('button');
     button.type = 'button';
@@ -32,14 +36,22 @@
     }
   }
 
-  function scan() {
-    addReportButton(document.getElementById('cosmic-detail'));
-  }
+  document.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    if (!button || button.classList.contains('cosmic-feedback-report')) return;
+    if (button.textContent.trim().toLowerCase() !== 'report broken') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openReport(itemNameFromDetail());
+  }, true);
 
   const style = document.createElement('style');
   style.textContent = '.cosmic-feedback-report{margin:10px 3px;border:1px solid var(--card-border,#2dccff);border-radius:9px;padding:9px 13px;background:rgba(255,80,80,.10);color:#ff8f8f;cursor:pointer;font-weight:700}.cosmic-feedback-report:hover{background:rgba(255,80,80,.18)}';
   document.head.appendChild(style);
 
+  function scan() {
+    addReportButton(document.getElementById('cosmic-detail'));
+  }
   new MutationObserver(scan).observe(document.body, {childList:true, subtree:true});
   scan();
 })();

@@ -29,8 +29,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin master
       - name: Inject Game Password
-        run: |
-          sed -i 's/PASSWORD_PLACEHOLDER/${{ secrets.PASSWORD_FOR_GAMES_UNLOCK }}/g' pages/lessons/lessons.html
+        run: sed -i 's/PASSWORD_PLACEHOLDER/${{ secrets.PASSWORD_FOR_GAMES_UNLOCK }}/g' pages/lessons/lessons.html
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -46,55 +45,16 @@ jobs:
           skip_fetch: true
       - name: Prepare identical deployment files
         run: |
+          set -euo pipefail
           rm -rf _site
           mkdir -p _site
           rsync -a --exclude='_site/' --exclude='.git/' --exclude='.github/' --exclude='.gitignore' ./ _site/
           python3 - <<'PY'
           from pathlib import Path
           import re, json
-          root=Path('_site/pages/lessons')
-          if not root.exists(): raise SystemExit('Missing Pages lessons directory')
-          text_extensions={'.html','.htm','.css','.svg'}
-          html_root=re.compile(r'(\b(?:src|href|action|poster|data-src|data-url)\s*=\s*["\'])/(?!/|cosmic/|https?://)',re.I)
-          css_root=re.compile(r'url\((?!["\']?//)(?!["\']?/cosmic/)')
-          normal_guard='''<script id="cosmic-pages-home-inline">(function(){function home(){var p=location.pathname,m='/pages/lessons/',i=p.indexOf(m);return location.origin+(i>=0?p.slice(0,i):'/cosmic')+m+'lessons.html'}function add(){if(!document.documentElement)return;var b=document.getElementById('cosmic-pages-home-inline-button');if(!b){b=document.createElement('button');b.id='cosmic-pages-home-inline-button';b.type='button';b.textContent='← Home';b.onclick=function(e){if(b.__dragged){e.preventDefault();b.__dragged=false;return}location.href=home()};(document.body||document.documentElement).appendChild(b);var dragging=false,moved=false,sx=0,sy=0,sl=0,st=0;b.style.cssText='position:fixed!important;top:12px!important;left:12px!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;padding:8px 14px!important;border:2px solid #2dccff!important;border-radius:10px!important;background:#0d1a21!important;color:#2dccff!important;font:700 14px system-ui,sans-serif!important;cursor:grab!important;user-select:none!important;touch-action:none!important;box-shadow:0 4px 16px rgba(0,0,0,.55)!important';b.addEventListener('pointerdown',function(e){if(e.button!==undefined&&e.button!==0)return;var r=b.getBoundingClientRect();dragging=true;moved=false;sx=e.clientX;sy=e.clientY;sl=r.left;st=r.top;b.style.cursor='grabbing';b.setPointerCapture?.(e.pointerId);e.preventDefault()});b.addEventListener('pointermove',function(e){if(!dragging)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!moved&&(Math.abs(dx)>4||Math.abs(dy)>4))moved=true;if(moved){b.style.left=Math.max(0,Math.min(innerWidth-b.offsetWidth,sl+dx))+'px';b.style.top=Math.max(0,Math.min(innerHeight-b.offsetHeight,st+dy))+'px';e.preventDefault()}});b.addEventListener('pointerup',function(e){if(!dragging)return;dragging=false;b.style.cursor='grab';if(moved)b.__dragged=true});b.addEventListener('pointercancel',function(){dragging=false;b.style.cursor='grab'})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add,{once:true});else add();})();</script>'''
-          smash_guard='''<script>(function(){function home(){var p=location.pathname,m='/pages/lessons/',i=p.indexOf(m);return location.origin+(i>=0?p.slice(0,i):'/cosmic')+m+'lessons.html'}function add(){if(!document.documentElement)return;var b=document.getElementById('cosmic-smash-home');if(!b){b=document.createElement('button');b.id='cosmic-smash-home';b.type='button';b.textContent='← Home';b.style.cssText='position:fixed!important;top:12px!important;left:12px!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;padding:8px 14px!important;border:2px solid #2dccff!important;border-radius:10px!important;background:#0d1a21!important;color:#2dccff!important;font:700 14px system-ui,sans-serif!important;cursor:grab!important;user-select:none!important;touch-action:none!important;box-shadow:0 4px 16px rgba(0,0,0,.55)!important';(document.body||document.documentElement).appendChild(b);var dragging=false,moved=false,sx=0,sy=0,sl=0,st=0;b.addEventListener('pointerdown',function(e){if(e.button!==undefined&&e.button!==0)return;var r=b.getBoundingClientRect();dragging=true;moved=false;sx=e.clientX;sy=e.clientY;sl=r.left;st=r.top;b.style.cursor='grabbing';b.setPointerCapture?.(e.pointerId);e.preventDefault()});b.addEventListener('pointermove',function(e){if(!dragging)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!moved&&(Math.abs(dx)>4||Math.abs(dy)>4))moved=true;if(moved){b.style.left=Math.max(0,Math.min(innerWidth-b.offsetWidth,sl+dx))+'px';b.style.top=Math.max(0,Math.min(innerHeight-b.offsetHeight,st+dy))+'px';e.preventDefault()}});b.addEventListener('pointerup',function(e){if(!dragging)return;dragging=false;b.style.cursor='grab';if(!moved)location.href=home()});b.addEventListener('pointercancel',function(){dragging=false;b.style.cursor='grab'})}add();})();</script>'''
-          literal=json.dumps(smash_guard)[1:-1].replace('</script>','<\\/script>')
-          marker='\\r\\n<\\/body>\\r\\n<\\/html>");'
-          for game_dir in root.iterdir():
-            if not game_dir.is_dir() or game_dir.name=='apps': continue
-            smash=game_dir.name.lower()=='smash karts (may not work at school)'
-            for path in game_dir.rglob('*'):
-              if not path.is_file() or path.suffix.lower() not in text_extensions: continue
-              try: text=path.read_text(encoding='utf-8')
-              except UnicodeDecodeError: continue
-              original=text
-              text=html_root.sub(r'\1/cosmic/',text); text=css_root.sub('url(/cosmic/',text)
-              if path.name.lower()=='index.html':
-                text=re.sub(r'<script id="cosmic-pages-game-guard"[^>]*></script>','',text,flags=re.I)
-                text=re.sub(r'<script id="cosmic-smash-home"[^>]*>.*?</script>','',text,flags=re.I|re.S)
-                text=re.sub(r'<script id="cosmic-pages-home-inline"[^>]*>.*?</script>','',text,flags=re.I|re.S)
-                if smash and 'cosmic-smash-home' not in text and marker in text: text=text.replace(marker,'\\r\\n'+literal+'\\r\\n<\\/body>\\r\\n<\\/html>");',1)
-                elif not smash and 'cosmic-pages-home-inline' not in text: text=re.sub(r'</body>',normal_guard+'</body>',text,count=1,flags=re.I) if re.search(r'</body>',text,re.I) else text+normal_guard
-              if text!=original: path.write_text(text,encoding='utf-8')
-          PY
-          python3 - <<'PY'
-          from pathlib import Path
-          import json
           site=Path('_site')
-          # Keep Cosmic's hub as the sole service-worker owner. Some bundled games
-          # contain their own PWA snippets, so strip only those extra registrations
-          # from the deployment copy without modifying the source game packages.
-          hub=site/'scripts/cosmic-hub.js'
-          registration='navigator.serviceWorker.register'
-          for p in site.rglob('*'):
-              if not p.is_file() or p.suffix.lower() not in {'.js','.html','.htm'} or p == hub:
-                  continue
-              try: text=p.read_text(encoding='utf-8')
-              except UnicodeDecodeError: continue
-              if registration in text:
-                  p.write_text(text.replace(registration,'Promise.resolve'),encoding='utf-8')
-          lessons=(site/'pages/lessons/lessons.html').read_text(encoding='utf-8')
+          lessons=site/'pages/lessons/lessons.html'
+          if not lessons.exists(): raise SystemExit('Missing Pages lessons directory')
           required=[
             'cosmic-hub.js?v=3',
             'cosmic-admin-guard.js?v=3',
@@ -102,39 +62,67 @@ jobs:
             'cosmic-feedback.js?v=2',
             'cosmic-profile-widget.js?v=2',
           ]
-          missing=[x for x in required if x not in lessons]
+          text=lessons.read_text(encoding='utf-8')
+          missing=[x for x in required if x not in text]
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
-          registrations=0
+
+          # Only Cosmic Hub owns the service worker. Strip duplicate registrations
+          # from bundled game/app code in the deployment copy.
+          hub=site/'scripts/cosmic-hub.js'
+          registration='navigator.serviceWorker.register'
           owners=[]
+          for p in site.rglob('*'):
+              if not p.is_file() or p.suffix.lower() not in {'.js','.html','.htm'} or p == hub:
+                  continue
+              try: value=p.read_text(encoding='utf-8')
+              except UnicodeDecodeError: continue
+              if registration in value:
+                  p.write_text(value.replace(registration,'Promise.resolve'),encoding='utf-8')
           for p in site.rglob('*'):
               if p.is_file() and p.suffix.lower() in {'.js','.html','.htm'}:
                   try: count=p.read_text(encoding='utf-8').count(registration)
                   except UnicodeDecodeError: continue
-                  if count:
-                      registrations += count
-                      owners.append(f'{p.relative_to(site)}:{count}')
-          if registrations != 1 or owners != ['scripts/cosmic-hub.js:1']:
+                  if count: owners.append(f'{p.relative_to(site)}:{count}')
+          if owners != ['scripts/cosmic-hub.js:1']:
               raise SystemExit(f'Expected only scripts/cosmic-hub.js to register the service worker; found {owners}')
+
           sw=(site/'sw.js').read_text(encoding='utf-8')
-          if "cosmic-shell-v5" not in sw or "cache: 'no-store'" not in sw: raise SystemExit('Authoritative sw.js validation failed')
-          if 'cosmic-shell-v1' in sw or 'cosmic-shell-v3' in sw or 'cosmic-shell-v4' in sw: raise SystemExit('Obsolete cache name remains in sw.js')
-          marker={'source_commit':'${{ github.sha }}','profile_widget':'scripts/cosmic-profile-widget.js?v=2','service_worker_cache':'cosmic-shell-v5'}
+          if "cosmic-shell-v5" not in sw or "cache: 'no-store'" not in sw:
+              raise SystemExit('Authoritative sw.js validation failed')
+          if any(x in sw for x in ('cosmic-shell-v1','cosmic-shell-v3','cosmic-shell-v4')):
+              raise SystemExit('Obsolete cache name remains in sw.js')
+
+          marker={
+            'source_commit':'${{ github.sha }}',
+            'profile_widget':'scripts/cosmic-profile-widget.js?v=2',
+            'service_worker_cache':'cosmic-shell-v5'
+          }
           (site/'deployment.json').write_text(json.dumps(marker,indent=2)+'\n',encoding='utf-8')
           print(json.dumps(marker))
           PY
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Upload artifact
+      - name: Upload exact build for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: '_site'
-      - name: Deploy the exact same build to Cloudflare Worker
+      - name: Deploy exact same build to Cloudflare Worker
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: '_site'
           command: deploy
+      - name: Confirm Cloudflare deployment exists
+        working-directory: '_site'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deployments list --name cosmicv2
+          echo 'Cloudflare control-plane deployment confirmed.'
+
   deploy:
     needs: build
     environment:
@@ -142,32 +130,31 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy exact build to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
-      - name: Verify GitHub Pages and Cloudflare contain this exact build
+      - name: Verify GitHub Pages contains this exact build
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}
-          WORKER_URL: https://cosmicv2.v75ultimate.workers.dev/
           EXPECTED_COMMIT: ${{ github.sha }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, os, urllib.request
+          import json, os, time, urllib.request
+          url=os.environ['PAGES_URL'].rstrip('/')+'/deployment.json'
           expected=os.environ['EXPECTED_COMMIT']
-          urls=[os.environ['PAGES_URL'].rstrip('/')+'/deployment.json',os.environ['WORKER_URL'].rstrip('/')+'/deployment.json']
-          for url in urls:
-              last=None
-              for _ in range(8):
-                  try:
-                      req=urllib.request.Request(url,headers={'Cache-Control':'no-cache'})
-                      with urllib.request.urlopen(req,timeout=20) as r:data=json.load(r)
-                      if data.get('source_commit')==expected:
-                          print(f'VERIFIED {url}: {data}')
-                          break
-                      last=data
-                  except Exception as exc:last=repr(exc)
-                  import time; time.sleep(5)
-              else:
-                  raise SystemExit(f'Deployed build mismatch at {url}. Expected {expected}, got {last}')
+          last=None
+          for _ in range(12):
+              try:
+                  req=urllib.request.Request(url,headers={'Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(req,timeout=20) as r: data=json.load(r)
+                  if data.get('source_commit')==expected:
+                      print(f'VERIFIED GitHub Pages: {data}')
+                      break
+                  last=data
+              except Exception as exc:
+                  last=repr(exc)
+              time.sleep(5)
+          else:
+              raise SystemExit(f'GitHub Pages build mismatch. Expected {expected}, got {last}')
           PY

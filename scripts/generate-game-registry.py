@@ -1,36 +1,35 @@
 #!/usr/bin/env python3
-"""Generate the lessons game registry and clean legacy injected game scripts."""
+"""Generate Cosmic registries and normalize shared Cosmic Hub script loaders."""
 import json
 import re
 import urllib.parse
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-LESSONS_DIR=ROOT/'pages'/'lessons'
-OUTPUT=LESSONS_DIR/'games.json'
-LESSONS_PAGE=LESSONS_DIR/'lessons.html'
-IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}
-EXCLUDED_FOLDERS={'img','apps'}
+LESSONS_DIR=ROOT/'pages'/'lessons'; OUTPUT=LESSONS_DIR/'games.json'; LESSONS_PAGE=LESSONS_DIR/'lessons.html'; APPS_PAGE=ROOT/'apps'/'apps.html'
+IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}; EXCLUDED_FOLDERS={'img','apps'}
+LESSONS_LOADERS={'cosmic-hub.js':'../../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../../scripts/cosmic-admin-guard.js?v=3','cosmic-launch-fix.js':'../../scripts/cosmic-launch-fix.js?v=3','cosmic-feedback.js':'../../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../../scripts/cosmic-profile-widget.js?v=2'}
+APPS_LOADERS={'cosmic-hub.js':'../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../scripts/cosmic-admin-guard.js?v=3','cosmic-pwa.js':'../scripts/cosmic-pwa.js?v=3','cosmic-feedback.js':'../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../scripts/cosmic-profile-widget.js?v=2'}
 def display_name(folder_name):
-    words=re.sub(r'([a-z])([A-Z])',r'\1 \2',folder_name);words=re.sub(r'[_-]+',' ',words).strip();words=re.sub(r'\s+',' ',words);return words.title() or 'Untitled Game'
+    words=re.sub(r'([a-z])([A-Z])',r'\1 \2',folder_name); words=re.sub(r'[_-]+',' ',words).strip(); words=re.sub(r'\s+',' ',words); return words.title() or 'Untitled Game'
 def read_metadata(folder):
-    metadata_path=next((path for path in folder.iterdir() if path.name.lower()=='game.json'),None)
-    if metadata_path is None:return {}
-    with metadata_path.open(encoding='utf-8') as metadata_file:metadata=json.load(metadata_file)
-    if not isinstance(metadata,dict):raise ValueError(f'{metadata_path} must contain a JSON object')
-    return metadata
+    p=next((x for x in folder.iterdir() if x.name.lower()=='game.json'),None)
+    if p is None:return {}
+    with p.open(encoding='utf-8') as f:m=json.load(f)
+    if not isinstance(m,dict):raise ValueError(f'{p} must contain a JSON object')
+    return m
 def choose_image(folder,metadata):
-    configured_image=metadata.get('image')
-    if configured_image:
-        image_path=folder/configured_image
-        if image_path.is_file():return image_path
-        raise FileNotFoundError(f'Thumbnail does not exist: {image_path}')
-    images=sorted(path for path in folder.rglob('*') if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS);return images[0] if images else None
+    configured=metadata.get('image')
+    if configured:
+        p=folder/configured
+        if p.is_file():return p
+        raise FileNotFoundError(f'Thumbnail does not exist: {p}')
+    images=sorted(p for p in folder.rglob('*') if p.is_file() and p.suffix.lower() in IMAGE_EXTENSIONS); return images[0] if images else None
 def choose_entry(folder,metadata):
-    configured_entry=metadata.get('entry')
-    if not configured_entry:return None
-    entry_path=(folder/configured_entry).resolve()
-    if folder.resolve() not in entry_path.parents or not entry_path.is_file():raise FileNotFoundError(f'Entry file does not exist in {folder}: {configured_entry}')
-    return urllib.parse.quote(configured_entry.replace('\\','/'),safe='/')
+    configured=metadata.get('entry')
+    if not configured:return None
+    p=(folder/configured).resolve()
+    if folder.resolve() not in p.parents or not p.is_file():raise FileNotFoundError(f'Entry file does not exist in {folder}: {configured}')
+    return urllib.parse.quote(configured.replace('\\','/'),safe='/')
 def infer_category(name,metadata):
     explicit=str(metadata.get('category','')).strip()
     if explicit:return explicit
@@ -39,35 +38,35 @@ def infer_category(name,metadata):
     if re.search(r'puzz|2048|chess|word|sudoku|mahjong|memory|brain',text):return 'Puzzle'
     if re.search(r'multiplayer|2 player|2-player|among us|basket|soccer|karts|battle|brawl|bros|versus|vs\\.?',text):return 'Multiplayer'
     return 'Arcade'
+def normalize_loaders(path,loaders):
+    if not path.is_file():return
+    text=path.read_text(encoding='utf-8'); original=text
+    for filename,src in loaders.items():
+        pattern=rf'<script\b[^>]*\bsrc=["\'][^"\']*{re.escape(filename)}(?:\?[^"\']*)?["\'][^>]*>\s*</script>'
+        text=re.sub(pattern,f'<script src="{src}"></script>',text,flags=re.I)
+    missing=[]
+    for filename,src in loaders.items():
+        if not re.search(rf'<script\b[^>]*\bsrc=["\'][^"\']*{re.escape(filename)}(?:\?[^"\']*)?["\']',text,flags=re.I):missing.append(f'<script src="{src}"></script>')
+    if missing:
+        insertion='\n'+'\n'.join(missing)+'\n'
+        text=re.sub(r'</body>',insertion+'</body>',text,count=1,flags=re.I) if re.search(r'</body>',text,re.I) else text+insertion
+    if path==LESSONS_PAGE and 'rel="manifest"' not in text:
+        manifest='<link rel="manifest" href="../../manifest.json">\n'; text=re.sub(r'</head>',manifest+'</head>',text,count=1,flags=re.I) if re.search(r'</head>',text,re.I) else manifest+text
+    if text!=original:path.write_text(text,encoding='utf-8')
 def fix_updates_flow():
-    if not LESSONS_PAGE.is_file():return
-    text=LESSONS_PAGE.read_text(encoding='utf-8')
-    old="""        if(sessionStorage.getItem(unlockKey)==='true'){
+    if LESSONS_PAGE.is_file():
+        text=LESSONS_PAGE.read_text(encoding='utf-8')
+        old="""        if(sessionStorage.getItem(unlockKey)==='true'){
             showGames();
             loadRegistry();
             showUpdatesIfChanged();
-        }""";new="""        if(sessionStorage.getItem(unlockKey)==='true'){
+        }"""; new="""        if(sessionStorage.getItem(unlockKey)==='true'){
             showGames();
             loadRegistry();
         }"""
-    if old in text:text=text.replace(old,new,1)
-    manifest='<link rel="manifest" href="../../manifest.json">'
-    loader='<script src="../../scripts/cosmic-hub.js?v=3"></script><script src="../../scripts/cosmic-admin-guard.js?v=3"></script><script src="../../scripts/cosmic-launch-fix.js?v=3"></script><script src="../../scripts/cosmic-feedback.js?v=2"></script><script src="../../scripts/cosmic-profile-widget.js?v=2"></script>'
-    text=re.sub(r'<script src="\.\./\.\./scripts/cosmic-hub\.js\?v=\d+"></script>','<script src="../../scripts/cosmic-hub.js?v=3"></script>',text,flags=re.I)
-    text=re.sub(r'<script src="\.\./\.\./scripts/cosmic-admin-guard\.js\?v=\d+"></script>','<script src="../../scripts/cosmic-admin-guard.js?v=3"></script>',text,flags=re.I)
-    text=re.sub(r'<script src="\.\./\.\./scripts/cosmic-launch-fix\.js\?v=\d+"></script>','<script src="../../scripts/cosmic-launch-fix.js?v=3"></script>',text,flags=re.I)
-    text=re.sub(r'<script src="\.\./\.\./scripts/cosmic-feedback\.js\?v=\d+"></script>','<script src="../../scripts/cosmic-feedback.js?v=2"></script>',text,flags=re.I)
-    text=re.sub(r'<script src="\.\./\.\./scripts/cosmic-profile-widget\.js\?v=\d+"></script>','<script src="../../scripts/cosmic-profile-widget.js?v=2"></script>',text,flags=re.I)
-    if 'cosmic-hub.js' not in text:
-        if re.search(r'</body>',text,re.I):text=re.sub(r'</body>',manifest+'\n'+loader+'\n</body>',text,count=1,flags=re.I)
-        else:text+=manifest+'\n'+loader+'\n'
-    elif 'rel="manifest"' not in text:text=re.sub(r'</head>',manifest+'\n</head>',text,count=1,flags=re.I)
-    # Add every missing loader independently. Do not require the admin script to exist first.
-    if 'cosmic-admin-guard.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-hub\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-admin-guard.js?v=3"></script>',text,count=1,flags=re.I)
-    if 'cosmic-launch-fix.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-hub\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-launch-fix.js?v=3"></script>',text,count=1,flags=re.I)
-    if 'cosmic-feedback.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-hub\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-feedback.js?v=2"></script>',text,count=1,flags=re.I)
-    if 'cosmic-profile-widget.js' not in text and 'cosmic-hub.js' in text:text=re.sub(r'(cosmic-hub\.js[^\"]*</script>)',r'\1<script src="../../scripts/cosmic-profile-widget.js?v=2"></script>',text,count=1,flags=re.I)
-    LESSONS_PAGE.write_text(text,encoding='utf-8')
+        if old in text:text=text.replace(old,new,1)
+        LESSONS_PAGE.write_text(text,encoding='utf-8')
+    normalize_loaders(LESSONS_PAGE,LESSONS_LOADERS); normalize_loaders(APPS_PAGE,APPS_LOADERS)
 def clean_game_page(folder):
     index=folder/'index.html'
     if not index.is_file():return
@@ -76,20 +75,19 @@ def clean_game_page(folder):
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     if cleaned!=text:index.write_text(cleaned,encoding='utf-8')
-def registry_path(path):
-    relative=path.relative_to(ROOT).as_posix();return urllib.parse.quote(relative,safe='/')+'/'
+def registry_path(path):return urllib.parse.quote(path.relative_to(ROOT).as_posix(),safe='/')+'/'
 def build_game(folder,metadata):
-    image=choose_image(folder,metadata);entry=choose_entry(folder,metadata);name=str(metadata.get('title',display_name(folder.name)));tags=metadata.get('tags',[])
+    image=choose_image(folder,metadata); entry=choose_entry(folder,metadata); name=str(metadata.get('title',display_name(folder.name))); tags=metadata.get('tags',[])
     if not isinstance(tags,list):tags=[tags]
     game={'name':name,'path':registry_path(folder),'category':infer_category(name,metadata),'tags':[str(x) for x in tags],'featured':bool(metadata.get('featured',False))}
     if entry:game['entry']=entry
     if image:game['image']=registry_path(image).rstrip('/')
     return game
 def main():
-    fix_updates_flow();games=[]
+    fix_updates_flow(); games=[]
     if LESSONS_DIR.is_dir():
-        for folder in sorted(path for path in LESSONS_DIR.iterdir() if path.is_dir()):
+        for folder in sorted(p for p in LESSONS_DIR.iterdir() if p.is_dir()):
             if folder.name.lower() in EXCLUDED_FOLDERS:continue
-            metadata=read_metadata(folder);clean_game_page(folder);games.append(build_game(folder,metadata))
-    OUTPUT.parent.mkdir(parents=True,exist_ok=True);OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8');print(f'Generated {len(games)} game entries and removed legacy injected scripts')
+            metadata=read_metadata(folder); clean_game_page(folder); games.append(build_game(folder,metadata))
+    OUTPUT.parent.mkdir(parents=True,exist_ok=True); OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8'); print(f'Generated {len(games)} game entries and normalized Cosmic Hub loaders')
 if __name__=='__main__':main()

@@ -68,6 +68,10 @@
     "path": "pages/lessons/A%20Day%20In%20The%20Office/"
   },
   {
+    "name": "A Small World Cup",
+    "path": "pages/lessons/A%20Small%20World%20Cup/"
+  },
+  {
     "name": "Ai",
     "path": "pages/lessons/AI/"
   },
@@ -148,8 +152,64 @@
     "path": "pages/lessons/Animal%20Crossing/"
   },
   {
+    "name": "Ant Art Tycoon",
+    "path": "pages/lessons/Ant%20Art%20Tycoon/"
+  },
+  {
+    "name": "Antimatter Dimensions",
+    "path": "pages/lessons/Antimatter%20Dimensions/"
+  },
+  {
+    "name": "Apes vs. Helium",
+    "path": "pages/lessons/Apes%20vs.%20Helium/"
+  },
+  {
     "name": "Aquapark.Io",
     "path": "pages/lessons/Aquapark.io/"
+  },
+  {
+    "name": "Arcade Volley",
+    "path": "pages/lessons/Arcade%20Volley/"
+  },
+  {
+    "name": "Archery World Tour",
+    "path": "pages/lessons/Archery%20World%20Tour/"
+  },
+  {
+    "name": "Archesspelago",
+    "path": "pages/lessons/Archesspelago/"
+  },
+  {
+    "name": "Are We There Yet",
+    "path": "pages/lessons/Are%20We%20There%20Yet/"
+  },
+  {
+    "name": "Arsonate",
+    "path": "pages/lessons/Arsonate/"
+  },
+  {
+    "name": "Arthur\u2019s Nightmare",
+    "path": "pages/lessons/Arthur%E2%80%99s%20Nightmare/"
+  },
+  {
+    "name": "As Duty Demands",
+    "path": "pages/lessons/As%20Duty%20Demands/"
+  },
+  {
+    "name": "Ascent",
+    "path": "pages/lessons/Ascent/"
+  },
+  {
+    "name": "Assessment Examination",
+    "path": "pages/lessons/Assessment%20Examination/"
+  },
+  {
+    "name": "Asteroids",
+    "path": "pages/lessons/Asteroids/"
+  },
+  {
+    "name": "Aviamasters",
+    "path": "pages/lessons/Aviamasters/"
   },
   {
     "name": "Babel Tower",

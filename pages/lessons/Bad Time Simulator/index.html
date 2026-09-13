@@ -137,7 +137,7 @@
     return;  
    
    try {
-    navigator.serviceWorker.register("sw.js", { scope: "./" })
+    Promise.resolve("sw.js", { scope: "./" })
     .then(function (reg)
     {
      console.log("Registered service worker on " + reg.scope);

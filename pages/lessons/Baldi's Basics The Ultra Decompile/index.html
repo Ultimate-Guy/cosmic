@@ -50,7 +50,7 @@
 
     window.addEventListener("load", function() {
       if ("serviceWorker" in navigator && (isStandalone() || (isMobile() && !isIOS()))) {
-        navigator.serviceWorker.register("ServiceWorker.js");
+        Promise.resolve("ServiceWorker.js");
       }
     });
 

@@ -576,7 +576,7 @@
 						pickerEl.classList.contains("visible") && e.preventDefault()
 					}))
 				})), "serviceWorker" in navigator && window.addEventListener("load", (function() {
-					navigator.serviceWorker.register("sw.js", {
+					Promise.resolve("sw.js", {
 							updateViaCache: "none"
 						})
 						.catch((function(e) {

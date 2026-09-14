@@ -41,16 +41,46 @@ jobs:
           mkdir -p _site
           rsync -a --exclude='_site/' --exclude='.git/' --exclude='.github/' --exclude='.gitignore' ./ _site/
           cp wrangler.jsonc _site/wrangler.jsonc
-          python3 - <<'PY'
+          BUILD_TAG="${GITHUB_SHA:0:12}" python3 - <<'PY'
           from pathlib import Path
-          import json
+          import json, os, re
           site=Path('_site')
+          build_tag=os.environ['BUILD_TAG']
           lessons=site/'pages/lessons/lessons.html'
           if not lessons.exists(): raise SystemExit('Missing Pages lessons directory')
-          required=['cosmic-hub.js?v=3','cosmic-admin-guard.js?v=3','cosmic-launch-fix.js?v=3','cosmic-feedback.js?v=2','cosmic-profile-widget.js?v=2']
+
+          # Every deployment gets unique local asset URLs so browsers cannot keep an old
+          # Cosmic Hub/settings script from a previous Cloudflare build.
+          local_assets={
+              'cosmic-hub.js': build_tag,
+              'cosmic-admin-guard.js': build_tag,
+              'cosmic-launch-fix.js': build_tag,
+              'cosmic-feedback.js': build_tag,
+              'cosmic-profile-widget.js': build_tag,
+              'cosmic-pwa.js': build_tag,
+              'settings-engine.js': build_tag,
+          }
+          script_pat=re.compile(r'(?P<prefix>(?:\.\./)+scripts/(?P<name>[^"\']+?\.js))(?:\?[^"\']*)?(?P<suffix>["\'])',re.I)
+          settings_pat=re.compile(r'(?P<prefix>(?:\.\./)+settings/(?P<name>settings-engine\.js))(?:\?[^"\']*)?(?P<suffix>["\'])',re.I)
+          for p in site.rglob('*'):
+              if not p.is_file() or p.suffix.lower() not in {'.html','.htm'}: continue
+              try: value=p.read_text(encoding='utf-8')
+              except UnicodeDecodeError: continue
+              original=value
+              def replace_script(m):
+                  name=m.group('name')
+                  return f"{m.group('prefix')}?build={build_tag}{m.group('suffix')}" if name in local_assets else m.group(0)
+              value=script_pat.sub(replace_script,value)
+              def replace_settings(m):
+                  return f"{m.group('prefix')}?build={build_tag}{m.group('suffix')}"
+              value=settings_pat.sub(replace_settings,value)
+              if value!=original: p.write_text(value,encoding='utf-8')
+
           text=lessons.read_text(encoding='utf-8')
+          required=[f'cosmic-hub.js?build={build_tag}',f'cosmic-admin-guard.js?build={build_tag}',f'cosmic-launch-fix.js?build={build_tag}',f'cosmic-feedback.js?build={build_tag}',f'cosmic-profile-widget.js?build={build_tag}']
           missing=[x for x in required if x not in text]
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
+
           hub=site/'scripts/cosmic-hub.js'
           registration='navigator.serviceWorker.register'
           owners=[]
@@ -65,10 +95,11 @@ jobs:
                   except UnicodeDecodeError: continue
                   if count: owners.append(f'{p.relative_to(site)}:{count}')
           if owners != ['scripts/cosmic-hub.js:1']: raise SystemExit(f'Expected only scripts/cosmic-hub.js to register the service worker; found {owners}')
+
           sw=(site/'sw.js').read_text(encoding='utf-8')
           if "cosmic-shell-v7" not in sw or "cache: 'no-store'" not in sw: raise SystemExit('Authoritative sw.js validation failed')
           if any(x in sw for x in ('cosmic-shell-v1','cosmic-shell-v3','cosmic-shell-v4','cosmic-shell-v5','cosmic-shell-v6')): raise SystemExit('Obsolete cache name remains in sw.js')
-          marker={'source_commit':'${{ github.sha }}','profile_widget':'scripts/cosmic-profile-widget.js?v=2','service_worker_cache':'cosmic-shell-v7'}
+          marker={'source_commit':'${{ github.sha }}','build_tag':build_tag,'profile_widget':f'scripts/cosmic-profile-widget.js?build={build_tag}','service_worker_cache':'cosmic-shell-v7'}
           (site/'deployment.json').write_text(json.dumps(marker,indent=2)+'\n',encoding='utf-8')
           print(json.dumps(marker))
           PY

@@ -52,50 +52,32 @@ jobs:
           cp wrangler.jsonc _site/wrangler.jsonc
           python3 - <<'PY'
           from pathlib import Path
-          import re, json
+          import json
           site=Path('_site')
           lessons=site/'pages/lessons/lessons.html'
           if not lessons.exists(): raise SystemExit('Missing Pages lessons directory')
-          required=[
-            'cosmic-hub.js?v=3',
-            'cosmic-admin-guard.js?v=3',
-            'cosmic-launch-fix.js?v=3',
-            'cosmic-feedback.js?v=2',
-            'cosmic-profile-widget.js?v=2',
-          ]
+          required=['cosmic-hub.js?v=3','cosmic-admin-guard.js?v=3','cosmic-launch-fix.js?v=3','cosmic-feedback.js?v=2','cosmic-profile-widget.js?v=2']
           text=lessons.read_text(encoding='utf-8')
           missing=[x for x in required if x not in text]
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
-
           hub=site/'scripts/cosmic-hub.js'
           registration='navigator.serviceWorker.register'
           owners=[]
           for p in site.rglob('*'):
-              if not p.is_file() or p.suffix.lower() not in {'.js','.html','.htm'} or p == hub:
-                  continue
+              if not p.is_file() or p.suffix.lower() not in {'.js','.html','.htm'} or p == hub: continue
               try: value=p.read_text(encoding='utf-8')
               except UnicodeDecodeError: continue
-              if registration in value:
-                  p.write_text(value.replace(registration,'Promise.resolve'),encoding='utf-8')
+              if registration in value: p.write_text(value.replace(registration,'Promise.resolve'),encoding='utf-8')
           for p in site.rglob('*'):
               if p.is_file() and p.suffix.lower() in {'.js','.html','.htm'}:
                   try: count=p.read_text(encoding='utf-8').count(registration)
                   except UnicodeDecodeError: continue
                   if count: owners.append(f'{p.relative_to(site)}:{count}')
-          if owners != ['scripts/cosmic-hub.js:1']:
-              raise SystemExit(f'Expected only scripts/cosmic-hub.js to register the service worker; found {owners}')
-
+          if owners != ['scripts/cosmic-hub.js:1']: raise SystemExit(f'Expected only scripts/cosmic-hub.js to register the service worker; found {owners}')
           sw=(site/'sw.js').read_text(encoding='utf-8')
-          if "cosmic-shell-v5" not in sw or "cache: 'no-store'" not in sw:
-              raise SystemExit('Authoritative sw.js validation failed')
-          if any(x in sw for x in ('cosmic-shell-v1','cosmic-shell-v3','cosmic-shell-v4')):
-              raise SystemExit('Obsolete cache name remains in sw.js')
-
-          marker={
-            'source_commit':'${{ github.sha }}',
-            'profile_widget':'scripts/cosmic-profile-widget.js?v=2',
-            'service_worker_cache':'cosmic-shell-v5'
-          }
+          if "cosmic-shell-v6" not in sw or "cache: 'no-store'" not in sw: raise SystemExit('Authoritative sw.js validation failed')
+          if any(x in sw for x in ('cosmic-shell-v1','cosmic-shell-v3','cosmic-shell-v4','cosmic-shell-v5')): raise SystemExit('Obsolete cache name remains in sw.js')
+          marker={'source_commit':'${{ github.sha }}','profile_widget':'scripts/cosmic-profile-widget.js?v=2','service_worker_cache':'cosmic-shell-v6'}
           (site/'deployment.json').write_text(json.dumps(marker,indent=2)+'\n',encoding='utf-8')
           print(json.dumps(marker))
           PY
@@ -121,6 +103,31 @@ jobs:
           set -euo pipefail
           npx --yes wrangler@4 deployments list --name cosmicv2 --config wrangler.jsonc
           echo 'Cloudflare control-plane deployment confirmed.'
+      - name: Verify Cloudflare serves this exact build
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, time, urllib.request
+          url='https://cosmicv2.v75ultimate.workers.dev/deployment.json'
+          expected=os.environ['EXPECTED_COMMIT']
+          last=None
+          for _ in range(12):
+              try:
+                  req=urllib.request.Request(url+'?verify='+expected,headers={'Cache-Control':'no-cache','Pragma':'no-cache'})
+                  with urllib.request.urlopen(req,timeout=20) as r: data=json.load(r)
+                  print('Cloudflare deployment marker:',data)
+                  if data.get('source_commit')==expected:
+                      print('VERIFIED Cloudflare serves this exact build.')
+                      break
+                  last=data
+              except Exception as exc:
+                  last=repr(exc)
+              time.sleep(5)
+          else:
+              raise SystemExit(f'Cloudflare live build mismatch. Expected {expected}, got {last}')
+          PY
 
   deploy:
     needs: build
@@ -145,7 +152,7 @@ jobs:
           last=None
           for _ in range(12):
               try:
-                  req=urllib.request.Request(url,headers={'Cache-Control':'no-cache'})
+                  req=urllib.request.Request(url+'?verify='+expected,headers={'Cache-Control':'no-cache'})
                   with urllib.request.urlopen(req,timeout=20) as r: data=json.load(r)
                   if data.get('source_commit')==expected:
                       print(f'VERIFIED GitHub Pages: {data}')

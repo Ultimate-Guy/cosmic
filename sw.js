@@ -1,9 +1,13 @@
-const CACHE = 'cosmic-shell-v6';
+const CACHE = 'cosmic-shell-v7';
 const OFFLINE_URL = './offline.html';
 const STATIC_ASSETS = [OFFLINE_URL];
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(STATIC_ASSETS)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(cache => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', event => {
@@ -20,7 +24,10 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
 
   if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(new Request(event.request, { cache: 'no-store' })).catch(() => caches.match(OFFLINE_URL)));
+    event.respondWith(
+      fetch(new Request(event.request, { cache: 'no-store' }))
+        .catch(() => caches.match(OFFLINE_URL))
+    );
     return;
   }
 

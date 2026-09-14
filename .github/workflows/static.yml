@@ -81,7 +81,16 @@ jobs:
           missing=[x for x in required if x not in text]
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
 
+          # Force the deployed service-worker URL and cache namespace to a new generation.
+          # This is deployment-only so an already-open browser cannot keep using v7.
           hub=site/'scripts/cosmic-hub.js'
+          hub_text=hub.read_text(encoding='utf-8')
+          hub_text=hub_text.replace("sw.js?v=7", "sw.js?v=8")
+          hub.write_text(hub_text,encoding='utf-8')
+          sw_path=site/'sw.js'
+          sw=sw_path.read_text(encoding='utf-8').replace('cosmic-shell-v7','cosmic-shell-v8')
+          sw_path.write_text(sw,encoding='utf-8')
+
           registration='navigator.serviceWorker.register'
           owners=[]
           for p in site.rglob('*'):
@@ -97,9 +106,9 @@ jobs:
           if owners != ['scripts/cosmic-hub.js:1']: raise SystemExit(f'Expected only scripts/cosmic-hub.js to register the service worker; found {owners}')
 
           sw=(site/'sw.js').read_text(encoding='utf-8')
-          if "cosmic-shell-v7" not in sw or "cache: 'no-store'" not in sw: raise SystemExit('Authoritative sw.js validation failed')
-          if any(x in sw for x in ('cosmic-shell-v1','cosmic-shell-v3','cosmic-shell-v4','cosmic-shell-v5','cosmic-shell-v6')): raise SystemExit('Obsolete cache name remains in sw.js')
-          marker={'source_commit':'${{ github.sha }}','build_tag':build_tag,'profile_widget':f'scripts/cosmic-profile-widget.js?build={build_tag}','service_worker_cache':'cosmic-shell-v7'}
+          if "cosmic-shell-v8" not in sw or "cache: 'no-store'" not in sw: raise SystemExit('Authoritative sw.js validation failed')
+          if any(x in sw for x in ('cosmic-shell-v1','cosmic-shell-v3','cosmic-shell-v4','cosmic-shell-v5','cosmic-shell-v6','cosmic-shell-v7')): raise SystemExit('Obsolete cache name remains in sw.js')
+          marker={'source_commit':'${{ github.sha }}','build_tag':build_tag,'profile_widget':f'scripts/cosmic-profile-widget.js?build={build_tag}','service_worker_cache':'cosmic-shell-v8'}
           (site/'deployment.json').write_text(json.dumps(marker,indent=2)+'\n',encoding='utf-8')
           print(json.dumps(marker))
           PY

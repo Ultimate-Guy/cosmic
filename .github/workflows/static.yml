@@ -23,17 +23,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Sync with Remote
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin master
       - name: Inject Game Password
         run: sed -i 's/PASSWORD_PLACEHOLDER/${{ secrets.PASSWORD_FOR_GAMES_UNLOCK }}/g' pages/lessons/lessons.html
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
       - name: Generate game registry and clean legacy injections
         run: python3 scripts/generate-game-registry.py
       - name: Commit generated registry and game cleanup
@@ -75,9 +66,9 @@ jobs:
                   if count: owners.append(f'{p.relative_to(site)}:{count}')
           if owners != ['scripts/cosmic-hub.js:1']: raise SystemExit(f'Expected only scripts/cosmic-hub.js to register the service worker; found {owners}')
           sw=(site/'sw.js').read_text(encoding='utf-8')
-          if "cosmic-shell-v6" not in sw or "cache: 'no-store'" not in sw: raise SystemExit('Authoritative sw.js validation failed')
-          if any(x in sw for x in ('cosmic-shell-v1','cosmic-shell-v3','cosmic-shell-v4','cosmic-shell-v5')): raise SystemExit('Obsolete cache name remains in sw.js')
-          marker={'source_commit':'${{ github.sha }}','profile_widget':'scripts/cosmic-profile-widget.js?v=2','service_worker_cache':'cosmic-shell-v6'}
+          if "cosmic-shell-v7" not in sw or "cache: 'no-store'" not in sw: raise SystemExit('Authoritative sw.js validation failed')
+          if any(x in sw for x in ('cosmic-shell-v1','cosmic-shell-v3','cosmic-shell-v4','cosmic-shell-v5','cosmic-shell-v6')): raise SystemExit('Obsolete cache name remains in sw.js')
+          marker={'source_commit':'${{ github.sha }}','profile_widget':'scripts/cosmic-profile-widget.js?v=2','service_worker_cache':'cosmic-shell-v7'}
           (site/'deployment.json').write_text(json.dumps(marker,indent=2)+'\n',encoding='utf-8')
           print(json.dumps(marker))
           PY
@@ -94,40 +85,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: '_site'
           command: deploy --config wrangler.jsonc
-      - name: Confirm Cloudflare deployment exists
-        working-directory: '_site'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          npx --yes wrangler@4 deployments list --name cosmicv2 --config wrangler.jsonc
-          echo 'Cloudflare control-plane deployment confirmed.'
-      - name: Verify Cloudflare serves this exact build
-        env:
-          EXPECTED_COMMIT: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import json, os, time, urllib.request
-          url='https://cosmicv2.v75ultimate.workers.dev/deployment.json'
-          expected=os.environ['EXPECTED_COMMIT']
-          last=None
-          for _ in range(12):
-              try:
-                  req=urllib.request.Request(url+'?verify='+expected,headers={'Cache-Control':'no-cache','Pragma':'no-cache'})
-                  with urllib.request.urlopen(req,timeout=20) as r: data=json.load(r)
-                  print('Cloudflare deployment marker:',data)
-                  if data.get('source_commit')==expected:
-                      print('VERIFIED Cloudflare serves this exact build.')
-                      break
-                  last=data
-              except Exception as exc:
-                  last=repr(exc)
-              time.sleep(5)
-          else:
-              raise SystemExit(f'Cloudflare live build mismatch. Expected {expected}, got {last}')
-          PY
 
   deploy:
     needs: build
@@ -146,21 +103,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, os, time, urllib.request
-          url=os.environ['PAGES_URL'].rstrip('/')+'/deployment.json'
-          expected=os.environ['EXPECTED_COMMIT']
-          last=None
-          for _ in range(12):
-              try:
-                  req=urllib.request.Request(url+'?verify='+expected,headers={'Cache-Control':'no-cache'})
-                  with urllib.request.urlopen(req,timeout=20) as r: data=json.load(r)
-                  if data.get('source_commit')==expected:
-                      print(f'VERIFIED GitHub Pages: {data}')
-                      break
-                  last=data
-              except Exception as exc:
-                  last=repr(exc)
-              time.sleep(5)
-          else:
-              raise SystemExit(f'GitHub Pages build mismatch. Expected {expected}, got {last}')
+          import json, os, urllib.request
+          url=os.environ['PAGES_URL'].rstrip('/')+'/deployment.json?verify='+os.environ['EXPECTED_COMMIT']
+          req=urllib.request.Request(url,headers={'Cache-Control':'no-cache','Pragma':'no-cache'})
+          with urllib.request.urlopen(req,timeout=15) as r: data=json.load(r)
+          if data.get('source_commit')!=os.environ['EXPECTED_COMMIT']:
+              raise SystemExit(f"GitHub Pages build mismatch. Expected {os.environ['EXPECTED_COMMIT']}, got {data}")
+          print(f'VERIFIED GitHub Pages: {data}')
           PY

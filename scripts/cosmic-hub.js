@@ -1,5 +1,8 @@
 (() => {
   'use strict';
+  // This identifier is also checked after a Cloudflare deploy. Keep it in the
+  // served script so a successful deploy cannot silently serve an older hub.
+  const COSMIC_HUB_RELEASE = 'cosmic-hub-v9';
   if (window.__COSMIC_HUB_V1__) return;
   window.__COSMIC_HUB_V1__ = true;
 
@@ -50,7 +53,7 @@
 
   function registerPwa() {
     if ('serviceWorker' in navigator) {
-      const sw=base+'sw.js?v=8';
+      const sw=base+'sw.js?v=9';
       navigator.serviceWorker.register(sw,{updateViaCache:'none'}).then(reg=>{reg.update().catch(()=>{});updateOffline();}).catch(()=>updateOffline());
     } else updateOffline();
     window.addEventListener('online',updateOffline); window.addEventListener('offline',updateOffline);

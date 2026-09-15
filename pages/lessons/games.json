@@ -646,6 +646,13 @@
     "featured": false
   },
   {
+    "name": "Drive Mad",
+    "path": "pages/lessons/Drive%20Mad/",
+    "category": "Arcade",
+    "tags": [],
+    "featured": false
+  },
+  {
     "name": "Getaway Shootout",
     "path": "pages/lessons/Getaway%20Shootout/",
     "category": "Arcade",

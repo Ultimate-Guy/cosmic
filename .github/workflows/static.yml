@@ -52,13 +52,14 @@ jobs:
               '.assetsignore', 'collections.json', 'cosmic-hub.css',
               'cosmic-hub.html', 'cosmic-sw.js', 'index.html',
               'manifest.json', 'offline.html', 'scripts/cosmic-hub.js',
-              'sw.js'
+              'scripts/cosmic-hub-repair.js', 'sw.js'
           ]
           absent=[path for path in required_assets if not (site/path).is_file()]
           if absent: raise SystemExit('Cloudflare staging is missing hub assets: '+', '.join(absent))
 
           local_assets={
               'cosmic-hub.js': build_tag,
+              'cosmic-hub-repair.js': build_tag,
               'cosmic-admin-guard.js': build_tag,
               'cosmic-launch-fix.js': build_tag,
               'cosmic-feedback.js': build_tag,
@@ -83,7 +84,12 @@ jobs:
               if value!=original: p.write_text(value,encoding='utf-8')
 
           text=lessons.read_text(encoding='utf-8')
-          required=[f'cosmic-hub.js?build={build_tag}',f'cosmic-admin-guard.js?build={build_tag}',f'cosmic-launch-fix.js?build={build_tag}',f'cosmic-feedback.js?build={build_tag}',f'cosmic-profile-widget.js?build={build_tag}']
+          repair_tag=f'<script src="../../scripts/cosmic-hub-repair.js?build={build_tag}"></script>'
+          if repair_tag not in text:
+              if '</body>' not in text: raise SystemExit('Cannot install Cosmic Hub repair loader: missing </body>')
+              text=text.replace('</body>',repair_tag+'\n</body>',1)
+              lessons.write_text(text,encoding='utf-8')
+          required=[f'cosmic-hub.js?build={build_tag}',f'cosmic-hub-repair.js?build={build_tag}',f'cosmic-admin-guard.js?build={build_tag}',f'cosmic-launch-fix.js?build={build_tag}',f'cosmic-feedback.js?build={build_tag}',f'cosmic-profile-widget.js?build={build_tag}']
           missing=[x for x in required if x not in text]
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
 

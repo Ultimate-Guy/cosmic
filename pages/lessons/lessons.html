@@ -65,7 +65,7 @@
         const returningFromGame=(()=>{try{const value=sessionStorage.getItem(RETURN_KEY);sessionStorage.removeItem(RETURN_KEY);return value==='1';}catch(e){return false;}})(); if(isUnlocked()||returningFromGame){showGames();if(!isUnlocked()){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}}loadRegistry();}else{document.getElementById('password-gate').style.display='grid';document.getElementById('site-content').style.display='none';} searchInput.addEventListener('input',e=>{const val=e.target.value.toLowerCase();let matches=0;cards.forEach(c=>{const show=c.name.includes(val);c.element.style.display=show?'flex':'none';if(show)matches++;});noResults.style.display=matches===0&&cards.length?'block':'none';});
     </script>
 <link rel="manifest" href="../../manifest.json">
-<script src="../../scripts/cosmic-hub.js?release=cosmic-hub-v9"></script>
+<script src="../../scripts/cosmic-hub.js?v=3"></script>
 
 <script src="../../scripts/cosmic-admin-guard.js?v=3"></script>
 <script src="../../scripts/cosmic-launch-fix.js?v=3"></script>

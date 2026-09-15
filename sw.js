@@ -1,4 +1,4 @@
-const CACHE = 'cosmic-shell-v8';
+const CACHE = 'cosmic-shell-v9';
 const OFFLINE_URL = './offline.html';
 const STATIC_ASSETS = [OFFLINE_URL];
 

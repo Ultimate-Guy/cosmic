@@ -89,8 +89,6 @@ jobs:
 
           hub=site/'scripts/cosmic-hub.js'
           hub_text=hub.read_text(encoding='utf-8')
-          hub_text=hub_text.replace("sw.js?v=9", "sw.js?v=10")
-          hub.write_text(hub_text,encoding='utf-8')
           sw_path=site/'sw.js'
           sw=sw_path.read_text(encoding='utf-8').replace('cosmic-shell-v9','cosmic-shell-v10')
           sw_path.write_text(sw,encoding='utf-8')

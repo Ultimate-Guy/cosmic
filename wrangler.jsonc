@@ -6,6 +6,10 @@
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
-    "run_worker_first": false
+    "run_worker_first": [
+      "/pages/lessons/lessons.html",
+      "/apps/apps.html",
+      "/cosmic-hub.html"
+    ]
   }
 }

@@ -48,25 +48,11 @@ jobs:
           build_tag=os.environ['BUILD_TAG']
           lessons=site/'pages/lessons/lessons.html'
           if not lessons.exists(): raise SystemExit('Missing Pages lessons directory')
-          required_assets=[
-              '.assetsignore', 'collections.json', 'cosmic-hub.css',
-              'cosmic-hub.html', 'cosmic-sw.js', 'index.html',
-              'manifest.json', 'offline.html', 'scripts/cosmic-hub.js',
-              'scripts/cosmic-hub-repair.js', 'sw.js'
-          ]
+          required_assets=['.assetsignore','collections.json','cosmic-hub.css','cosmic-hub.html','cosmic-sw.js','index.html','manifest.json','offline.html','scripts/cosmic-hub.js','scripts/cosmic-hub-repair.js','sw.js']
           absent=[path for path in required_assets if not (site/path).is_file()]
           if absent: raise SystemExit('Cloudflare staging is missing hub assets: '+', '.join(absent))
 
-          local_assets={
-              'cosmic-hub.js': build_tag,
-              'cosmic-hub-repair.js': build_tag,
-              'cosmic-admin-guard.js': build_tag,
-              'cosmic-launch-fix.js': build_tag,
-              'cosmic-feedback.js': build_tag,
-              'cosmic-profile-widget.js': build_tag,
-              'cosmic-pwa.js': build_tag,
-              'settings-engine.js': build_tag,
-          }
+          local_assets={'cosmic-hub.js':build_tag,'cosmic-hub-repair.js':build_tag,'cosmic-admin-guard.js':build_tag,'cosmic-launch-fix.js':build_tag,'cosmic-feedback.js':build_tag,'cosmic-profile-widget.js':build_tag,'cosmic-pwa.js':build_tag,'settings-engine.js':build_tag}
           script_pat=re.compile(r'(?P<prefix>(?:\.\./)+scripts/(?P<name>[^"\']+?\.js))(?:\?[^"\']*)?(?P<suffix>["\'])',re.I)
           settings_pat=re.compile(r'(?P<prefix>(?:\.\./)+settings/(?P<name>settings-engine\.js))(?:\?[^"\']*)?(?P<suffix>["\'])',re.I)
           for p in site.rglob('*'):
@@ -78,18 +64,21 @@ jobs:
                   name=m.group('name')
                   return f"{m.group('prefix')}?build={build_tag}{m.group('suffix')}" if name in local_assets else m.group(0)
               value=script_pat.sub(replace_script,value)
-              def replace_settings(m):
-                  return f"{m.group('prefix')}?build={build_tag}{m.group('suffix')}"
-              value=settings_pat.sub(replace_settings,value)
+              value=settings_pat.sub(lambda m:f"{m.group('prefix')}?build={build_tag}{m.group('suffix')}",value)
               if value!=original: p.write_text(value,encoding='utf-8')
 
           text=lessons.read_text(encoding='utf-8')
+          hub_tag=f'<script src="../../scripts/cosmic-hub.js?build={build_tag}"></script>'
           repair_tag=f'<script src="../../scripts/cosmic-hub-repair.js?build={build_tag}"></script>'
-          if repair_tag not in text:
+          marker='../../scripts/cosmic-hub.js'
+          if marker not in text:
+              if '</body>' not in text: raise SystemExit('Cannot install Cosmic Hub loader: missing </body>')
+              text=text.replace('</body>',hub_tag+'\n'+repair_tag+'\n</body>',1)
+          elif repair_tag not in text:
               if '</body>' not in text: raise SystemExit('Cannot install Cosmic Hub repair loader: missing </body>')
               text=text.replace('</body>',repair_tag+'\n</body>',1)
-              lessons.write_text(text,encoding='utf-8')
-          required=[f'cosmic-hub.js?build={build_tag}',f'cosmic-hub-repair.js?build={build_tag}',f'cosmic-admin-guard.js?build={build_tag}',f'cosmic-launch-fix.js?build={build_tag}',f'cosmic-feedback.js?build={build_tag}',f'cosmic-profile-widget.js?build={build_tag}']
+          lessons.write_text(text,encoding='utf-8')
+          required=[hub_tag,repair_tag]
           missing=[x for x in required if x not in text]
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
 
@@ -115,7 +104,7 @@ jobs:
 
           sw=(site/'sw.js').read_text(encoding='utf-8')
           if "cosmic-shell-v10" not in sw or "cache: 'no-store'" not in sw: raise SystemExit('Authoritative sw.js validation failed')
-          cache_names=set(re.findall(r"['\"](cosmic-shell-v\d+)['\"]", sw))
+          cache_names=set(re.findall(r"['\"](cosmic-shell-v\d+)['\"]",sw))
           obsolete={f'cosmic-shell-v{i}' for i in (1,3,4,5,6,7,8,9)}
           if cache_names & obsolete: raise SystemExit('Obsolete cache name remains in sw.js: '+', '.join(sorted(cache_names & obsolete)))
           if cache_names != {'cosmic-shell-v10'}: raise SystemExit(f'Unexpected service-worker cache names: {sorted(cache_names)}')

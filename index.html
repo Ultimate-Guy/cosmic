@@ -130,7 +130,7 @@
       const target = new URL(targetPath, window.location.href).href;
       const htmlContent = getCloakHTML(target);
       const blob = new Blob([htmlContent], { type: 'text/html' });
-      const blobUrl = URL.createObjectURL(htmlContent);
+      const blobUrl = URL.createObjectURL(blob);
       const win = window.open(blobUrl, '_blank');
       if (!win) return;
       window.location.replace('https://www.google.com');

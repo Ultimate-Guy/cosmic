@@ -71,17 +71,19 @@ jobs:
           preflight_tag=f'<script src="../../scripts/cosmic-hub-preflight.js?build={build_tag}"></script>'
           hub_tag=f'<script src="../../scripts/cosmic-hub.js?build={build_tag}"></script>'
           repair_tag=f'<script src="../../scripts/cosmic-hub-repair.js?build={build_tag}"></script>'
-          marker='../../scripts/cosmic-hub.js'
-          if marker not in text:
-              if '</body>' not in text: raise SystemExit('Cannot install Cosmic Hub loader: missing </body>')
-              text=text.replace('</body>',preflight_tag+'\n'+hub_tag+'\n'+repair_tag+'\n</body>',1)
-          else:
-              if preflight_tag not in text:
-                  text=text.replace(marker, '../../scripts/cosmic-hub-preflight.js?build='+build_tag+'"></script>\n<script src="'+marker+'?build='+build_tag, 1)
-                  text=text.replace('src="../../scripts/cosmic-hub-preflight.js?build='+build_tag+'"></script>', preflight_tag, 1)
-              if repair_tag not in text:
-                  if '</body>' not in text: raise SystemExit('Cannot install Cosmic Hub repair loader: missing </body>')
-                  text=text.replace('</body>',repair_tag+'\n</body>',1)
+          hub_pattern=re.compile(r'<script\s+src=["\'](?:\.\./)+scripts/cosmic-hub\.js(?:\?[^"\']*)?["\']></script>',re.I)
+          if not hub_pattern.search(text):
+              raise SystemExit('Cannot install Cosmic Hub loader: missing existing cosmic-hub.js script')
+          text=hub_pattern.sub(hub_tag,text,count=1)
+          if preflight_tag not in text:
+              text=text.replace(hub_tag,preflight_tag+'\n'+hub_tag,1)
+          if repair_tag not in text:
+              if '</body>' not in text: raise SystemExit('Cannot install Cosmic Hub repair loader: missing </body>')
+              text=text.replace('</body>',repair_tag+'\n</body>',1)
+          required=[preflight_tag,hub_tag,repair_tag]
+          missing=[x for x in required if x not in text]
+          if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
+
           lessons.write_text(text,encoding='utf-8')
           required=[preflight_tag,hub_tag,repair_tag]
           missing=[x for x in required if x not in text]

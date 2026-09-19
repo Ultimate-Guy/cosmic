@@ -11,6 +11,9 @@ class UsernameRegistry {
       await this.state.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS activity (username TEXT NOT NULL, game_key TEXT NOT NULL, game_name TEXT NOT NULL, opens INTEGER NOT NULL DEFAULT 0, last_opened INTEGER NOT NULL, PRIMARY KEY (username, game_key))'
       );
+      await this.state.storage.sql.exec(
+        'CREATE TABLE IF NOT EXISTS site_state (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
+      );
     });
   }
 
@@ -109,6 +112,106 @@ class UsernameRegistry {
     });
   }
 
+  async siteState() {
+    const rows = await this.state.storage.sql.exec(
+      'SELECT key, value FROM site_state'
+    ).toArray();
+    const raw = Object.fromEntries(rows.map(row => [row.key, row.value]));
+    const parse = (key, fallback) => {
+      try { return raw[key] ? JSON.parse(raw[key]) : fallback; } catch (_) { return fallback; }
+    };
+    return this.json({
+      ok: true,
+      blacklisted: parse('blacklisted', []),
+      featured: parse('featured', []),
+      maintenance: !!parse('maintenance', false),
+      imported: parse('imported', [])
+    });
+  }
+
+  async adminSiteState(request) {
+    let body;
+    try { body = await request.json(); } catch { return this.json({ ok: false, error: 'invalid-json' }, 400); }
+    const action = typeof body?.action === 'string' ? body.action : '';
+    const read = async (key, fallback) => {
+      const row = await this.state.storage.sql.exec(
+        'SELECT value FROM site_state WHERE key = ?', key
+      ).one();
+      if (!row) return fallback;
+      try { return JSON.parse(row.value); } catch (_) { return fallback; }
+    };
+    const write = async (key, value) => {
+      await this.state.storage.sql.exec(
+        'INSERT INTO site_state (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+        key, JSON.stringify(value)
+      );
+    };
+
+    if (action === 'blacklist_toggle') {
+      const target = typeof body?.target === 'string' ? body.target.trim().slice(0, 500) : '';
+      if (!target) return this.json({ ok: false, error: 'missing-target' }, 400);
+      const list = await read('blacklisted', []);
+      const index = list.findIndex(item => String(item?.target || '').toLowerCase() === target.toLowerCase());
+      let enabled;
+      if (index >= 0) {
+        list.splice(index, 1);
+        enabled = false;
+      } else {
+        list.push({ target, created_at: Date.now() });
+        enabled = true;
+      }
+      await write('blacklisted', list.slice(-250));
+      return this.siteState();
+    }
+
+    if (action === 'feature_toggle') {
+      const name = typeof body?.name === 'string' ? body.name.trim().slice(0, 160) : '';
+      if (!name) return this.json({ ok: false, error: 'missing-name' }, 400);
+      const list = await read('featured', []);
+      const index = list.findIndex(item => String(item?.name || '').toLowerCase() === name.toLowerCase());
+      if (index >= 0) list.splice(index, 1);
+      else list.push({ name, created_at: Date.now() });
+      await write('featured', list.slice(-20));
+      return this.siteState();
+    }
+
+    if (action === 'maintenance_toggle') {
+      const current = !!await read('maintenance', false);
+      await write('maintenance', !current);
+      return this.siteState();
+    }
+
+    if (action === 'import') {
+      const incoming = Array.isArray(body?.items) ? body.items : [];
+      if (!incoming.length) return this.json({ ok: false, error: 'no-items' }, 400);
+      const clean = incoming.slice(0, 100).map(item => {
+        const name = typeof item?.name === 'string' ? item.name.trim().slice(0, 160) : '';
+        const path = typeof item?.path === 'string' ? item.path.trim().slice(0, 1000) : '';
+        const kind = item?.kind === 'app' ? 'app' : 'game';
+        if (!name || !path) return null;
+        const entry = typeof item?.entry === 'string' ? item.entry.trim().slice(0, 300) : '';
+        const image = typeof item?.image === 'string' ? item.image.trim().slice(0, 1000) : '';
+        const description = typeof item?.description === 'string' ? item.description.trim().slice(0, 500) : '';
+        const category = typeof item?.category === 'string' ? item.category.trim().slice(0, 60) : '';
+        const tags = Array.isArray(item?.tags) ? item.tags.map(x => String(x).slice(0, 40)).slice(0, 10) : [];
+        return { name, path, kind, ...(entry ? { entry } : {}), ...(image ? { image } : {}), ...(description ? { description } : {}), ...(category ? { category } : {}), tags };
+      }).filter(Boolean);
+      if (!clean.length) return this.json({ ok: false, error: 'invalid-items' }, 400);
+      const existing = await read('imported', []);
+      const merged = [...existing];
+      for (const item of clean) {
+        const key = (item.kind + ':' + item.name).toLowerCase();
+        const index = merged.findIndex(x => (x.kind + ':' + x.name).toLowerCase() === key);
+        if (index >= 0) merged[index] = item;
+        else merged.push(item);
+      }
+      await write('imported', merged.slice(-250));
+      return this.siteState();
+    }
+
+    return this.json({ ok: false, error: 'unknown-action' }, 400);
+  }
+
   async fetch(request) {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204 });
@@ -122,6 +225,8 @@ class UsernameRegistry {
     if (url.pathname === '/activity' && request.method === 'POST') return this.activity(request);
     if (url.pathname === '/list' && request.method === 'GET') return this.adminList();
     if (url.pathname === '/detail' && request.method === 'GET') return this.adminDetail(url.searchParams.get('username') || '');
+    if (url.pathname === '/state' && request.method === 'GET') return this.siteState();
+    if (url.pathname === '/admin-site-state' && request.method === 'POST') return this.adminSiteState(request);
     return this.json({ ok: false, error: 'not-found' }, 404);
   }
 }
@@ -295,6 +400,20 @@ function handleDeploymentStatus(request) {
   });
 }
 
+async function handleSiteState(request, env) {
+  if (request.method !== 'GET') return jsonResponse(request, { ok: false }, 405);
+  const registry = env.USERNAME_REGISTRY;
+  return registry.get(registry.idFromName('global')).fetch(new Request(new URL('/state', request.url), request));
+}
+
+async function handleAdminSiteState(request, env) {
+  if (!(await verifyAdminSession(request, env))) return jsonResponse(request, { ok: false, error: 'unauthorized' }, 401);
+  const registry = env.USERNAME_REGISTRY;
+  return registry.get(registry.idFromName('global')).fetch(
+    new Request(new URL('/admin-site-state', request.url), request)
+  );
+}
+
 async function handleAdminAccounts(request, env) {
   if (!(await verifyAdminSession(request, env))) return jsonResponse(request, { ok: false, error: 'unauthorized' }, 401);
   const registry = env.USERNAME_REGISTRY;
@@ -391,6 +510,8 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
     if (url.pathname === '/api/admin/session') return handleAdminSession(request, env);
     if (url.pathname === '/api/admin/accounts' || url.pathname === '/api/admin/account') return handleAdminAccounts(request, env);
+    if (url.pathname === '/api/site-state') return handleSiteState(request, env);
+    if (url.pathname === '/api/admin/site-state') return handleAdminSiteState(request, env);
     if (url.pathname === '/api/deployment-status') return handleDeploymentStatus(request);
     if (url.pathname === '/api/developer/sysinfo') return handleDeveloperSysinfo(request, env);
     if (url.pathname === '/api/hub-diagnostics') return handleHubDiagnostics(request, env);

@@ -102,7 +102,7 @@
       '#cosmic-dev-panel .dev-command{display:block;width:100%;margin:7px 0;padding:10px 11px;border:1px solid rgba(45,204,255,.28);border-radius:11px;background:rgba(45,204,255,.05);color:#f2f7fa;text-align:left;cursor:pointer}',
       '#cosmic-dev-panel .dev-command:hover{background:rgba(45,204,255,.13)}#cosmic-dev-panel .dev-command b{display:block;color:#2dccff}#cosmic-dev-panel .dev-command small{display:block;margin-top:3px;color:#9fb1bc}',
       '#cosmic-dev-overlay{position:fixed;right:12px;bottom:12px;z-index:2147483646;width:min(520px,94vw);max-height:44vh;overflow:auto;padding:12px;border:1px solid #2dccff;border-radius:14px;background:rgba(2,7,11,.96);color:#eaf8ff;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 15px 60px rgba(0,0,0,.58)}',
-      '#cosmic-dev-overlay .row{padding:5px 0;border-bottom:1px solid rgba(45,204,255,.12);white-space:pre-wrap;word-break:break-word}.cosmic-dev-light-preview{background:#eef4f7!important;color:#102028!important}.cosmic-dev-light-preview a{color:#084f70!important}'
+      '#cosmic-dev-overlay .row{padding:5px 0;border-bottom:1px solid rgba(45,204,255,.12);white-space:pre-wrap;word-break:break-word}.cosmic-dev-tilt{transform:perspective(1200px) rotateX(.35deg) rotateY(-.35deg);transform-origin:center top}.cosmic-dev-invert{filter:invert(1) hue-rotate(180deg)}.cosmic-dev-retro{position:relative}.cosmic-dev-retro:after{content:"";position:fixed;inset:0;z-index:2147483643;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.0) 0,rgba(0,0,0,.0) 2px,rgba(0,0,0,.10) 3px,rgba(0,0,0,.10) 4px);mix-blend-mode:multiply}.cosmic-dev-light-preview{background:#eef4f7!important;color:#102028!important}.cosmic-dev-light-preview a{color:#084f70!important}'
     ].join('');
     document.head.appendChild(style);
   }
@@ -345,7 +345,7 @@
     if(!isDeveloper()) return;
     const ok=await confirmCommand(command,args);
     if(!ok) return;
-    return confirmedRunCommand(command,args);
+    return runCommand(command,args);
   }
 
   async function runCommand(command,args='') {
@@ -498,7 +498,7 @@
     COMMANDS.forEach(([name,desc])=>{
       const b=document.createElement('button');b.type='button';b.className='dev-command';
       b.innerHTML='<b>'+safe(name)+'</b><small>'+safe(desc)+'</small>';
-      b.onclick=()=>{const command=name.split(' ')[0],args=name.includes('[')?window.prompt(name+' argument:','')||'':'';runCommand(command,args);};
+      b.onclick=()=>{const command=name.split(' ')[0],args=name.includes('[')?window.prompt(name+' argument:','')||'':'';confirmedRunCommand(command,args);};
       panel.appendChild(b);
     });
     document.body.append(fab,panel);dragElement(fab);dragElement(panel);

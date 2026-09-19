@@ -152,6 +152,8 @@ jobs:
       - name: Verify Cloudflare deployment serves this build
         env:
           EXPECTED_COMMIT: ${{ github.sha }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
           npx --yes wrangler@4 deployments list --name cosmicv2

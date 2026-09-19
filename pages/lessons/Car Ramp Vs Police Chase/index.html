@@ -163,6 +163,8 @@ Element.prototype.requestPointerLock = async function(...args) {
     try { (args[0] ||= {}).unadjustedMovement = true; await oPRL.apply(this, args); } catch(e) {}
 };
 </script>
-<script src="../../scripts/cosmic-dev-tools.js?build=dev-commands"></script>
+
+<script src="../../scripts/game-guard.js?v=guard"></script>
+<script src="../../scripts/cosmic-dev-loader.js?build=dev-commands"></script>
 </body>
 </html>

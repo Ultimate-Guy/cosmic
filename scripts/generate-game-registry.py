@@ -49,7 +49,12 @@ def normalize_loaders(path,loaders):
         if not re.search(rf'<script\b[^>]*\bsrc=["\'][^"\']*{re.escape(filename)}(?:\?[^"\']*)?["\']',text,flags=re.I):missing.append(f'<script src="{src}"></script>')
     if missing:
         insertion='\n'+'\n'.join(missing)+'\n'
-        text=re.sub(r'</body>',insertion+'</body>',text,count=1,flags=re.I) if re.search(r'</body>',text,re.I) else text+insertion
+        matches=list(re.finditer(r'</body>',text,re.I))
+        if matches:
+            pos=matches[-1].start()
+            text=text[:pos]+insertion+text[pos:]
+        else:
+            text=text+insertion
     if path==LESSONS_PAGE and 'rel="manifest"' not in text:
         manifest='<link rel="manifest" href="../../manifest.json">\n'; text=re.sub(r'</head>',manifest+'</head>',text,count=1,flags=re.I) if re.search(r'</head>',text,re.I) else manifest+text
     if text!=original:path.write_text(text,encoding='utf-8')
@@ -78,7 +83,12 @@ def clean_game_page(folder):
     for loader in ('game-guard.js','cosmic-dev-loader.js'):
         cleaned=re.sub(r'\s*<script[^>]*src=["\'][^"\']*'+re.escape(loader)+r'[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL)
     insertion='\n<script src="../../scripts/game-guard.js?v=guard"></script>\n<script src="../../scripts/cosmic-dev-loader.js?build=dev-commands"></script>\n'
-    cleaned=re.sub(r'</body>',insertion+'</body>',cleaned,count=1,flags=re.I) if re.search(r'</body>',cleaned,re.I) else cleaned+insertion
+    matches=list(re.finditer(r'</body>',cleaned,re.I))
+    if matches:
+        pos=matches[-1].start()
+        cleaned=cleaned[:pos]+insertion+cleaned[pos:]
+    else:
+        cleaned=cleaned+insertion
     # Game packages sometimes ship their own service-worker registration. Cosmic
     # owns the only service worker now; replace those calls with resolved promises
     # so the game code continues without registering another worker.

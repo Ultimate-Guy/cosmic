@@ -207,3 +207,4 @@ export default {
     return fetchAsset(request, env);
   }
 };
+export { UsernameRegistry };

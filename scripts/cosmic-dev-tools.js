@@ -489,6 +489,7 @@
 
   function createMenu(){
     if(!isDeveloper()||!isGameContext()||window.top!==window.self)return;
+    if(!document.body){document.addEventListener('DOMContentLoaded',createMenu,{once:true});return;}
     ensureStyle();
     if(document.getElementById('cosmic-dev-fab'))return;
     const fab=document.createElement('button');fab.id='cosmic-dev-fab';fab.type='button';fab.textContent='☄ Dev Commands';
@@ -507,8 +508,17 @@
   }
 
   ensureStyle();
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{if(isDeveloper())createMenu();},{once:true});
-  else if(isDeveloper())createMenu();
+  const bootDevMenu=()=>{
+    if(isDeveloper())createMenu();
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootDevMenu,{once:true});
+  else bootDevMenu();
+  // Keep the launcher available if another Cosmic script rebuilds the page body.
+  let devMenuObserver;
+  try {
+    devMenuObserver=new MutationObserver(()=>{if(isDeveloper()&&!document.getElementById('cosmic-dev-fab'))createMenu();});
+    devMenuObserver.observe(document.documentElement,{childList:true,subtree:true});
+  } catch (_) {}
 
   window.CosmicDevTools={isDeveloper,commands:COMMANDS,runCommand,getHubCommands,adminToken,showToast};
 })();

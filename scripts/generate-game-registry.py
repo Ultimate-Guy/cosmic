@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 LESSONS_DIR=ROOT/'pages'/'lessons'; OUTPUT=LESSONS_DIR/'games.json'; LESSONS_PAGE=LESSONS_DIR/'lessons.html'; APPS_PAGE=ROOT/'apps'/'apps.html'
 IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}; EXCLUDED_FOLDERS={'img','apps'}
-LESSONS_LOADERS={'cosmic-dev-loader.js':'../../scripts/cosmic-dev-loader.js?build=dev-commands','game-guard.js':'../../scripts/game-guard.js?v=guard','cosmic-hub.js':'../../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../../scripts/cosmic-admin-guard.js?v=3','cosmic-launch-fix.js':'../../scripts/cosmic-launch-fix.js?v=3','cosmic-feedback.js':'../../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../../scripts/cosmic-profile-widget.js?v=2'}
+LESSONS_LOADERS={'cosmic-dev-loader.js':'../../scripts/cosmic-dev-loader.js?build=dev-commands','cosmic-hub.js':'../../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../../scripts/cosmic-admin-guard.js?v=3','cosmic-launch-fix.js':'../../scripts/cosmic-launch-fix.js?v=3','cosmic-feedback.js':'../../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../../scripts/cosmic-profile-widget.js?v=2'}
 APPS_LOADERS={'cosmic-dev-loader.js':'../scripts/cosmic-dev-loader.js?build=dev-commands','cosmic-hub.js':'../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../scripts/cosmic-admin-guard.js?v=3','cosmic-pwa.js':'../scripts/cosmic-pwa.js?v=3','cosmic-feedback.js':'../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../scripts/cosmic-profile-widget.js?v=2'}
 def display_name(folder_name):
     words=re.sub(r'([a-z])([A-Z])',r'\1 \2',folder_name); words=re.sub(r'[_-]+',' ',words).strip(); words=re.sub(r'\s+',' ',words); return words.title() or 'Untitled Game'
@@ -41,6 +41,8 @@ def infer_category(name,metadata):
 def normalize_loaders(path,loaders):
     if not path.is_file():return
     text=path.read_text(encoding='utf-8'); original=text
+    if path==LESSONS_PAGE:
+        text=re.sub(r'\s*<script[^>]*src=["\\'][^"\\']*game-guard\\.js[^"\\']*["\\'][^>]*>\\s*</script>\\s*','\\n',text,flags=re.I)
     for filename,src in loaders.items():
         pattern=rf'<script\b[^>]*\bsrc=["\'][^"\']*{re.escape(filename)}(?:\?[^"\']*)?["\'][^>]*>\s*</script>'
         text=re.sub(pattern,f'<script src="{src}"></script>',text,flags=re.I)

@@ -36,6 +36,45 @@ async function handleAdminAuth(request, env) {
   return jsonResponse(request, { ok: password === expected });
 }
 
+async function handleHubDiagnostics(request, env) {
+  const paths = [
+    '/pages/lessons/lessons.html',
+    '/scripts/cosmic-hub.js',
+    '/scripts/cosmic-hub-preflight.js',
+    '/scripts/cosmic-hub-repair.js',
+    '/pages/lessons/games.json'
+  ];
+  const result = {};
+  for (const path of paths) {
+    try {
+      const response = await env.ASSETS.fetch(new Request(new URL(path, request.url)));
+      const text = await response.text();
+      result[path] = {
+        status: response.status,
+        bytes: text.length,
+        lessons_has_hub_loader: path.endsWith('lessons.html')
+          ? /(?:\\.\\.\/)+scripts\/cosmic-hub\.js/i.test(text)
+          : undefined,
+        lessons_has_preflight: path.endsWith('lessons.html')
+          ? /(?:\\.\\.\/)+scripts\/cosmic-hub-preflight\.js/i.test(text)
+          : undefined,
+        lessons_has_repair: path.endsWith('lessons.html')
+          ? /(?:\\.\\.\/)+scripts\/cosmic-hub-repair\.js/i.test(text)
+          : undefined,
+        hub_release: path.endsWith('cosmic-hub.js')
+          ? (text.match(/COSMIC_HUB_RELEASE\\s*=\\s*['"]([^'"]+)/i) || [])[1] || null
+          : undefined,
+        game_entries: path.endsWith('games.json')
+          ? (() => { try { const data = JSON.parse(text); return Array.isArray(data) ? data.length : -1; } catch (_) { return -1; } })()
+          : undefined
+      };
+    } catch (error) {
+      result[path] = { status: 0, error: error instanceof Error ? error.message : String(error) };
+    }
+  }
+  return jsonResponse(request, { ok: true, assets: result });
+}
+
 function handleDeploymentStatus(request) {
   return jsonResponse(request, {
     ok: true,
@@ -126,6 +165,7 @@ export default {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
     if (url.pathname === '/api/deployment-status') return handleDeploymentStatus(request);
+    if (url.pathname === '/api/hub-diagnostics') return handleHubDiagnostics(request, env);
     if (url.pathname === '/api/ai') return handleAI(request, env);
     if (url.pathname === '/api/admin/auth' || url.pathname === '/api/admin-auth') return handleAdminAuth(request, env);
 

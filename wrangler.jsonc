@@ -12,5 +12,19 @@
       "/apps/apps.html",
       "/cosmic-hub.html"
     ]
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "USERNAME_REGISTRY",
+        "class_name": "UsernameRegistry"
+      }
+    ]
+  },
+  "exports": {
+    "UsernameRegistry": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
   }
 }

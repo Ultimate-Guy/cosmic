@@ -127,6 +127,7 @@ class UsernameRegistry {
 }
 
 const COSMIC_DEPLOYMENT_COMMIT = '__COSMIC_DEPLOYMENT_COMMIT__';
+const COSMIC_DEPLOYMENT_TIMESTAMP = '__COSMIC_DEPLOYMENT_TIMESTAMP__';
 
 const ALLOWED_ORIGINS = new Set([
   'https://ultimate-guy.github.io',
@@ -265,6 +266,25 @@ async function handleHubDiagnostics(request, env) {
   return jsonResponse(request, { ok: true, assets: result });
 }
 
+async function handleDeveloperSysinfo(request, env) {
+  if (!(await verifyAdminSession(request, env))) return jsonResponse(request, { ok: false, error: 'unauthorized' }, 401);
+  const cf = request.cf || {};
+  return jsonResponse(request, {
+    ok: true,
+    worker: 'cosmicv2',
+    edge_region: cf.colo || 'unknown',
+    country: cf.country || 'unknown',
+    build_timestamp: COSMIC_DEPLOYMENT_TIMESTAMP,
+    source_commit: COSMIC_DEPLOYMENT_COMMIT,
+    configured: {
+      ASSETS: !!env.ASSETS,
+      USERNAME_REGISTRY: !!env.USERNAME_REGISTRY,
+      COSMIC_ADMIN_PASSWORD: typeof env.COSMIC_ADMIN_PASSWORD === 'string' && !!env.COSMIC_ADMIN_PASSWORD,
+      OPENROUTER_API_KEY: typeof env.OPENROUTER_API_KEY === 'string' && !!env.OPENROUTER_API_KEY
+    }
+  });
+}
+
 function handleDeploymentStatus(request) {
   return jsonResponse(request, {
     ok: true,
@@ -372,6 +392,7 @@ export default {
     if (url.pathname === '/api/admin/session') return handleAdminSession(request, env);
     if (url.pathname === '/api/admin/accounts' || url.pathname === '/api/admin/account') return handleAdminAccounts(request, env);
     if (url.pathname === '/api/deployment-status') return handleDeploymentStatus(request);
+    if (url.pathname === '/api/developer/sysinfo') return handleDeveloperSysinfo(request, env);
     if (url.pathname === '/api/hub-diagnostics') return handleHubDiagnostics(request, env);
     if (url.pathname === '/api/ai') return handleAI(request, env);
     if (url.pathname === '/api/admin/auth' || url.pathname === '/api/admin-auth') return handleAdminAuth(request, env);

@@ -61,70 +61,72 @@
   }
 
   const COMMAND_GROUPS = [
-    {
-      title: '🌐 Global & Site-Wide',
-      commands: [
-        ['/home', 'Returns to the main Cosmic Games Hub so you can jump back into the site from anywhere.'],
-        ['/reload', 'Instantly reloads the current Cosmic page to test the latest local state and page startup behavior.'],
-        ['/announcement [text]', 'Shows a temporary Cosmic-wide developer banner at the top of the current page for quick maintenance or status testing.'],
-        ['/flushcache', 'Force-clears Cosmic browser caches and local site assets immediately so you can test the site from a clean client state.'],
-        ['/exportdata', 'Downloads a backup of your local Cosmic settings, favorites, notes, profile data, and layout preferences as a JSON file.']
-      ]
-    },
-    {
-      title: '📊 Debugging & System Status',
-      commands: [
-        ['/sysinfo', 'Displays the active Cloudflare Worker status, current edge data center, build timestamp, deployment commit, and configuration state without revealing secret values.'],
-        ['/toggledebug', 'Enables a floating diagnostic console that logs request timings, response statuses, JavaScript errors, and failed requests in real-time.'],
-        ['/benchmark', 'Runs a quick internal speed test against important Cosmic resources and reports the response time for each request.'],
-        ['/stats', 'Shows DOM size, resource load timings, average response time, and JavaScript heap usage when the browser exposes it.']
-      ]
-    },
-    {
-      title: '🎨 Personalization & Theme Controls',
-      commands: [
-        ['/theme [name]', 'Instantly previews a different Cosmic color theme so you can test the site with alternate palettes without editing the code.'],
-        ['/hidedark', 'Toggles a light/contrast preview so you can quickly test how Cosmic looks outside of its normal dark theme.'],
-        ['/custombg [url]', 'Applies a custom background image locally so you can preview new Cosmic backgrounds without changing the deployed site.'],
-        ['/disguise [preset]', 'Changes the current tab title and favicon to a selected generic preset for local interface testing.'],
-        ['/zoom [percentage]', 'Forces the current Cosmic page to a specific scale such as 80% or 125% to test responsive layouts on different displays.']
-      ]
-    },
-    {
-      title: '🛡️ Moderation & User Control',
-      commands: [
-        ['/blacklist [url/game]', 'Adds or removes a game or URL from Cosmic’s authenticated site-wide block list so you can quickly control broken or unwanted content.'],
-        ['/feature [name]', 'Adds or removes a game from the server-side featured list so you can control which content is highlighted.'],
-        ['/maintenance', 'Instantly toggles Cosmic maintenance mode so normal visitors receive the maintenance screen while your authenticated developer session can continue working.'],
-        ['/import [json/url]', 'Imports validated game or app entries into Cosmic’s server-side curation data without rewriting the GitHub repository.']
-      ]
-    },
-    {
-      title: '🕹️ Games & Experience',
-      commands: [
-        ['/mutegames', 'Instantly mutes accessible audio and video on the current Cosmic page, including media that a game exposes to its document.'],
-        ['/fullscreen', 'Forces the current Cosmic page into browser fullscreen mode for testing game canvases, layouts, and immersive experiences.'],
-        ['/screenshot', 'Captures the selected Cosmic tab or window through the browser capture prompt and saves the result as an image.'],
-        ['/killtab', 'Attempts to close the current browser tab when the browser permits scripted tab closing.'],
-        ['/blanket', 'Wraps the current Cosmic page in a large local developer test error screen that can be unlocked with the developer password.']
-      ]
-    },
-    {
-      title: '⚡ Site Performance & Utility',
-      commands: [
-        ['/toggledebug', 'Turns the live diagnostics overlay on or off so you can inspect request timing and page errors while testing Cosmic.'],
-        ['/flushcache', 'Clears the local Cosmic cache and reloads the page so you can verify behavior without stale browser assets.'],
-        ['/exportdata', 'Creates a portable backup of the Cosmic data stored in this browser before you make changes or clear local storage.']
-      ]
-    },
-    {
-      title: '🎭 Secret Easter Eggs & Fun',
-      commands: [
-        ['/tilt', 'Applies a subtle CSS 3D tilt to the current page, giving Cosmic a slightly askew visual effect.'],
-        ['/invert', 'Inverts the current page colors for a quick glitch/cyberpunk visual effect.'],
-        ['/retro', 'Applies a CRT-style scanline filter to the page for a grainy, glowing arcade look.']
-      ]
-    }
+    { title: '🌐 Global & Site-Wide', commands: [
+      ['/home','Returns to the main Cosmic Games Hub so you can jump back into the site from anywhere.'],
+      ['/reload','Instantly reloads the current Cosmic page to test the latest local state and page startup behavior.'],
+      ['/announcement [text]','Shows a temporary developer banner at the top of the current page for quick maintenance or status testing.'],
+      ['/exportdata','Downloads a backup of your local Cosmic settings, favorites, notes, profile data, and layout preferences as a JSON file.'],
+      ['/count','Displays the current number of indexed games and apps that Cosmic can see from its registries.'],
+      ['/random','Instantly opens a random visible Cosmic game or app for a quick surprise pick.'],
+      ['/copyurl','Copies the current Cosmic page URL to your clipboard for quick debugging or sharing.'],
+      ['/pageinfo','Shows local page information such as the current path, host, connection state, and viewport size.']
+    ]},
+    { title: '📊 Debugging & System Status', commands: [
+      ['/sysinfo','Displays the active Cloudflare Worker status, current edge data center, build timestamp, deployment commit, and configuration state without revealing secret values.'],
+      ['/toggledebug','Enables a floating diagnostic console that logs request timings, response statuses, JavaScript errors, and failed requests in real-time.'],
+      ['/benchmark','Runs a quick internal speed test against important Cosmic resources and reports the response time for each request.'],
+      ['/stats','Shows DOM size, resource load timings, average response time, and JavaScript heap usage when the browser exposes it.']
+    ]},
+    { title: '🔌 Proxy & Cloaking Controls', commands: [
+      ['/adblock','Toggles a local ad-like element blocker on the current page and accessible same-origin frames for cleaner-page testing.'],
+      ['/aspect [ratio]','Forces the active game area toward a ratio such as 16:9, 4:3, or square to test stretched-game layouts.'],
+      ['/stretch','Toggles filling accessible game canvases, videos, and frames to available page space for layout testing.'],
+      ['/injectcss [css]','Applies custom CSS directly to the current page so you can test a layout change instantly before editing the repository.']
+    ]},
+    { title: '🎮 Ultimate Game Hacks & Tweaks', commands: [
+      ['/aspect [ratio]','Instantly forces the active game area toward a specific ratio such as 16:9, 4:3, or square to test rendering behavior.'],
+      ['/stretch','Toggles stretching the accessible game area to fill the available screen space for layout and resolution testing.'],
+      ['/injectcss [css]','Lets you apply raw CSS to the current page for rapid layout experiments before pushing code.'],
+      ['/mutegames','Instantly mutes accessible audio and video on the current Cosmic page.'],
+      ['/fullscreen','Forces the current Cosmic page into browser fullscreen mode for testing immersive layouts.'],
+      ['/screenshot','Captures the selected Cosmic tab or window through the browser capture prompt and saves the result as an image.']
+    ]},
+    { title: '🎨 Personalization & Theme Controls', commands: [
+      ['/theme [name]','Instantly previews a different Cosmic color theme so you can test alternate palettes without editing code.'],
+      ['/hidedark','Toggles a light/contrast preview so you can test Cosmic outside its normal dark theme.'],
+      ['/custombg [url]','Applies a custom background image locally so you can preview a new Cosmic background without changing the deployment.'],
+      ['/font [name]','Swaps the page typography between local choices such as monospace, sans-serif, serif, or Comic Sans for readability testing.'],
+      ['/zoom [percentage]','Forces the current page to a specific scale such as 80% or 125% for responsive-layout testing.'],
+      ['/compact','Shrinks card spacing and padding so you can preview a denser game grid.'],
+      ['/cleanui','Hides major navigation and decorative text so you can preview a minimalist content-focused layout.']
+    ]},
+    { title: '🛡️ Moderation & User Control', commands: [
+      ['/blacklist [url/game]','Adds or removes a game or URL from Cosmic’s authenticated site-wide block list for broken or unwanted content.'],
+      ['/feature [name]','Adds or removes a game from the server-side featured list so you can control highlighted content.'],
+      ['/maintenance','Toggles Cosmic maintenance mode while your authenticated developer session can continue working.'],
+      ['/import [json/url]','Imports validated game or app entries into Cosmic’s server-side curation data without rewriting GitHub.'],
+      ['/locksite','Locks the current site view behind the existing authenticated developer/admin session.']
+    ]},
+    { title: '🔒 Privacy, Security & Disguises', commands: [
+      ['/destroytrail','Clears current-session data and the recent-games trail while leaving long-term saved Cosmic profile settings intact.'],
+      ['/fakeloading','Places a completely local official-looking loading screen over the current page so you can test a fake-loading state.'],
+      ['/disguise [preset]','Changes the current tab title and favicon to a selected generic preset for local interface testing.'],
+      ['/blanket','Wraps the current Cosmic page in a large local test error screen that uses the existing authenticated admin session to unlock.']
+    ]},
+    { title: '📈 Site Management & UI Adjustments', commands: [
+      ['/grid [columns]','Changes the local games/apps grid density so you can test a specific number of columns.'],
+      ['/focus','Dims non-essential page chrome so the main game or content area becomes the visual focus.'],
+      ['/resetfx','Resets developer-only visual, layout, loading, lock, and injected-CSS effects back to normal.']
+    ]},
+    { title: '🌀 Visual Overrides & Visual FX', commands: [
+      ['/blur','Instantly applies a 10px blur to the current page for a quick local privacy-effect test.'],
+      ['/matrix','Drops a falling digital-rain effect behind the page for a Matrix-style visual test.'],
+      ['/grayscale','Removes page color and previews Cosmic entirely in grayscale.'],
+      ['/shake','Applies a short screen-shake animation to the current page.'],
+      ['/tilt','Applies a subtle CSS 3D tilt to the current page.'],
+      ['/invert','Inverts the current page colors for a quick glitch/cyberpunk visual effect.'],
+      ['/retro','Applies a CRT-style scanline filter for a grainy arcade look.']
+    ]}
   ];
 
   const COMMAND_DESCRIPTIONS = Object.fromEntries(

@@ -61,71 +61,72 @@
   }
 
   const COMMAND_GROUPS = [
-    { title: '🌐 Global & Site-Wide', commands: [
+    {title:'🌐 Global & Site-Wide',commands:[
       ['/home','Returns to the main Cosmic Games Hub so you can jump back into the site from anywhere.'],
-      ['/reload','Instantly reloads the current Cosmic page to test the latest local state and page startup behavior.'],
+      ['/reload','Instantly reloads the current page to test the latest local state and page startup behavior.'],
       ['/announcement [text]','Shows a temporary developer banner at the top of the current page for quick maintenance or status testing.'],
       ['/exportdata','Downloads a backup of your local Cosmic settings, favorites, notes, profile data, and layout preferences as a JSON file.'],
-      ['/count','Displays the current number of indexed games and apps that Cosmic can see from its registries.'],
-      ['/random','Instantly opens a random visible Cosmic game or app for a quick surprise pick.'],
-      ['/copyurl','Copies the current Cosmic page URL to your clipboard for quick debugging or sharing.'],
-      ['/pageinfo','Shows local page information such as the current path, host, connection state, and viewport size.']
+      ['/count','Displays the exact number of games and apps currently indexed by Cosmic.'],
+      ['/random','Instantly launches a random visible Cosmic game or app for a quick surprise pick.'],
+      ['/copyurl','Copies the current Cosmic page URL to the clipboard for quick debugging or sharing.'],
+      ['/pageinfo','Shows the current path, host, online state, and viewport size.']
     ]},
-    { title: '📊 Debugging & System Status', commands: [
-      ['/sysinfo','Displays the active Cloudflare Worker status, current edge data center, build timestamp, deployment commit, and configuration state without revealing secret values.'],
+    {title:'📊 Debugging & System Status',commands:[
+      ['/sysinfo','Displays the active Cloudflare Worker environment status, current edge data center, build timestamp, deployment commit, and configuration state without revealing secret values.'],
       ['/toggledebug','Enables a floating diagnostic console that logs request timings, response statuses, JavaScript errors, and failed requests in real-time.'],
+      ['/flushcache','Force-clears Cosmic browser caches and local site assets immediately so you can test from a clean client state.'],
       ['/benchmark','Runs a quick internal speed test against important Cosmic resources and reports the response time for each request.'],
       ['/stats','Shows DOM size, resource load timings, average response time, and JavaScript heap usage when the browser exposes it.']
     ]},
-    { title: '🔌 Proxy & Cloaking Controls', commands: [
-      ['/adblock','Toggles a local ad-like element blocker on the current page and accessible same-origin frames for cleaner-page testing.'],
-      ['/aspect [ratio]','Forces the active game area toward a ratio such as 16:9, 4:3, or square to test stretched-game layouts.'],
-      ['/stretch','Toggles filling accessible game canvases, videos, and frames to available page space for layout testing.'],
-      ['/injectcss [css]','Applies custom CSS directly to the current page so you can test a layout change instantly before editing the repository.']
+    {title:'🔌 Proxy & Cloaking Controls',commands:[
+      ['/adblock','Toggles a local ad-like element blocker on the current page for cleaner-game testing.'],
+      ['/aspect [ratio]','Instantly forces the active game area toward a specific ratio such as 16:9, 4:3, or square to test stretched-game layouts.'],
+      ['/stretch','Toggles stretching accessible game canvases, videos, and frames to fill the available page space.'],
+      ['/injectcss [css]','Allows you to apply raw CSS directly to the current page so you can test layout changes before pushing code.']
     ]},
-    { title: '🎮 Ultimate Game Hacks & Tweaks', commands: [
-      ['/aspect [ratio]','Instantly forces the active game area toward a specific ratio such as 16:9, 4:3, or square to test rendering behavior.'],
-      ['/stretch','Toggles stretching the accessible game area to fill the available screen space for layout and resolution testing.'],
-      ['/injectcss [css]','Lets you apply raw CSS to the current page for rapid layout experiments before pushing code.'],
-      ['/mutegames','Instantly mutes accessible audio and video on the current Cosmic page.'],
-      ['/fullscreen','Forces the current Cosmic page into browser fullscreen mode for testing immersive layouts.'],
-      ['/screenshot','Captures the selected Cosmic tab or window through the browser capture prompt and saves the result as an image.']
+    {title:'🎮 Ultimate Game Hacks & Tweaks',commands:[
+      ['/aspect [ratio]','Instantly forces the active game canvas or frame toward dimensions such as 16:9, 4:3, or square to fix stretched retro-game layouts.'],
+      ['/stretch','Toggles stretching a game area to fill available screen space while ignoring the original resolution ratio for testing.'],
+      ['/injectcss [css]','Lets you type CSS directly into the current session to hide or restyle annoying elements while debugging.'],
+      ['/mutegames','Instantly mutes accessible audio and video from the current game or page.'],
+      ['/fullscreen','Forces the current game/page into browser fullscreen for immersive layout testing.'],
+      ['/screenshot','Captures the selected Cosmic tab or window through the browser capture picker and saves it as an image.']
     ]},
-    { title: '🎨 Personalization & Theme Controls', commands: [
-      ['/theme [name]','Instantly previews a different Cosmic color theme so you can test alternate palettes without editing code.'],
-      ['/hidedark','Toggles a light/contrast preview so you can test Cosmic outside its normal dark theme.'],
-      ['/custombg [url]','Applies a custom background image locally so you can preview a new Cosmic background without changing the deployment.'],
-      ['/font [name]','Swaps the page typography between local choices such as monospace, sans-serif, serif, or Comic Sans for readability testing.'],
-      ['/zoom [percentage]','Forces the current page to a specific scale such as 80% or 125% for responsive-layout testing.'],
-      ['/compact','Shrinks card spacing and padding so you can preview a denser game grid.'],
-      ['/cleanui','Hides major navigation and decorative text so you can preview a minimalist content-focused layout.']
+    {title:'🎨 Personalization & Theme Controls',commands:[
+      ['/theme [name]','Instantly swaps the Cosmic visual theme locally so you can preview alternate palettes without changing the deployed site.'],
+      ['/hidedark','Toggles the dark-mode preview off or on for quick contrast testing.'],
+      ['/custombg [url]','Overlays a custom background image locally so you can preview a new Cosmic backdrop without editing the repository.'],
+      ['/font [name]','Swaps the global page typography between safe local choices such as monospace, sans-serif, serif, or Comic Sans.'],
+      ['/zoom [percentage]','Forces the global page scaling to shrink or grow so you can test Cosmic on smaller or larger displays.'],
+      ['/compact','Shrinks card padding and spacing so you can preview a denser homepage layout.'],
+      ['/cleanui','Hides major navigation and decorative UI so you can preview a minimalist content-focused layout.']
     ]},
-    { title: '🛡️ Moderation & User Control', commands: [
-      ['/blacklist [url/game]','Adds or removes a game or URL from Cosmic’s authenticated site-wide block list for broken or unwanted content.'],
-      ['/feature [name]','Adds or removes a game from the server-side featured list so you can control highlighted content.'],
-      ['/maintenance','Toggles Cosmic maintenance mode while your authenticated developer session can continue working.'],
-      ['/import [json/url]','Imports validated game or app entries into Cosmic’s server-side curation data without rewriting GitHub.'],
-      ['/locksite','Locks the current site view behind the existing authenticated developer/admin session.']
+    {title:'🛡️ Moderation & User Control',commands:[
+      ['/blacklist [url/game]','Instantly hides a game or blocks a URL site-wide through authenticated Cosmic curation controls.'],
+      ['/feature [name]','Pins a specific game name into the authenticated server-side featured list.'],
+      ['/maintenance','Instantly toggles Cosmic maintenance mode so normal visitors see the maintenance screen while your authenticated developer session can continue working.'],
+      ['/import [json/url]','Directly imports validated game/app entries into Cosmic’s server-side curation list without rewriting GitHub files.'],
+      ['/locksite','Locks the current site view behind your authenticated Cosmic admin session until you unlock it.']
     ]},
-    { title: '🔒 Privacy, Security & Disguises', commands: [
-      ['/destroytrail','Clears current-session data and the recent-games trail while leaving long-term saved Cosmic profile settings intact.'],
-      ['/fakeloading','Places a completely local official-looking loading screen over the current page so you can test a fake-loading state.'],
+    {title:'🔒 Privacy, Security & Disguises',commands:[
+      ['/destroytrail','Instantly wipes current-session trail data and recent-game history while leaving major saved account settings intact.'],
+      ['/fakeloading','Triggers a local official-looking loading screen over the page so you can test a fake loading state.'],
       ['/disguise [preset]','Changes the current tab title and favicon to a selected generic preset for local interface testing.'],
-      ['/blanket','Wraps the current Cosmic page in a large local test error screen that uses the existing authenticated admin session to unlock.']
+      ['/killtab','Attempts to close the active browser tab when the browser allows scripted closing.'],
+      ['/blanket','Wraps the current page in a giant interactive local fake-error screen that unlocks through the authenticated admin session.']
     ]},
-    { title: '📈 Site Management & UI Adjustments', commands: [
-      ['/grid [columns]','Changes the local games/apps grid density so you can test a specific number of columns.'],
-      ['/focus','Dims non-essential page chrome so the main game or content area becomes the visual focus.'],
-      ['/resetfx','Resets developer-only visual, layout, loading, lock, and injected-CSS effects back to normal.']
+    {title:'📈 Site Management & UI Adjustments',commands:[
+      ['/grid [columns]','Changes the local game/app grid density so you can test a specific number of columns on the current display.'],
+      ['/resetfx','Resets developer-only visual, layout, loading, lock, and injected-CSS effects back to normal Cosmic styling.']
     ]},
-    { title: '🌀 Visual Overrides & Visual FX', commands: [
-      ['/blur','Instantly applies a 10px blur to the current page for a quick local privacy-effect test.'],
-      ['/matrix','Drops a falling digital-rain effect behind the page for a Matrix-style visual test.'],
-      ['/grayscale','Removes page color and previews Cosmic entirely in grayscale.'],
-      ['/shake','Applies a short screen-shake animation to the current page.'],
-      ['/tilt','Applies a subtle CSS 3D tilt to the current page.'],
-      ['/invert','Inverts the current page colors for a quick glitch/cyberpunk visual effect.'],
-      ['/retro','Applies a CRT-style scanline filter for a grainy arcade look.']
+    {title:'🌀 Visual Overrides & Visual FX',commands:[
+      ['/blur','Instantly blurs the current website by 10px as a quick local privacy-effect test.'],
+      ['/matrix','Drops a falling digital-rain effect over the background for a Matrix-style visual test.'],
+      ['/grayscale','Removes all page colors and previews Cosmic in black and white.'],
+      ['/shake','Applies a short screen-shake animation to the active page for visual-effect testing.'],
+      ['/tilt','Applies a subtle CSS 3D tilt effect to the entire page, making Cosmic look slightly askew.'],
+      ['/invert','Inverts all page colors for a quick glitch/cyberpunk aesthetic.'],
+      ['/retro','Applies a retro CRT monitor filter with glowing scanlines.']
     ]}
   ];
 
@@ -146,7 +147,7 @@
       '#cosmic-dev-panel .dev-head strong{margin-right:auto;color:#2dccff;letter-spacing:.4px}.dev-close{width:32px;height:32px;padding:0;border-radius:9px;border:1px solid rgba(45,204,255,.5);background:rgba(45,204,255,.08);color:#2dccff;font-size:20px;cursor:pointer}',
       '#cosmic-dev-panel .dev-command{display:block;width:100%;margin:7px 0;padding:10px 11px;border:1px solid rgba(45,204,255,.28);border-radius:11px;background:rgba(45,204,255,.05);color:#f2f7fa;text-align:left;cursor:pointer}',
       '#cosmic-dev-panel .dev-command:hover{background:rgba(45,204,255,.13)}#cosmic-dev-panel .dev-command b{display:block;color:#2dccff}#cosmic-dev-panel .dev-command small{display:block;margin-top:3px;color:#9fb1bc}',\n      '#cosmic-dev-panel .dev-group-title{margin:14px 2px 6px;color:#2dccff;font:800 12px system-ui,sans-serif;letter-spacing:.6px;text-transform:none}.cosmic-dev-group:first-child .dev-group-title{margin-top:2px}',
-      '.cosmic-dev-adblock [class*="ad"],.cosmic-dev-adblock [id*="ad"],.cosmic-dev-adblock [class*="advert"],.cosmic-dev-adblock [id*="advert"]{display:none!important}.cosmic-dev-cleanui header,.cosmic-dev-cleanui nav,.cosmic-dev-cleanui footer{display:none!important}.cosmic-dev-compact .game-card,.cosmic-dev-compact .app-card{padding:8px!important;min-height:110px!important}.cosmic-dev-blur body{filter:blur(10px)!important}.cosmic-dev-grayscale{filter:grayscale(1)!important}.cosmic-dev-stretch iframe,.cosmic-dev-stretch canvas,.cosmic-dev-stretch video{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:fill!important}.cosmic-dev-shake{animation:cosmicDevShake .7s ease-in-out}@keyframes cosmicDevShake{0%,100%{transform:translate(0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,-1px)}80%{transform:translate(3px,1px)}}',
+      '#cosmic-dev-fake-loading{font-family:system-ui,sans-serif}.cosmic-dev-adblock [class*="ad"],.cosmic-dev-adblock [id*="ad"],.cosmic-dev-adblock [class*="advert"],.cosmic-dev-adblock [id*="advert"]{display:none!important}.cosmic-dev-cleanui header,.cosmic-dev-cleanui nav,.cosmic-dev-cleanui footer{display:none!important}.cosmic-dev-compact .game-card,.cosmic-dev-compact .app-card{padding:8px!important;min-height:110px!important}.cosmic-dev-blur body{filter:blur(10px)!important}.cosmic-dev-grayscale{filter:grayscale(1)!important}.cosmic-dev-stretch iframe,.cosmic-dev-stretch canvas,.cosmic-dev-stretch video{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:fill!important}.cosmic-dev-shake{animation:cosmicDevShake .7s ease-in-out}@keyframes cosmicDevShake{0%,100%{transform:translate(0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,-1px)}80%{transform:translate(3px,1px)}}',
       '#cosmic-dev-overlay{position:fixed;right:12px;bottom:12px;z-index:2147483646;width:min(520px,94vw);max-height:44vh;overflow:auto;padding:12px;border:1px solid #2dccff;border-radius:14px;background:rgba(2,7,11,.96);color:#eaf8ff;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 15px 60px rgba(0,0,0,.58)}',
       '#cosmic-dev-overlay .row{padding:5px 0;border-bottom:1px solid rgba(45,204,255,.12);white-space:pre-wrap;word-break:break-word}.cosmic-dev-tilt{transform:perspective(1200px) rotateX(.35deg) rotateY(-.35deg);transform-origin:center top}.cosmic-dev-invert{filter:invert(1) hue-rotate(180deg)}.cosmic-dev-retro{position:relative}.cosmic-dev-retro:after{content:"";position:fixed;inset:0;z-index:2147483643;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.0) 0,rgba(0,0,0,.0) 2px,rgba(0,0,0,.10) 3px,rgba(0,0,0,.10) 4px);mix-blend-mode:multiply}.cosmic-dev-light-preview{background:#eef4f7!important;color:#102028!important}.cosmic-dev-light-preview a{color:#084f70!important}'
     ].join('');
@@ -395,6 +396,151 @@
     return runCommand(command,args);
   }
 
+
+  function toggleDevClass(cls,onMessage,offMessage){
+    const on=!document.documentElement.classList.contains(cls);
+    document.documentElement.classList.toggle(cls,on);
+    showToast(on?onMessage:offMessage);
+  }
+
+  function adblockCommand(){
+    toggleDevClass('cosmic-dev-adblock','Local ad-like elements hidden.','Local adblock preview disabled.');
+  }
+
+  function aspectCommand(args){
+    const value=(args||'').trim().toLowerCase();
+    const ratios={'16:9':'16 / 9','4:3':'4 / 3','square':'1 / 1'};
+    const chosen=ratios[value]||ratios['16:9'];
+    const target=document.querySelector('iframe,canvas,video');
+    if(!target){showToast('No game frame or canvas found.');return;}
+    target.style.aspectRatio=chosen;
+    target.style.width='100%';
+    showToast('Game aspect preview set to '+(ratios[value]?value:'16:9')+'.');
+  }
+
+  function stretchCommand(){
+    toggleDevClass('cosmic-dev-stretch','Game stretch enabled.','Game stretch disabled.');
+  }
+
+  function injectCssCommand(args){
+    const css=(args||'').trim();
+    if(!css){showToast('Enter CSS to inject.');return;}
+    let style=document.getElementById('cosmic-dev-injected-css');
+    if(!style){style=document.createElement('style');style.id='cosmic-dev-injected-css';document.head.appendChild(style);}
+    style.textContent=css;
+    showToast('Custom CSS applied locally.');
+  }
+
+  function destroyTrailCommand(){
+    try{sessionStorage.clear();localStorage.removeItem('cosmicRecent');localStorage.removeItem('cosmicRecentV1');}catch(_){}
+    showToast('Current-session trail and recent-gaming data cleared. Saved account data remains.');
+  }
+
+  function fakeLoadingCommand(){
+    let overlay=document.getElementById('cosmic-dev-fake-loading');
+    if(overlay){overlay.remove();showToast('Fake loading screen disabled.');return;}
+    overlay=document.createElement('div');
+    overlay.id='cosmic-dev-fake-loading';
+    overlay.style.cssText='position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;background:#061017;color:#f2f7fa;font:600 16px system-ui,sans-serif;text-align:center';
+    overlay.innerHTML='<div><div style="width:46px;height:46px;margin:0 auto 15px;border:4px solid rgba(45,204,255,.2);border-top-color:#2dccff;border-radius:50%;animation:cosmicDevSpin 1s linear infinite"></div><h2>Loading Cosmic…</h2><p style="color:#9fb1bc">Connecting to services…</p></div>';
+    document.body.appendChild(overlay);
+    showToast('Fake loading screen enabled.');
+  }
+
+  async function lockSiteCommand(){
+    const token=await adminToken();
+    if(!token)return;
+    let overlay=document.getElementById('cosmic-dev-locksite');
+    if(overlay){overlay.remove();showToast('Developer site lock disabled.');return;}
+    overlay=document.createElement('div');
+    overlay.id='cosmic-dev-locksite';
+    overlay.style.cssText='position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;background:#061017;color:#f2f7fa;text-align:center;font:600 16px system-ui,sans-serif';
+    overlay.innerHTML='<div><div style="font-size:52px">☄</div><h2>Cosmic Locked</h2><p>Unlocking requires your authenticated admin password.</p><button id="cosmic-dev-unlock-site">Unlock</button></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#cosmic-dev-unlock-site').onclick=async()=>{const t=await adminToken();if(t){overlay.remove();showToast('Developer site lock disabled.');}};
+  }
+
+  function cleanUiCommand(){
+    toggleDevClass('cosmic-dev-cleanui','Minimal UI enabled.','Minimal UI disabled.');
+  }
+
+  async function getJsonSafe(path,fallback){
+    try{
+      const response=await fetch(new URL(path,location.href),{cache:'no-store'});
+      if(!response.ok)throw new Error('request');
+      const data=await response.json();
+      return Array.isArray(data)?data:fallback;
+    }catch(_){return fallback;}
+  }
+
+  async function countCommand(){
+    const games=await getJsonSafe('games.json',[]);
+    const apps=await getJsonSafe('/apps/apps.json',[]);
+    showModal('Cosmic • Count','<div style="line-height:1.8"><b>Games:</b> '+games.length+'<br><b>Apps:</b> '+apps.length+'</div>');
+  }
+
+  function fontCommand(args){
+    const allowed=['monospace','sans-serif','serif','system-ui','comic sans ms'];
+    const requested=(args||'').trim().toLowerCase();
+    const chosen=allowed.includes(requested)?requested:'monospace';
+    document.body.style.fontFamily=chosen;
+    showToast('Font preview set to '+chosen+'.');
+  }
+
+  function compactCommand(){
+    toggleDevClass('cosmic-dev-compact','Compact layout enabled.','Compact layout disabled.');
+  }
+
+  function blurCommand(){
+    toggleDevClass('cosmic-dev-blur','Blur enabled.','Blur disabled.');
+  }
+
+  function matrixCommand(){
+    let canvas=document.getElementById('cosmic-dev-matrix');
+    if(canvas){canvas.remove();showToast('Matrix effect disabled.');return;}
+    canvas=document.createElement('canvas');
+    canvas.id='cosmic-dev-matrix';
+    canvas.style.cssText='position:fixed;inset:0;z-index:2147483643;pointer-events:none;opacity:.22';
+    document.body.appendChild(canvas);
+    const ctx=canvas.getContext('2d');
+    const chars='01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const resize=()=>{canvas.width=innerWidth;canvas.height=innerHeight;};
+    const draw=()=>{
+      ctx.fillStyle='rgba(0,0,0,.08)';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle='#38ff88';
+      ctx.font='14px monospace';
+      for(let x=0;x<canvas.width;x+=14)ctx.fillText(chars[Math.floor(Math.random()*chars.length)],x,Math.random()*canvas.height);
+      canvas.__raf=requestAnimationFrame(draw);
+    };
+    resize();draw();
+    window.addEventListener('resize',resize);
+    showToast('Matrix effect enabled.');
+  }
+
+  function grayscaleCommand(){
+    toggleDevClass('cosmic-dev-grayscale','Grayscale enabled.','Grayscale disabled.');
+  }
+
+  function shakeCommand(){
+    document.documentElement.classList.remove('cosmic-dev-shake');
+    void document.documentElement.offsetWidth;
+    document.documentElement.classList.add('cosmic-dev-shake');
+    setTimeout(()=>document.documentElement.classList.remove('cosmic-dev-shake'),700);
+    showToast('Screen shake applied.');
+  }
+
+  function resetEffectsCommand(){
+    document.documentElement.classList.remove('cosmic-dev-adblock','cosmic-dev-stretch','cosmic-dev-cleanui','cosmic-dev-compact','cosmic-dev-blur','cosmic-dev-grayscale');
+    document.documentElement.style.removeProperty('--cosmic-dev-font');
+    document.body.style.fontFamily='';
+    document.getElementById('cosmic-dev-injected-css')?.remove();
+    document.getElementById('cosmic-dev-matrix')?.remove();
+    document.getElementById('cosmic-dev-fake-loading')?.remove();
+    document.getElementById('cosmic-dev-locksite')?.remove();
+    showToast('Developer local effects reset.');
+  }
+
   async function runCommand(command,args='') {
     if(!isDeveloper())return;
     switch(command){
@@ -424,22 +570,22 @@
       case '/tilt': return visualClass('cosmic-dev-tilt','Tilt effect enabled.');
       case '/invert': return visualClass('cosmic-dev-invert','Color inversion enabled.');
       case '/retro': return visualClass('cosmic-dev-retro','CRT filter enabled.');
-      case '/adblock': return adblock();
-      case '/aspect': return aspect(args);
-      case '/stretch': return stretch();
-      case '/injectcss': return injectcss(args);
-      case '/destroytrail': return destroytrail();
-      case '/fakeloading': return fakeloading();
-      case '/locksite': return locksite();
-      case '/cleanui': return cleanui();
-      case '/count': return count();
-      case '/font': return font(args);
-      case '/compact': return compact();
-      case '/blur': return blur();
-      case '/matrix': return matrix();
-      case '/grayscale': return grayscale();
-      case '/shake': return shake();
-
+      case '/adblock': return adblockCommand();
+      case '/aspect': return aspectCommand(args);
+      case '/stretch': return stretchCommand();
+      case '/injectcss': return injectCssCommand(args);
+      case '/destroytrail': return destroyTrailCommand();
+      case '/fakeloading': return fakeLoadingCommand();
+      case '/locksite': return lockSiteCommand();
+      case '/cleanui': return cleanUiCommand();
+      case '/count': return countCommand();
+      case '/font': return fontCommand(args);
+      case '/compact': return compactCommand();
+      case '/blur': return blurCommand();
+      case '/matrix': return matrixCommand();
+      case '/grayscale': return grayscaleCommand();
+      case '/shake': return shakeCommand();
+      case '/resetfx': return resetEffectsCommand();
       default: return showToast('Unknown developer command: '+command);
     }
   }
@@ -513,6 +659,35 @@
   function visualClass(cls,message){
     document.body.classList.toggle(cls);showToast(document.body.classList.contains(cls)?message:message.replace('enabled','disabled'));
   }
+
+  const COMMANDS=[
+    ['/sysinfo','Safe Worker, edge, build, and configuration status'],
+    ['/toggledebug','Show local request timings, errors, and resource diagnostics'],
+    ['/flushcache','Clear local Cosmic caches without touching account data'],
+    ['/theme [name]','Preview a Cosmic theme locally'],
+    ['/hidedark','Toggle a light/contrast preview'],
+    ['/custombg [url]','Preview a background image locally'],
+    ['/mutegames','Mute page audio/video when accessible'],
+    ['/fullscreen','Toggle browser fullscreen'],
+    ['/screenshot','Capture the selected Cosmic tab/window'],
+    ['/stats','Show DOM, resource, timing, and JS heap stats'],
+    ['/announcement [text]','Show a local developer banner'],
+    ['/reload','Reload the current page'],
+    ['/home','Return to the Cosmic games Hub'],
+    ['/blacklist [url/game]','Block or unblock a game/URL site-wide'],
+    ['/feature [name]','Feature or unfeature a game'],
+    ['/maintenance','Toggle site maintenance mode'],
+    ['/import [json/url]','Import curated game/app entries'],
+    ['/disguise [preset]','Apply a local generic tab title/icon preset'],
+    ['/killtab','Attempt to close the current tab'],
+    ['/blanket','Show a password-unlocked local test error screen'],
+    ['/benchmark','Measure same-origin response timings'],
+    ['/exportdata','Download a local Cosmic settings backup'],
+    ['/zoom [percentage]','Scale the current page locally'],
+    ['/tilt','Toggle a subtle 3D tilt effect'],
+    ['/invert','Toggle color inversion'],
+    ['/retro','Toggle a CRT visual filter']
+  ];
 
   function getHubCommands(){
     return COMMANDS.map(([name,desc])=>[name,()=>{
@@ -589,64 +764,4 @@
   } catch (_) {}
 
   window.CosmicDevTools={isDeveloper,commands:COMMANDS,runCommand,getHubCommands,adminToken,showToast};
-})()
-  function toggleClass(cls,onMessage,offMessage){
-    const on=!document.documentElement.classList.contains(cls);
-    document.documentElement.classList.toggle(cls,on);
-    showToast(on?onMessage:offMessage);
-  }
-  function adblock(){toggleClass('cosmic-dev-adblock','Ad-like elements hidden locally.','Local adblock preview disabled.');}
-  function aspect(args){
-    const ratio=(args||'').trim().toLowerCase(), map={'16:9':'16 / 9','4:3':'4 / 3','square':'1 / 1'};
-    const value=map[ratio]||map['16:9'];
-    const el=document.querySelector('iframe,canvas,video');
-    if(!el){showToast('No game frame or canvas found.');return;}
-    el.style.aspectRatio=value; el.style.width='100%'; showToast('Game aspect preview: '+(map[ratio]?ratio:'16:9'));
-  }
-  function stretch(){toggleClass('cosmic-dev-stretch','Game stretch enabled.','Game stretch disabled.');}
-  function injectcss(args){
-    if(!(args||'').trim()){showToast('Enter CSS to inject.');return;}
-    let el=document.getElementById('cosmic-dev-injected-css');
-    if(!el){el=document.createElement('style');el.id='cosmic-dev-injected-css';document.head.appendChild(el);}
-    el.textContent=args; showToast('Custom CSS applied locally.');
-  }
-  function destroytrail(){
-    try{sessionStorage.clear(); localStorage.removeItem('cosmicRecent'); localStorage.removeItem('cosmicRecentV1');}catch(_){}
-    showToast('Current session trail and recent list cleared. Saved account data was left alone.');
-  }
-  function fakeloading(){
-    let el=document.getElementById('cosmic-dev-fake-loading');
-    if(el){el.remove();showToast('Fake loading screen disabled.');return;}
-    el=document.createElement('div');el.id='cosmic-dev-fake-loading';
-    el.style.cssText='position:fixed;inset:0;z-index:2147483645;background:#061017;display:grid;place-items:center;color:#2dccff;font:600 18px system-ui,sans-serif;text-align:center';
-    el.innerHTML='<div><div style="font-size:46px">◌</div><div>Loading Cosmic…</div><small style="color:#9fb1bc">Connecting to services…</small></div>';
-    document.body.appendChild(el); showToast('Fake loading screen enabled.');
-  }
-  async function locksite(){
-    const token=await adminToken(); if(!token)return;
-    let el=document.getElementById('cosmic-dev-locksite');
-    if(el){el.remove();showToast('Site lock disabled.');return;}
-    el=document.createElement('div');el.id='cosmic-dev-locksite';
-    el.style.cssText='position:fixed;inset:0;z-index:2147483646;background:#061017;display:grid;place-items:center;color:#f2f7fa;text-align:center;font:600 16px system-ui,sans-serif';
-    el.innerHTML='<div><div style="font-size:52px">☄</div><h2>Cosmic Locked</h2><p>Developer lock is active.</p><button id="cosmic-dev-unlock-site">Unlock</button></div>';
-    document.body.appendChild(el);
-    el.querySelector('#cosmic-dev-unlock-site').onclick=async()=>{const t=await adminToken();if(t){el.remove();showToast('Site lock disabled.');}};
-  }
-  function cleanui(){toggleClass('cosmic-dev-cleanui','Minimal UI enabled.','Minimal UI disabled.');}
-  async function count(){const games=await getJsonSafe('games.json',[]);showModal('Cosmic • Count','<b>Games:</b> '+games.length);}
-  async function getJsonSafe(path,fallback){try{const r=await fetch(new URL(path,location.href),{cache:'no-store'});if(!r.ok)throw 0;const d=await r.json();return Array.isArray(d)?d:fallback;}catch(_){return fallback;}}
-  function font(args){const allowed=['monospace','sans-serif','serif','system-ui','comic sans ms'];const n=(args||'').trim().toLowerCase();document.body.style.fontFamily=allowed.includes(n)?n:'monospace';showToast('Font preview: '+(allowed.includes(n)?n:'monospace'));}
-  function compact(){toggleClass('cosmic-dev-compact','Compact layout enabled.','Compact layout disabled.');}
-  function blur(){toggleClass('cosmic-dev-blur','Blur enabled.','Blur disabled.');}
-  function matrix(){
-    let c=document.getElementById('cosmic-dev-matrix');if(c){c.remove();showToast('Matrix effect disabled.');return;}
-    c=document.createElement('canvas');c.id='cosmic-dev-matrix';c.style.cssText='position:fixed;inset:0;z-index:2147483643;pointer-events:none;opacity:.22';document.body.appendChild(c);
-    const x=c.getContext('2d'), chars='01ABCDEFGHIJKLMNOPQRSTUVWXYZ';let raf;
-    const resize=()=>{c.width=innerWidth;c.height=innerHeight};resize();
-    const draw=()=>{x.fillStyle='rgba(0,0,0,.08)';x.fillRect(0,0,c.width,c.height);x.fillStyle='#38ff88';x.font='14px monospace';for(let i=0;i<c.width/14;i++)x.fillText(chars[Math.random()*chars.length|0],i*14,Math.random()*c.height);raf=requestAnimationFrame(draw)};draw();
-    c.dataset.raf=raf;showToast('Matrix effect enabled.');
-  }
-  function grayscale(){toggleClass('cosmic-dev-grayscale','Grayscale enabled.','Grayscale disabled.');}
-  function shake(){document.documentElement.classList.remove('cosmic-dev-shake');void document.documentElement.offsetWidth;document.documentElement.classList.add('cosmic-dev-shake');setTimeout(()=>document.documentElement.classList.remove('cosmic-dev-shake'),700);showToast('Screen shake applied.');}
-
-;
+})();

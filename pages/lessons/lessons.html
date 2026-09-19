@@ -33,15 +33,22 @@
         .settings-trigger,.apps-trigger,.youtube-trigger { background:transparent; border:1px solid var(--card-border); color:var(--accent); padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:700; }
         .youtube-trigger { border-color:#2dccff; box-shadow:0 0 10px rgba(45,204,255,.15); }
         .youtube-trigger:hover { background:rgba(45,204,255,.12); box-shadow:0 0 18px rgba(45,204,255,.4); }
+
+        /* Updates popup: the X stays fixed, while the updates themselves scroll inside the panel. */
         #updates-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; background:rgba(0,0,0,.84); backdrop-filter:blur(6px); z-index:10000; }
-        #updates-panel { position:relative; width:min(680px,94vw); max-height:84vh; overflow-y:auto; box-sizing:border-box; padding:28px; border:2px solid var(--card-border); border-radius:20px; background:rgba(6,20,16,.98); color:#f0f4f8; box-shadow:0 20px 70px rgba(0,0,0,.6); font-family:system-ui,sans-serif; }
-        #updates-panel h1 { margin:0 0 18px; color:var(--accent); letter-spacing:3px; text-align:center; text-shadow:0 0 10px var(--accent); }
-        #updates-panel .update { margin:12px 0; padding:14px 16px; border-radius:12px; background:rgba(45,204,255,.08); border:1px solid rgba(45,204,255,.22); line-height:1.55; }
-        #updates-panel .update strong,#updates-panel .general-section h2 { color:var(--accent); }
-        #updates-panel .general-section { margin-top:24px; padding-top:20px; border-top:1px solid rgba(45,204,255,.25); }
-        #updates-panel .general-list { margin:0; padding-left:22px; line-height:1.7; }
+        #updates-panel { position:relative; width:min(680px,94vw); max-height:84vh; overflow:hidden; box-sizing:border-box; padding:0; border:2px solid var(--card-border); border-radius:20px; background:rgba(6,20,16,.98); color:#f0f4f8; box-shadow:0 20px 70px rgba(0,0,0,.6); font-family:system-ui,sans-serif; }
+        #updates-panel .updates-card { width:100% !important; max-width:none !important; max-height:none !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; background:transparent !important; }
+        #updates-panel .updates-shell { max-height:min(84vh,680px); }
+        #updates-panel .updates-feed { overflow-y:auto !important; }
         #close-updates { position:fixed; top:18px; right:22px; width:42px; height:42px; border:1px solid var(--card-border); border-radius:50%; background:rgba(13,26,33,.96); color:var(--accent); font-size:25px; line-height:1; cursor:pointer; z-index:10001; }
-        @media(max-width:600px){#top-bar{padding:12px 16px}.brand h1{font-size:2rem}.nav-links{right:16px;gap:6px}.settings-trigger,.apps-trigger,.youtube-trigger{padding:7px 10px;font-size:.8rem}#close-updates{top:10px;right:10px}#updates-panel{padding:20px}.password-card{padding:25px}.admin-note{font-size:.68rem}}
+        @media(max-width:600px){
+            #top-bar{padding:12px 16px}.brand h1{font-size:2rem}.nav-links{right:16px;gap:6px}.settings-trigger,.apps-trigger,.youtube-trigger{padding:7px 10px;font-size:.8rem}
+            #close-updates{top:10px;right:10px}
+            #updates-overlay{padding:10px}
+            #updates-panel{width:94vw;max-height:84vh}
+            #updates-panel .updates-shell{max-height:84vh}
+            .password-card{padding:25px}.admin-note{font-size:.68rem}
+        }
     </style>
 </head>
 <body>
@@ -66,7 +73,6 @@
     </script>
 <link rel="manifest" href="../../manifest.json">
 <script src="../../scripts/cosmic-hub.js?v=3"></script>
-
 <script src="../../scripts/cosmic-admin-guard.js?v=3"></script>
 <script src="../../scripts/cosmic-launch-fix.js?v=3"></script>
 <script src="../../scripts/cosmic-feedback.js?v=2"></script>

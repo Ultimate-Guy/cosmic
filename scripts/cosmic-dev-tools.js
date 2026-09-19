@@ -423,6 +423,22 @@
       case '/tilt': return visualClass('cosmic-dev-tilt','Tilt effect enabled.');
       case '/invert': return visualClass('cosmic-dev-invert','Color inversion enabled.');
       case '/retro': return visualClass('cosmic-dev-retro','CRT filter enabled.');
+      case '/adblock': return adblock();
+      case '/aspect': return aspect(args);
+      case '/stretch': return stretch();
+      case '/injectcss': return injectcss(args);
+      case '/destroytrail': return destroytrail();
+      case '/fakeloading': return fakeloading();
+      case '/locksite': return locksite();
+      case '/cleanui': return cleanui();
+      case '/count': return count();
+      case '/font': return font(args);
+      case '/compact': return compact();
+      case '/blur': return blur();
+      case '/matrix': return matrix();
+      case '/grayscale': return grayscale();
+      case '/shake': return shake();
+
       default: return showToast('Unknown developer command: '+command);
     }
   }
@@ -601,4 +617,64 @@
   } catch (_) {}
 
   window.CosmicDevTools={isDeveloper,commands:COMMANDS,runCommand,getHubCommands,adminToken,showToast};
-})();
+})()
+  function toggleClass(cls,onMessage,offMessage){
+    const on=!document.documentElement.classList.contains(cls);
+    document.documentElement.classList.toggle(cls,on);
+    showToast(on?onMessage:offMessage);
+  }
+  function adblock(){toggleClass('cosmic-dev-adblock','Ad-like elements hidden locally.','Local adblock preview disabled.');}
+  function aspect(args){
+    const ratio=(args||'').trim().toLowerCase(), map={'16:9':'16 / 9','4:3':'4 / 3','square':'1 / 1'};
+    const value=map[ratio]||map['16:9'];
+    const el=document.querySelector('iframe,canvas,video');
+    if(!el){showToast('No game frame or canvas found.');return;}
+    el.style.aspectRatio=value; el.style.width='100%'; showToast('Game aspect preview: '+(map[ratio]?ratio:'16:9'));
+  }
+  function stretch(){toggleClass('cosmic-dev-stretch','Game stretch enabled.','Game stretch disabled.');}
+  function injectcss(args){
+    if(!(args||'').trim()){showToast('Enter CSS to inject.');return;}
+    let el=document.getElementById('cosmic-dev-injected-css');
+    if(!el){el=document.createElement('style');el.id='cosmic-dev-injected-css';document.head.appendChild(el);}
+    el.textContent=args; showToast('Custom CSS applied locally.');
+  }
+  function destroytrail(){
+    try{sessionStorage.clear(); localStorage.removeItem('cosmicRecent'); localStorage.removeItem('cosmicRecentV1');}catch(_){}
+    showToast('Current session trail and recent list cleared. Saved account data was left alone.');
+  }
+  function fakeloading(){
+    let el=document.getElementById('cosmic-dev-fake-loading');
+    if(el){el.remove();showToast('Fake loading screen disabled.');return;}
+    el=document.createElement('div');el.id='cosmic-dev-fake-loading';
+    el.style.cssText='position:fixed;inset:0;z-index:2147483645;background:#061017;display:grid;place-items:center;color:#2dccff;font:600 18px system-ui,sans-serif;text-align:center';
+    el.innerHTML='<div><div style="font-size:46px">◌</div><div>Loading Cosmic…</div><small style="color:#9fb1bc">Connecting to services…</small></div>';
+    document.body.appendChild(el); showToast('Fake loading screen enabled.');
+  }
+  async function locksite(){
+    const token=await adminToken(); if(!token)return;
+    let el=document.getElementById('cosmic-dev-locksite');
+    if(el){el.remove();showToast('Site lock disabled.');return;}
+    el=document.createElement('div');el.id='cosmic-dev-locksite';
+    el.style.cssText='position:fixed;inset:0;z-index:2147483646;background:#061017;display:grid;place-items:center;color:#f2f7fa;text-align:center;font:600 16px system-ui,sans-serif';
+    el.innerHTML='<div><div style="font-size:52px">☄</div><h2>Cosmic Locked</h2><p>Developer lock is active.</p><button id="cosmic-dev-unlock-site">Unlock</button></div>';
+    document.body.appendChild(el);
+    el.querySelector('#cosmic-dev-unlock-site').onclick=async()=>{const t=await adminToken();if(t){el.remove();showToast('Site lock disabled.');}};
+  }
+  function cleanui(){toggleClass('cosmic-dev-cleanui','Minimal UI enabled.','Minimal UI disabled.');}
+  async function count(){const games=await getJsonSafe('games.json',[]);showModal('Cosmic • Count','<b>Games:</b> '+games.length);}
+  async function getJsonSafe(path,fallback){try{const r=await fetch(new URL(path,location.href),{cache:'no-store'});if(!r.ok)throw 0;const d=await r.json();return Array.isArray(d)?d:fallback;}catch(_){return fallback;}}
+  function font(args){const allowed=['monospace','sans-serif','serif','system-ui','comic sans ms'];const n=(args||'').trim().toLowerCase();document.body.style.fontFamily=allowed.includes(n)?n:'monospace';showToast('Font preview: '+(allowed.includes(n)?n:'monospace'));}
+  function compact(){toggleClass('cosmic-dev-compact','Compact layout enabled.','Compact layout disabled.');}
+  function blur(){toggleClass('cosmic-dev-blur','Blur enabled.','Blur disabled.');}
+  function matrix(){
+    let c=document.getElementById('cosmic-dev-matrix');if(c){c.remove();showToast('Matrix effect disabled.');return;}
+    c=document.createElement('canvas');c.id='cosmic-dev-matrix';c.style.cssText='position:fixed;inset:0;z-index:2147483643;pointer-events:none;opacity:.22';document.body.appendChild(c);
+    const x=c.getContext('2d'), chars='01ABCDEFGHIJKLMNOPQRSTUVWXYZ';let raf;
+    const resize=()=>{c.width=innerWidth;c.height=innerHeight};resize();
+    const draw=()=>{x.fillStyle='rgba(0,0,0,.08)';x.fillRect(0,0,c.width,c.height);x.fillStyle='#38ff88';x.font='14px monospace';for(let i=0;i<c.width/14;i++)x.fillText(chars[Math.random()*chars.length|0],i*14,Math.random()*c.height);raf=requestAnimationFrame(draw)};draw();
+    c.dataset.raf=raf;showToast('Matrix effect enabled.');
+  }
+  function grayscale(){toggleClass('cosmic-dev-grayscale','Grayscale enabled.','Grayscale disabled.');}
+  function shake(){document.documentElement.classList.remove('cosmic-dev-shake');void document.documentElement.offsetWidth;document.documentElement.classList.add('cosmic-dev-shake');setTimeout(()=>document.documentElement.classList.remove('cosmic-dev-shake'),700);showToast('Screen shake applied.');}
+
+;

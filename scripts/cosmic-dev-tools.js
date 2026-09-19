@@ -488,7 +488,7 @@
   }
 
   function createMenu(){
-    if(!isDeveloper()||!isGameContext()||window.top!==window.self)return;
+    if(!isDeveloper()||!isGameContext())return;
     if(!document.body){document.addEventListener('DOMContentLoaded',createMenu,{once:true});return;}
     ensureStyle();
     if(document.getElementById('cosmic-dev-fab'))return;
@@ -508,9 +508,8 @@
   }
 
   ensureStyle();
-  const bootDevMenu=()=>{
-    if(isDeveloper())createMenu();
-  };
+  const bootDevMenu=()=>{ if(isDeveloper())createMenu(); };
+  setTimeout(bootDevMenu,250);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootDevMenu,{once:true});
   else bootDevMenu();
   // Keep the launcher available if another Cosmic script rebuilds the page body.

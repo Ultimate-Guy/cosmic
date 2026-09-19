@@ -75,25 +75,6 @@ jobs:
               value=settings_pat.sub(lambda m:f"{m.group('prefix')}?build={build_tag}{m.group('suffix')}",value)
               if value!=original: p.write_text(value,encoding='utf-8')
 
-          # Load the developer toolkit globally on every HTML page. The loader
-          # computes the correct /cosmic/ base on GitHub Pages and / on Cloudflare.
-          dev_loader_name='scripts/cosmic-dev-loader.js'
-          for p in site.rglob('*'):
-              if not p.is_file() or p.suffix.lower() not in {'.html','.htm'}: continue
-              try: value=p.read_text(encoding='utf-8')
-              except UnicodeDecodeError: continue
-              if dev_loader_name in value: continue
-              depth=len(p.relative_to(site).parent.parts)
-              prefix='../'*depth
-              tag=f'<script src="{prefix}{dev_loader_name}?build={build_tag}"></script>'
-              matches=list(re.finditer(r'</body>',value,re.I))
-              if matches:
-                  pos=matches[-1].start()
-                  value=value[:pos]+tag+'\\n'+value[pos:]
-              else:
-                  value += '\\n'+tag+'\\n'
-              p.write_text(value,encoding='utf-8')
-
           text=lessons.read_text(encoding='utf-8')
           preflight_tag=f'<script src="../../scripts/cosmic-hub-preflight.js?build={build_tag}"></script>'
           hub_tag=f'<script src="../../scripts/cosmic-hub.js?build={build_tag}"></script>'

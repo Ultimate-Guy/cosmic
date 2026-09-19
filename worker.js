@@ -11,6 +11,9 @@ class UsernameRegistry {
       await this.state.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS activity (username TEXT NOT NULL, game_key TEXT NOT NULL, game_name TEXT NOT NULL, opens INTEGER NOT NULL DEFAULT 0, last_opened INTEGER NOT NULL, PRIMARY KEY (username, game_key))'
       );
+      await this.state.storage.sql.exec(
+        'CREATE TABLE IF NOT EXISTS site_state (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
+      );
     });
   }
 
@@ -109,6 +112,106 @@ class UsernameRegistry {
     });
   }
 
+  async siteState() {
+    const rows = await this.state.storage.sql.exec(
+      'SELECT key, value FROM site_state'
+    ).toArray();
+    const raw = Object.fromEntries(rows.map(row => [row.key, row.value]));
+    const parse = (key, fallback) => {
+      try { return raw[key] ? JSON.parse(raw[key]) : fallback; } catch (_) { return fallback; }
+    };
+    return this.json({
+      ok: true,
+      blacklisted: parse('blacklisted', []),
+      featured: parse('featured', []),
+      maintenance: !!parse('maintenance', false),
+      imported: parse('imported', [])
+    });
+  }
+
+  async adminSiteState(request) {
+    let body;
+    try { body = await request.json(); } catch { return this.json({ ok: false, error: 'invalid-json' }, 400); }
+    const action = typeof body?.action === 'string' ? body.action : '';
+    const read = async (key, fallback) => {
+      const row = await this.state.storage.sql.exec(
+        'SELECT value FROM site_state WHERE key = ?', key
+      ).one();
+      if (!row) return fallback;
+      try { return JSON.parse(row.value); } catch (_) { return fallback; }
+    };
+    const write = async (key, value) => {
+      await this.state.storage.sql.exec(
+        'INSERT INTO site_state (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+        key, JSON.stringify(value)
+      );
+    };
+
+    if (action === 'blacklist_toggle') {
+      const target = typeof body?.target === 'string' ? body.target.trim().slice(0, 500) : '';
+      if (!target) return this.json({ ok: false, error: 'missing-target' }, 400);
+      const list = await read('blacklisted', []);
+      const index = list.findIndex(item => String(item?.target || '').toLowerCase() === target.toLowerCase());
+      let enabled;
+      if (index >= 0) {
+        list.splice(index, 1);
+        enabled = false;
+      } else {
+        list.push({ target, created_at: Date.now() });
+        enabled = true;
+      }
+      await write('blacklisted', list.slice(-250));
+      return this.siteState();
+    }
+
+    if (action === 'feature_toggle') {
+      const name = typeof body?.name === 'string' ? body.name.trim().slice(0, 160) : '';
+      if (!name) return this.json({ ok: false, error: 'missing-name' }, 400);
+      const list = await read('featured', []);
+      const index = list.findIndex(item => String(item?.name || '').toLowerCase() === name.toLowerCase());
+      if (index >= 0) list.splice(index, 1);
+      else list.push({ name, created_at: Date.now() });
+      await write('featured', list.slice(-20));
+      return this.siteState();
+    }
+
+    if (action === 'maintenance_toggle') {
+      const current = !!await read('maintenance', false);
+      await write('maintenance', !current);
+      return this.siteState();
+    }
+
+    if (action === 'import') {
+      const incoming = Array.isArray(body?.items) ? body.items : [];
+      if (!incoming.length) return this.json({ ok: false, error: 'no-items' }, 400);
+      const clean = incoming.slice(0, 100).map(item => {
+        const name = typeof item?.name === 'string' ? item.name.trim().slice(0, 160) : '';
+        const path = typeof item?.path === 'string' ? item.path.trim().slice(0, 1000) : '';
+        const kind = item?.kind === 'app' ? 'app' : 'game';
+        if (!name || !path) return null;
+        const entry = typeof item?.entry === 'string' ? item.entry.trim().slice(0, 300) : '';
+        const image = typeof item?.image === 'string' ? item.image.trim().slice(0, 1000) : '';
+        const description = typeof item?.description === 'string' ? item.description.trim().slice(0, 500) : '';
+        const category = typeof item?.category === 'string' ? item.category.trim().slice(0, 60) : '';
+        const tags = Array.isArray(item?.tags) ? item.tags.map(x => String(x).slice(0, 40)).slice(0, 10) : [];
+        return { name, path, kind, ...(entry ? { entry } : {}), ...(image ? { image } : {}), ...(description ? { description } : {}), ...(category ? { category } : {}), tags };
+      }).filter(Boolean);
+      if (!clean.length) return this.json({ ok: false, error: 'invalid-items' }, 400);
+      const existing = await read('imported', []);
+      const merged = [...existing];
+      for (const item of clean) {
+        const key = (item.kind + ':' + item.name).toLowerCase();
+        const index = merged.findIndex(x => (x.kind + ':' + x.name).toLowerCase() === key);
+        if (index >= 0) merged[index] = item;
+        else merged.push(item);
+      }
+      await write('imported', merged.slice(-250));
+      return this.siteState();
+    }
+
+    return this.json({ ok: false, error: 'unknown-action' }, 400);
+  }
+
   async fetch(request) {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204 });
@@ -122,6 +225,8 @@ class UsernameRegistry {
     if (url.pathname === '/activity' && request.method === 'POST') return this.activity(request);
     if (url.pathname === '/list' && request.method === 'GET') return this.adminList();
     if (url.pathname === '/detail' && request.method === 'GET') return this.adminDetail(url.searchParams.get('username') || '');
+    if (url.pathname === '/state' && request.method === 'GET') return this.siteState();
+    if (url.pathname === '/admin-site-state' && request.method === 'POST') return this.adminSiteState(request);
     return this.json({ ok: false, error: 'not-found' }, 404);
   }
 }
@@ -186,7 +291,12 @@ async function createAdminSession(secret) {
 async function verifyAdminSession(request, env) {
   const expected = env.COSMIC_ADMIN_PASSWORD;
   if (typeof expected !== 'string' || !expected) return false;
-  const authorization = request.headers.get('Authorization') || '';
+  let authorization = request.headers.get('Authorization') || '';
+  if (!authorization.startsWith('Bearer ')) {
+    const cookie = request.headers.get('Cookie') || '';
+    const match = cookie.match(/(?:^|;\s*)cosmic_admin_session=([^;]+)/);
+    if (match) authorization = 'Bearer ' + decodeURIComponent(match[1]);
+  }
   if (!authorization.startsWith('Bearer ')) return false;
   const token = authorization.slice(7).trim();
   const dot = token.indexOf('.');
@@ -212,7 +322,10 @@ async function handleAdminSession(request, env) {
   const expected = env.COSMIC_ADMIN_PASSWORD;
   if (typeof expected !== 'string' || !expected) return jsonResponse(request, { ok: false, error: 'server-not-configured' }, 500);
   if (password !== expected) return jsonResponse(request, { ok: false, error: 'invalid-password' }, 401);
-  return jsonResponse(request, { ok: true, token: await createAdminSession(expected) });
+  const token = await createAdminSession(expected);
+  const response = jsonResponse(request, { ok: true, token });
+  response.headers.append('Set-Cookie', 'cosmic_admin_session=' + encodeURIComponent(token) + '; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=Lax');
+  return response;
 }
 
 
@@ -293,6 +406,39 @@ function handleDeploymentStatus(request) {
     hub_release: 'cosmic-hub-v9',
     service_worker_cache: 'cosmic-shell-v10'
   });
+}
+
+
+async function isMaintenanceMode(env) {
+  try {
+    const registry = env.USERNAME_REGISTRY;
+    const response = await registry.get(registry.idFromName('global')).fetch(
+      new Request('https://internal/state')
+    );
+    const data = await response.json();
+    return !!data.maintenance;
+  } catch (_) {
+    return false;
+  }
+}
+
+async function handleMaintenanceBypass(request, env) {
+  const authorization = request.headers.get('Authorization') || '';
+  return await verifyAdminSession(new Request(request.url, { headers: { Authorization: authorization } }), env);
+}
+
+async function handleSiteState(request, env) {
+  if (request.method !== 'GET') return jsonResponse(request, { ok: false }, 405);
+  const registry = env.USERNAME_REGISTRY;
+  return registry.get(registry.idFromName('global')).fetch(new Request(new URL('/state', request.url), request));
+}
+
+async function handleAdminSiteState(request, env) {
+  if (!(await verifyAdminSession(request, env))) return jsonResponse(request, { ok: false, error: 'unauthorized' }, 401);
+  const registry = env.USERNAME_REGISTRY;
+  return registry.get(registry.idFromName('global')).fetch(
+    new Request(new URL('/admin-site-state', request.url), request)
+  );
 }
 
 async function handleAdminAccounts(request, env) {
@@ -391,6 +537,8 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
     if (url.pathname === '/api/admin/session') return handleAdminSession(request, env);
     if (url.pathname === '/api/admin/accounts' || url.pathname === '/api/admin/account') return handleAdminAccounts(request, env);
+    if (url.pathname === '/api/site-state') return handleSiteState(request, env);
+    if (url.pathname === '/api/admin/site-state') return handleAdminSiteState(request, env);
     if (url.pathname === '/api/deployment-status') return handleDeploymentStatus(request);
     if (url.pathname === '/api/developer/sysinfo') return handleDeveloperSysinfo(request, env);
     if (url.pathname === '/api/hub-diagnostics') return handleHubDiagnostics(request, env);
@@ -403,6 +551,13 @@ export default {
     }
 
     if (request.method === 'GET' || request.method === 'HEAD') {
+      const maintenance = await isMaintenanceMode(env);
+      const bypass = maintenance ? await handleMaintenanceBypass(request, env) : false;
+      const isMaintenanceAsset = url.pathname === '/api/site-state' || url.pathname === '/api/admin/site-state' ||
+        /^(\/scripts\/cosmic-dev-tools\.js|\/worker\.js|\/sw\.js)$/i.test(url.pathname);
+      if (maintenance && !bypass && !isMaintenanceAsset && !url.pathname.startsWith('/api/')) {
+        return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cosmic • Maintenance</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050c12;color:#f2f7fa;font:16px system-ui,sans-serif;text-align:center}main{max-width:560px;padding:32px;border:1px solid #2dccff;border-radius:22px;background:#07131a;box-shadow:0 25px 80px rgba(0,0,0,.55)}h1{color:#2dccff}</style></head><body><main><div style="font-size:48px">☄</div><h1>Cosmic is under maintenance</h1><p>We're making updates right now. Please check back soon.</p></main></body></html>`,{status:503,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'no-store'}});
+      }
       const hub = await serveHub(request, env);
       if (hub) return hub;
       return fetchAsset(request, env);

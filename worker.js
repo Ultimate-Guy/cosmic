@@ -1,3 +1,5 @@
+const COSMIC_DEPLOYMENT_COMMIT = '__COSMIC_DEPLOYMENT_COMMIT__';
+
 const ALLOWED_ORIGINS = new Set([
   'https://ultimate-guy.github.io',
   'https://cosmicv2.v75ultimate.workers.dev'
@@ -32,6 +34,16 @@ async function handleAdminAuth(request, env) {
   const expected = env.COSMIC_ADMIN_PASSWORD;
   if (typeof expected !== 'string' || !expected) return jsonResponse(request, { ok: false, error: 'server-not-configured' }, 500);
   return jsonResponse(request, { ok: password === expected });
+}
+
+function handleDeploymentStatus(request) {
+  return jsonResponse(request, {
+    ok: true,
+    service: 'cosmicv2',
+    source_commit: COSMIC_DEPLOYMENT_COMMIT,
+    hub_release: 'cosmic-hub-v9',
+    service_worker_cache: 'cosmic-shell-v10'
+  });
 }
 
 async function handleAI(request, env) {
@@ -113,6 +125,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
+    if (url.pathname === '/api/deployment-status') return handleDeploymentStatus(request);
     if (url.pathname === '/api/ai') return handleAI(request, env);
     if (url.pathname === '/api/admin/auth' || url.pathname === '/api/admin-auth') return handleAdminAuth(request, env);
 

@@ -291,7 +291,12 @@ async function createAdminSession(secret) {
 async function verifyAdminSession(request, env) {
   const expected = env.COSMIC_ADMIN_PASSWORD;
   if (typeof expected !== 'string' || !expected) return false;
-  const authorization = request.headers.get('Authorization') || '';
+  let authorization = request.headers.get('Authorization') || '';
+  if (!authorization.startsWith('Bearer ')) {
+    const cookie = request.headers.get('Cookie') || '';
+    const match = cookie.match(/(?:^|;\s*)cosmic_admin_session=([^;]+)/);
+    if (match) authorization = 'Bearer ' + decodeURIComponent(match[1]);
+  }
   if (!authorization.startsWith('Bearer ')) return false;
   const token = authorization.slice(7).trim();
   const dot = token.indexOf('.');
@@ -317,7 +322,10 @@ async function handleAdminSession(request, env) {
   const expected = env.COSMIC_ADMIN_PASSWORD;
   if (typeof expected !== 'string' || !expected) return jsonResponse(request, { ok: false, error: 'server-not-configured' }, 500);
   if (password !== expected) return jsonResponse(request, { ok: false, error: 'invalid-password' }, 401);
-  return jsonResponse(request, { ok: true, token: await createAdminSession(expected) });
+  const token = await createAdminSession(expected);
+  const response = jsonResponse(request, { ok: true, token });
+  response.headers.append('Set-Cookie', 'cosmic_admin_session=' + encodeURIComponent(token) + '; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=Lax');
+  return response;
 }
 
 

@@ -41,6 +41,8 @@ def infer_category(name,metadata):
 def normalize_loaders(path,loaders):
     if not path.is_file():return
     text=path.read_text(encoding='utf-8'); original=text
+    if path==LESSONS_PAGE:
+        text=re.sub(r'\s*<script[^>]*src=["\\'][^"\\']*game-guard\\.js[^"\\']*["\\'][^>]*>\\s*</script>\\s*','\\n',text,flags=re.I)
     for filename,src in loaders.items():
         pattern=rf'<script\b[^>]*\bsrc=["\'][^"\']*{re.escape(filename)}(?:\?[^"\']*)?["\'][^>]*>\s*</script>'
         text=re.sub(pattern,f'<script src="{src}"></script>',text,flags=re.I)

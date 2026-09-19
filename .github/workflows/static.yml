@@ -160,12 +160,12 @@ jobs:
           python3 - <<'PY'
           import json, os, urllib.request
           expected=os.environ['EXPECTED_COMMIT']
-          url='https://cosmicv2.v75ultimate.workers.dev/deployment.json?verify='+expected
-          req=urllib.request.Request(url,headers={'Cache-Control':'no-cache','Pragma':'no-cache'})
+          url='https://cosmicv2.v75ultimate.workers.dev/api/deployment-status?verify='+expected
+          req=urllib.request.Request(url,headers={'Cache-Control':'no-cache','Pragma':'no-cache','User-Agent':'Cosmic-Deployment-Verification/1.0'})
           with urllib.request.urlopen(req,timeout=30) as r:
               data=json.load(r)
           if data.get('source_commit') != expected:
-              raise SystemExit(f'Cloudflare build mismatch. Expected {expected}, got {data}')
+              raise SystemExit(f'Cloudflare Worker build mismatch. Expected {expected}, got {data}')
           print(f'VERIFIED Cloudflare Worker build: {data}')
           PY
 

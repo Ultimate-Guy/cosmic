@@ -15,9 +15,9 @@
   }
   function isDeveloper() { return currentUser() === ADMIN_NAME; }
   function isGameContext() {
-    const path = location.pathname || '';
-    return /\/pages\/lessons\/game-shell\.html$/i.test(path)
-      || (/\/pages\/lessons\//i.test(path) && !/\/lessons\.html$/i.test(path));
+    // Developer controls are intentionally global: the authenticated developer
+    // menu should be available on the Hub, apps, settings, game shell, and games.
+    return true;
   }
   function showToast(message) {
     let t = document.getElementById('cosmic-dev-toast');

@@ -102,7 +102,7 @@ jobs:
           worker_text=worker.read_text(encoding='utf-8')
           worker_marker="const COSMIC_DEPLOYMENT_COMMIT = '__COSMIC_DEPLOYMENT_COMMIT__';"
           if worker_marker not in worker_text: raise SystemExit('Worker deployment marker is missing')
-          worker.write_text(worker_text.replace(worker_marker, f"const COSMIC_DEPLOYMENT_COMMIT = '{os.environ['GITHUB_SHA']}';"), encoding='utf-8')
+          worker.write_text(worker_text.replace(worker_marker, "const COSMIC_DEPLOYMENT_COMMIT = '${{ github.sha }}';"), encoding='utf-8')
 
           hub=site/'scripts/cosmic-hub.js'
           hub_text=hub.read_text(encoding='utf-8')

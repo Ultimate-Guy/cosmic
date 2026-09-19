@@ -5,6 +5,9 @@ on:
     branches: ["master"]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: write
   pages: write
@@ -132,21 +135,30 @@ jobs:
         with:
           path: '_site'
       - name: Deploy exact same build to Cloudflare Worker
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: '_site'
-          command: deploy --config wrangler.jsonc
-      - name: Confirm Cloudflare control-plane deployment
         working-directory: '_site'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
+          npx --yes wrangler@4 deploy --config wrangler.jsonc
+      - name: Verify Cloudflare deployment serves this build
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
           npx --yes wrangler@4 deployments list --name cosmicv2
-          echo 'Cloudflare control-plane deployment confirmed.'
+          python3 - <<'PY'
+          import json, os, urllib.request
+          expected=os.environ['EXPECTED_COMMIT']
+          url='https://cosmicv2.v75ultimate.workers.dev/deployment.json?verify='+expected
+          req=urllib.request.Request(url,headers={'Cache-Control':'no-cache','Pragma':'no-cache'})
+          with urllib.request.urlopen(req,timeout=30) as r:
+              data=json.load(r)
+          if data.get('source_commit') != expected:
+              raise SystemExit(f'Cloudflare build mismatch. Expected {expected}, got {data}')
+          print(f'VERIFIED Cloudflare Worker build: {data}')
+          PY
 
   deploy:
     needs: build

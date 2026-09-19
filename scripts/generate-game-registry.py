@@ -74,6 +74,10 @@ def clean_game_page(folder):
     cleaned=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
+    cleaned=re.sub(r'\s*<script[^>]*src=["\'][^"\']*cosmic-dev-tools\.js[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL)
+    dev_loader='<script src="../../scripts/cosmic-dev-tools.js?build=dev-commands"></script>'
+    if dev_loader not in cleaned:
+        cleaned=re.sub(r'</body>',dev_loader+'\n</body>',cleaned,count=1,flags=re.I) if re.search(r'</body>',cleaned,re.I) else cleaned+'\n'+dev_loader+'\n'
     # Game packages sometimes ship their own service-worker registration. Cosmic
     # owns the only service worker now; replace those calls with resolved promises
     # so the game code continues without registering another worker.

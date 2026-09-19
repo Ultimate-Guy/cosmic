@@ -1,3 +1,29 @@
+class UsernameRegistry {
+  constructor(state) {
+    this.state = state;
+    this.state.blockConcurrencyWhile(async () => {
+      await this.state.storage.sql.exec(
+        'CREATE TABLE IF NOT EXISTS usernames (username TEXT PRIMARY KEY, created_at INTEGER NOT NULL)'
+      );
+    });
+  }
+
+  async fetch(request) {
+    if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+    let body;
+    try { body = await request.json(); } catch { return new Response(JSON.stringify({ok:false,error:'invalid-json'}), {status:400,headers:{'Content-Type':'application/json'}}); }
+    const username = typeof body?.username === 'string' ? body.username.trim() : '';
+    if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) {
+      return new Response(JSON.stringify({ok:false,error:'invalid-username'}), {status:400,headers:{'Content-Type':'application/json'}});
+    }
+    const key = username.toLowerCase();
+    const row = await this.state.storage.sql.exec('SELECT username FROM usernames WHERE username = ?', key).one();
+    if (row) return new Response(JSON.stringify({ok:false,error:'taken'}), {status:409,headers:{'Content-Type':'application/json'}});
+    await this.state.storage.sql.exec('INSERT INTO usernames (username, created_at) VALUES (?, ?)', key, Date.now());
+    return new Response(JSON.stringify({ok:true,username}), {status:200,headers:{'Content-Type':'application/json'}});
+  }
+}
+
 const COSMIC_DEPLOYMENT_COMMIT = '__COSMIC_DEPLOYMENT_COMMIT__';
 
 const ALLOWED_ORIGINS = new Set([
@@ -168,6 +194,10 @@ export default {
     if (url.pathname === '/api/hub-diagnostics') return handleHubDiagnostics(request, env);
     if (url.pathname === '/api/ai') return handleAI(request, env);
     if (url.pathname === '/api/admin/auth' || url.pathname === '/api/admin-auth') return handleAdminAuth(request, env);
+    if (url.pathname === '/api/usernames/reserve' && request.method === 'POST') {
+      const id = env.USERNAME_REGISTRY.idFromName('global');
+      return env.USERNAME_REGISTRY.get(id).fetch(request);
+    }
 
     if (request.method === 'GET' || request.method === 'HEAD') {
       const hub = await serveHub(request, env);

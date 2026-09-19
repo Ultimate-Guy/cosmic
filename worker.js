@@ -400,6 +400,25 @@ function handleDeploymentStatus(request) {
   });
 }
 
+
+async function isMaintenanceMode(env) {
+  try {
+    const registry = env.USERNAME_REGISTRY;
+    const response = await registry.get(registry.idFromName('global')).fetch(
+      new Request('https://internal/state')
+    );
+    const data = await response.json();
+    return !!data.maintenance;
+  } catch (_) {
+    return false;
+  }
+}
+
+async function handleMaintenanceBypass(request, env) {
+  const authorization = request.headers.get('Authorization') || '';
+  return await verifyAdminSession(new Request(request.url, { headers: { Authorization: authorization } }), env);
+}
+
 async function handleSiteState(request, env) {
   if (request.method !== 'GET') return jsonResponse(request, { ok: false }, 405);
   const registry = env.USERNAME_REGISTRY;
@@ -524,6 +543,13 @@ export default {
     }
 
     if (request.method === 'GET' || request.method === 'HEAD') {
+      const maintenance = await isMaintenanceMode(env);
+      const bypass = maintenance ? await handleMaintenanceBypass(request, env) : false;
+      const isMaintenanceAsset = url.pathname === '/api/site-state' || url.pathname === '/api/admin/site-state' ||
+        /^(\/scripts\/cosmic-dev-tools\.js|\/worker\.js|\/sw\.js)$/i.test(url.pathname);
+      if (maintenance && !bypass && !isMaintenanceAsset && !url.pathname.startsWith('/api/')) {
+        return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cosmic • Maintenance</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050c12;color:#f2f7fa;font:16px system-ui,sans-serif;text-align:center}main{max-width:560px;padding:32px;border:1px solid #2dccff;border-radius:22px;background:#07131a;box-shadow:0 25px 80px rgba(0,0,0,.55)}h1{color:#2dccff}</style></head><body><main><div style="font-size:48px">☄</div><h1>Cosmic is under maintenance</h1><p>We're making updates right now. Please check back soon.</p></main></body></html>`,{status:503,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'no-store'}});
+      }
       const hub = await serveHub(request, env);
       if (hub) return hub;
       return fetchAsset(request, env);

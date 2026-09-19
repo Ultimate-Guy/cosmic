@@ -97,6 +97,13 @@ jobs:
           missing=[x for x in required if x not in text]
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
 
+          worker=site/'worker.js'
+          if not worker.is_file(): raise SystemExit('Missing worker.js')
+          worker_text=worker.read_text(encoding='utf-8')
+          worker_marker="const COSMIC_DEPLOYMENT_COMMIT = '__COSMIC_DEPLOYMENT_COMMIT__';"
+          if worker_marker not in worker_text: raise SystemExit('Worker deployment marker is missing')
+          worker.write_text(worker_text.replace(worker_marker, f"const COSMIC_DEPLOYMENT_COMMIT = '{os.environ['GITHUB_SHA']}';"), encoding='utf-8')
+
           hub=site/'scripts/cosmic-hub.js'
           hub_text=hub.read_text(encoding='utf-8')
           sw_path=site/'sw.js'

@@ -7,8 +7,8 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 LESSONS_DIR=ROOT/'pages'/'lessons'; OUTPUT=LESSONS_DIR/'games.json'; LESSONS_PAGE=LESSONS_DIR/'lessons.html'; APPS_PAGE=ROOT/'apps'/'apps.html'
 IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}; EXCLUDED_FOLDERS={'img','apps'}
-LESSONS_LOADERS={'cosmic-dev-loader.js':'../../scripts/cosmic-dev-loader.js?build=dev-commands','cosmic-hub.js':'../../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../../scripts/cosmic-admin-guard.js?v=3','cosmic-launch-fix.js':'../../scripts/cosmic-launch-fix.js?v=3','cosmic-feedback.js':'../../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../../scripts/cosmic-profile-widget.js?v=2'}
-APPS_LOADERS={'cosmic-dev-loader.js':'../scripts/cosmic-dev-loader.js?build=dev-commands','cosmic-hub.js':'../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../scripts/cosmic-admin-guard.js?v=3','cosmic-pwa.js':'../scripts/cosmic-pwa.js?v=3','cosmic-feedback.js':'../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../scripts/cosmic-profile-widget.js?v=2'}
+LESSONS_LOADERS={'cosmic-dev-tools.js':'../../scripts/cosmic-dev-tools.js?build=dev-commands','cosmic-hub.js':'../../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../../scripts/cosmic-admin-guard.js?v=3','cosmic-launch-fix.js':'../../scripts/cosmic-launch-fix.js?v=3','cosmic-feedback.js':'../../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../../scripts/cosmic-profile-widget.js?v=2'}
+APPS_LOADERS={'cosmic-dev-tools.js':'../scripts/cosmic-dev-tools.js?build=dev-commands','cosmic-hub.js':'../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../scripts/cosmic-admin-guard.js?v=3','cosmic-pwa.js':'../scripts/cosmic-pwa.js?v=3','cosmic-feedback.js':'../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../scripts/cosmic-profile-widget.js?v=2'}
 def display_name(folder_name):
     words=re.sub(r'([a-z])([A-Z])',r'\1 \2',folder_name); words=re.sub(r'[_-]+',' ',words).strip(); words=re.sub(r'\s+',' ',words); return words.title() or 'Untitled Game'
 def read_metadata(folder):
@@ -82,9 +82,9 @@ def clean_game_page(folder):
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script[^>]*src=["\'][^"\']*cosmic-dev-tools\.js[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL)
-    for loader in ('game-guard.js','cosmic-dev-loader.js'):
+    for loader in ('game-guard.js','cosmic-dev-loader.js','cosmic-dev-tools.js'):
         cleaned=re.sub(r'\s*<script[^>]*src=["\'][^"\']*'+re.escape(loader)+r'[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL)
-    insertion='\n<script src="../../scripts/game-guard.js?v=guard"></script>\n<script src="../../scripts/cosmic-dev-loader.js?build=dev-commands"></script>\n'
+    insertion='\n<script src="../../scripts/game-guard.js?v=guard"></script>\n<script src="../../scripts/cosmic-dev-tools.js?build=dev-commands"></script>\n'
     matches=list(re.finditer(r'</body>',cleaned,re.I))
     if matches:
         pos=matches[-1].start()

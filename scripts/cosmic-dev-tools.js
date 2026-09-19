@@ -94,7 +94,7 @@
     const style = document.createElement('style');
     style.id = 'cosmic-dev-tools-style';
     style.textContent = [
-      '#cosmic-dev-fab{position:fixed;left:12px;top:60px;z-index:2147483647;padding:9px 13px;border:2px solid #2dccff;border-radius:10px;background:#0d1a21;color:#2dccff;font:700 13px system-ui,sans-serif;cursor:grab;user-select:none;touch-action:none;box-shadow:0 5px 18px rgba(0,0,0,.55)}',
+      '#cosmic-dev-fab{position:fixed;left:12px;top:60px;z-index:2147483647;padding:6px 9px;border:2px solid #2dccff;border-radius:10px;background:#0d1a21;color:#2dccff;font:700 11px system-ui,sans-serif;cursor:grab;user-select:none;touch-action:none;box-shadow:0 5px 18px rgba(0,0,0,.55)}',
       '#cosmic-dev-fab:hover{background:#16303b}#cosmic-dev-fab:active{cursor:grabbing}',
       '#cosmic-dev-panel{position:fixed;left:12px;top:60px;z-index:2147483647;width:min(390px,calc(100vw - 24px));max-height:min(76vh,640px);overflow:auto;display:none;padding:14px;border:2px solid #2dccff;border-radius:16px;background:rgba(5,12,18,.97);color:#f2f7fa;box-shadow:0 24px 70px rgba(0,0,0,.65);backdrop-filter:blur(14px)}',
       '#cosmic-dev-panel.open{display:block}#cosmic-dev-panel .dev-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}',
@@ -489,6 +489,7 @@
 
   function createMenu(){
     if(!isDeveloper()||!isGameContext()||window.top!==window.self)return;
+    if(!document.body){document.addEventListener('DOMContentLoaded',createMenu,{once:true});return;}
     ensureStyle();
     if(document.getElementById('cosmic-dev-fab'))return;
     const fab=document.createElement('button');fab.id='cosmic-dev-fab';fab.type='button';fab.textContent='☄ Dev Commands';
@@ -507,8 +508,17 @@
   }
 
   ensureStyle();
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{if(isDeveloper())createMenu();},{once:true});
-  else if(isDeveloper())createMenu();
+  const bootDevMenu=()=>{
+    if(isDeveloper())createMenu();
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootDevMenu,{once:true});
+  else bootDevMenu();
+  // Keep the launcher available if another Cosmic script rebuilds the page body.
+  let devMenuObserver;
+  try {
+    devMenuObserver=new MutationObserver(()=>{if(isDeveloper()&&!document.getElementById('cosmic-dev-fab'))createMenu();});
+    devMenuObserver.observe(document.documentElement,{childList:true,subtree:true});
+  } catch (_) {}
 
   window.CosmicDevTools={isDeveloper,commands:COMMANDS,runCommand,getHubCommands,adminToken,showToast};
 })();

@@ -60,7 +60,7 @@ jobs:
           absent=[path for path in required_assets if not (site/path).is_file()]
           if absent: raise SystemExit('Cloudflare staging is missing hub assets: '+', '.join(absent))
 
-          local_assets={'cosmic-hub.js':build_tag,'cosmic-hub-preflight.js':build_tag,'cosmic-hub-repair.js':build_tag,'cosmic-admin-guard.js':build_tag,'cosmic-launch-fix.js':build_tag,'cosmic-feedback.js':build_tag,'cosmic-profile-widget.js':build_tag,'cosmic-pwa.js':build_tag,'settings-engine.js':build_tag}
+          local_assets={'cosmic-dev-tools.js':build_tag,'cosmic-hub.js':build_tag,'cosmic-hub-preflight.js':build_tag,'cosmic-hub-repair.js':build_tag,'cosmic-admin-guard.js':build_tag,'cosmic-launch-fix.js':build_tag,'cosmic-feedback.js':build_tag,'cosmic-profile-widget.js':build_tag,'cosmic-pwa.js':build_tag,'settings-engine.js':build_tag}
           script_pat=re.compile(r'(?P<prefix>(?:\.\./)+scripts/(?P<name>[^"\']+?\.js))(?:\?[^"\']*)?(?P<suffix>["\'])',re.I)
           settings_pat=re.compile(r'(?P<prefix>(?:\.\./)+settings/(?P<name>settings-engine\.js))(?:\?[^"\']*)?(?P<suffix>["\'])',re.I)
           for p in site.rglob('*'):

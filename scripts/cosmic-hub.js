@@ -12,8 +12,12 @@
   const ADMIN_NAME = 'TheDevilAngel';
   const root = document.documentElement;
   const path = location.pathname || '';
-  const isApps = /\/apps\/apps\.html$/i.test(path);
-  const isGames = /\/pages\/lessons\/lessons\.html$/i.test(path);
+  const pathIsApps = /\/apps\/apps\.html$/i.test(path);
+  const pathIsGames = /\/pages\/lessons\/lessons\.html$/i.test(path);
+  let isApps = pathIsApps;
+  let isGames = pathIsGames;
+  let bootStarted = false;
+  let bootRetry = null;
   const base = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
   const apiBase = location.origin;
   const safe = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -86,6 +90,15 @@
   function addTools(){const main=document.querySelector('main');if(!main||document.getElementById('cosmic-hub-tools'))return;const host=document.createElement('div');host.id='cosmic-hub-tools';const tools=document.createElement('div');tools.className='cosmic-filters';tools.innerHTML='<button class="cosmic-tool" id="cosmic-cmd">⌘ Command</button><button class="cosmic-tool" id="cosmic-theme-btn">Themes</button><button class="cosmic-tool" id="cosmic-help-btn">?</button><button class="cosmic-tool" id="cosmic-collections-btn">Collections</button><button class="cosmic-tool" id="cosmic-report">Report broken</button>';host.appendChild(tools);main.insertBefore(host,main.firstChild);document.getElementById('cosmic-cmd').onclick=commandPalette;document.getElementById('cosmic-theme-btn').onclick=themeModal;document.getElementById('cosmic-help-btn').onclick=helpModal;document.getElementById('cosmic-collections-btn').onclick=collectionsModal;document.getElementById('cosmic-report').onclick=feedbackBroken;}
   function wireExistingCards(){const list=isGames?games.map(x=>normalize({...x,kind:'game'})):apps.map(x=>normalize({...x,kind:'app'}));const cards=document.querySelectorAll(isGames?'.game-card':'.app-card');cards.forEach(card=>{const name=card.querySelector('.game-title,.app-title')?.textContent?.trim();const item=list.find(x=>x.name===name)||list.find(x=>x.name.toLowerCase()===String(name).toLowerCase());if(item)decorateCard(card,item,launchTarget(item));});}
   function installShortcuts(){document.addEventListener('keydown',e=>{const tag=(e.target?.tagName||'').toLowerCase();if(e.key==='Escape'){document.querySelectorAll('.cosmic-modal').forEach(x=>x.style.display='none');return;}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();commandPalette();return;}if(e.key==='/'&&!['input','textarea'].includes(tag)){e.preventDefault();const s=document.querySelector('#gamesearchinput,#search');if(s){s.focus();s.select();}else commandPalette();}if(e.key==='?'&&!['input','textarea'].includes(tag)){e.preventDefault();helpModal();}});}
-  async function boot(){if(!isGames&&!isApps)return;applyTheme();registerPwa();addAccountButton();addTools();filters();installShortcuts();const data=await Promise.all([getJson(base+'pages/lessons/games.json',[]),getJson(base+'apps/apps.json',[]),getJson(base+'collections.json',[])]);games=Array.isArray(data[0])?data[0]:[];apps=Array.isArray(data[1])?data[1]:[];collections=Array.isArray(data[2])?data[2]:[];allItems=buildItemData();mission();renderHubSections();const observer=new MutationObserver(()=>wireExistingCards());observer.observe(document.body,{childList:true,subtree:true});wireExistingCards();const search=document.querySelector('#gamesearchinput,#search');search?.addEventListener('input',()=>setTimeout(()=>wireExistingCards(),0));window.addEventListener('message',e=>{if(e.data?.type!=='cosmic-score')return;const name=e.data.name||document.title,id=`game:${name}`,p=profile();p.stats[id]=p.stats[id]||{};p.stats[id].lastScore=String(e.data.score??'').slice(0,40);const n=Number(e.data.score);if(Number.isFinite(n)&&(!Number.isFinite(Number(p.stats[id].highScore))||n>Number(p.stats[id].highScore)))p.stats[id].highScore=String(n);writeProfile(p);});}
+  async function boot(){
+    if (bootStarted) return;
+    isApps = isApps || !!document.getElementById('appsgrid');
+    isGames = isGames || !!document.getElementById('gamesgrid');
+    if(!isGames&&!isApps){
+      if (!bootRetry) bootRetry=setTimeout(()=>{bootRetry=null;boot();},800);
+      return;
+    }
+    bootStarted=true;
+    applyTheme();registerPwa();addAccountButton();addTools();filters();installShortcuts();const data=await Promise.all([getJson(base+'pages/lessons/games.json',[]),getJson(base+'apps/apps.json',[]),getJson(base+'collections.json',[])]);games=Array.isArray(data[0])?data[0]:[];apps=Array.isArray(data[1])?data[1]:[];collections=Array.isArray(data[2])?data[2]:[];allItems=buildItemData();mission();renderHubSections();const observer=new MutationObserver(()=>wireExistingCards());observer.observe(document.body,{childList:true,subtree:true});wireExistingCards();const search=document.querySelector('#gamesearchinput,#search');search?.addEventListener('input',()=>setTimeout(()=>wireExistingCards(),0));window.addEventListener('message',e=>{if(e.data?.type!=='cosmic-score')return;const name=e.data.name||document.title,id=`game:${name}`,p=profile();p.stats[id]=p.stats[id]||{};p.stats[id].lastScore=String(e.data.score??'').slice(0,40);const n=Number(e.data.score);if(Number.isFinite(n)&&(!Number.isFinite(Number(p.stats[id].highScore))||n>Number(p.stats[id].highScore)))p.stats[id].highScore=String(n);writeProfile(p);});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

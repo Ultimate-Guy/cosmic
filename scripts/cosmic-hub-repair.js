@@ -50,7 +50,7 @@
     const style = 'border:1px solid var(--accent,#2dccff);border-radius:999px;padding:8px 13px;background:rgba(0,0,0,.22);color:var(--accent,#2dccff);cursor:pointer;font-weight:700';
     const suggest = document.createElement('button');
     suggest.type = 'button'; suggest.style.cssText = style; suggest.textContent = '💡 Suggest a Game';
-    suggest.onclick = () => openIssue('Game suggestion for Cosmic', 'Suggest a game for Cosmic.\n\nSuggested game: \nWhy it would be good: \nSource/link (optional): ');
+    suggest.onclick = () => window.open('https://docs.google.com/forms/d/e/1FAIpQLSelUdV2ZsRrufoHV16KYsy1WpG6ecc4r5dugcrrTe1V7n6G9g/viewform?usp=publish-editor', '_blank', 'noopener,noreferrer');
 
     const report = document.createElement('button');
     report.type = 'button'; report.style.cssText = style; report.textContent = '⚠️ Report a Game';

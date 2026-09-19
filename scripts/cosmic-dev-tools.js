@@ -514,35 +514,6 @@
     document.body.classList.toggle(cls);showToast(document.body.classList.contains(cls)?message:message.replace('enabled','disabled'));
   }
 
-  const COMMANDS=[
-    ['/sysinfo','Safe Worker, edge, build, and configuration status'],
-    ['/toggledebug','Show local request timings, errors, and resource diagnostics'],
-    ['/flushcache','Clear local Cosmic caches without touching account data'],
-    ['/theme [name]','Preview a Cosmic theme locally'],
-    ['/hidedark','Toggle a light/contrast preview'],
-    ['/custombg [url]','Preview a background image locally'],
-    ['/mutegames','Mute page audio/video when accessible'],
-    ['/fullscreen','Toggle browser fullscreen'],
-    ['/screenshot','Capture the selected Cosmic tab/window'],
-    ['/stats','Show DOM, resource, timing, and JS heap stats'],
-    ['/announcement [text]','Show a local developer banner'],
-    ['/reload','Reload the current page'],
-    ['/home','Return to the Cosmic games Hub'],
-    ['/blacklist [url/game]','Block or unblock a game/URL site-wide'],
-    ['/feature [name]','Feature or unfeature a game'],
-    ['/maintenance','Toggle site maintenance mode'],
-    ['/import [json/url]','Import curated game/app entries'],
-    ['/disguise [preset]','Apply a local generic tab title/icon preset'],
-    ['/killtab','Attempt to close the current tab'],
-    ['/blanket','Show a password-unlocked local test error screen'],
-    ['/benchmark','Measure same-origin response timings'],
-    ['/exportdata','Download a local Cosmic settings backup'],
-    ['/zoom [percentage]','Scale the current page locally'],
-    ['/tilt','Toggle a subtle 3D tilt effect'],
-    ['/invert','Toggle color inversion'],
-    ['/retro','Toggle a CRT visual filter']
-  ];
-
   function getHubCommands(){
     return COMMANDS.map(([name,desc])=>[name,()=>{
       const command=name.split(' ')[0],args=name.includes('[')?window.prompt(name+' argument:','')||'':'';

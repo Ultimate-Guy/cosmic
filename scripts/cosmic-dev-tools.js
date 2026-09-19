@@ -60,34 +60,77 @@
     }
   }
 
-  const COMMAND_DESCRIPTIONS = {
-    '/sysinfo':'Shows authenticated Worker, edge, build, and configuration status without revealing secret values.',
-    '/toggledebug':'Turns the local diagnostic overlay on or off for request timings and JavaScript errors.',
-    '/flushcache':'Clears Cosmic browser caches and reloads the current page.',
-    '/theme':'Previews a Cosmic visual theme locally.',
-    '/hidedark':'Toggles a light/contrast preview for the current page.',
-    '/custombg':'Applies a background image locally until the page is reloaded.',
-    '/mutegames':'Mutes accessible audio and video on the current page.',
-    '/fullscreen':'Toggles browser fullscreen mode.',
-    '/screenshot':'Uses the browser screen-share picker to capture a selected Cosmic tab or window.',
-    '/stats':'Shows local DOM, resource timing, and JavaScript heap information when available.',
-    '/announcement':'Shows a temporary local developer announcement banner.',
-    '/reload':'Reloads the current page.',
-    '/home':'Returns to the Cosmic games Hub.',
-    '/blacklist':'Adds or removes a game or URL from the authenticated site-wide Cosmic block list.',
-    '/feature':'Adds or removes a game name from the authenticated featured list.',
-    '/maintenance':'Toggles authenticated site maintenance mode. The public site shows maintenance while developer access remains available.',
-    '/import':'Imports validated game/app entries into the authenticated server-side curation list.',
-    '/disguise':'Changes the current tab title and icon to a selected generic preset for local UI testing.',
-    '/killtab':'Attempts to close the current tab. Browsers may refuse this for tabs not opened by script.',
-    '/blanket':'Shows a full-page local test error screen. Unlocking requires the current developer password.',
-    '/benchmark':'Measures several same-origin requests and reports their local response timing.',
-    '/exportdata':'Downloads your local Cosmic profile, favorites, notes, and layout settings as JSON.',
-    '/zoom':'Applies a local page scale such as 80% or 125%.',
-    '/tilt':'Applies a subtle local 3D tilt effect.',
-    '/invert':'Inverts the current page colors locally.',
-    '/retro':'Applies a local CRT-style scanline visual filter.'
-  };
+  const COMMAND_GROUPS = [
+    {
+      title: '🌐 Global & Site-Wide',
+      commands: [
+        ['/home', 'Returns to the main Cosmic Games Hub so you can jump back into the site from anywhere.'],
+        ['/reload', 'Instantly reloads the current Cosmic page to test the latest local state and page startup behavior.'],
+        ['/announcement [text]', 'Shows a temporary Cosmic-wide developer banner at the top of the current page for quick maintenance or status testing.'],
+        ['/flushcache', 'Force-clears Cosmic browser caches and local site assets immediately so you can test the site from a clean client state.'],
+        ['/exportdata', 'Downloads a backup of your local Cosmic settings, favorites, notes, profile data, and layout preferences as a JSON file.']
+      ]
+    },
+    {
+      title: '📊 Debugging & System Status',
+      commands: [
+        ['/sysinfo', 'Displays the active Cloudflare Worker status, current edge data center, build timestamp, deployment commit, and configuration state without revealing secret values.'],
+        ['/toggledebug', 'Enables a floating diagnostic console that logs request timings, response statuses, JavaScript errors, and failed requests in real-time.'],
+        ['/benchmark', 'Runs a quick internal speed test against important Cosmic resources and reports the response time for each request.'],
+        ['/stats', 'Shows DOM size, resource load timings, average response time, and JavaScript heap usage when the browser exposes it.']
+      ]
+    },
+    {
+      title: '🎨 Personalization & Theme Controls',
+      commands: [
+        ['/theme [name]', 'Instantly previews a different Cosmic color theme so you can test the site with alternate palettes without editing the code.'],
+        ['/hidedark', 'Toggles a light/contrast preview so you can quickly test how Cosmic looks outside of its normal dark theme.'],
+        ['/custombg [url]', 'Applies a custom background image locally so you can preview new Cosmic backgrounds without changing the deployed site.'],
+        ['/disguise [preset]', 'Changes the current tab title and favicon to a selected generic preset for local interface testing.'],
+        ['/zoom [percentage]', 'Forces the current Cosmic page to a specific scale such as 80% or 125% to test responsive layouts on different displays.']
+      ]
+    },
+    {
+      title: '🛡️ Moderation & User Control',
+      commands: [
+        ['/blacklist [url/game]', 'Adds or removes a game or URL from Cosmic’s authenticated site-wide block list so you can quickly control broken or unwanted content.'],
+        ['/feature [name]', 'Adds or removes a game from the server-side featured list so you can control which content is highlighted.'],
+        ['/maintenance', 'Instantly toggles Cosmic maintenance mode so normal visitors receive the maintenance screen while your authenticated developer session can continue working.'],
+        ['/import [json/url]', 'Imports validated game or app entries into Cosmic’s server-side curation data without rewriting the GitHub repository.']
+      ]
+    },
+    {
+      title: '🕹️ Games & Experience',
+      commands: [
+        ['/mutegames', 'Instantly mutes accessible audio and video on the current Cosmic page, including media that a game exposes to its document.'],
+        ['/fullscreen', 'Forces the current Cosmic page into browser fullscreen mode for testing game canvases, layouts, and immersive experiences.'],
+        ['/screenshot', 'Captures the selected Cosmic tab or window through the browser capture prompt and saves the result as an image.'],
+        ['/killtab', 'Attempts to close the current browser tab when the browser permits scripted tab closing.'],
+        ['/blanket', 'Wraps the current Cosmic page in a large local developer test error screen that can be unlocked with the developer password.']
+      ]
+    },
+    {
+      title: '⚡ Site Performance & Utility',
+      commands: [
+        ['/toggledebug', 'Turns the live diagnostics overlay on or off so you can inspect request timing and page errors while testing Cosmic.'],
+        ['/flushcache', 'Clears the local Cosmic cache and reloads the page so you can verify behavior without stale browser assets.'],
+        ['/exportdata', 'Creates a portable backup of the Cosmic data stored in this browser before you make changes or clear local storage.']
+      ]
+    },
+    {
+      title: '🎭 Secret Easter Eggs & Fun',
+      commands: [
+        ['/tilt', 'Applies a subtle CSS 3D tilt to the current page, giving Cosmic a slightly askew visual effect.'],
+        ['/invert', 'Inverts the current page colors for a quick glitch/cyberpunk visual effect.'],
+        ['/retro', 'Applies a CRT-style scanline filter to the page for a grainy, glowing arcade look.']
+      ]
+    }
+  ];
+
+  const COMMAND_DESCRIPTIONS = Object.fromEntries(
+    COMMAND_GROUPS.flatMap(group => group.commands)
+  );
+  const COMMANDS = COMMAND_GROUPS.flatMap(group => group.commands);
 
   function ensureStyle() {
     if (document.getElementById('cosmic-dev-tools-style')) return;
@@ -100,24 +143,25 @@
       '#cosmic-dev-panel.open{display:block}#cosmic-dev-panel .dev-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}',
       '#cosmic-dev-panel .dev-head strong{margin-right:auto;color:#2dccff;letter-spacing:.4px}.dev-close{width:32px;height:32px;padding:0;border-radius:9px;border:1px solid rgba(45,204,255,.5);background:rgba(45,204,255,.08);color:#2dccff;font-size:20px;cursor:pointer}',
       '#cosmic-dev-panel .dev-command{display:block;width:100%;margin:7px 0;padding:10px 11px;border:1px solid rgba(45,204,255,.28);border-radius:11px;background:rgba(45,204,255,.05);color:#f2f7fa;text-align:left;cursor:pointer}',
-      '#cosmic-dev-panel .dev-command:hover{background:rgba(45,204,255,.13)}#cosmic-dev-panel .dev-command b{display:block;color:#2dccff}#cosmic-dev-panel .dev-command small{display:block;margin-top:3px;color:#9fb1bc}',
+      '#cosmic-dev-panel .dev-command:hover{background:rgba(45,204,255,.13)}#cosmic-dev-panel .dev-command b{display:block;color:#2dccff}#cosmic-dev-panel .dev-command small{display:block;margin-top:3px;color:#9fb1bc}',\n      '#cosmic-dev-panel .dev-group-title{margin:14px 2px 6px;color:#2dccff;font:800 12px system-ui,sans-serif;letter-spacing:.6px;text-transform:none}.cosmic-dev-group:first-child .dev-group-title{margin-top:2px}',
       '#cosmic-dev-overlay{position:fixed;right:12px;bottom:12px;z-index:2147483646;width:min(520px,94vw);max-height:44vh;overflow:auto;padding:12px;border:1px solid #2dccff;border-radius:14px;background:rgba(2,7,11,.96);color:#eaf8ff;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 15px 60px rgba(0,0,0,.58)}',
       '#cosmic-dev-overlay .row{padding:5px 0;border-bottom:1px solid rgba(45,204,255,.12);white-space:pre-wrap;word-break:break-word}.cosmic-dev-tilt{transform:perspective(1200px) rotateX(.35deg) rotateY(-.35deg);transform-origin:center top}.cosmic-dev-invert{filter:invert(1) hue-rotate(180deg)}.cosmic-dev-retro{position:relative}.cosmic-dev-retro:after{content:"";position:fixed;inset:0;z-index:2147483643;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.0) 0,rgba(0,0,0,.0) 2px,rgba(0,0,0,.10) 3px,rgba(0,0,0,.10) 4px);mix-blend-mode:multiply}.cosmic-dev-light-preview{background:#eef4f7!important;color:#102028!important}.cosmic-dev-light-preview a{color:#084f70!important}'
     ].join('');
     document.head.appendChild(style);
   }
 
-  function dragElement(el) {
+  function dragElement(el, handle=el) {
     if (!el || el.__cosmicDevDrag) return;
     el.__cosmicDevDrag = true;
     let dragging=false,moved=false,startX=0,startY=0,startLeft=0,startTop=0;
-    el.addEventListener('pointerdown', e => {
+    handle.addEventListener('pointerdown', e => {
       if (e.button !== undefined && e.button !== 0) return;
       const r=el.getBoundingClientRect();
       dragging=true;moved=false;startX=e.clientX;startY=e.clientY;startLeft=r.left;startTop=r.top;
-      el.style.cursor='grabbing';el.setPointerCapture?.(e.pointerId);e.preventDefault();
+      handle.style.cursor='grabbing';
+      handle.setPointerCapture?.(e.pointerId);
     });
-    el.addEventListener('pointermove', e => {
+    handle.addEventListener('pointermove', e => {
       if(!dragging)return;
       const dx=e.clientX-startX,dy=e.clientY-startY;
       if(!moved&&(Math.abs(dx)>4||Math.abs(dy)>4))moved=true;
@@ -129,13 +173,13 @@
         e.preventDefault();
       }
     });
-    el.addEventListener('pointerup', e => {
+    handle.addEventListener('pointerup', e => {
       if(!dragging)return;
-      dragging=false;el.style.cursor='grab';
-      if(el.releasePointerCapture?.(e.pointerId)&&el.hasPointerCapture?.(e.pointerId))el.releasePointerCapture(e.pointerId);
-      if(moved)el.dataset.dragged='1';
+      dragging=false;handle.style.cursor='grab';
+      if(handle.releasePointerCapture?.(e.pointerId)&&handle.hasPointerCapture?.(e.pointerId))handle.releasePointerCapture(e.pointerId);
+      if(moved)handle.dataset.dragged='1';
     });
-    el.addEventListener('pointercancel',()=>{dragging=false;el.style.cursor='grab';});
+    handle.addEventListener('pointercancel',()=>{dragging=false;handle.style.cursor='grab';});
   }
 
   function openPanelFromFab() {
@@ -492,19 +536,54 @@
     if(!document.body){document.addEventListener('DOMContentLoaded',createMenu,{once:true});return;}
     ensureStyle();
     if(document.getElementById('cosmic-dev-fab'))return;
-    const fab=document.createElement('button');fab.id='cosmic-dev-fab';fab.type='button';fab.textContent='☄ Dev Commands';
+
+    const fab=document.createElement('button');
+    fab.id='cosmic-dev-fab';
+    fab.type='button';
+    fab.textContent='☄ Dev Commands';
     fab.setAttribute('aria-label','Open Cosmic developer commands');
-    const panel=document.createElement('div');panel.id='cosmic-dev-panel';
+
+    const panel=document.createElement('div');
+    panel.id='cosmic-dev-panel';
     panel.innerHTML='<div class="dev-head"><strong>☄ Cosmic Developer</strong><button class="dev-close" type="button" aria-label="Close developer commands">×</button></div>';
-    COMMANDS.forEach(([name,desc])=>{
-      const b=document.createElement('button');b.type='button';b.className='dev-command';
-      b.innerHTML='<b>'+safe(name)+'</b><small>'+safe(desc)+'</small>';
-      b.onclick=()=>{const command=name.split(' ')[0],args=name.includes('[')?window.prompt(name+' argument:','')||'':'';confirmedRunCommand(command,args);};
-      panel.appendChild(b);
+
+    COMMAND_GROUPS.forEach(group=>{
+      const section=document.createElement('section');
+      section.className='cosmic-dev-group';
+      const heading=document.createElement('div');
+      heading.className='dev-group-title';
+      heading.textContent=group.title;
+      section.appendChild(heading);
+
+      group.commands.forEach(([name,desc])=>{
+        const b=document.createElement('button');
+        b.type='button';
+        b.className='dev-command';
+        b.innerHTML='<b>'+safe(name)+'</b><small>'+safe(desc)+'</small>';
+        b.onclick=()=>{
+          const command=name.split(' ')[0];
+          const args=name.includes('[')?window.prompt(name+' argument:','')||'':'';
+          confirmedRunCommand(command,args);
+        };
+        section.appendChild(b);
+      });
+      panel.appendChild(section);
     });
-    document.body.append(fab,panel);dragElement(fab);dragElement(panel);
-    fab.addEventListener('click',e=>{if(fab.dataset.dragged==='1'){fab.dataset.dragged='0';return;}openPanelFromFab();});
-    panel.querySelector('.dev-close').onclick=closePanel;
+
+    document.body.append(fab,panel);
+    dragElement(fab);
+    const header=panel.querySelector('.dev-head');
+    if(header)dragElement(panel,header);
+
+    fab.addEventListener('click',e=>{
+      if(fab.dataset.dragged==='1'){fab.dataset.dragged='0';return;}
+      openPanelFromFab();
+    });
+    panel.querySelector('.dev-close').addEventListener('click',e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      closePanel();
+    });
   }
 
   ensureStyle();

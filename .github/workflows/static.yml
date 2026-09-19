@@ -86,8 +86,10 @@ jobs:
               depth=len(p.relative_to(site).parent.parts)
               prefix='../'*depth
               tag=f'<script src="{prefix}{dev_loader_name}?build={build_tag}"></script>'
-              if re.search(r'</body>',value,re.I):
-                  value=re.sub(r'</body>',tag+'\\n</body>',value,count=1,flags=re.I)
+              matches=list(re.finditer(r'</body>',value,re.I))
+              if matches:
+                  pos=matches[-1].start()
+                  value=value[:pos]+tag+'\\n'+value[pos:]
               else:
                   value += '\\n'+tag+'\\n'
               p.write_text(value,encoding='utf-8')

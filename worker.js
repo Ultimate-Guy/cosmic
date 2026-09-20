@@ -638,7 +638,8 @@ async function handleAdminGlobal(request, env) {
   const analyticsActions = new Set(['account','online','recentusers','userstats','activitylog','topgames','recentgames']);
   if (analyticsActions.has(action)) {
     const registry = env.USERNAME_REGISTRY;
-    return registry.get(registry.idFromName('global')).fetch(new Request('https://internal/analytics'));
+    const internal = await registry.get(registry.idFromName('global')).fetch(new Request('https://internal/analytics'));
+    return jsonResponse(request, await internal.json(), internal.status);
   }
   if (action === 'gamecount' || action === 'gameinfo') {
     const readAsset = async path => {
@@ -677,7 +678,8 @@ async function handleAdminGlobal(request, env) {
   // All remaining global mutation commands share the Durable Object-backed site state.
   const registry=env.USERNAME_REGISTRY;
   const forwarded=new Request(new URL('/admin-site-state',request.url),{method:'POST',headers:request.headers,body:JSON.stringify(body)});
-  return registry.get(registry.idFromName('global')).fetch(forwarded);
+  const internal=await registry.get(registry.idFromName('global')).fetch(forwarded);
+  return jsonResponse(request, await internal.json(), internal.status);
 }
 
 async function handleAI(request, env) {

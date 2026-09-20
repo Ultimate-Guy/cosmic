@@ -88,6 +88,29 @@ class UsernameRegistry {
     });
   }
 
+  async analytics() {
+    const accounts = await this.state.storage.sql.exec(
+      'SELECT username, created_at FROM accounts ORDER BY created_at DESC'
+    ).toArray();
+    const activity = await this.state.storage.sql.exec(
+      'SELECT username, game_name, opens, last_opened FROM activity ORDER BY last_opened DESC LIMIT 1000'
+    ).toArray();
+    const topGames = await this.state.storage.sql.exec(
+      'SELECT game_name, COALESCE(SUM(opens), 0) AS opens, COUNT(DISTINCT username) AS users, MAX(last_opened) AS last_opened FROM activity GROUP BY game_name ORDER BY opens DESC LIMIT 100'
+    ).toArray();
+    const recentUsers = await this.state.storage.sql.exec(
+      'SELECT username, MAX(last_opened) AS last_opened, COUNT(DISTINCT game_name) AS games, COALESCE(SUM(opens), 0) AS opens FROM activity GROUP BY username ORDER BY last_opened DESC LIMIT 100'
+    ).toArray();
+    return this.json({
+      ok: true,
+      account_count: accounts.length,
+      accounts: accounts.map(a => ({ username: a.username, created_at: Number(a.created_at) })),
+      activity: activity.map(a => ({ username: a.username, game_name: a.game_name, opens: Number(a.opens), last_opened: Number(a.last_opened) })),
+      top_games: topGames.map(a => ({ game_name: a.game_name, opens: Number(a.opens), users: Number(a.users), last_opened: Number(a.last_opened) })),
+      recent_users: recentUsers.map(a => ({ username: a.username, last_opened: Number(a.last_opened), games: Number(a.games), opens: Number(a.opens) }))
+    });
+  }
+
   async adminDetail(username) {
     const key = username.toLowerCase();
     const account = await this.state.storage.sql.exec(
@@ -126,7 +149,9 @@ class UsernameRegistry {
       featured: parse('featured', []),
       maintenance: !!parse('maintenance', false),
       imported: parse('imported', []),
-      announcement: parse('announcement', null)
+      announcement: parse('announcement', null),
+      maintenance_message: parse('maintenance_message', ''),
+      global: parse('global_state', {})
     });
   }
 
@@ -190,7 +215,14 @@ class UsernameRegistry {
 
     if (action === 'maintenance_toggle') {
       const current = !!await read('maintenance', false);
-      await write('maintenance', !current);
+      const enabled = !current;
+      await write('maintenance', enabled);
+      const message = typeof body?.message === 'string' ? body.message.trim().slice(0, 500) : '';
+      if (enabled && message) await write('maintenance_message', message);
+      if (!enabled) await write('maintenance_message', '');
+      const global = await read('global_state', {});
+      global.mode = { value: enabled ? 'maintenance' : 'normal', created_at: Date.now() };
+      await write('global_state', global);
       return this.siteState();
     }
 
@@ -222,6 +254,125 @@ class UsernameRegistry {
       return this.siteState();
     }
 
+    if (action === 'global_notice_set' || action === 'site_banner_set' || action === 'global_message_set' || action === 'broadcast_set') {
+      const text = typeof body?.text === 'string' ? body.text.trim().slice(0, 1000) : '';
+      if (!text) return this.json({ ok: false, error: 'missing-text' }, 400);
+      const keyMap = { global_notice_set: 'global_notice', site_banner_set: 'site_banner', global_message_set: 'global_message', broadcast_set: 'broadcast' };
+      const key = keyMap[action];
+      const global = await read('global_state', {});
+      global[key] = { text, created_at: Date.now() };
+      await write('global_state', global);
+      return this.siteState();
+    }
+
+    if (action === 'global_notice_clear' || action === 'site_banner_clear' || action === 'global_message_clear' || action === 'broadcast_clear' || action === 'global_badge_clear' || action === 'spotlight_clear' || action === 'countdown_clear') {
+      const keyMap = {
+        global_notice_clear: 'global_notice', site_banner_clear: 'site_banner', global_message_clear: 'global_message',
+        broadcast_clear: 'broadcast', global_badge_clear: 'global_badge', spotlight_clear: 'spotlight', countdown_clear: 'countdown'
+      };
+      const global = await read('global_state', {});
+      delete global[keyMap[action]];
+      await write('global_state', global);
+      return this.siteState();
+    }
+
+    if (action === 'sitemode_set' || action === 'global_theme_set' || action === 'global_badge_set' || action === 'spotlight_set' || action === 'countdown_set' || action === 'event_set' || action === 'event_message' || action === 'event_timer' || action === 'gameannounce_set' || action === 'disabled_game_toggle' || action === 'maintenance_set') {
+      const global = await read('global_state', {});
+      if (action === 'sitemode_set') {
+        const mode = typeof body?.mode === 'string' ? body.mode.trim().slice(0, 40) : '';
+        if (!mode) return this.json({ ok: false, error: 'missing-mode' }, 400);
+        global.mode = { value: mode, created_at: Date.now() };
+      } else if (action === 'global_theme_set') {
+        const theme = typeof body?.theme === 'string' ? body.theme.trim().toLowerCase() : '';
+        if (!['nebula','deep-space','solar-flare','synthwave'].includes(theme)) return this.json({ ok: false, error: 'invalid-theme' }, 400);
+        global.theme = { value: theme, created_at: Date.now() };
+      } else if (action === 'global_badge_set') {
+        const text = typeof body?.text === 'string' ? body.text.trim().slice(0, 120) : '';
+        if (!text) return this.json({ ok: false, error: 'missing-text' }, 400);
+        global.global_badge = { text, created_at: Date.now() };
+      } else if (action === 'spotlight_set') {
+        const name = typeof body?.name === 'string' ? body.name.trim().slice(0, 160) : '';
+        if (!name) return this.json({ ok: false, error: 'missing-name' }, 400);
+        global.spotlight = { name, created_at: Date.now() };
+      } else if (action === 'countdown_set') {
+        const minutes = Number(body?.minutes);
+        const target = Number(body?.target);
+        const label = typeof body?.label === 'string' ? body.label.trim().slice(0, 160) : 'Countdown';
+        const end = Number.isFinite(target) && target > Date.now() ? target : (Number.isFinite(minutes) && minutes > 0 ? Date.now() + Math.min(minutes, 7 * 24 * 60) * 60000 : 0);
+        if (!end) return this.json({ ok: false, error: 'invalid-countdown' }, 400);
+        global.countdown = { label, target: end, created_at: Date.now() };
+      } else if (action === 'event_set') {
+        const name = typeof body?.name === 'string' ? body.name.trim().slice(0, 160) : '';
+        if (!name) return this.json({ ok: false, error: 'missing-name' }, 400);
+        global.event = { name, message: typeof body?.message === 'string' ? body.message.trim().slice(0, 500) : '', target: Number(body?.target) > Date.now() ? Number(body.target) : null, created_at: Date.now() };
+      } else if (action === 'event_message') {
+        if (!global.event) return this.json({ ok: false, error: 'no-event' }, 400);
+        global.event.message = typeof body?.message === 'string' ? body.message.trim().slice(0, 500) : '';
+        global.event.updated_at = Date.now();
+      } else if (action === 'event_timer') {
+        if (!global.event) return this.json({ ok: false, error: 'no-event' }, 400);
+        const minutes = Number(body?.minutes); const target = Number(body?.target);
+        const end = Number.isFinite(target) && target > Date.now() ? target : (Number.isFinite(minutes) && minutes > 0 ? Date.now() + Math.min(minutes, 7 * 24 * 60) * 60000 : 0);
+        if (!end) return this.json({ ok: false, error: 'invalid-timer' }, 400);
+        global.event.target = end; global.event.updated_at = Date.now();
+      } else if (action === 'gameannounce_set') {
+        const game = typeof body?.game === 'string' ? body.game.trim().slice(0, 160) : '';
+        const text = typeof body?.text === 'string' ? body.text.trim().slice(0, 500) : '';
+        if (!game || !text) return this.json({ ok: false, error: 'missing-game-or-text' }, 400);
+        const list = Array.isArray(global.game_announcements) ? global.game_announcements : [];
+        const key = game.toLowerCase();
+        const idx = list.findIndex(x => String(x?.game || '').toLowerCase() === key);
+        const entry = { game, text, created_at: Date.now() };
+        if (idx >= 0) list[idx] = entry; else list.push(entry);
+        global.game_announcements = list.slice(-100);
+      } else if (action === 'disabled_game_toggle') {
+        const name = typeof body?.name === 'string' ? body.name.trim().slice(0, 160) : '';
+        if (!name) return this.json({ ok: false, error: 'missing-name' }, 400);
+        const list = Array.isArray(global.disabled_games) ? global.disabled_games : [];
+        const idx = list.findIndex(x => String(x).toLowerCase() === name.toLowerCase());
+        if (idx >= 0) list.splice(idx, 1); else list.push(name);
+        global.disabled_games = list.slice(-250);
+      } else if (action === 'maintenance_set') {
+        const enabled = body?.enabled !== false;
+        global.mode = { value: enabled ? 'maintenance' : 'normal', created_at: Date.now() };
+        await write('maintenance', enabled);
+        await write('maintenance_message', typeof body?.message === 'string' ? body.message.trim().slice(0, 500) : '');
+      }
+      await write('global_state', global);
+      return this.siteState();
+    }
+
+    if (action === 'event_end') {
+      const global = await read('global_state', {});
+      delete global.event;
+      delete global.countdown;
+      await write('global_state', global);
+      return this.siteState();
+    }
+
+    if (action === 'featured_rotate') {
+      const list = await read('featured', []);
+      if (list.length > 1) list.push(list.shift());
+      await write('featured', list);
+      const global = await read('global_state', {});
+      global.spotlight = list[0] ? { name: String(list[0].name || ''), created_at: Date.now() } : undefined;
+      await write('global_state', global);
+      return this.siteState();
+    }
+
+    if (action === 'global_refresh' || action === 'sync_signal') {
+      const global = await read('global_state', {});
+      global[action === 'global_refresh' ? 'global_refresh' : 'sync_signal'] = Date.now();
+      await write('global_state', global);
+      return this.siteState();
+    }
+
+    if (action === 'clearall') {
+      const keys = ['blacklisted','featured','maintenance','maintenance_message','imported','announcement','global_state'];
+      for (const key of keys) await write(key, key === 'maintenance' ? false : key === 'global_state' ? {} : key === 'maintenance_message' ? '' : key === 'announcement' ? null : []);
+      return this.siteState();
+    }
+
     return this.json({ ok: false, error: 'unknown-action' }, 400);
   }
 
@@ -238,6 +389,7 @@ class UsernameRegistry {
     if (url.pathname === '/activity' && request.method === 'POST') return this.activity(request);
     if (url.pathname === '/list' && request.method === 'GET') return this.adminList();
     if (url.pathname === '/detail' && request.method === 'GET') return this.adminDetail(url.searchParams.get('username') || '');
+    if (url.pathname === '/analytics' && request.method === 'GET') return this.analytics();
     if (url.pathname === '/state' && request.method === 'GET') return this.siteState();
     if (url.pathname === '/admin-site-state' && request.method === 'POST') return this.adminSiteState(request);
     return this.json({ ok: false, error: 'not-found' }, 404);
@@ -422,6 +574,15 @@ function handleDeploymentStatus(request) {
 }
 
 
+async function getMaintenanceMessage(env) {
+  try {
+    const registry = env.USERNAME_REGISTRY;
+    const response = await registry.get(registry.idFromName('global')).fetch(new Request('https://internal/state'));
+    const data = await response.json();
+    return typeof data.maintenance_message === 'string' ? data.maintenance_message.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) : '';
+  } catch (_) { return ''; }
+}
+
 async function isMaintenanceMode(env) {
   try {
     const registry = env.USERNAME_REGISTRY;
@@ -467,6 +628,56 @@ async function handleAdminAccounts(request, env) {
     return registry.get(id).fetch(new Request(new URL('/detail?username=' + encodeURIComponent(username), request.url), request));
   }
   return jsonResponse(request, { ok: false, error: 'not-found' }, 404);
+}
+
+async function handleAdminGlobal(request, env) {
+  if (!(await verifyAdminSession(request, env))) return jsonResponse(request, { ok: false, error: 'unauthorized' }, 401);
+  let body;
+  try { body = await request.json(); } catch { return jsonResponse(request, { ok: false, error: 'invalid-json' }, 400); }
+  const action = typeof body?.action === 'string' ? body.action : '';
+  const analyticsActions = new Set(['account','online','recentusers','userstats','activitylog','topgames','recentgames']);
+  if (analyticsActions.has(action)) {
+    const registry = env.USERNAME_REGISTRY;
+    return registry.get(registry.idFromName('global')).fetch(new Request('https://internal/analytics'));
+  }
+  if (action === 'gamecount' || action === 'gameinfo') {
+    const readAsset = async path => {
+      try {
+        const response = await env.ASSETS.fetch(new Request(new URL(path, request.url)));
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+      } catch (_) { return []; }
+    };
+    const [games,apps] = await Promise.all([readAsset('/pages/lessons/games.json'),readAsset('/apps/apps.json')]);
+    if (action === 'gamecount') return jsonResponse(request,{ok:true,games:games.length,apps:apps.length,total:games.length+apps.length});
+    const name = typeof body?.name === 'string' ? body.name.trim().toLowerCase() : '';
+    const item = [...games.map(x=>({...x,kind:'game'})),...apps.map(x=>({...x,kind:'app'}))].find(x=>String(x.name||'').toLowerCase()===name);
+    const registry = env.USERNAME_REGISTRY;
+    const analytics = await registry.get(registry.idFromName('global')).fetch(new Request('https://internal/analytics')).then(r=>r.json());
+    const stats = (analytics.top_games||[]).find(x=>String(x.game_name||'').toLowerCase()===name) || null;
+    return jsonResponse(request,{ok:true,item:item||null,stats});
+  }
+  if (action === 'status' || action === 'version' || action === 'deployinfo' || action === 'sysinfo') return handleDeveloperSysinfo(request,env);
+  if (action === 'routes') return jsonResponse(request,{ok:true,routes:['/api/site-state','/api/admin/site-state','/api/admin/global','/api/admin/accounts','/api/admin/account','/api/developer/sysinfo','/api/deployment-status','/api/hub-diagnostics','/api/ai']});
+  if (action === 'assets') return jsonResponse(request,{ok:true,bindings:{ASSETS:!!env.ASSETS,USERNAME_REGISTRY:!!env.USERNAME_REGISTRY},notes:'Static assets are served through the configured Workers Assets binding.'});
+  if (action === 'healthcheck' || action === 'diagnostics') {
+    const started=Date.now();
+    const checks=[];
+    try { const r=await fetch(new URL('/api/deployment-status',request.url),{cache:'no-store'}); checks.push({name:'deployment-status',status:r.status,ok:r.ok}); } catch(e){ checks.push({name:'deployment-status',status:0,ok:false,error:String(e)}); }
+    try { const reg=env.USERNAME_REGISTRY; const r=await reg.get(reg.idFromName('global')).fetch(new Request('https://internal/state')); checks.push({name:'username-registry',status:r.status,ok:r.ok}); } catch(e){ checks.push({name:'username-registry',status:0,ok:false,error:String(e)}); }
+    return jsonResponse(request,{ok:checks.every(x=>x.ok),duration_ms:Date.now()-started,checks});
+  }
+  if (action === 'latency') {
+    const started=Date.now();
+    try { const r=await fetch(new URL('/api/deployment-status',request.url),{cache:'no-store'}); return jsonResponse(request,{ok:r.ok,status:r.status,latency_ms:Date.now()-started}); }
+    catch(e){ return jsonResponse(request,{ok:false,latency_ms:Date.now()-started,error:String(e)},502); }
+  }
+  if (action === 'cacheinfo' || action === 'errors' || action === 'requests') return jsonResponse(request,{ok:true,scope:'local',note: action==='cacheinfo'?'Browser cache data is local to the current device.':'Historical browser request/error logs are not stored by Cosmic; use /toggledebug for live local request/error capture.'});
+
+  // All remaining global mutation commands share the Durable Object-backed site state.
+  const registry=env.USERNAME_REGISTRY;
+  const forwarded=new Request(new URL('/admin-site-state',request.url),{method:'POST',headers:request.headers,body:JSON.stringify(body)});
+  return registry.get(registry.idFromName('global')).fetch(forwarded);
 }
 
 async function handleAI(request, env) {
@@ -552,6 +763,7 @@ export default {
     if (url.pathname === '/api/admin/accounts' || url.pathname === '/api/admin/account') return handleAdminAccounts(request, env);
     if (url.pathname === '/api/site-state') return handleSiteState(request, env);
     if (url.pathname === '/api/admin/site-state') return handleAdminSiteState(request, env);
+    if (url.pathname === '/api/admin/global') return handleAdminGlobal(request, env);
     if (url.pathname === '/api/deployment-status') return handleDeploymentStatus(request);
     if (url.pathname === '/api/developer/sysinfo') return handleDeveloperSysinfo(request, env);
     if (url.pathname === '/api/hub-diagnostics') return handleHubDiagnostics(request, env);
@@ -569,7 +781,7 @@ export default {
       const isMaintenanceAsset = url.pathname === '/api/site-state' || url.pathname === '/api/admin/site-state' ||
         /^(\/scripts\/cosmic-dev-tools\.js|\/worker\.js|\/sw\.js)$/i.test(url.pathname);
       if (maintenance && !bypass && !isMaintenanceAsset && !url.pathname.startsWith('/api/')) {
-        return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cosmic • Maintenance</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050c12;color:#f2f7fa;font:16px system-ui,sans-serif;text-align:center}main{max-width:560px;padding:32px;border:1px solid #2dccff;border-radius:22px;background:#07131a;box-shadow:0 25px 80px rgba(0,0,0,.55)}h1{color:#2dccff}</style></head><body><main><div style="font-size:48px">☄</div><h1>Cosmic is under maintenance</h1><p>We're making updates right now. Please check back soon.</p></main></body></html>`,{status:503,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'no-store'}});
+        return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cosmic • Maintenance</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050c12;color:#f2f7fa;font:16px system-ui,sans-serif;text-align:center}main{max-width:560px;padding:32px;border:1px solid #2dccff;border-radius:22px;background:#07131a;box-shadow:0 25px 80px rgba(0,0,0,.55)}h1{color:#2dccff}</style></head><body><main><div style="font-size:48px">☄</div><h1>Cosmic is under maintenance</h1><p>${await getMaintenanceMessage(env)}</p></main></body></html>`,{status:503,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'no-store'}});
       }
       const hub = await serveHub(request, env);
       if (hub) return hub;

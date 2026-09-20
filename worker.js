@@ -125,7 +125,8 @@ class UsernameRegistry {
       blacklisted: parse('blacklisted', []),
       featured: parse('featured', []),
       maintenance: !!parse('maintenance', false),
-      imported: parse('imported', [])
+      imported: parse('imported', []),
+      announcement: parse('announcement', null)
     });
   }
 
@@ -172,6 +173,18 @@ class UsernameRegistry {
       if (index >= 0) list.splice(index, 1);
       else list.push({ name, created_at: Date.now() });
       await write('featured', list.slice(-20));
+      return this.siteState();
+    }
+
+    if (action === 'announcement_set') {
+      const text = typeof body?.text === 'string' ? body.text.trim().slice(0, 1000) : '';
+      if (!text) return this.json({ ok: false, error: 'missing-announcement' }, 400);
+      await write('announcement', { text, created_at: Date.now() });
+      return this.siteState();
+    }
+
+    if (action === 'announcement_clear') {
+      await write('announcement', null);
       return this.siteState();
     }
 

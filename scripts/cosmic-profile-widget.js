@@ -15,6 +15,7 @@
     button.style.cursor = 'grab';
     button.style.userSelect = 'none';
     button.style.touchAction = 'none';
+    button.style.display = 'block';
 
     let dragging = false;
     let moved = false;
@@ -72,11 +73,8 @@
       }
     }, true);
 
-    // Keep the control out of the way once a game/app is being opened.
-    document.addEventListener('click', event => {
-      const launch = event.target.closest?.('.play-btn, .blank-btn, .open-btn, .cosmic-mini, [data-cosmic-launch], a[href*="game-shell.html"], a[href*="apps.html"]');
-      if (launch) button.style.display = 'none';
-    }, true);
+    // Keep the profile control persistent. Launches navigate away naturally,
+    // so there is no need to hide the button and risk leaving it stuck hidden.
   };
 
   const observer = new MutationObserver(setup);

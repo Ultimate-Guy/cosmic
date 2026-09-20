@@ -4,6 +4,8 @@
   const ADMIN_NAME = 'TheDevilAngel';
   const SESSION_KEY = 'cosmicCurrentUserV1';
   const TOKEN_KEY = 'cosmicDeveloperTokenV1';
+  const ADMIN_GATE_KEY = 'cosmicSecretAdminPasswordV1';
+  const ENTRY_KEY = 'cosmicGamesUnlocked';
   const API = location.origin;
 
   const safe = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({
@@ -13,7 +15,18 @@
   function currentUser() {
     try { return localStorage.getItem(SESSION_KEY) || 'Guest'; } catch (_) { return 'Guest'; }
   }
-  function isDeveloper() { return currentUser() === ADMIN_NAME; }
+  function hasAdminGateAuth() {
+    try {
+      return localStorage.getItem(ADMIN_GATE_KEY) === '1' &&
+        sessionStorage.getItem(ENTRY_KEY) === '1';
+    } catch (_) { return false; }
+  }
+  function isDeveloper() {
+    // Account usernames are origin-scoped, so GitHub Pages and the Cloudflare
+    // Worker cannot share cosmicCurrentUserV1. The existing admin gate is the
+    // secure per-origin fallback after its admin password has been verified.
+    return currentUser() === ADMIN_NAME || hasAdminGateAuth();
+  }
   function isGameContext() {
     // Developer controls are intentionally global: the authenticated developer
     // menu should be available on the Hub, apps, settings, game shell, and games.

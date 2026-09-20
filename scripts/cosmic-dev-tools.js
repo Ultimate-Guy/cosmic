@@ -5,6 +5,13 @@
   const SESSION_KEY = 'cosmicCurrentUserV1';
   const TOKEN_KEY = 'cosmicDeveloperTokenV1';
   const API = location.hostname.endsWith('.github.io') ? 'https://cosmicv2.v75ultimate.workers.dev' : location.origin;
+  (function loadGlobalState(){
+    if(window.__COSMIC_GLOBAL_STATE__||document.querySelector('script[data-cosmic-global-state]'))return;
+    const s=document.createElement('script');
+    s.dataset.cosmicGlobalState='1';
+    s.src=(location.hostname.endsWith('.github.io')?'/cosmic/':'/')+'scripts/cosmic-global-state.js?v=global-state';
+    (document.head||document.documentElement).appendChild(s);
+  })();
 
   const safe = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'

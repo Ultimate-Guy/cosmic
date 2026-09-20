@@ -174,6 +174,7 @@
     let dragging=false,moved=false,startX=0,startY=0,startLeft=0,startTop=0;
     handle.addEventListener('pointerdown', e => {
       if (e.button !== undefined && e.button !== 0) return;
+      if (e.target?.closest?.('button,input,textarea,select,a')) return;
       const r=el.getBoundingClientRect();
       dragging=true;moved=false;startX=e.clientX;startY=e.clientY;startLeft=r.left;startTop=r.top;
       handle.style.cursor='grabbing';
@@ -729,11 +730,17 @@
       if(fab.dataset.dragged==='1'){fab.dataset.dragged='0';return;}
       openPanelFromFab();
     });
-    panel.querySelector('.dev-close').addEventListener('click',e=>{
-      e.preventDefault();
-      e.stopPropagation();
-      closePanel();
-    });
+    const closeButton = panel.querySelector('.dev-close');
+    if (closeButton) {
+      closeButton.style.pointerEvents = 'auto';
+      closeButton.style.zIndex = '2147483647';
+      closeButton.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.currentTarget?.blur?.();
+        closePanel();
+      }, {capture:true});
+    }
   }
 
   function entryGateReady(){

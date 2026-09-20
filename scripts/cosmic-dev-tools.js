@@ -4,7 +4,7 @@
   const ADMIN_NAME = 'TheDevilAngel';
   const SESSION_KEY = 'cosmicCurrentUserV1';
   const TOKEN_KEY = 'cosmicDeveloperTokenV1';
-  const API = location.origin;
+  const API = location.hostname.endsWith('.github.io') ? 'https://cosmicv2.v75ultimate.workers.dev' : location.origin;
 
   const safe = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -367,12 +367,54 @@
     }catch(_){showToast('Screenshot cancelled or unavailable.');}
   }
 
-  function localAnnouncement(args){
-    const text=(args||'').trim();if(!text){showToast('Use /announcement your message');return;}
-    const banner=document.createElement('div');banner.textContent=text;
-    banner.style.cssText='position:fixed;left:0;right:0;top:0;z-index:2147483644;padding:10px 44px 10px 16px;border-bottom:1px solid #2dccff;background:rgba(5,12,18,.96);color:#f2f7fa;font:700 13px system-ui,sans-serif;text-align:center';
-    const close=document.createElement('button');close.textContent='×';close.style.cssText='position:absolute;right:10px;top:6px;border:0;background:none;color:#2dccff;font-size:22px;cursor:pointer';
-    close.onclick=()=>banner.remove();banner.appendChild(close);document.body.appendChild(banner);
+  const GLOBAL_ANNOUNCEMENT_DISMISS_KEY='cosmicGlobalAnnouncementDismissedV2';
+
+  function renderGlobalAnnouncement(data){
+    const announcement=data?.announcement;
+    const existing=document.getElementById('cosmic-global-announcement');
+    if(!announcement?.text){existing?.remove();return;}
+    let dismissed='';
+    try{dismissed=sessionStorage.getItem(GLOBAL_ANNOUNCEMENT_DISMISS_KEY)||'';}catch(_){}
+    const id=String(announcement.created_at||announcement.text);
+    if(dismissed===id){existing?.remove();return;}
+
+    const banner=existing||document.createElement('div');
+    banner.id='cosmic-global-announcement';
+    banner.style.cssText='position:fixed;left:0;right:0;top:0;z-index:2147483646;padding:11px 50px 11px 16px;border-bottom:1px solid #2dccff;background:linear-gradient(90deg,rgba(5,20,28,.98),rgba(8,17,29,.98),rgba(13,12,29,.98));color:#f2f7fa;font:700 13px system-ui,sans-serif;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.35);backdrop-filter:blur(10px)';
+    banner.textContent='';
+    const message=document.createElement('span');message.textContent=announcement.text;
+    const close=document.createElement('button');
+    close.type='button';close.textContent='×';close.setAttribute('aria-label','Dismiss global announcement');
+    close.style.cssText='position:absolute;right:10px;top:5px;width:34px;height:34px;border:1px solid rgba(45,204,255,.35);border-radius:8px;background:rgba(45,204,255,.07);color:#2dccff;font-size:21px;cursor:pointer';
+    close.onclick=()=>{try{sessionStorage.setItem(GLOBAL_ANNOUNCEMENT_DISMISS_KEY,id);}catch(_){}banner.remove();};
+    banner.append(message,close);
+    if(!existing)document.body.appendChild(banner);
+  }
+
+  async function syncGlobalAnnouncement(){
+    try{
+      const response=await fetch(API+'/api/site-state?announcement='+Date.now(),{cache:'no-store'});
+      if(!response.ok)return;
+      renderGlobalAnnouncement(await response.json());
+    }catch(_){}
+  }
+
+  async function globalAnnouncement(args){
+    const text=(args||'').trim();
+    const token=await adminToken();
+    if(!token)return;
+    try{
+      const response=await fetch(API+'/api/admin/site-state',{
+        method:'POST',
+        headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+        body:JSON.stringify({action:text.toLowerCase()==='clear'?'announcement_clear':'announcement_set',...(text.toLowerCase()==='clear'?{}:{text})}),
+        cache:'no-store'
+      });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok||!data.ok)throw new Error(data.error||'Global announcement update failed.');
+      renderGlobalAnnouncement(data);
+      showToast(text.toLowerCase()==='clear'?'Global announcement cleared.':'Global announcement published across Cosmic.');
+    }catch(e){showToast('Global announcement failed: '+(e.message||e));}
   }
 
   function commandDescription(command) {
@@ -561,7 +603,7 @@
       case '/fullscreen': return fullscreen();
       case '/screenshot': return screenshot();
       case '/stats': return stats();
-      case '/announcement': return localAnnouncement(args);
+      case '/announcement': return globalAnnouncement(args);
       case '/reload': return location.reload();
       case '/home': return location.href=location.origin+(location.hostname.endsWith('.github.io')?'/cosmic/pages/lessons/lessons.html':'/pages/lessons/lessons.html');
       case '/blacklist': return siteStateCommand('blacklist_toggle',{target:args});
@@ -745,6 +787,8 @@
   }
 
   ensureStyle();
+  syncGlobalAnnouncement();
+  setInterval(syncGlobalAnnouncement,5000);
   const removeDeveloperMenu=()=>{
     document.getElementById('cosmic-dev-panel')?.remove();
     document.getElementById('cosmic-dev-fab')?.remove();

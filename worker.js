@@ -146,7 +146,7 @@ class UsernameRegistry {
       if(stored && typeof stored==='object') {
         const global=stored.global&&typeof stored.global==='object'?{...stored.global}:{};
         const migratedVersion=Number(stored.version||0);
-        if(migratedVersion<3){
+        if(migratedVersion<4){
           delete global.global_notice;
           delete global.site_banner;
           delete global.global_message;
@@ -159,7 +159,7 @@ class UsernameRegistry {
         if(global.global_refresh && Number(global.global_refresh)<Date.now()-30000) delete global.global_refresh;
         if(global.sync_signal && Number(global.sync_signal)<Date.now()-30000) delete global.sync_signal;
         const normalized={
-          version:3,
+          version:4,
           blacklisted:Array.isArray(stored.blacklisted)?stored.blacklisted:[],
           featured:Array.isArray(stored.featured)?stored.featured:[],
           maintenance:!!stored.maintenance,
@@ -172,13 +172,13 @@ class UsernameRegistry {
         return normalized;
       }
     }catch(_){}
-    const defaults={version:3,blacklisted:[],featured:[],maintenance:false,imported:[],announcement:null,maintenance_message:'',global:{}};
+    const defaults={version:4,blacklisted:[],featured:[],maintenance:false,imported:[],announcement:null,maintenance_message:'',global:{}};
     try{
       const rows=await this.state.storage.sql.exec('SELECT key, value FROM site_state').toArray();
       const raw=Object.fromEntries(rows.map(row=>[row.key,row.value]));
       const parse=(k,f)=>{try{return raw[k]?JSON.parse(raw[k]):f}catch(_){return f}};
       const migrated={
-        version:3,
+        version:4,
         blacklisted:parse('blacklisted',[]),
         featured:parse('featured',[]),
         maintenance:!!parse('maintenance',false),
@@ -204,7 +204,7 @@ class UsernameRegistry {
 
   async sharedStateWrite(state) {
     const normalized={
-      version:3,
+      version:4,
       blacklisted:Array.isArray(state.blacklisted)?state.blacklisted:[],
       featured:Array.isArray(state.featured)?state.featured:[],
       maintenance:!!state.maintenance,

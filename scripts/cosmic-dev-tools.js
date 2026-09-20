@@ -439,11 +439,27 @@
     if(!existing)document.body.appendChild(banner);
   }
 
+  function renderGlobalState(data){
+    const g=data?.global||{};
+    if(g.theme?.value) document.body.dataset.cosmicTheme=g.theme.value;
+    let badge=document.getElementById('cosmic-global-badge');
+    if(g.global_badge?.text){badge=badge||document.createElement('div');badge.id='cosmic-global-badge';badge.textContent=g.global_badge.text;badge.style.cssText='position:fixed;right:14px;bottom:14px;z-index:2147483645;padding:7px 11px;border:1px solid #2dccff;border-radius:999px;background:rgba(5,12,18,.94);color:#2dccff;font:800 12px system-ui,sans-serif';if(!badge.parentNode)document.body.appendChild(badge);}else badge?.remove();
+    let cd=document.getElementById('cosmic-global-countdown');
+    if(g.countdown?.target && Number(g.countdown.target)>Date.now()){cd=cd||document.createElement('div');cd.id='cosmic-global-countdown';cd.style.cssText='position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:2147483644;padding:8px 12px;border:1px solid #2dccff;border-radius:10px;background:rgba(5,12,18,.96);color:#f2f7fa;font:800 12px system-ui,sans-serif';if(!cd.parentNode)document.body.appendChild(cd);clearInterval(cd.__timer);cd.__timer=setInterval(()=>{const ms=Math.max(0,Number(g.countdown.target)-Date.now());const s=Math.floor(ms/1000);cd.textContent=(g.countdown.label||'Countdown')+' • '+Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0');if(ms<=0){clearInterval(cd.__timer);cd.remove();}},1000);}else cd?.remove();
+    const globalMessages=[g.global_notice,g.site_banner,g.global_message,g.broadcast].filter(x=>x?.text);
+    let stack=document.getElementById('cosmic-global-state-stack');
+    if(!globalMessages.length){stack?.remove();}else{stack=stack||document.createElement('div');stack.id='cosmic-global-state-stack';stack.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:2147483645;display:grid;gap:8px;pointer-events:none;font:700 13px system-ui,sans-serif';stack.innerHTML='';globalMessages.forEach(x=>{const el=document.createElement('div');el.textContent=x.text;el.style.cssText='padding:10px 14px;border:1px solid #2dccff;border-radius:12px;background:rgba(5,12,18,.96);color:#f2f7fa;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)';stack.appendChild(el);});if(!stack.parentNode)document.body.appendChild(stack);}
+    const signal=Number(g.global_reload||g.global_refresh||g.sync_signal||0); if(signal && signal!==window.__cosmicLastGlobalSignal){window.__cosmicLastGlobalSignal=signal;if(g.global_reload) location.reload();}
+  }
+
   async function syncGlobalAnnouncement(){
     try{
       const response=await fetch(API+'/api/site-state?announcement='+Date.now(),{cache:'no-store'});
       if(!response.ok)return;
-      renderGlobalAnnouncement(await response.json());
+      const data=await response.json();
+      renderGlobalAnnouncement(data);
+      renderGlobalState(data);
+      refreshDevCommandButtons();
     }catch(_){}
   }
 
@@ -485,6 +501,17 @@
     if(command==='/fakeloading')return !!document.getElementById('cosmic-dev-fake-loading');
     if(command==='/locksite')return !!document.getElementById('cosmic-dev-locksite');
     return false;
+  }
+
+  const localToggleCommands=new Set(['/adblock','/stretch','/hidedark','/compact','/cleanui','/blur','/matrix','/grayscale','/tilt','/invert','/retro','/fakeloading','/locksite']);
+  function refreshDevCommandButtons(){
+    document.querySelectorAll('#cosmic-dev-panel .dev-command').forEach(button=>{
+      const command=button.dataset.command; if(!command)return;
+      const toggleable=DEV_GLOBAL_TOGGLES.has(command)||localToggleCommands.has(command); if(!toggleable)return;
+      const on=DEV_GLOBAL_TOGGLES.has(command)?globalToggleIsOn(command,button.dataset.args||''):localCommandIsOn(command);
+      const chip=button.querySelector('.dev-action'); if(chip){chip.hidden=!on;chip.textContent='Off';}
+      button.classList.toggle('is-on',on);
+    });
   }
 
   function confirmCommand(command,args='') {
@@ -658,6 +685,51 @@
     showToast('Developer local effects reset.');
   }
 
+  function pageBase(){return location.hostname.endsWith('.github.io')?'/cosmic/':'/';}
+
+  async function randomCommand(){
+    try{
+      const base=pageBase();
+      const [games,apps]=await Promise.all([
+        fetch(base+'pages/lessons/games.json?dev='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():[]).catch(()=>[]),
+        fetch(base+'apps/apps.json?dev='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():[]).catch(()=>[])
+      ]);
+      const list=[...(Array.isArray(games)?games:[]).map(x=>({...x,kind:'game'})),...(Array.isArray(apps)?apps:[]).map(x=>({...x,kind:'app'}))];
+      if(!list.length){showToast('No games or apps are available.');return;}
+      const item=list[Math.floor(Math.random()*list.length)];
+      if(item.kind==='game') location.href=base+'pages/lessons/game-shell.html?game='+encodeURIComponent(new URL(base+item.path+(item.entry||''),location.href).href);
+      else {const u=new URL(base+'apps/app.html',location.origin);u.searchParams.set('url',new URL(item.path+(item.entry||''),location.href).href);u.searchParams.set('name',item.name||'Cosmic App');location.href=u.href;}
+    }catch(e){showToast('Random launch failed: '+(e.message||e));}
+  }
+
+  async function copyUrlCommand(){
+    try{await navigator.clipboard.writeText(location.href);showToast('Current URL copied.');}
+    catch(_){showToast('Could not copy the current URL in this browser.');}
+  }
+
+  function pageInfoCommand(){
+    showModal('Cosmic • Page Info','<div style="line-height:1.8"><b>Path:</b> '+safe(location.pathname)+'<br><b>Host:</b> '+safe(location.host)+'<br><b>Online:</b> '+(navigator.onLine?'Yes':'No')+'<br><b>Viewport:</b> '+innerWidth+' × '+innerHeight+'<br><b>User:</b> '+safe(currentUser())+'</div>');
+  }
+
+  function gridCommand(args){
+    const raw=(args||'').trim(); const columns=Number(raw);
+    if(!Number.isInteger(columns)||columns<1||columns>12){showToast('Use /grid with 1–12 columns.');return;}
+    const targets=[document.getElementById('gamesgrid'),document.getElementById('appsgrid')].filter(Boolean);
+    if(!targets.length){showToast('No Cosmic grid is present on this page.');return;}
+    targets.forEach(el=>el.style.gridTemplateColumns='repeat('+columns+',minmax(0,1fr))');
+    showToast('Grid set to '+columns+' columns on this page.');
+  }
+
+  function syncGlobalToggleState(command,args,data){
+    const key=toggleKey(command,args); let on=false;
+    if(command==='/maintenance') on=!!data?.maintenance;
+    else if(command==='/feature') on=(data?.featured||[]).some(x=>String(x?.name||'').toLowerCase()===String(args||'').trim().toLowerCase());
+    else if(command==='/blacklist') on=(data?.blacklisted||[]).some(x=>String(x?.target||'').toLowerCase()===String(args||'').trim().toLowerCase());
+    else if(command==='/disablegame') on=(data?.global?.disabled_games||[]).some(x=>String(x).toLowerCase()===String(args||'').trim().toLowerCase());
+    else if(command==='/enablegame') on=false;
+    devToggleState[key]=on;
+  }
+
   const DEV_GLOBAL_TOGGLES = new Set(['/maintenance','/feature','/blacklist','/disablegame','/enablegame']);
   const devToggleState = Object.create(null);
   function toggleKey(command,args){return command+'::'+String(args||'').trim().toLowerCase();}
@@ -667,7 +739,7 @@
   async function globalCommand(command,args=''){
     const token=await adminToken(); if(!token)return;
     const raw=(args||'').trim();
-    const parts=raw.split(/\\s+/); const first=parts.shift()||''; const rest=parts.join(' ');
+    const parts=raw.split(/\s+/); const first=parts.shift()||''; const rest=parts.join(' ');
     let body={action:command.slice(1)};
     if(command==='/announcement') body={action:raw.toLowerCase()==='clear'?'announcement_clear':'announcement_set',...(raw.toLowerCase()==='clear'?{}:{text:raw})};
     else if(command==='/globalnotice') body={action:'global_notice_set',text:raw};
@@ -699,7 +771,7 @@
     try{
       const r=await fetch(API+'/api/admin/global',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body),cache:'no-store'});
       const d=await r.json().catch(()=>({})); if(!r.ok||!d.ok)throw new Error(d.error||'Global command failed');
-      if(DEV_GLOBAL_TOGGLES.has(command)) setGlobalToggleState(command,args,command!=='/enablegame');
+      if(DEV_GLOBAL_TOGGLES.has(command)) syncGlobalToggleState(command,args,d);
       if(command==='/globalreload') location.reload();
       else showModal('Cosmic • '+command,'<pre style="white-space:pre-wrap">'+safe(JSON.stringify(d,null,2))+'</pre>');
     }catch(e){showToast('Global command failed: '+(e.message||e));}
@@ -728,6 +800,11 @@
       case '/deployinfo': case '/diagnostics': case '/routes': case '/assets': case '/clearall':
         return globalCommand(command,args);
       case '/reload': return location.reload();
+      case '/accounts': return accountsCommand();
+      case '/random': return randomCommand();
+      case '/copyurl': return copyUrlCommand();
+      case '/pageinfo': return pageInfoCommand();
+      case '/grid': return gridCommand(args);
       case '/home': return location.href=location.origin+(location.hostname.endsWith('.github.io')?'/cosmic/pages/lessons/lessons.html':'/pages/lessons/lessons.html');
       case '/blacklist': return siteStateCommand('blacklist_toggle',{target:args});
       case '/feature': return globalCommand('/feature',args);
@@ -750,7 +827,7 @@
       case '/fakeloading': return fakeLoadingCommand();
       case '/locksite': return lockSiteCommand();
       case '/cleanui': return cleanUiCommand();
-      case '/count': return countCommand();
+      case '/count': return globalCommand('/gamecount','');
       case '/font': return fontCommand(args);
       case '/compact': return compactCommand();
       case '/blur': return blurCommand();
@@ -867,11 +944,15 @@
         const b=document.createElement('button');
         b.type='button';
         b.className='dev-command';
-        b.innerHTML='<b>'+safe(name)+'</b><small>'+safe(desc)+'</small>';
+        const command=name.split(' ')[0];
+        b.dataset.command=command;
+        b.dataset.args='';
+        b.innerHTML='<b>'+safe(name)+'</b><small>'+safe(desc)+'</small>'+((DEV_GLOBAL_TOGGLES.has(command)||localToggleCommands.has(command))?'<span class="dev-action" hidden>Off</span>':'');
         b.onclick=()=>{
           const command=name.split(' ')[0];
           const args=name.includes('[')?window.prompt(name+' argument:','')||'':'';
-          confirmedRunCommand(command,args);
+          b.dataset.args=args;
+          confirmedRunCommand(command,args).finally(refreshDevCommandButtons);
         };
         section.appendChild(b);
       });
@@ -879,6 +960,7 @@
     });
 
     document.body.append(fab,panel);
+    refreshDevCommandButtons();
     dragElement(fab);
     const header=panel.querySelector('.dev-head');
     if(header)dragElement(panel,header);

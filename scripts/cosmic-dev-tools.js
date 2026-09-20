@@ -80,6 +80,7 @@
 
   const COMMAND_GROUPS = [
     {title:'🌐 Global',commands:[
+      ['/accounts','GLOBAL — opens the paginated server account viewer.'],
       ['/home','LOCAL — returns to the main Cosmic Games Hub.'],
       ['/reload','LOCAL — reloads the current page.'],
       ['/announcement [text]','GLOBAL — publishes or clears the shared Cosmic announcement.'],
@@ -97,7 +98,6 @@
       ['/recentusers','GLOBAL — shows recently active users.'],
       ['/userstats [username]','GLOBAL — shows activity statistics for an account.'],
       ['/activitylog','GLOBAL — shows recent server-side account/game activity.'],
-      ['/accounts','GLOBAL — opens the paginated server account viewer.'],
       ['/count','GLOBAL — shows current game/app counts.'],
       ['/gamecount','GLOBAL — shows server-side game/app counts.'],
       ['/gameinfo [name]','GLOBAL — shows server registry details for a game/app.'],
@@ -466,28 +466,97 @@
   }
 
   async function accountsCommand(){
-    const token=await adminToken(); if(!token)return;
+    const token=await adminToken();
+    if(!token)return;
+
     try{
-      const response=await fetch(API+'/api/admin/accounts',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
+      const response=await fetch(API+'/api/admin/accounts',{
+        headers:{Authorization:'Bearer '+token},
+        cache:'no-store'
+      });
       const data=await response.json().catch(()=>({}));
       if(!response.ok||!data.ok)throw new Error(data.error||'Could not load accounts.');
-      const accounts=Array.isArray(data.accounts)?data.accounts:[]; let page=0; const pageSize=8;
-      const modal=document.createElement('div'); modal.id='cosmic-dev-accounts-modal'; modal.style.cssText='position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.74);backdrop-filter:blur(8px)';
-      const shell=document.createElement('div'); shell.style.cssText='width:min(700px,95vw);max-height:86vh;overflow:hidden;border:2px solid #2dccff;border-radius:18px;background:#07131a;color:#f2f7fa;box-shadow:0 25px 90px rgba(0,0,0,.72)';
-      shell.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid rgba(45,204,255,.18)"><strong style="color:#2dccff">Cosmic • Accounts</strong><span data-account-count style="color:#8196a1;font-size:12px"></span><button data-close style="margin-left:auto;width:32px;height:32px;border:1px solid rgba(45,204,255,.35);border-radius:9px;background:rgba(45,204,255,.07);color:#2dccff;font-size:20px;cursor:pointer">×</button></div><div data-accounts-panel style="max-height:calc(86vh - 58px);overflow:auto;padding:14px"></div>';
-      modal.appendChild(shell); document.body.appendChild(modal);
-      const panel=modal.querySelector('[data-accounts-panel]');
-      const render=()=>{
-        const totalPages=Math.max(1,Math.ceil(accounts.length/pageSize)); page=Math.max(0,Math.min(page,totalPages-1)); const shown=accounts.slice(page*pageSize,(page+1)*pageSize);
-        modal.querySelector('[data-account-count]').textContent=accounts.length+' total • Page '+(page+1)+'/'+totalPages;
-        panel.innerHTML=(shown.length?shown.map(a=>'<button data-user="'+safe(a.username)+'" style="display:block;width:100%;margin:0 0 8px;padding:11px 12px;border:1px solid rgba(45,204,255,.2);border-radius:11px;background:rgba(45,204,255,.04);color:#f2f7fa;text-align:left;cursor:pointer"><b style="display:block">'+safe(a.username)+'</b><small style="display:block;margin-top:4px;color:#8da2ad">Created: '+safe(a.created_at?new Date(a.created_at).toLocaleString():'Unknown')+' • Opens: '+safe(a.total_opens??0)+' • Last active: '+safe(a.last_opened?new Date(a.last_opened).toLocaleString():'Never')+'</small></button>').join(''):'<div style="padding:18px;color:#8196a1;text-align:center">No Cosmic accounts exist yet.</div>')+'<div style="display:flex;justify-content:space-between;gap:8px;margin-top:12px"><button data-prev>Previous</button><button data-next>Next</button></div>';
-        const prev=panel.querySelector('[data-prev]'),next=panel.querySelector('[data-next]');
-        prev.disabled=page<=0; next.disabled=page>=totalPages-1; [prev,next].forEach(b=>{b.style.cssText='padding:9px 13px;border:1px solid #2dccff;border-radius:9px;background:#103441;color:#2dccff;cursor:pointer';});
-        prev.onclick=()=>{if(page>0){page--;render();}}; next.onclick=()=>{if(page<totalPages-1){page++;render();}};
-        panel.querySelectorAll('[data-user]').forEach(btn=>btn.onclick=async()=>{try{const rr=await fetch(API+'/api/admin/account?username='+encodeURIComponent(btn.dataset.user),{headers:{Authorization:'Bearer '+token},cache:'no-store'});const dd=await rr.json().catch(()=>({}));if(!rr.ok||!dd.ok)throw new Error(dd.error||'Could not load account details.');const a=dd.account||{},games=Array.isArray(a.games)?a.games:[];panel.innerHTML='<button data-back>← Back</button><h3 style="color:#2dccff">'+safe(a.username||btn.dataset.user)+'</h3><p>Created: '+safe(a.created_at?new Date(a.created_at).toLocaleString():'Unknown')+'</p><p>Games played: '+games.length+'</p><div>'+ (games.length?games.map(g=>'<div style="padding:9px;margin:6px 0;border:1px solid rgba(45,204,255,.14);border-radius:9px"><b>'+safe(g.game_name)+'</b><br><small>Opens: '+safe(g.opens)+' • Last opened: '+safe(g.last_opened?new Date(g.last_opened).toLocaleString():'Unknown')+'</small></div>').join(''):'No game activity recorded.')+'</div>';panel.querySelector('[data-back]').onclick=render;}catch(e){showToast('Account details failed: '+(e.message||e));}});
+
+      const accounts=Array.isArray(data.accounts)?data.accounts:[];
+      let page=0;
+      const pageSize=8;
+
+      const openAccountDetails=async(username)=>{
+        try{
+          const detailResponse=await fetch(API+'/api/admin/account?username='+encodeURIComponent(username),{
+            headers:{Authorization:'Bearer '+token},
+            cache:'no-store'
+          });
+          const detail=await detailResponse.json().catch(()=>({}));
+          if(!detailResponse.ok||!detail.ok)throw new Error(detail.error||'Could not load account details.');
+
+          const account=detail.account||{};
+          const games=Array.isArray(account.games)?account.games:[];
+          const modal=document.getElementById('cosmic-dev-accounts-modal');
+          if(!modal)return;
+
+          const panel=modal.querySelector('[data-accounts-panel]');
+          if(!panel)return;
+
+          panel.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button data-back style="border:1px solid rgba(45,204,255,.35);border-radius:9px;padding:8px 11px;background:rgba(45,204,255,.07);color:#2dccff;cursor:pointer">← Back</button><strong style="color:#2dccff">'+safe(account.username||username)+'</strong></div>'+
+            '<div style="display:grid;gap:8px">'+
+            '<div style="padding:10px;border:1px solid rgba(45,204,255,.18);border-radius:10px;background:rgba(45,204,255,.04)"><b>Created:</b> '+safe(account.created_at?new Date(account.created_at).toLocaleString():'Unknown')+'</div>'+
+            '<div style="padding:10px;border:1px solid rgba(45,204,255,.18);border-radius:10px;background:rgba(45,204,255,.04)"><b>Games played:</b> '+games.length+'</div>'+
+            '</div>'+
+            '<h3 style="margin:16px 0 8px;color:#2dccff">Game activity</h3>'+
+            (games.length?'<div style="display:grid;gap:6px">'+games.map(game=>'<div style="padding:9px 10px;border:1px solid rgba(45,204,255,.14);border-radius:9px;background:rgba(0,0,0,.12)"><b>'+safe(game.game_name)+'</b><br><small style="color:#91a5b0">Opens: '+safe(game.opens)+' • Last opened: '+safe(game.last_opened?new Date(game.last_opened).toLocaleString():'Unknown')+'</small></div>').join('')+'</div>':'<div style="color:#8196a1">No game activity recorded.</div>');
+          panel.querySelector('[data-back]').onclick=()=>renderAccountPage();
+        }catch(e){
+          showToast('Account details failed: '+(e.message||e));
+        }
       };
-      modal.querySelector('[data-close]').onclick=()=>modal.remove(); modal.onclick=e=>{if(e.target===modal)modal.remove();}; render();
-    }catch(e){showToast('Accounts failed: '+(e.message||e));}
+
+      const modal=document.createElement('div');
+      modal.id='cosmic-dev-accounts-modal';
+      modal.style.cssText='position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.74);backdrop-filter:blur(8px)';
+
+      const shell=document.createElement('div');
+      shell.style.cssText='width:min(700px,95vw);max-height:86vh;overflow:hidden;border:2px solid #2dccff;border-radius:18px;background:#07131a;color:#f2f7fa;box-shadow:0 25px 90px rgba(0,0,0,.72)';
+      shell.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid rgba(45,204,255,.18)"><strong style="color:#2dccff">Cosmic • Accounts</strong><span data-account-count style="color:#8196a1;font-size:12px"></span><button data-close style="margin-left:auto;width:32px;height:32px;border:1px solid rgba(45,204,255,.35);border-radius:9px;background:rgba(45,204,255,.07);color:#2dccff;font-size:20px;cursor:pointer">×</button></div><div data-accounts-panel style="max-height:calc(86vh - 58px);overflow:auto;padding:14px"></div>';
+      modal.appendChild(shell);
+      document.body.appendChild(modal);
+
+      const renderAccountPage=()=>{
+        const panel=modal.querySelector('[data-accounts-panel]');
+        const count=modal.querySelector('[data-account-count]');
+        const totalPages=Math.max(1,Math.ceil(accounts.length/pageSize));
+        page=Math.max(0,Math.min(page,totalPages-1));
+        const start=page*pageSize;
+        const shown=accounts.slice(start,start+pageSize);
+        if(count)count.textContent=accounts.length+' total • Page '+(page+1)+'/'+totalPages;
+
+        panel.innerHTML=(shown.length?shown.map((account,index)=>'<button data-account="'+safe(account.username)+'" style="display:block;width:100%;margin:0 0 8px;padding:11px 12px;border:1px solid rgba(45,204,255,.2);border-radius:11px;background:rgba(45,204,255,.04);color:#f2f7fa;text-align:left;cursor:pointer"><b style="display:block;color:#f4fbff">'+safe(account.username)+'</b><small style="display:block;margin-top:4px;color:#8da2ad">Created: '+safe(account.created_at?new Date(account.created_at).toLocaleString():'Unknown')+' • Opens: '+safe(account.total_opens??0)+' • Last active: '+safe(account.last_opened?new Date(account.last_opened).toLocaleString():'Never')+'</small></button>').join(''):'<div style="padding:18px;color:#8196a1;text-align:center">No Cosmic accounts exist yet.</div>')+
+          '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:12px"><button data-prev style="padding:9px 13px;border:1px solid rgba(45,204,255,.3);border-radius:9px;background:rgba(45,204,255,.06);color:#2dccff;cursor:pointer">Previous</button><button data-next style="padding:9px 13px;border:1px solid #2dccff;border-radius:9px;background:#103441;color:#2dccff;font-weight:800;cursor:pointer">Next</button></div>';
+
+        panel.querySelectorAll('[data-account]').forEach(btn=>{
+          btn.onclick=()=>openAccountDetails(btn.dataset.account);
+        });
+        panel.querySelector('[data-prev]').disabled=page<=0;
+        panel.querySelector('[data-next]').disabled=page>=totalPages-1;
+        panel.querySelector('[data-prev]').style.opacity=page<=0?'.45':'1';
+        panel.querySelector('[data-next]').style.opacity=page>=totalPages-1?'.45':'1';
+        panel.querySelector('[data-prev]').onclick=()=>{if(page>0){page--;renderAccountPage();}};
+        panel.querySelector('[data-next]').onclick=()=>{if(page<totalPages-1){page++;renderAccountPage();}};
+      };
+
+      modal.querySelector('[data-close]').onclick=()=>modal.remove();
+      modal.addEventListener('click',event=>{if(event.target===modal)modal.remove();});
+
+      // Expose the renderer to the account-detail back button.
+      modal.__renderAccounts=renderAccountPage;
+      window.__cosmicRenderAccounts=renderAccountPage;
+      const renderAccountPageGlobal=()=>window.__cosmicRenderAccounts?.();
+      // Account detail uses this stable callback instead of relying on local closure lookup timing.
+      window.__cosmicRenderAccounts=renderAccountPage;
+      renderAccountPage();
+    }catch(e){
+      showToast('Accounts failed: '+(e.message||e));
+    }
   }
 
   function commandDescription(command) {

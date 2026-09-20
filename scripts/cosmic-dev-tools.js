@@ -606,7 +606,7 @@
     document.querySelectorAll('#cosmic-dev-panel .dev-command').forEach(button=>{
       const command=button.dataset.command; if(!command||!TOGGLE_COMMANDS.has(command)) return;
       const on=commandIsOn(command); const action=button.querySelector('.dev-action');
-      if(action){action.textContent=on?'Off':'Continue'; action.classList.toggle('is-off',on);}
+      if(action){action.textContent='Off'; action.hidden=!on; action.classList.toggle('is-off',on);}
       button.classList.toggle('is-on',on);
     });
   }
@@ -987,7 +987,7 @@
         b.className='dev-command';
         const command=name.split(' ')[0];
         b.dataset.command=command;
-        b.innerHTML='<b>'+safe(name)+'</b><small>'+safe(desc)+'</small>'+ (TOGGLE_COMMANDS.has(command)?'<span class="dev-action">Continue</span>':'');
+        b.innerHTML='<b>'+safe(name)+'</b><small>'+safe(desc)+'</small>'+ (TOGGLE_COMMANDS.has(command)?'<span class="dev-action" hidden>Off</span>':'');
         b.onclick=()=>{
           const command=name.split(' ')[0];
           const args=name.includes('[')?window.prompt(name+' argument:','')||'':'';

@@ -193,7 +193,10 @@ jobs:
   deploy:
     needs: build
     permissions:
+      contents: read
+      actions: read
       pages: write
+      deployments: write
       id-token: write
     environment:
       name: github-pages
@@ -203,6 +206,8 @@ jobs:
       - name: Deploy exact build to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          token: ${{ github.token }}
       - name: Verify GitHub Pages contains this exact build
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}

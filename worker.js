@@ -88,7 +88,7 @@ class UsernameRegistry {
     });
   }
 
-  async analytics() {
+  async analytics(filters = {}) {
     const accounts = await this.state.storage.sql.exec(
       'SELECT username, created_at FROM accounts ORDER BY created_at DESC'
     ).toArray();
@@ -101,13 +101,17 @@ class UsernameRegistry {
     const recentUsers = await this.state.storage.sql.exec(
       'SELECT username, MAX(last_opened) AS last_opened, COUNT(DISTINCT game_name) AS games, COALESCE(SUM(opens), 0) AS opens FROM activity GROUP BY username ORDER BY last_opened DESC LIMIT 100'
     ).toArray();
+    const usernameFilter = typeof filters.username === 'string' ? filters.username.trim().toLowerCase() : '';
+    const gameFilter = typeof filters.game === 'string' ? filters.game.trim().toLowerCase() : '';
+    const filteredActivity = activity.filter(a => (!usernameFilter || String(a.username).toLowerCase() === usernameFilter) && (!gameFilter || String(a.game_name).toLowerCase() === gameFilter));
+    const filteredRecentUsers = recentUsers.filter(a => !usernameFilter || String(a.username).toLowerCase() === usernameFilter);
     return this.json({
       ok: true,
       account_count: accounts.length,
       accounts: accounts.map(a => ({ username: a.username, created_at: Number(a.created_at) })),
-      activity: activity.map(a => ({ username: a.username, game_name: a.game_name, opens: Number(a.opens), last_opened: Number(a.last_opened) })),
-      top_games: topGames.map(a => ({ game_name: a.game_name, opens: Number(a.opens), users: Number(a.users), last_opened: Number(a.last_opened) })),
-      recent_users: recentUsers.map(a => ({ username: a.username, last_opened: Number(a.last_opened), games: Number(a.games), opens: Number(a.opens) }))
+      activity: filteredActivity.map(a => ({ username: a.username, game_name: a.game_name, opens: Number(a.opens), last_opened: Number(a.last_opened) })),
+      top_games: (gameFilter ? topGames.filter(a => String(a.game_name).toLowerCase() === gameFilter) : topGames).map(a => ({ game_name: a.game_name, opens: Number(a.opens), users: Number(a.users), last_opened: Number(a.last_opened) })),
+      recent_users: filteredRecentUsers.map(a => ({ username: a.username, last_opened: Number(a.last_opened), games: Number(a.games), opens: Number(a.opens) }))
     });
   }
 
@@ -289,7 +293,7 @@ class UsernameRegistry {
       const global = await read('global_state', {});
       if (action === 'sitemode_set') {
         const mode = typeof body?.mode === 'string' ? body.mode.trim().slice(0, 40).toLowerCase() : '';
-        if (!mode) return this.json({ ok: false, error: 'missing-mode' }, 400);
+        if (!['normal','maintenance'].includes(mode)) return this.json({ ok: false, error: 'invalid-mode', allowed: ['normal','maintenance'] }, 400);
         const enabled = mode === 'maintenance';
         if (mode === 'normal' || mode === 'maintenance') await write('maintenance', enabled);
         global.mode = { value: mode, created_at: Date.now() };
@@ -372,9 +376,9 @@ class UsernameRegistry {
       return this.siteState();
     }
 
-    if (action === 'global_refresh' || action === 'sync_signal') {
+    if (action === 'global_refresh' || action === 'global_reload' || action === 'sync_signal') {
       const global = await read('global_state', {});
-      global[action === 'global_refresh' ? 'global_refresh' : 'sync_signal'] = Date.now();
+      global[action === 'global_refresh' ? 'global_refresh' : action === 'global_reload' ? 'global_reload' : 'sync_signal'] = Date.now();
       await write('global_state', global);
       return this.siteState();
     }

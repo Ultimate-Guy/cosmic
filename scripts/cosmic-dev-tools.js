@@ -442,7 +442,16 @@
     const globalMessages=[g.global_notice,g.site_banner,g.global_message,g.broadcast].filter(x=>x?.text);
     let stack=document.getElementById('cosmic-global-state-stack');
     if(!globalMessages.length){stack?.remove();}else{stack=stack||document.createElement('div');stack.id='cosmic-global-state-stack';stack.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:2147483645;display:grid;gap:8px;pointer-events:none;font:700 13px system-ui,sans-serif';stack.innerHTML='';globalMessages.forEach(x=>{const el=document.createElement('div');el.textContent=x.text;el.style.cssText='padding:10px 14px;border:1px solid #2dccff;border-radius:12px;background:rgba(5,12,18,.96);color:#f2f7fa;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)';stack.appendChild(el);});if(!stack.parentNode)document.body.appendChild(stack);}
-    const signal=Number(g.global_reload||g.global_refresh||g.sync_signal||0); if(signal && signal!==window.__cosmicLastGlobalSignal){window.__cosmicLastGlobalSignal=signal;if(g.global_reload) location.reload();}
+    const signal=Number(g.global_reload||0);
+    if(signal && Date.now()-signal<30000){
+      let seen='';
+      try{seen=sessionStorage.getItem('cosmicGlobalReloadSeenV2')||'';}catch(_){}
+      if(seen!==String(signal)){
+        try{sessionStorage.setItem('cosmicGlobalReloadSeenV2',String(signal));}catch(_){}
+        setTimeout(()=>location.reload(),50);
+        return;
+      }
+    }
   }
 
   async function syncGlobalState(){
@@ -864,7 +873,7 @@
     if(command==='/announcement') body=(!raw&&globalToggleIsOn('/announcement',''))?{action:'announcement_clear'}:({action:raw.toLowerCase()==='clear'?'announcement_clear':'announcement_set',...(raw.toLowerCase()==='clear'?{}:{text:raw})});
     else if(command==='/globalnotice') body=!raw&&globalToggleIsOn('/globalnotice','')?{action:'global_notice_clear'}:{action:'global_notice_set',text:raw};
     else if(command==='/clearnotice') body={action:'global_notice_clear'};
-    else if(command==='/sitebanner') body={action:'site_banner_set',text:raw};
+    else if(command==='/sitebanner') body=!raw&&globalToggleIsOn('/sitebanner','')?{action:'site_banner_clear'}:{action:'site_banner_set',text:raw};
     else if(command==='/sitemode') body=!raw&&globalToggleIsOn('/sitemode','')?{action:'sitemode_set',mode:'normal'}:{action:'sitemode_set',mode:first||'normal'};
     else if(command==='/globalrefresh') body={action:'global_refresh'};
     else if(command==='/globalreload') body={action:'global_reload'};

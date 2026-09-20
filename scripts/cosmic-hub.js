@@ -1,18 +1,4 @@
-(()
-  function enhanceCards(){
-    document.querySelectorAll('.game-card,.app-card').forEach(card=>{
-      if(card.dataset.cosmicEnhanced==='1')return;
-      const title=card.querySelector('.game-title,.app-title')?.textContent?.trim();
-      const item=allItems.find(x=>x.name.toLowerCase()===String(title||'').toLowerCase());
-      if(!item)return;
-      card.dataset.cosmicEnhanced='1';
-      const meta=playMeta(item),info=document.createElement('small');
-      info.className='cosmic-play-meta';info.style.cssText='display:block;text-align:center;opacity:.75;margin:4px 0';info.textContent=meta.time+' • '+meta.tags.join(' • ');
-      card.querySelector('.game-title,.app-title')?.after(info);
-      card.addEventListener('dblclick',()=>previewDrawer(item));
-    });
-  }
- => {
+(() => {
   'use strict';
   // This identifier is also checked after a Cloudflare deploy. Keep it in the
   // served script so a successful deploy cannot silently serve an older hub.

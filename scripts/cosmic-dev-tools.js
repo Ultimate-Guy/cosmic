@@ -3,6 +3,9 @@
 
   const ADMIN_NAME = 'TheDevilAngel';
   const SESSION_KEY = 'cosmicCurrentUserV1';
+  let __cosmicDeveloperAuthorized = false;
+  try { __cosmicDeveloperAuthorized = localStorage.getItem(SESSION_KEY) === ADMIN_NAME; } catch (_) {}
+  if (!__cosmicDeveloperAuthorized) return;
   const TOKEN_KEY = 'cosmicDeveloperTokenV1';
   const API = location.hostname.endsWith('.github.io') ? 'https://cosmicv2.v75ultimate.workers.dev' : location.origin;
   (function loadGlobalState(){

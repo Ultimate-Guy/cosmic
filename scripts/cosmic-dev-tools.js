@@ -66,111 +66,119 @@
 
   const COMMAND_GROUPS = [
     {title:'🌐 Global',commands:[
-      ['/home','Local navigation only — returns to the main Cosmic Games Hub.'],
-      ['/reload','Local only — reloads the current page.'],
-      ['/announcement [text]','GLOBAL — publishes or clears the shared Cosmic announcement for connected Cosmic pages.'],
-      ['/globalnotice [text]','GLOBAL — publishes a shared notice across Cosmic pages.'],
+      ['/home','LOCAL — returns to the main Cosmic Games Hub.'],
+      ['/reload','LOCAL — reloads the current page.'],
+      ['/announcement [text]','GLOBAL — publishes or clears the shared Cosmic announcement.'],
+      ['/globalnotice [text]','GLOBAL — publishes a shared notice across Cosmic.'],
       ['/clearnotice','GLOBAL — clears the shared global notice.'],
       ['/sitebanner [text]','GLOBAL — sets a shared site-wide banner.'],
-      ['/sitemode [mode]','GLOBAL — sets the shared site mode, such as normal or maintenance.'],
-      ['/globalrefresh','GLOBAL — sends a shared refresh signal to connected Cosmic pages.'],
-      ['/globalreload','GLOBAL — sends a shared reload signal to connected Cosmic pages.'],
-      ['/globalmessage [text]','GLOBAL — publishes a shared message to connected Cosmic pages.'],
-      ['/broadcast [text]','GLOBAL — publishes a shared broadcast message.'],
+      ['/sitemode [mode]','GLOBAL — sets the shared site mode.'],
+      ['/globalrefresh','GLOBAL — sends a shared refresh signal.'],
+      ['/globalreload','GLOBAL — tells connected Cosmic pages to reload.'],
+      ['/globalmessage [text]','GLOBAL — publishes a shared global message.'],
+      ['/broadcast [text]','GLOBAL — publishes a shared broadcast.'],
       ['/sync','GLOBAL — sends a shared synchronization signal.'],
-      ['/account [username]','GLOBAL — opens account information from the server registry.'],
-      ['/online','GLOBAL — shows recently active account activity from the server registry.'],
-      ['/recentusers','GLOBAL — shows the most recently active registered users.'],
-      ['/userstats [username]','GLOBAL — shows server-side activity statistics for an account.'],
-      ['/activitylog','GLOBAL — shows recent server-side game/account activity.'],
+      ['/account [username]','GLOBAL — shows account information from the server registry.'],
+      ['/online','GLOBAL — shows recent activity from the account registry.'],
+      ['/recentusers','GLOBAL — shows recently active users.'],
+      ['/userstats [username]','GLOBAL — shows activity statistics for an account.'],
+      ['/activitylog','GLOBAL — shows recent server-side account/game activity.'],
       ['/accounts','GLOBAL — opens the paginated server account viewer.'],
-      ['/count','GLOBAL — shows the current game/app registry counts.'],
-      ['/gamecount','GLOBAL — shows server registry game/app counts.'],
-      ['/gameinfo [name]','GLOBAL — shows server registry details and activity for a game/app.'],
-      ['/topgames','GLOBAL — shows the most-opened games from server activity.'],
-      ['/recentgames','GLOBAL — shows recently opened games from server activity.'],
-      ['/gameannounce [game]','GLOBAL — publishes a shared announcement for a specific game.'],
-      ['/disablegame [name]','GLOBAL — toggles a game off in shared curation state.'],
-      ['/enablegame [name]','GLOBAL — re-enables a previously disabled game.'],
-      ['/feature [name]','GLOBAL — toggles a game in the shared featured list.'],
+      ['/count','GLOBAL — shows current game/app counts.'],
+      ['/gamecount','GLOBAL — shows server-side game/app counts.'],
+      ['/gameinfo [name]','GLOBAL — shows server registry details for a game/app.'],
+      ['/topgames','GLOBAL — shows the most-opened games.'],
+      ['/recentgames','GLOBAL — shows recently opened games.'],
+      ['/gameannounce [game]','GLOBAL — publishes a shared announcement for one game.'],
+      ['/disablegame [name]','GLOBAL — disables a game in shared state.'],
+      ['/enablegame [name]','GLOBAL — re-enables a game in shared state.'],
+      ['/feature [name]','GLOBAL — adds/removes a game from the shared featured list.'],
       ['/unfeature [name]','GLOBAL — removes a game from the shared featured list.'],
       ['/featuredrotate','GLOBAL — rotates the shared featured list.'],
-      ['/spotlight [name]','GLOBAL — sets the shared Cosmic spotlight item.'],
-      ['/globalbadge [text]','GLOBAL — sets the shared global badge text.'],
-      ['/globaltheme [name]','GLOBAL — sets the shared Cosmic theme for connected pages.'],
-      ['/countdown [minutes]','GLOBAL — starts a shared countdown visible to connected pages.'],
-      ['/event [name]','GLOBAL — starts a shared Cosmic event.'],
+      ['/spotlight [name]','GLOBAL — sets the shared spotlight item.'],
+      ['/globalbadge [text]','GLOBAL — sets shared badge text.'],
+      ['/globaltheme [name]','GLOBAL — sets the shared Cosmic theme.'],
+      ['/countdown [minutes]','GLOBAL — starts a shared countdown.'],
+      ['/event [name]','GLOBAL — starts a shared event.'],
       ['/eventmessage [text]','GLOBAL — updates the active shared event message.'],
-      ['/eventtimer [minutes]','GLOBAL — sets the active shared event timer.'],
-      ['/endevent','GLOBAL — ends the active shared event and countdown.'],
-      ['/maintenance [message]','GLOBAL — toggles shared maintenance mode and optionally sets its message.'],
+      ['/eventtimer [minutes]','GLOBAL — sets the active event timer.'],
+      ['/endevent','GLOBAL — ends the shared event.'],
+      ['/maintenance [message]','GLOBAL — toggles shared maintenance mode with an optional message.'],
       ['/clearall','GLOBAL — clears shared global curation/state data.'],
-      ['/blacklist [url/game]','GLOBAL — toggles a shared server-side blacklist entry.'],
-      ['/import [json/url]','GLOBAL — imports validated game/app entries into shared server-side curation.'],
+      ['/blacklist [url/game]','GLOBAL — toggles a shared blacklist entry.'],
+      ['/import [json/url]','GLOBAL — imports validated items into shared server state.'],
       ['/status','GLOBAL — shows shared deployment/service status.'],
-      ['/healthcheck','GLOBAL — checks shared Cosmic service health.'],
-      ['/errors','GLOBAL — reports whether shared historical error logs exist; live errors remain local.'],
-      ['/requests','GLOBAL — reports whether shared historical request logs exist; live request logs remain local.'],
+      ['/healthcheck','GLOBAL — checks shared service health.'],
+      ['/errors','GLOBAL — reports the available error-log scope.'],
+      ['/requests','GLOBAL — reports the available request-log scope.'],
       ['/latency','GLOBAL — checks current service latency.'],
-      ['/cacheinfo','GLOBAL — reports cache scope; browser cache itself remains local.'],
-      ['/version','GLOBAL — shows the deployed service/build information.'],
-      ['/deployinfo','GLOBAL — shows current deployment information.'],
-      ['/diagnostics','GLOBAL — runs shared deployment diagnostics.'],
+      ['/cacheinfo','GLOBAL — reports cache scope.'],
+      ['/version','GLOBAL — shows deployment/build information.'],
+      ['/deployinfo','GLOBAL — shows deployment information.'],
+      ['/diagnostics','GLOBAL — runs shared diagnostics.'],
       ['/routes','GLOBAL — lists server API routes.'],
       ['/assets','GLOBAL — shows server asset/binding status.'],
-      ['/globalrefresh','GLOBAL — broadcasts a shared refresh signal.'],
-      ['/exportdata','LOCAL — downloads this browser's Cosmic settings/profile backup.'],
-      ['/random','LOCAL — launches a random item from the current page registry.'],
+      ['/exportdata','LOCAL — downloads this browser’s Cosmic settings backup.'],
+      ['/random','LOCAL — launches a random visible Cosmic item.'],
       ['/copyurl','LOCAL — copies the current page URL.'],
       ['/pageinfo','LOCAL — shows this browser/page information.']
     ]},
     {title:'📊 Debugging & System Status',commands:[
-      ['/sysinfo','LOCAL VIEW — displays authenticated Worker environment details without secrets.'],
-      ['/toggledebug','LOCAL — toggles the diagnostic console for this browser session.'],
-      ['/flushcache','LOCAL — clears Cosmic browser caches on this device.'],
-      ['/benchmark','LOCAL — measures resource timings from this browser.'],
-      ['/stats','LOCAL — shows DOM/resource/browser performance data.']
+      ['/sysinfo','Displays the active Cloudflare Worker environment status, current edge data center, build timestamp, deployment commit, and configuration state without revealing secret values.'],
+      ['/toggledebug','Enables a floating diagnostic console that logs request timings, response statuses, JavaScript errors, and failed requests in real-time.'],
+      ['/flushcache','Force-clears Cosmic browser caches and local site assets immediately so you can test from a clean client state.'],
+      ['/benchmark','Runs a quick internal speed test against important Cosmic resources and reports the response time for each request.'],
+      ['/stats','Shows DOM size, resource load timings, average response time, and JavaScript heap usage when the browser exposes it.']
     ]},
     {title:'🔌 Proxy & Cloaking Controls',commands:[
-      ['/adblock','LOCAL — toggles the ad-like element preview on this page.'],
-      ['/aspect [ratio]','LOCAL — changes the active game area ratio.'],
-      ['/stretch','LOCAL — toggles game stretching on this page.'],
-      ['/injectcss [css]','LOCAL — injects CSS into this page.']
+      ['/adblock','Toggles a local ad-like element blocker on the current page for cleaner-game testing.'],
+      ['/aspect [ratio]','Instantly forces the active game area toward a specific ratio such as 16:9, 4:3, or square to test stretched-game layouts.'],
+      ['/stretch','Toggles stretching accessible game canvases, videos, and frames to fill the available page space.'],
+      ['/injectcss [css]','Allows you to apply raw CSS directly to the current page so you can test layout changes before pushing code.']
     ]},
     {title:'🎮 Ultimate Game Hacks & Tweaks',commands:[
-      ['/mutegames','LOCAL — mutes accessible media on this page.'],
-      ['/fullscreen','LOCAL — toggles browser fullscreen for this page.'],
-      ['/screenshot','LOCAL — captures the selected browser surface.']
+      ['/aspect [ratio]','Instantly forces the active game canvas or frame toward dimensions such as 16:9, 4:3, or square to fix stretched retro-game layouts.'],
+      ['/stretch','Toggles stretching a game area to fill available screen space while ignoring the original resolution ratio for testing.'],
+      ['/injectcss [css]','Lets you type CSS directly into the current session to hide or restyle annoying elements while debugging.'],
+      ['/mutegames','Instantly mutes accessible audio and video from the current game or page.'],
+      ['/fullscreen','Forces the current game/page into browser fullscreen for immersive layout testing.'],
+      ['/screenshot','Captures the selected Cosmic tab or window through the browser capture picker and saves it as an image.']
     ]},
     {title:'🎨 Personalization & Theme Controls',commands:[
-      ['/theme [name]','LOCAL — previews a theme on this browser.'],
-      ['/hidedark','LOCAL — toggles the local light/dark preview.'],
-      ['/custombg [url]','LOCAL — applies a background only on this browser.'],
-      ['/font [name]','LOCAL — changes local page typography.'],
-      ['/zoom [percentage]','LOCAL — changes local page scaling.'],
-      ['/compact','LOCAL — toggles compact layout on this page.'],
-      ['/cleanui','LOCAL — toggles minimal UI on this page.']
+      ['/theme [name]','Instantly swaps the Cosmic visual theme locally so you can preview alternate palettes without changing the deployed site.'],
+      ['/hidedark','Toggles the dark-mode preview off or on for quick contrast testing.'],
+      ['/custombg [url]','Overlays a custom background image locally so you can preview a new Cosmic backdrop without editing the repository.'],
+      ['/font [name]','Swaps the global page typography between safe local choices such as monospace, sans-serif, serif, or Comic Sans.'],
+      ['/zoom [percentage]','Forces the global page scaling to shrink or grow so you can test Cosmic on smaller or larger displays.'],
+      ['/compact','Shrinks card padding and spacing so you can preview a denser homepage layout.'],
+      ['/cleanui','Hides major navigation and decorative UI so you can preview a minimalist content-focused layout.']
+    ]},
+    {title:'🛡️ Moderation & User Control',commands:[
+      ['/blacklist [url/game]','Instantly hides a game or blocks a URL site-wide through authenticated Cosmic curation controls.'],
+      ['/feature [name]','Pins a specific game name into the authenticated server-side featured list.'],
+      ['/maintenance','Instantly toggles Cosmic maintenance mode so normal visitors see the maintenance screen while your authenticated developer session can continue working.'],
+      ['/import [json/url]','Directly imports validated game/app entries into Cosmic’s server-side curation list without rewriting GitHub files.'],
+      ['/locksite','Locks the current site view behind your authenticated Cosmic admin session until you unlock it.']
     ]},
     {title:'🔒 Privacy, Security & Disguises',commands:[
-      ['/destroytrail','LOCAL — clears this browser's current-session/recent trail.'],
-      ['/fakeloading','LOCAL — toggles a fake loading screen on this page.'],
-      ['/disguise [preset]','LOCAL — changes this tab's title/icon.'],
-      ['/killtab','LOCAL — attempts to close this tab.'],
-      ['/blanket','LOCAL — shows a local developer test screen.'],
-      ['/locksite','LOCAL — locks this current page behind developer auth.']
+      ['/destroytrail','Instantly wipes current-session trail data and recent-game history while leaving major saved account settings intact.'],
+      ['/fakeloading','Triggers a local official-looking loading screen over the page so you can test a fake loading state.'],
+      ['/disguise [preset]','Changes the current tab title and favicon to a selected generic preset for local interface testing.'],
+      ['/killtab','Attempts to close the active browser tab when the browser allows scripted closing.'],
+      ['/blanket','Wraps the current page in a giant interactive local fake-error screen that unlocks through the authenticated admin session.']
     ]},
     {title:'📈 Site Management & UI Adjustments',commands:[
-      ['/grid [columns]','LOCAL — changes local grid density.'],
-      ['/resetfx','LOCAL — resets local developer effects.']
+      ['/grid [columns]','Changes the local game/app grid density so you can test a specific number of columns on the current display.'],
+      ['/resetfx','Resets developer-only visual, layout, loading, lock, and injected-CSS effects back to normal Cosmic styling.']
     ]},
     {title:'🌀 Visual Overrides & Visual FX',commands:[
-      ['/blur','LOCAL — toggles blur on this page.'],
-      ['/matrix','LOCAL — toggles Matrix-style rain on this page.'],
-      ['/grayscale','LOCAL — toggles grayscale on this page.'],
-      ['/shake','LOCAL — applies a local screen shake.'],
-      ['/tilt','LOCAL — toggles a local tilt effect.'],
-      ['/invert','LOCAL — toggles local color inversion.'],
-      ['/retro','LOCAL — toggles a local CRT effect.']
+      ['/blur','Instantly blurs the current website by 10px as a quick local privacy-effect test.'],
+      ['/matrix','Drops a falling digital-rain effect over the background for a Matrix-style visual test.'],
+      ['/grayscale','Removes all page colors and previews Cosmic in black and white.'],
+      ['/shake','Applies a short screen-shake animation to the active page for visual-effect testing.'],
+      ['/tilt','Applies a subtle CSS 3D tilt effect to the entire page, making Cosmic look slightly askew.'],
+      ['/invert','Inverts all page colors for a quick glitch/cyberpunk aesthetic.'],
+      ['/retro','Applies a retro CRT monitor filter with glowing scanlines.']
     ]}
   ];
 
@@ -190,7 +198,7 @@
       '#cosmic-dev-panel.open{display:block}#cosmic-dev-panel .dev-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}',
       '#cosmic-dev-panel .dev-head strong{margin-right:auto;color:#2dccff;letter-spacing:.4px}.dev-close{width:32px;height:32px;padding:0;border-radius:9px;border:1px solid rgba(45,204,255,.5);background:rgba(45,204,255,.08);color:#2dccff;font-size:20px;cursor:pointer}',
       '#cosmic-dev-panel .dev-command{display:block;width:100%;margin:7px 0;padding:10px 11px;border:1px solid rgba(45,204,255,.28);border-radius:11px;background:rgba(45,204,255,.05);color:#f2f7fa;text-align:left;cursor:pointer}',
-      '#cosmic-dev-panel .dev-command:hover{background:rgba(45,204,255,.13)}#cosmic-dev-panel .dev-command.is-on{border-color:#2dccff;background:rgba(45,204,255,.12)}#cosmic-dev-panel .dev-action{float:right;margin-top:4px;padding:3px 8px;border-radius:999px;border:1px solid rgba(45,204,255,.5);color:#2dccff;font:800 10px system-ui,sans-serif}.cosmic-dev-panel .dev-action.is-off{background:#2dccff;color:#031721}#cosmic-dev-panel .dev-command b{display:block;color:#2dccff}#cosmic-dev-panel .dev-command small{display:block;margin-top:3px;color:#9fb1bc}',
+      '#cosmic-dev-panel .dev-command:hover{background:rgba(45,204,255,.13)}#cosmic-dev-panel .dev-command b{display:block;color:#2dccff}#cosmic-dev-panel .dev-command small{display:block;margin-top:3px;color:#9fb1bc}',
       '#cosmic-dev-panel .dev-group-title{margin:14px 2px 6px;color:#2dccff;font:800 12px system-ui,sans-serif;letter-spacing:.6px;text-transform:none}.cosmic-dev-group:first-child .dev-group-title{margin-top:2px}',
       '#cosmic-dev-fake-loading{font-family:system-ui,sans-serif}.cosmic-dev-adblock [class*="ad"],.cosmic-dev-adblock [id*="ad"],.cosmic-dev-adblock [class*="advert"],.cosmic-dev-adblock [id*="advert"]{display:none!important}.cosmic-dev-cleanui header,.cosmic-dev-cleanui nav,.cosmic-dev-cleanui footer{display:none!important}.cosmic-dev-compact .game-card,.cosmic-dev-compact .app-card{padding:8px!important;min-height:110px!important}.cosmic-dev-blur body{filter:blur(10px)!important}.cosmic-dev-grayscale{filter:grayscale(1)!important}.cosmic-dev-stretch iframe,.cosmic-dev-stretch canvas,.cosmic-dev-stretch video{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:fill!important}.cosmic-dev-shake{animation:cosmicDevShake .7s ease-in-out}@keyframes cosmicDevShake{0%,100%{transform:translate(0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,-1px)}80%{transform:translate(3px,1px)}}',
       '#cosmic-dev-overlay{position:fixed;right:12px;bottom:12px;z-index:2147483646;width:min(520px,94vw);max-height:44vh;overflow:auto;padding:12px;border:1px solid #2dccff;border-radius:14px;background:rgba(2,7,11,.96);color:#eaf8ff;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 15px 60px rgba(0,0,0,.58)}',
@@ -431,38 +439,11 @@
     if(!existing)document.body.appendChild(banner);
   }
 
-  let lastGlobalRefreshSignal=0;
-  function renderGlobalState(data){
-    const global=data?.global||{};
-    if(global.theme?.value) document.body.dataset.cosmicTheme=String(global.theme.value);
-    let badge=document.getElementById('cosmic-global-badge');
-    if(global.global_badge?.text){
-      badge=badge||document.createElement('div'); badge.id='cosmic-global-badge'; badge.textContent=global.global_badge.text;
-      badge.style.cssText='position:fixed;right:14px;bottom:14px;z-index:2147483645;padding:7px 11px;border:1px solid #2dccff;border-radius:999px;background:rgba(5,12,18,.94);color:#2dccff;font:800 12px system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.4)';
-      if(!badge.parentNode)document.body.appendChild(badge);
-    } else badge?.remove();
-    let countdown=document.getElementById('cosmic-global-countdown');
-    if(global.countdown?.target && Number(global.countdown.target)>Date.now()){
-      countdown=countdown||document.createElement('div'); countdown.id='cosmic-global-countdown';
-      countdown.style.cssText='position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:2147483644;padding:8px 12px;border:1px solid #2dccff;border-radius:10px;background:rgba(5,12,18,.96);color:#f2f7fa;font:800 12px system-ui,sans-serif';
-      if(!countdown.parentNode)document.body.appendChild(countdown);
-      const tick=()=>{const left=Math.max(0,Number(global.countdown.target)-Date.now());const s=Math.floor(left/1000);countdown.textContent=(global.countdown.label||'Countdown')+' • '+Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0');if(left<=0){countdown.remove();}};tick();clearInterval(countdown.__timer);countdown.__timer=setInterval(tick,1000);
-    } else countdown?.remove();
-    const items=[global.global_notice,global.site_banner,global.global_message,global.broadcast].filter(x=>x?.text);
-    const existing=document.getElementById('cosmic-global-state-stack'); if(!items.length){existing?.remove();} else {
-      const stack=existing||document.createElement('div'); stack.id='cosmic-global-state-stack';
-      stack.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:2147483645;display:grid;gap:8px;pointer-events:none;font:700 13px system-ui,sans-serif'; stack.innerHTML='';
-      items.forEach(item=>{const el=document.createElement('div');el.textContent=item.text;el.style.cssText='padding:10px 14px;border:1px solid #2dccff;border-radius:12px;background:rgba(5,12,18,.96);color:#f2f7fa;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)';stack.appendChild(el);});
-      if(!existing)document.body.appendChild(stack);
-    }
-    const signal=Number(global.global_refresh||global.sync_signal||0); if(signal&&signal!==lastGlobalRefreshSignal){lastGlobalRefreshSignal=signal;if(global.global_refresh && document.visibilityState!=='hidden') location.reload();}
-  }
-
   async function syncGlobalAnnouncement(){
     try{
-      const response=await fetch(API+'/api/site-state?global='+Date.now(),{cache:'no-store'});
+      const response=await fetch(API+'/api/site-state?announcement='+Date.now(),{cache:'no-store'});
       if(!response.ok)return;
-      const data=await response.json(); window.__cosmicGlobalState=data.global||{}; renderGlobalAnnouncement(data); renderGlobalState(data); refreshDevCommandButtons();
+      renderGlobalAnnouncement(await response.json());
     }catch(_){}
   }
 
@@ -484,138 +465,36 @@
     }catch(e){showToast('Global announcement failed: '+(e.message||e));}
   }
 
-  async function accountsCommand(){
-    const token=await adminToken();
-    if(!token)return;
-
-    try{
-      const response=await fetch(API+'/api/admin/accounts',{
-        headers:{Authorization:'Bearer '+token},
-        cache:'no-store'
-      });
-      const data=await response.json().catch(()=>({}));
-      if(!response.ok||!data.ok)throw new Error(data.error||'Could not load accounts.');
-
-      const accounts=Array.isArray(data.accounts)?data.accounts:[];
-      let page=0;
-      const pageSize=8;
-
-      const openAccountDetails=async(username)=>{
-        try{
-          const detailResponse=await fetch(API+'/api/admin/account?username='+encodeURIComponent(username),{
-            headers:{Authorization:'Bearer '+token},
-            cache:'no-store'
-          });
-          const detail=await detailResponse.json().catch(()=>({}));
-          if(!detailResponse.ok||!detail.ok)throw new Error(detail.error||'Could not load account details.');
-
-          const account=detail.account||{};
-          const games=Array.isArray(account.games)?account.games:[];
-          const modal=document.getElementById('cosmic-dev-accounts-modal');
-          if(!modal)return;
-
-          const panel=modal.querySelector('[data-accounts-panel]');
-          if(!panel)return;
-
-          panel.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button data-back style="border:1px solid rgba(45,204,255,.35);border-radius:9px;padding:8px 11px;background:rgba(45,204,255,.07);color:#2dccff;cursor:pointer">← Back</button><strong style="color:#2dccff">'+safe(account.username||username)+'</strong></div>'+
-            '<div style="display:grid;gap:8px">'+
-            '<div style="padding:10px;border:1px solid rgba(45,204,255,.18);border-radius:10px;background:rgba(45,204,255,.04)"><b>Created:</b> '+safe(account.created_at?new Date(account.created_at).toLocaleString():'Unknown')+'</div>'+
-            '<div style="padding:10px;border:1px solid rgba(45,204,255,.18);border-radius:10px;background:rgba(45,204,255,.04)"><b>Games played:</b> '+games.length+'</div>'+
-            '</div>'+
-            '<h3 style="margin:16px 0 8px;color:#2dccff">Game activity</h3>'+
-            (games.length?'<div style="display:grid;gap:6px">'+games.map(game=>'<div style="padding:9px 10px;border:1px solid rgba(45,204,255,.14);border-radius:9px;background:rgba(0,0,0,.12)"><b>'+safe(game.game_name)+'</b><br><small style="color:#91a5b0">Opens: '+safe(game.opens)+' • Last opened: '+safe(game.last_opened?new Date(game.last_opened).toLocaleString():'Unknown')+'</small></div>').join('')+'</div>':'<div style="color:#8196a1">No game activity recorded.</div>');
-          panel.querySelector('[data-back]').onclick=()=>renderAccountPage();
-        }catch(e){
-          showToast('Account details failed: '+(e.message||e));
-        }
-      };
-
-      const modal=document.createElement('div');
-      modal.id='cosmic-dev-accounts-modal';
-      modal.style.cssText='position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.74);backdrop-filter:blur(8px)';
-
-      const shell=document.createElement('div');
-      shell.style.cssText='width:min(700px,95vw);max-height:86vh;overflow:hidden;border:2px solid #2dccff;border-radius:18px;background:#07131a;color:#f2f7fa;box-shadow:0 25px 90px rgba(0,0,0,.72)';
-      shell.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid rgba(45,204,255,.18)"><strong style="color:#2dccff">Cosmic • Accounts</strong><span data-account-count style="color:#8196a1;font-size:12px"></span><button data-close style="margin-left:auto;width:32px;height:32px;border:1px solid rgba(45,204,255,.35);border-radius:9px;background:rgba(45,204,255,.07);color:#2dccff;font-size:20px;cursor:pointer">×</button></div><div data-accounts-panel style="max-height:calc(86vh - 58px);overflow:auto;padding:14px"></div>';
-      modal.appendChild(shell);
-      document.body.appendChild(modal);
-
-      const renderAccountPage=()=>{
-        const panel=modal.querySelector('[data-accounts-panel]');
-        const count=modal.querySelector('[data-account-count]');
-        const totalPages=Math.max(1,Math.ceil(accounts.length/pageSize));
-        page=Math.max(0,Math.min(page,totalPages-1));
-        const start=page*pageSize;
-        const shown=accounts.slice(start,start+pageSize);
-        if(count)count.textContent=accounts.length+' total • Page '+(page+1)+'/'+totalPages;
-
-        panel.innerHTML=(shown.length?shown.map((account,index)=>'<button data-account="'+safe(account.username)+'" style="display:block;width:100%;margin:0 0 8px;padding:11px 12px;border:1px solid rgba(45,204,255,.2);border-radius:11px;background:rgba(45,204,255,.04);color:#f2f7fa;text-align:left;cursor:pointer"><b style="display:block;color:#f4fbff">'+safe(account.username)+'</b><small style="display:block;margin-top:4px;color:#8da2ad">Created: '+safe(account.created_at?new Date(account.created_at).toLocaleString():'Unknown')+' • Opens: '+safe(account.total_opens??0)+' • Last active: '+safe(account.last_opened?new Date(account.last_opened).toLocaleString():'Never')+'</small></button>').join(''):'<div style="padding:18px;color:#8196a1;text-align:center">No Cosmic accounts exist yet.</div>')+
-          '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:12px"><button data-prev style="padding:9px 13px;border:1px solid rgba(45,204,255,.3);border-radius:9px;background:rgba(45,204,255,.06);color:#2dccff;cursor:pointer">Previous</button><button data-next style="padding:9px 13px;border:1px solid #2dccff;border-radius:9px;background:#103441;color:#2dccff;font-weight:800;cursor:pointer">Next</button></div>';
-
-        panel.querySelectorAll('[data-account]').forEach(btn=>{
-          btn.onclick=()=>openAccountDetails(btn.dataset.account);
-        });
-        panel.querySelector('[data-prev]').disabled=page<=0;
-        panel.querySelector('[data-next]').disabled=page>=totalPages-1;
-        panel.querySelector('[data-prev]').style.opacity=page<=0?'.45':'1';
-        panel.querySelector('[data-next]').style.opacity=page>=totalPages-1?'.45':'1';
-        panel.querySelector('[data-prev]').onclick=()=>{if(page>0){page--;renderAccountPage();}};
-        panel.querySelector('[data-next]').onclick=()=>{if(page<totalPages-1){page++;renderAccountPage();}};
-      };
-
-      modal.querySelector('[data-close]').onclick=()=>modal.remove();
-      modal.addEventListener('click',event=>{if(event.target===modal)modal.remove();});
-
-      // Expose the renderer to the account-detail back button.
-      modal.__renderAccounts=renderAccountPage;
-      window.__cosmicRenderAccounts=renderAccountPage;
-      const renderAccountPageGlobal=()=>window.__cosmicRenderAccounts?.();
-      // Account detail uses this stable callback instead of relying on local closure lookup timing.
-      window.__cosmicRenderAccounts=renderAccountPage;
-      renderAccountPage();
-    }catch(e){
-      showToast('Accounts failed: '+(e.message||e));
-    }
-  }
-
   function commandDescription(command) {
     return COMMAND_DESCRIPTIONS[command] || 'Runs this developer command.';
   }
 
-  const TOGGLE_COMMANDS = new Set(['/adblock','/stretch','/hidedark','/compact','/cleanui','/blur','/matrix','/grayscale','/tilt','/invert','/retro','/fakeloading','/locksite','/maintenance','/feature','/blacklist','/disablegame','/enablegame']);
-  function commandIsOn(command){
-    if(command==='/adblock') return document.documentElement.classList.contains('cosmic-dev-adblock');
-    if(command==='/stretch') return document.documentElement.classList.contains('cosmic-dev-stretch');
-    if(command==='/hidedark') return document.body.classList.contains('cosmic-dev-light-preview');
-    if(command==='/compact') return document.documentElement.classList.contains('cosmic-dev-compact');
-    if(command==='/cleanui') return document.documentElement.classList.contains('cosmic-dev-cleanui');
-    if(command==='/blur') return document.documentElement.classList.contains('cosmic-dev-blur');
-    if(command==='/grayscale') return document.documentElement.classList.contains('cosmic-dev-grayscale');
-    if(command==='/tilt') return document.body.classList.contains('cosmic-dev-tilt');
-    if(command==='/invert') return document.body.classList.contains('cosmic-dev-invert');
-    if(command==='/retro') return document.body.classList.contains('cosmic-dev-retro');
-    if(command==='/matrix') return !!document.getElementById('cosmic-dev-matrix');
-    if(command==='/fakeloading') return !!document.getElementById('cosmic-dev-fake-loading');
-    if(command==='/locksite') return !!document.getElementById('cosmic-dev-locksite');
-    if(command==='/maintenance') return String(window.__cosmicGlobalState?.mode?.value||'')==='maintenance';
-    if(command==='/event') return !!window.__cosmicGlobalState?.event;
-    if(command==='/countdown') return !!window.__cosmicGlobalState?.countdown;
+  function localCommandIsOn(command){
+    const root=document.documentElement;
+    if(command==='/adblock')return root.classList.contains('cosmic-dev-adblock');
+    if(command==='/stretch')return root.classList.contains('cosmic-dev-stretch');
+    if(command==='/hidedark')return document.body.classList.contains('cosmic-dev-light-preview');
+    if(command==='/compact')return root.classList.contains('cosmic-dev-compact');
+    if(command==='/cleanui')return root.classList.contains('cosmic-dev-cleanui');
+    if(command==='/blur')return root.classList.contains('cosmic-dev-blur');
+    if(command==='/matrix')return !!document.getElementById('cosmic-dev-matrix');
+    if(command==='/grayscale')return root.classList.contains('cosmic-dev-grayscale');
+    if(command==='/tilt')return document.body.classList.contains('cosmic-dev-tilt');
+    if(command==='/invert')return document.body.classList.contains('cosmic-dev-invert');
+    if(command==='/retro')return document.body.classList.contains('cosmic-dev-retro');
+    if(command==='/fakeloading')return !!document.getElementById('cosmic-dev-fake-loading');
+    if(command==='/locksite')return !!document.getElementById('cosmic-dev-locksite');
     return false;
-  }
-  function refreshDevCommandButtons(){
-    document.querySelectorAll('#cosmic-dev-panel .dev-command').forEach(button=>{
-      const command=button.dataset.command; if(!command||!TOGGLE_COMMANDS.has(command)) return;
-      const on=commandIsOn(command); const action=button.querySelector('.dev-action');
-      if(action){action.textContent='Off'; action.hidden=!on; action.classList.toggle('is-off',on);}
-      button.classList.toggle('is-on',on);
-    });
   }
 
   function confirmCommand(command,args='') {
     return new Promise(resolve => {
-      const old=document.getElementById('cosmic-dev-confirm'); if(old) old.remove();
-      const active=TOGGLE_COMMANDS.has(command)&&commandIsOn(command);
-      const m=document.createElement('div'); m.id='cosmic-dev-confirm';
+      const toggleable=DEV_GLOBAL_TOGGLES.has(command)||['/adblock','/stretch','/hidedark','/compact','/cleanui','/blur','/matrix','/grayscale','/tilt','/invert','/retro','/fakeloading','/locksite'].includes(command);
+      const active=toggleable && (DEV_GLOBAL_TOGGLES.has(command)?globalToggleIsOn(command,args):localCommandIsOn(command));
+      const old=document.getElementById('cosmic-dev-confirm');
+      if(old) old.remove();
+      const m=document.createElement('div');
+      m.id='cosmic-dev-confirm';
       m.style.cssText='position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.72);backdrop-filter:blur(8px)';
       const safeArgs=args ? '<div style="margin-top:10px;padding:9px 11px;border:1px solid rgba(45,204,255,.25);border-radius:10px;background:rgba(45,204,255,.05);word-break:break-word"><b>Input:</b> '+safe(args)+'</div>' : '';
       m.innerHTML='<div style="width:min(520px,94vw);padding:20px;border:2px solid #2dccff;border-radius:18px;background:#07131a;color:#f2f7fa;box-shadow:0 25px 80px rgba(0,0,0,.7)"><button data-cancel style="float:right;width:32px;height:32px;border:1px solid #2dccff;border-radius:9px;background:rgba(45,204,255,.08);color:#2dccff;font-size:20px;cursor:pointer">×</button><div style="color:#2dccff;font:800 12px system-ui,sans-serif;letter-spacing:.6px">DEVELOPER COMMAND</div><h2 style="margin:7px 0 10px">'+safe(command)+'</h2><p style="line-height:1.55;margin:0">'+safe(commandDescription(command))+'</p>'+safeArgs+'<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px"><button data-cancel style="padding:9px 14px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:transparent;color:#dce8ed;cursor:pointer">Cancel</button><button data-continue style="padding:9px 16px;border:1px solid #2dccff;border-radius:10px;background:#103441;color:#2dccff;font-weight:800;cursor:pointer">'+(active?'Off':'Continue')+'</button></div></div>';
@@ -779,10 +658,16 @@
     showToast('Developer local effects reset.');
   }
 
+  const DEV_GLOBAL_TOGGLES = new Set(['/maintenance','/feature','/blacklist','/disablegame','/enablegame']);
+  const devToggleState = Object.create(null);
+  function toggleKey(command,args){return command+'::'+String(args||'').trim().toLowerCase();}
+  function globalToggleIsOn(command,args){return !!devToggleState[toggleKey(command,args)];}
+  function setGlobalToggleState(command,args,on){devToggleState[toggleKey(command,args)]=!!on;}
+
   async function globalCommand(command,args=''){
     const token=await adminToken(); if(!token)return;
     const raw=(args||'').trim();
-    const [first,...rest]=raw.split(/\\s+/); const restText=rest.join(' ');
+    const parts=raw.split(/\\s+/); const first=parts.shift()||''; const rest=parts.join(' ');
     let body={action:command.slice(1)};
     if(command==='/announcement') body={action:raw.toLowerCase()==='clear'?'announcement_clear':'announcement_set',...(raw.toLowerCase()==='clear'?{}:{text:raw})};
     else if(command==='/globalnotice') body={action:'global_notice_set',text:raw};
@@ -794,18 +679,16 @@
     else if(command==='/globalmessage') body={action:'global_message_set',text:raw};
     else if(command==='/broadcast') body={action:'broadcast_set',text:raw};
     else if(command==='/sync') body={action:'sync_signal'};
-    else if(command==='/account') body={action:'account',username:raw};
-    else if(command==='/userstats') body={action:'userstats',username:raw};
-    else if(command==='/gameinfo') body={action:'gameinfo',name:raw};
-    else if(command==='/gameannounce') body={action:'gameannounce_set',game:first,text:restText};
+    else if(command==='/account'||command==='/userstats'||command==='/gameinfo') body={action:command.slice(1),username:command==='/account'||command==='/userstats'?raw:undefined,name:command==='/gameinfo'?raw:undefined};
+    else if(command==='/gameannounce') body={action:'gameannounce_set',game:first,text:rest};
     else if(command==='/disablegame') body={action:'disabled_game_toggle',name:raw};
     else if(command==='/enablegame') body={action:'disabled_game_enable',name:raw};
     else if(command==='/unfeature') body={action:'unfeature',name:raw};
     else if(command==='/spotlight') body={action:'spotlight_set',name:raw};
     else if(command==='/globalbadge') body={action:'global_badge_set',text:raw};
     else if(command==='/globaltheme') body={action:'global_theme_set',theme:first};
-    else if(command==='/countdown') body={action:'countdown_set',minutes:Number(first),label:restText||'Countdown'};
-    else if(command==='/event') body={action:'event_set',name:first||raw,message:restText};
+    else if(command==='/countdown') body={action:'countdown_set',minutes:Number(first),label:rest||'Countdown'};
+    else if(command==='/event') body={action:'event_set',name:first||raw,message:rest};
     else if(command==='/eventmessage') body={action:'event_message',message:raw};
     else if(command==='/eventtimer') body={action:'event_timer',minutes:Number(first)};
     else if(command==='/endevent') body={action:'event_end'};
@@ -814,11 +697,11 @@
     else if(command==='/feature') body={action:'feature_toggle',name:raw};
     else if(command==='/clearall') body={action:'clearall'};
     try{
-      const response=await fetch(API+'/api/admin/global',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body),cache:'no-store'});
-      const data=await response.json().catch(()=>({})); if(!response.ok||!data.ok)throw new Error(data.error||'Global command failed.');
+      const r=await fetch(API+'/api/admin/global',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body),cache:'no-store'});
+      const d=await r.json().catch(()=>({})); if(!r.ok||!d.ok)throw new Error(d.error||'Global command failed');
+      if(DEV_GLOBAL_TOGGLES.has(command)) setGlobalToggleState(command,args,command!=='/enablegame');
       if(command==='/globalreload') location.reload();
-      else showModal('Cosmic • '+command,data.global||data.announcement?'<pre style="white-space:pre-wrap">'+safe(JSON.stringify(data,null,2))+'</pre>':'<pre style="white-space:pre-wrap">'+safe(JSON.stringify(data,null,2))+'</pre>');
-      syncGlobalAnnouncement();
+      else showModal('Cosmic • '+command,'<pre style="white-space:pre-wrap">'+safe(JSON.stringify(d,null,2))+'</pre>');
     }catch(e){showToast('Global command failed: '+(e.message||e));}
   }
 
@@ -835,7 +718,7 @@
       case '/fullscreen': return fullscreen();
       case '/screenshot': return screenshot();
       case '/stats': return stats();
-      case '/announcement': return globalCommand(command,args);
+      case '/announcement': return globalCommand('/announcement',args);
       case '/globalnotice': case '/clearnotice': case '/sitebanner': case '/sitemode': case '/globalrefresh': case '/globalreload':
       case '/globalmessage': case '/broadcast': case '/sync': case '/account': case '/online': case '/recentusers': case '/userstats':
       case '/activitylog': case '/gamecount': case '/gameinfo': case '/topgames': case '/recentgames': case '/gameannounce':
@@ -844,7 +727,6 @@
       case '/status': case '/healthcheck': case '/errors': case '/requests': case '/latency': case '/cacheinfo': case '/version':
       case '/deployinfo': case '/diagnostics': case '/routes': case '/assets': case '/clearall':
         return globalCommand(command,args);
-      case '/accounts': return accountsCommand();
       case '/reload': return location.reload();
       case '/home': return location.href=location.origin+(location.hostname.endsWith('.github.io')?'/cosmic/pages/lessons/lessons.html':'/pages/lessons/lessons.html');
       case '/blacklist': return siteStateCommand('blacklist_toggle',{target:args});
@@ -868,7 +750,7 @@
       case '/fakeloading': return fakeLoadingCommand();
       case '/locksite': return lockSiteCommand();
       case '/cleanui': return cleanUiCommand();
-      case '/count': return globalCommand('/gamecount','');
+      case '/count': return countCommand();
       case '/font': return fontCommand(args);
       case '/compact': return compactCommand();
       case '/blur': return blurCommand();
@@ -985,13 +867,11 @@
         const b=document.createElement('button');
         b.type='button';
         b.className='dev-command';
-        const command=name.split(' ')[0];
-        b.dataset.command=command;
-        b.innerHTML='<b>'+safe(name)+'</b><small>'+safe(desc)+'</small>'+ (TOGGLE_COMMANDS.has(command)?'<span class="dev-action" hidden>Off</span>':'');
+        b.innerHTML='<b>'+safe(name)+'</b><small>'+safe(desc)+'</small>';
         b.onclick=()=>{
           const command=name.split(' ')[0];
           const args=name.includes('[')?window.prompt(name+' argument:','')||'':'';
-          confirmedRunCommand(command,args).finally(refreshDevCommandButtons);
+          confirmedRunCommand(command,args);
         };
         section.appendChild(b);
       });
@@ -1007,7 +887,6 @@
       if(fab.dataset.dragged==='1'){fab.dataset.dragged='0';return;}
       openPanelFromFab();
     });
-    refreshDevCommandButtons();
     const closeButton = panel.querySelector('.dev-close');
     if (closeButton) {
       closeButton.style.pointerEvents = 'auto';

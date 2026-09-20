@@ -1,4 +1,18 @@
-(() => {
+(()
+  function enhanceCards(){
+    document.querySelectorAll('.game-card,.app-card').forEach(card=>{
+      if(card.dataset.cosmicEnhanced==='1')return;
+      const title=card.querySelector('.game-title,.app-title')?.textContent?.trim();
+      const item=allItems.find(x=>x.name.toLowerCase()===String(title||'').toLowerCase());
+      if(!item)return;
+      card.dataset.cosmicEnhanced='1';
+      const meta=playMeta(item),info=document.createElement('small');
+      info.className='cosmic-play-meta';info.style.cssText='display:block;text-align:center;opacity:.75;margin:4px 0';info.textContent=meta.time+' • '+meta.tags.join(' • ');
+      card.querySelector('.game-title,.app-title')?.after(info);
+      card.addEventListener('dblclick',()=>previewDrawer(item));
+    });
+  }
+ => {
   'use strict';
   // This identifier is also checked after a Cloudflare deploy. Keep it in the
   // served script so a successful deploy cannot silently serve an older hub.
@@ -45,6 +59,7 @@
   async function getJson(url, fallback) { try { const r = await fetch(url, {cache:'no-store'}); if (!r.ok) throw new Error(r.status); return await r.json(); } catch (_) { return fallback; } }
 
   const css = `
+    html.cosmic-focus-mode body>*:not(#cosmic-focus-exit){display:none!important}html.cosmic-focus-mode{background:#000!important}html.cosmic-focus-mode body{margin:0!important;background:#000!important}
     #cosmic-hub-tools{max-width:1400px;margin:0 auto;padding:0 40px 18px}
     .cosmic-section{margin:18px 0}.cosmic-section h3{margin:0 0 10px;color:var(--accent,#2dccff);font-size:1rem;letter-spacing:1px}.cosmic-row{display:flex;gap:10px;overflow:auto;padding:4px 2px 10px;scrollbar-width:thin}.cosmic-mini{min-width:170px;max-width:210px;padding:12px;border:1px solid var(--card-border,#2dccff);border-radius:14px;background:rgba(6,20,16,.7);color:inherit;cursor:pointer;text-align:left}.cosmic-mini:hover{transform:translateY(-2px);background:rgba(45,204,255,.12)}.cosmic-mini b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cosmic-mini small{opacity:.7}.cosmic-star{position:absolute;right:8px;top:8px;width:32px;height:32px;border:1px solid var(--card-border,#2dccff);border-radius:50%;background:rgba(0,0,0,.55);color:var(--accent,#2dccff);cursor:pointer;font-size:17px;z-index:3}.game-card,.app-card{position:relative}.cosmic-more{margin-top:8px;width:100%;height:30px;border-radius:9px;border:1px solid var(--card-border,#2dccff);background:transparent;color:var(--accent,#2dccff);cursor:pointer}.cosmic-filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}.cosmic-filter,.cosmic-tool{border:1px solid var(--card-border,#2dccff);border-radius:999px;padding:7px 12px;background:rgba(0,0,0,.22);color:var(--accent,#2dccff);cursor:pointer}.cosmic-filter.active{background:var(--accent,#2dccff);color:#031721}.cosmic-badge{position:fixed;right:14px;bottom:14px;z-index:2147483000;padding:7px 11px;border:1px solid var(--card-border,#2dccff);border-radius:999px;background:rgba(5,12,18,.92);color:var(--accent,#2dccff);font:700 12px system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.4)}#cosmic-account{position:fixed;right:14px;top:14px;z-index:2147483001}.cosmic-modal{position:fixed;inset:0;z-index:2147483002;display:none;place-items:center;padding:20px;background:rgba(0,0,0,.78);backdrop-filter:blur(8px)}.cosmic-panel{width:min(760px,95vw);max-height:88vh;overflow:auto;padding:24px;border:1px solid var(--card-border,#2dccff);border-radius:20px;background:#07131a;color:#f2f7fa;box-shadow:0 25px 80px rgba(0,0,0,.65)}.cosmic-panel h2{margin-top:0;color:var(--accent,#2dccff)}.cosmic-panel input,.cosmic-panel textarea,.cosmic-panel select{width:100%;box-sizing:border-box;margin:6px 0 12px;padding:10px;border-radius:9px;border:1px solid var(--card-border,#2dccff);background:#02070b;color:#fff}.cosmic-panel button{border:1px solid var(--card-border,#2dccff);border-radius:9px;padding:9px 13px;background:rgba(45,204,255,.1);color:var(--accent,#2dccff);cursor:pointer;margin:3px}.cosmic-primary{background:var(--accent,#2dccff)!important;color:#031721!important}.cosmic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.cosmic-dev-card{display:flex;flex-direction:column;gap:7px;text-align:left;padding:14px;border:1px solid var(--card-border,#2dccff);border-radius:14px;background:linear-gradient(145deg,rgba(45,204,255,.12),rgba(0,0,0,.22));color:inherit;cursor:pointer;min-height:82px}.cosmic-dev-card:hover{transform:translateY(-2px);background:rgba(45,204,255,.16)}.cosmic-dev-card small{opacity:.72;line-height:1.4}.cosmic-dev-card.static{cursor:default}.cosmic-dev-card.static:hover{transform:none}.cosmic-stat{padding:12px;border:1px solid rgba(45,204,255,.2);border-radius:12px;background:rgba(45,204,255,.06)}#cosmic-palette{align-items:start;padding-top:12vh}.cosmic-result{padding:11px;border-radius:10px;cursor:pointer}.cosmic-result:hover{background:rgba(45,204,255,.12)}.cosmic-help{line-height:1.7}.cosmic-offline{opacity:.75}@media(max-width:700px){#cosmic-hub-tools{padding:0 16px 14px}.cosmic-mini{min-width:145px}#cosmic-account{top:8px;right:8px}.cosmic-badge{right:8px;bottom:8px}}
     body[data-cosmic-theme="deep-space"]{--accent:#8db4ff!important;--card-border:rgba(141,180,255,.45)!important;--card-bg:rgba(7,14,28,.8)!important}body[data-cosmic-theme="solar-flare"]{--accent:#ffb35c!important;--card-border:rgba(255,179,92,.45)!important;--card-bg:rgba(30,16,7,.8)!important}body[data-cosmic-theme="synthwave"]{--accent:#ff63e6!important;--card-border:rgba(255,99,230,.45)!important;--card-bg:rgba(24,7,28,.8)!important}body[data-cosmic-theme="nebula"]{--accent:#2dccff!important;--card-border:rgba(45,204,255,.42)!important;--card-bg:rgba(6,20,16,.76)!important}
@@ -73,12 +88,136 @@
   function recordOpen(item){const p=profile(),id=itemId(item);p.recent=[id,...p.recent.filter(x=>x!==id)].slice(0,12);p.stats[id]=p.stats[id]||{opens:0,lastScore:'',highScore:''};p.stats[id].opens++;p.stats[id].lastOpened=Date.now();writeProfile(p);const username=currentUser();const account=load(ACCOUNTS,{})[username.toLowerCase()];if(username!=='Guest'&&account?.accountToken&&item.kind==='game'){fetch(apiBase+'/api/accounts/activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,account_token:account.accountToken,game_name:item.name})}).catch(()=>{});}setTimeout(renderHubSections,50);}
   function detailModal(item,launch){const p=profile(),id=itemId(item),s=p.stats[id]||{},note=p.notes[id]||'';const m=openModal('cosmic-detail','',`<div class="cosmic-stat"><b>${safe(item.name)}</b><br/><small>${safe(item.kind)} • ${safe(item.category||inferCategory(item))}</small></div><label>Personal note<textarea id="cd-note" rows="3" placeholder="e.g. use for math">${safe(note)}</textarea></label>${item.kind==='game'?`<label>Last score<input id="cd-score" value="${safe(s.lastScore||'')}" inputmode="numeric" placeholder="Optional"></label><label>High score<input id="cd-high" value="${safe(s.highScore||'')}" inputmode="numeric" placeholder="Optional"></label>`:''}<p>Opened ${s.opens||0} time(s).</p><button class="cosmic-primary" id="cd-save">Save</button><button id="cd-launch">Open</button>`);m.querySelector('#cd-save').onclick=()=>{const q=profile();q.notes[id]=m.querySelector('#cd-note').value.slice(0,500);q.stats[id]=q.stats[id]||{};if(item.kind==='game'){q.stats[id].lastScore=m.querySelector('#cd-score').value.slice(0,40);q.stats[id].highScore=m.querySelector('#cd-high').value.slice(0,40);}writeProfile(q);m.style.display='none';};m.querySelector('#cd-launch').onclick=()=>{recordOpen(item);location.href=launch;};}
   function buildItemData(){return [...games.map(x=>normalize({...x,kind:'game'})),...apps.map(x=>normalize({...x,kind:'app'}))];}
-  let allItems=[];function itemById(id){return allItems.find(x=>itemId(x)===id);}function renderMini(item){const b=document.createElement('button');b.className='cosmic-mini';b.type='button';b.innerHTML=`<b>${safe(item.name)}</b><small>${safe(item.category)}</small>`;b.onclick=()=>{recordOpen(item);location.href=launchTarget(item);};return b;}
+  let allItems=[];function itemById(id){return allItems.find(x=>itemId(x)===id);}function renderMini(item){const b=document.createElement('button');b.className='cosmic-mini';b.type='button';b.innerHTML=`<b>${safe(item.name)}</b><small>${safe(item.category)}</small>`;b.onclick=()=>previewDrawer(item);return b;}
   function gameTarget(item){return new URL(base+'pages/lessons/game-shell.html?game='+encodeURIComponent(new URL(item.path+(item.entry||''),location.href).href),location.origin).href;}
   function appTarget(item){const u=new URL(base+'apps/app.html',location.origin);u.searchParams.set('url',item.path+(item.entry||''));u.searchParams.set('name',item.name||'Cosmic App');return u.href;}
   function launchTarget(item){return item.kind==='game'?gameTarget(item):appTarget(item);}
   function renderHubSections(){const host=document.getElementById('cosmic-hub-tools');if(!host)return;const p=profile();host.querySelectorAll('.cosmic-dynamic').forEach(x=>x.remove());const pinned=p.favorites.map(itemById).filter(Boolean),recent=p.recent.map(itemById).filter(Boolean);const add=(title,list)=>{if(!list.length)return;const s=document.createElement('section');s.className='cosmic-section cosmic-dynamic';s.innerHTML=`<h3>${title}</h3>`;const r=document.createElement('div');r.className='cosmic-row';list.forEach(x=>r.appendChild(renderMini(x)));s.appendChild(r);host.appendChild(s);};add('★ Pinned',pinned);add('↻ Recently Played / Opened',recent);}
-  function mission(){if(!allItems.length)return;const day=Math.floor(Date.now()/86400000),item=allItems[day%allItems.length];let host=document.getElementById('cosmic-mission');if(!host){host=document.createElement('section');host.id='cosmic-mission';host.className='cosmic-section';host.innerHTML='<h3>✦ Mission of the Day</h3><div class="cosmic-stat"></div>';const tools=document.getElementById('cosmic-hub-tools');tools?.prepend(host);}const reason={Arcade:'a quick burst of action',Multiplayer:'a good pick for a multiplayer session',Puzzle:'a brain-teasing change of pace',Utility:'a useful tool worth trying',AI:'something smart and different',New:'something fresh in the library'}[item.category]||'something worth discovering';host.querySelector('.cosmic-stat').innerHTML=`<b>${safe(item.name)}</b><br><small>Try it today because it is ${reason}.</small><br><button class="cosmic-primary" id="cosmic-mission-go">Launch</button>`;host.querySelector('#cosmic-mission-go').onclick=()=>{recordOpen(item);location.href=launchTarget(item);};}
+  function localKey(name){return 'cosmic_'+name+'_'+currentUser().toLowerCase();}
+  function saveJson(key,value){try{localStorage.setItem(key,JSON.stringify(value));}catch(_){}}
+  function loadJson(key,fallback){try{const v=JSON.parse(localStorage.getItem(key));return v??fallback;}catch(_){return fallback;}}
+
+  function playMeta(item){
+    const s=(item.tags||[]).join(' ').toLowerCase()+' '+(item.description||'').toLowerCase()+' '+(item.name||'').toLowerCase();
+    const tags=[];
+    if(/touch|mobile/.test(s))tags.push('touch');
+    else tags.push('keyboard');
+    if(/multiplayer|2 player|2-player|versus|vs\.?|battle karts|baseball bros|basket random/.test(s)||item.category==='Multiplayer')tags.push('multiplayer');
+    const mins=/quick|mini|2048|puzzle|sudoku|word|memory/.test(s)?'5 min':/story|adventure|rpg|simulator|racing/.test(s)?'15+ min':'10 min';
+    return {time:mins,tags};
+  }
+
+  function smartPick(){
+    if(!allItems.length)return null;
+    const p=profile(), recent=new Set(p.recent||[]), fav=new Set(p.favorites||[]);
+    const scored=allItems.map(item=>{
+      const id=itemId(item),s=p.stats[id]||{};
+      let score=Math.random()*4;
+      if(recent.has(id))score-=7;
+      if(fav.has(id))score+=5;
+      score+=Math.min(Number(s.opens||0),5);
+      if(item.kind==='game')score+=2;
+      return {item,score};
+    }).sort((a,b)=>b.score-a.score);
+    return scored[0]?.item||allItems[0];
+  }
+
+  function launchItem(item){
+    if(!item)return;
+    recordOpen(item);
+    location.href=launchTarget(item);
+  }
+
+  function previewDrawer(item){
+    const meta=playMeta(item);
+    let d=document.getElementById('cosmic-preview-drawer');
+    if(!d){
+      d=document.createElement('aside');d.id='cosmic-preview-drawer';
+      d.style.cssText='position:fixed;right:0;top:0;bottom:0;width:min(430px,94vw);z-index:2147483003;transform:translateX(102%);transition:transform .22s ease;background:#07131a;color:#f2f7fa;border-left:1px solid var(--card-border,#2dccff);box-shadow:-25px 0 70px rgba(0,0,0,.55);padding:22px;box-sizing:border-box;overflow:auto;';
+      document.body.appendChild(d);
+    }
+    const image=item.image?new URL(item.image,location.href).href:'';
+    d.innerHTML='<button id="cp-close" style="float:right">×</button>'+(image?'<img src="'+safe(image)+'" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px">':'')+
+      '<h2 style="color:var(--accent,#2dccff)">'+safe(item.name)+'</h2>'+
+      '<p><b>'+safe(item.category||'Game')+'</b> • '+safe(meta.time)+'</p>'+
+      '<p>'+safe((item.tags||[]).join(' • ')||'No tags yet')+'</p>'+
+      '<p>Controls: '+safe(meta.tags.join(' • '))+'</p>'+
+      '<p>'+safe(item.description||'Ready to launch from Cosmic.')+'</p>'+
+      '<button class="cosmic-primary" id="cp-launch">Launch</button><button id="cp-focus">Focus Mode</button>';
+    d.querySelector('#cp-close').onclick=()=>d.style.transform='translateX(102%)';
+    d.querySelector('#cp-launch').onclick=()=>launchItem(item);
+    d.querySelector('#cp-focus').onclick=()=>{d.style.transform='translateX(102%)';focusMode(true);launchItem(item);};
+    requestAnimationFrame(()=>d.style.transform='translateX(0)');
+  }
+
+  function focusMode(on){
+    document.documentElement.classList.toggle('cosmic-focus-mode',on);
+    saveJson('cosmicFocusMode',!!on);
+    let b=document.getElementById('cosmic-focus-exit');
+    if(on&&!b){b=document.createElement('button');b.id='cosmic-focus-exit';b.textContent='Exit Focus';b.style.cssText='position:fixed;top:12px;left:12px;z-index:2147483646;border:1px solid #2dccff;border-radius:999px;padding:8px 12px;background:#07131a;color:#2dccff;cursor:pointer';b.onclick=()=>focusMode(false);document.body.appendChild(b);}
+    if(!on)b?.remove();
+  }
+
+  function dailyQuest(){
+    if(!allItems.length)return;
+    const day=Math.floor(Date.now()/86400000);
+    const item=allItems[day%allItems.length];
+    const p=profile(),id=itemId(item),stat=p.stats[id]||{};
+    const goal=Number(stat.opens||0)>0?'Beat your previous best on '+item.name+'.':'Try '+item.name+' today.';
+    let host=document.getElementById('cosmic-daily-quest');
+    if(!host){host=document.createElement('section');host.id='cosmic-daily-quest';host.className='cosmic-section';const tools=document.getElementById('cosmic-hub-tools');tools?.prepend(host);}
+    host.innerHTML='<h3>✦ Cosmic Daily Quest</h3><div class="cosmic-stat"><b>'+safe(item.name)+'</b><br><small>'+safe(goal)+'</small><br><button class="cosmic-primary" id="cosmic-daily-go">Start Quest</button></div>';
+    host.querySelector('#cosmic-daily-go').onclick=()=>launchItem(item);
+  }
+
+  function smartPickUI(){
+    let host=document.getElementById('cosmic-smart-pick');
+    if(!host){host=document.createElement('section');host.id='cosmic-smart-pick';host.className='cosmic-section';const tools=document.getElementById('cosmic-hub-tools');tools?.prepend(host);}
+    const item=smartPick();if(!item)return;
+    host.innerHTML='<h3>✦ Pick for Me</h3><div class="cosmic-stat"><b>'+safe(item.name)+'</b><br><small>'+safe(item.category)+' • '+safe(playMeta(item).time)+'</small><br><button class="cosmic-primary" id="cosmic-pick-go">Play</button> <button id="cosmic-pick-again">Pick Again</button></div>';
+    host.querySelector('#cosmic-pick-go').onclick=()=>launchItem(item);
+    host.querySelector('#cosmic-pick-again').onclick=smartPickUI;
+  }
+
+  function categoryCarousel(){
+    const host=document.getElementById('cosmic-category-carousel')||(()=>{const x=document.createElement('section');x.id='cosmic-category-carousel';x.className='cosmic-section';const tools=document.getElementById('cosmic-hub-tools');tools?.appendChild(x);return x;})();
+    const cats=['Arcade','Puzzle','Multiplayer','Utility','AI','New'];
+    host.innerHTML='<h3>✦ Explore Categories</h3><div class="cosmic-row"></div>';
+    const row=host.querySelector('.cosmic-row');
+    cats.forEach(cat=>{const items=allItems.filter(x=>x.category===cat).slice(0,8);if(!items.length)return;const b=document.createElement('button');b.className='cosmic-mini';b.innerHTML='<b>'+cat+'</b><small>'+items.length+' picks</small>';b.onclick=()=>{const q=document.querySelector('#gamesearchinput,#search');if(q){q.value=cat;q.dispatchEvent(new Event('input',{bubbles:true}));}};row.appendChild(b);});
+  }
+
+  function achievements(){
+    const p=profile(),stats=Object.values(p.stats||{}),opens=stats.reduce((n,x)=>n+Number(x.opens||0),0);
+    const cats=new Set((p.recent||[]).map(id=>itemById(id)?.category).filter(Boolean));
+    const days=loadJson(localKey('streak'),{last:0,count:0}),today=Math.floor(Date.now()/86400000);
+    const streak=days.last===today?days.count:days.last===today-1?days.count+1:1;
+    saveJson(localKey('streak'),{last:today,count:streak});
+    const earned=[opens>=10?'Played 10 games':'',cats.size>=3?'Explored 3 categories':'',streak>=7?'7-day Cosmic streak':''].filter(Boolean);
+    let host=document.getElementById('cosmic-achievements');
+    if(!host){host=document.createElement('section');host.id='cosmic-achievements';host.className='cosmic-section';const tools=document.getElementById('cosmic-hub-tools');tools?.appendChild(host);}
+    host.innerHTML='<h3>✦ Achievements & Milestones</h3><div class="cosmic-stat">'+(earned.length?earned.map(x=>'🏆 '+safe(x)).join('<br>'):'Play more to unlock local milestones.')+'</div>';
+  }
+
+  function exportImport(){
+    let host=document.getElementById('cosmic-portability');
+    if(!host){host=document.createElement('section');host.id='cosmic-portability';host.className='cosmic-section';const tools=document.getElementById('cosmic-hub-tools');tools?.appendChild(host);}
+    host.innerHTML='<h3>✦ Favorites & Settings</h3><div class="cosmic-stat"><button id="cosmic-export">Export Backup</button> <button id="cosmic-import">Import Backup</button><input id="cosmic-import-file" type="file" accept="application/json" hidden></div>';
+    host.querySelector('#cosmic-export').onclick=()=>{const payload={version:1,user:currentUser(),profile:profile(),settings:Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith('cosmic-')).map(k=>[k,localStorage.getItem(k)]))};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));a.download='cosmic-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
+    host.querySelector('#cosmic-import').onclick=()=>host.querySelector('#cosmic-import-file').click();
+    host.querySelector('#cosmic-import-file').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.profile)writeProfile(d.profile);if(d.settings&&typeof d.settings==='object')Object.entries(d.settings).forEach(([k,v])=>{if(String(k).startsWith('cosmic-'))localStorage.setItem(k,String(v));});alert('Cosmic backup imported. Reloading…');location.reload();}catch(_){alert('That backup file could not be imported.');}};rd.readAsText(f);};
+  }
+
+  function telemetry(){
+    let host=document.getElementById('cosmic-telemetry');
+    if(!host){host=document.createElement('section');host.id='cosmic-telemetry';host.className='cosmic-section';const tools=document.getElementById('cosmic-hub-tools');tools?.appendChild(host);}
+    const nav=performance.getEntriesByType('navigation')[0],sw=navigator.serviceWorker?.controller;
+    const lowPower=('getBattery' in navigator)?'Battery API available (browser may expose power state)':'Power state unavailable';
+    host.innerHTML='<h3>✦ Local Diagnostics</h3><div class="cosmic-stat"><b>Load:</b> '+Math.round(nav?.loadEventEnd||performance.now())+' ms<br><b>Service worker:</b> '+(sw?'active':'not controlling this page')+'<br><b>Device:</b> '+safe(navigator.hardwareConcurrency||'unknown')+' CPU threads<br><b>Power:</b> '+lowPower+'<br><small>Diagnostics stay in this browser and are not uploaded.</small></div>';
+  }
+
+  function mission(){dailyQuest();smartPickUI();categoryCarousel();achievements();exportImport();telemetry();}
+
   function filters(){const form=isGames?document.getElementById('gamesearchform'):document.querySelector('.toolbar');if(!form)return;let box=document.getElementById('cosmic-filters');if(box)return;box=document.createElement('div');box.id='cosmic-filters';box.className='cosmic-filters';['All','Arcade','Multiplayer','Puzzle','Utility','AI','New'].forEach(c=>{const b=document.createElement('button');b.className='cosmic-filter'+(c==='All'?' active':'');b.textContent=c;b.onclick=()=>{box.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');filterCards(c);};box.appendChild(b);});form.insertAdjacentElement('afterend',box);}
   function filterCards(category){document.querySelectorAll(isGames?'.game-card':'.app-card').forEach(card=>{const name=card.querySelector('.game-title,.app-title')?.textContent||'';const item=allItems.find(x=>x.kind===(isGames?'game':'app')&&x.name.toLowerCase()===name.toLowerCase());card.style.display=!item||category==='All'||item.category===category?'':'none';});}
   function developerExtraCommands(){return window.CosmicDevTools?.isDeveloper?.() ? window.CosmicDevTools.getHubCommands() : [];}
@@ -110,6 +249,6 @@
       return;
     }
     bootStarted=true;
-    applyTheme();registerPwa();addAccountButton();addTools();filters();installShortcuts();const data=await Promise.all([getJson(base+'pages/lessons/games.json',[]),getJson(base+'apps/apps.json',[]),getJson(base+'collections.json',[])]);games=Array.isArray(data[0])?data[0]:[];apps=Array.isArray(data[1])?data[1]:[];collections=Array.isArray(data[2])?data[2]:[];allItems=buildItemData();mission();renderHubSections();const observer=new MutationObserver(()=>wireExistingCards());observer.observe(document.body,{childList:true,subtree:true});wireExistingCards();const search=document.querySelector('#gamesearchinput,#search');search?.addEventListener('input',()=>setTimeout(()=>wireExistingCards(),0));window.addEventListener('message',e=>{if(e.data?.type!=='cosmic-score')return;const name=e.data.name||document.title,id=`game:${name}`,p=profile();p.stats[id]=p.stats[id]||{};p.stats[id].lastScore=String(e.data.score??'').slice(0,40);const n=Number(e.data.score);if(Number.isFinite(n)&&(!Number.isFinite(Number(p.stats[id].highScore))||n>Number(p.stats[id].highScore)))p.stats[id].highScore=String(n);writeProfile(p);});}
+    applyTheme();registerPwa();addAccountButton();addTools();filters();installShortcuts();const data=await Promise.all([getJson(base+'pages/lessons/games.json',[]),getJson(base+'apps/apps.json',[]),getJson(base+'collections.json',[])]);games=Array.isArray(data[0])?data[0]:[];apps=Array.isArray(data[1])?data[1]:[];collections=Array.isArray(data[2])?data[2]:[];allItems=buildItemData();mission();renderHubSections();const observer=new MutationObserver(()=>wireExistingCards());observer.observe(document.body,{childList:true,subtree:true});enhanceCards();wireExistingCards();enhanceCards();const search=document.querySelector('#gamesearchinput,#search');search?.addEventListener('input',()=>setTimeout(()=>wireExistingCards(),0));window.addEventListener('message',e=>{if(e.data?.type!=='cosmic-score')return;const name=e.data.name||document.title,id=`game:${name}`,p=profile();p.stats[id]=p.stats[id]||{};p.stats[id].lastScore=String(e.data.score??'').slice(0,40);const n=Number(e.data.score);if(Number.isFinite(n)&&(!Number.isFinite(Number(p.stats[id].highScore))||n>Number(p.stats[id].highScore)))p.stats[id].highScore=String(n);writeProfile(p);});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

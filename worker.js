@@ -143,22 +143,42 @@ class UsernameRegistry {
     const key='cosmicGlobalStateV2';
     try{
       const stored=await this.state.storage.get(key);
-      if(stored && typeof stored==='object') return {
-        blacklisted:Array.isArray(stored.blacklisted)?stored.blacklisted:[],
-        featured:Array.isArray(stored.featured)?stored.featured:[],
-        maintenance:!!stored.maintenance,
-        imported:Array.isArray(stored.imported)?stored.imported:[],
-        announcement:stored.announcement||null,
-        maintenance_message:typeof stored.maintenance_message==='string'?stored.maintenance_message:'',
-        global:stored.global&&typeof stored.global==='object'?stored.global:{}
-      };
+      if(stored && typeof stored==='object') {
+        const global=stored.global&&typeof stored.global==='object'?{...stored.global}:{};
+        const migratedVersion=Number(stored.version||0);
+        if(migratedVersion<3){
+          delete global.global_notice;
+          delete global.site_banner;
+          delete global.global_message;
+          delete global.broadcast;
+          delete global.global_reload;
+          delete global.global_refresh;
+          delete global.sync_signal;
+        }
+        if(global.global_reload && Number(global.global_reload)<Date.now()-30000) delete global.global_reload;
+        if(global.global_refresh && Number(global.global_refresh)<Date.now()-30000) delete global.global_refresh;
+        if(global.sync_signal && Number(global.sync_signal)<Date.now()-30000) delete global.sync_signal;
+        const normalized={
+          version:3,
+          blacklisted:Array.isArray(stored.blacklisted)?stored.blacklisted:[],
+          featured:Array.isArray(stored.featured)?stored.featured:[],
+          maintenance:!!stored.maintenance,
+          imported:Array.isArray(stored.imported)?stored.imported:[],
+          announcement:stored.announcement||null,
+          maintenance_message:typeof stored.maintenance_message==='string'?stored.maintenance_message:'',
+          global
+        };
+        if(migratedVersion<3 || global.global_reload===undefined || global.global_refresh===undefined || global.sync_signal===undefined) try{await this.state.storage.put(key,normalized)}catch(_){}
+        return normalized;
+      }
     }catch(_){}
-    const defaults={blacklisted:[],featured:[],maintenance:false,imported:[],announcement:null,maintenance_message:'',global:{}};
+    const defaults={version:3,blacklisted:[],featured:[],maintenance:false,imported:[],announcement:null,maintenance_message:'',global:{}};
     try{
       const rows=await this.state.storage.sql.exec('SELECT key, value FROM site_state').toArray();
       const raw=Object.fromEntries(rows.map(row=>[row.key,row.value]));
       const parse=(k,f)=>{try{return raw[k]?JSON.parse(raw[k]):f}catch(_){return f}};
       const migrated={
+        version:3,
         blacklisted:parse('blacklisted',[]),
         featured:parse('featured',[]),
         maintenance:!!parse('maintenance',false),
@@ -167,6 +187,13 @@ class UsernameRegistry {
         maintenance_message:parse('maintenance_message',''),
         global:parse('global_state',{})
       };
+      delete migrated.global.global_notice;
+      delete migrated.global.site_banner;
+      delete migrated.global.global_message;
+      delete migrated.global.broadcast;
+      delete migrated.global.global_reload;
+      delete migrated.global.global_refresh;
+      delete migrated.global.sync_signal;
       try{await this.state.storage.put(key,migrated);}catch(_){}
       return migrated;
     }catch(_){
@@ -177,6 +204,7 @@ class UsernameRegistry {
 
   async sharedStateWrite(state) {
     const normalized={
+      version:3,
       blacklisted:Array.isArray(state.blacklisted)?state.blacklisted:[],
       featured:Array.isArray(state.featured)?state.featured:[],
       maintenance:!!state.maintenance,

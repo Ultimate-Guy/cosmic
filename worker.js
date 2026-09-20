@@ -190,6 +190,15 @@ class UsernameRegistry {
       return this.siteState();
     }
 
+    if (action === 'unfeature') {
+      const name = typeof body?.name === 'string' ? body.name.trim().slice(0, 160) : '';
+      if (!name) return this.json({ ok: false, error: 'missing-name' }, 400);
+      const list = await read('featured', []);
+      const filtered = list.filter(item => String(item?.name || '').toLowerCase() !== name.toLowerCase());
+      await write('featured', filtered);
+      return this.siteState();
+    }
+
     if (action === 'feature_toggle') {
       const name = typeof body?.name === 'string' ? body.name.trim().slice(0, 160) : '';
       if (!name) return this.json({ ok: false, error: 'missing-name' }, 400);
@@ -279,8 +288,10 @@ class UsernameRegistry {
     if (action === 'sitemode_set' || action === 'global_theme_set' || action === 'global_badge_set' || action === 'spotlight_set' || action === 'countdown_set' || action === 'event_set' || action === 'event_message' || action === 'event_timer' || action === 'gameannounce_set' || action === 'disabled_game_toggle' || action === 'maintenance_set') {
       const global = await read('global_state', {});
       if (action === 'sitemode_set') {
-        const mode = typeof body?.mode === 'string' ? body.mode.trim().slice(0, 40) : '';
+        const mode = typeof body?.mode === 'string' ? body.mode.trim().slice(0, 40).toLowerCase() : '';
         if (!mode) return this.json({ ok: false, error: 'missing-mode' }, 400);
+        const enabled = mode === 'maintenance';
+        if (mode === 'normal' || mode === 'maintenance') await write('maintenance', enabled);
         global.mode = { value: mode, created_at: Date.now() };
       } else if (action === 'global_theme_set') {
         const theme = typeof body?.theme === 'string' ? body.theme.trim().toLowerCase() : '';
@@ -325,12 +336,13 @@ class UsernameRegistry {
         const entry = { game, text, created_at: Date.now() };
         if (idx >= 0) list[idx] = entry; else list.push(entry);
         global.game_announcements = list.slice(-100);
-      } else if (action === 'disabled_game_toggle') {
+      } else if (action === 'disabled_game_toggle' || action === 'disabled_game_enable') {
         const name = typeof body?.name === 'string' ? body.name.trim().slice(0, 160) : '';
         if (!name) return this.json({ ok: false, error: 'missing-name' }, 400);
         const list = Array.isArray(global.disabled_games) ? global.disabled_games : [];
         const idx = list.findIndex(x => String(x).toLowerCase() === name.toLowerCase());
-        if (idx >= 0) list.splice(idx, 1); else list.push(name);
+        if (action === 'disabled_game_enable') { if (idx >= 0) list.splice(idx, 1); }
+        else if (idx >= 0) list.splice(idx, 1); else list.push(name);
         global.disabled_games = list.slice(-250);
       } else if (action === 'maintenance_set') {
         const enabled = body?.enabled !== false;

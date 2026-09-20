@@ -81,6 +81,36 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsDataURL(file);
   });
 
+  const autoCloakGrid=document.getElementById('autoCloakGrid');
+  const autoCloakStatus=document.getElementById('autoCloakStatus');
+  const AUTO_CLOAK_PREF='cosmicAutoCloakV3';
+  function getAutoCloakPreference(){
+    try{return JSON.parse(localStorage.getItem(AUTO_CLOAK_PREF))||{enabled:false,type:'blank'};}
+    catch{return {enabled:false,type:'blank'};}
+  }
+  function markAutoCloak(){
+    const pref=getAutoCloakPreference();
+    const current=pref.enabled?(pref.type||'blank'):'off';
+    autoCloakGrid?.querySelectorAll('[data-auto-cloak]').forEach(card=>{
+      const active=card.dataset.autoCloak===current;
+      card.classList.toggle('active',active);
+      card.setAttribute('aria-checked',active?'true':'false');
+    });
+    if(autoCloakStatus){
+      autoCloakStatus.textContent=current==='off'
+        ?'Auto cloak is off. Cosmic will open normally.'
+        :'Auto cloak: '+(current==='blank'?'About:Blank':'Blob')+'. The cloaked Command Center appears first.';
+    }
+  }
+  autoCloakGrid?.querySelectorAll('[data-auto-cloak]').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const type=card.dataset.autoCloak;
+      localStorage.setItem(AUTO_CLOAK_PREF,JSON.stringify({enabled:type!=='off',type:type==='off'?'blank':type}));
+      markAutoCloak();
+    });
+  });
+  markAutoCloak();
+
   const cloakSelect=document.getElementById('cloakSelect');
   const cloakGrid=document.getElementById('cloakGrid');
   const cloakPresets=[

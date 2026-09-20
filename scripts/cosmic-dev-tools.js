@@ -745,12 +745,24 @@
   function globalToggleIsOn(command,args){return !!devToggleState[toggleKey(command,args)];}
   function setGlobalToggleState(command,args,on){devToggleState[toggleKey(command,args)]=!!on;}
 
+  const SITE_STATE_GLOBAL_MUTATIONS=new Set([
+    '/announcement','/globalnotice','/clearnotice','/sitebanner','/sitemode',
+    '/globalrefresh','/globalreload','/globalmessage','/broadcast','/sync',
+    '/gameannounce','/blacklist','/disablegame','/enablegame','/unfeature',
+    '/spotlight','/globalbadge','/globaltheme','/countdown','/event',
+    '/eventmessage','/eventtimer','/endevent','/featuredrotate','/maintenance',
+    '/feature','/clearall'
+  ]);
+
   async function globalCommand(command,args=''){
     let token=await adminToken(); if(!token)return;
     const raw=(args||'').trim();
-    const parts=raw.split(/\s+/); const first=parts.shift()||''; const rest=parts.join(' ');
-    const needsText=new Set(['/globalnotice','/sitebanner','/globalmessage','/broadcast','/globalbadge','/spotlight','/eventmessage','/announcement']);
-    const needsName=new Set(['/account','/userstats','/gameinfo','/feature','/unfeature','/disablegame','/enablegame','/blacklist']);
+    const parts=raw?raw.split(/\s+/):[];
+    const first=parts.shift()||'';
+    const rest=parts.join(' ');
+
+    const needsText=new Set(['/globalnotice','/sitebanner','/globalmessage','/broadcast','/globalbadge']);
+    const needsName=new Set(['/account','/userstats','/gameinfo','/feature','/unfeature','/disablegame','/enablegame','/blacklist','/spotlight']);
     if(needsText.has(command)&&!raw){showToast('Enter the text for '+command+'.');return;}
     if(needsName.has(command)&&!raw){showToast('Enter the name/target for '+command+'.');return;}
     if(command==='/gameannounce'){
@@ -760,6 +772,7 @@
     if(command==='/globaltheme'&&!['nebula','deep-space','solar-flare','synthwave'].includes(first.toLowerCase())){showToast('Use /globaltheme nebula, deep-space, solar-flare, or synthwave.');return;}
     if(command==='/sitemode'&&!['normal','maintenance'].includes(first.toLowerCase())){showToast('Use /sitemode normal or maintenance.');return;}
     if((command==='/countdown'||command==='/eventtimer')&&(!Number.isFinite(Number(first))||Number(first)<=0)){showToast('Enter a positive number of minutes.');return;}
+
     let body={action:command.slice(1)};
     if(command==='/announcement') body={action:raw.toLowerCase()==='clear'?'announcement_clear':'announcement_set',...(raw.toLowerCase()==='clear'?{}:{text:raw})};
     else if(command==='/globalnotice') body={action:'global_notice_set',text:raw};
@@ -773,7 +786,10 @@
     else if(command==='/sync') body={action:'sync_signal'};
     else if(command==='/account'||command==='/userstats') body={action:command.slice(1),username:raw};
     else if(command==='/gameinfo') body={action:'gameinfo',name:raw};
-    else if(command==='/gameannounce') { const split=raw.split(/\s*[|:]\s*/); body={action:'gameannounce_set',game:(split.shift()||''),text:split.join(' | ')||''}; }
+    else if(command==='/gameannounce'){
+      const split=raw.split(/\s*[|:]\s*/);
+      body={action:'gameannounce_set',game:(split.shift()||''),text:split.join(' | ')||''};
+    }
     else if(command==='/blacklist') body={action:'blacklist_toggle',target:raw};
     else if(command==='/disablegame') body={action:'disabled_game_toggle',name:raw};
     else if(command==='/enablegame') body={action:'disabled_game_enable',name:raw};
@@ -790,18 +806,53 @@
     else if(command==='/maintenance') body={action:'maintenance_toggle',message:raw};
     else if(command==='/feature') body={action:'feature_toggle',name:raw};
     else if(command==='/clearall') body={action:'clearall'};
+
+    const primaryEndpoint=SITE_STATE_GLOBAL_MUTATIONS.has(command)
+      ? API+'/api/admin/site-state'
+      : API+'/api/admin/global';
+    const fallbackEndpoint=primaryEndpoint===API+'/api/admin/global'
+      ? API+'/api/admin/site-state'
+      : null;
+
+    const send=async endpoint=>{
+      return fetch(endpoint,{
+        method:'POST',
+        headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+        body:JSON.stringify(body),
+        cache:'no-store'
+      });
+    };
+
     try{
-      let r=await fetch(API+'/api/admin/global',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body),cache:'no-store'});
-      if(r.status===401){
+      let response;
+      try{
+        response=await send(primaryEndpoint);
+      }catch(networkError){
+        if(!fallbackEndpoint) throw networkError;
+        response=await send(fallbackEndpoint);
+      }
+
+      if(response.status===401){
         token=await adminToken(true);
         if(!token)return;
-        r=await fetch(API+'/api/admin/global',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body),cache:'no-store'});
+        response=await send(primaryEndpoint).catch(async networkError=>{
+          if(!fallbackEndpoint)throw networkError;
+          return send(fallbackEndpoint);
+        });
       }
-      const d=await r.json().catch(()=>({})); if(!r.ok||!d.ok)throw new Error(d.error||'Global command failed');
-      if(DEV_GLOBAL_TOGGLES.has(command)) syncGlobalToggleState(command,args,d);
+
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok||!data.ok) throw new Error(data.error||('Request failed with HTTP '+response.status));
+
+      if(DEV_GLOBAL_TOGGLES.has(command)) syncGlobalToggleState(command,args,data);
+      await syncGlobalState();
+
       if(command==='/globalreload') location.reload();
-      else showModal('Cosmic • '+command,'<pre style="white-space:pre-wrap">'+safe(JSON.stringify(d,null,2))+'</pre>');
-    }catch(e){showToast('Global command failed: '+(e.message||e));}
+      else showModal('Cosmic • '+command,'<pre style="white-space:pre-wrap">'+safe(JSON.stringify(data,null,2))+'</pre>');
+    }catch(error){
+      const message=error?.message||String(error);
+      showToast('Global command failed: '+message);
+    }
   }
 
   async function runCommand(command,args='') {

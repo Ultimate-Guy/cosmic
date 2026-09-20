@@ -439,6 +439,16 @@ function jsonResponse(request, body, status = 200) {
   h.set('Content-Type', 'application/json; charset=utf-8');
   return new Response(JSON.stringify(body), { status, headers: h });
 }
+
+async function forwardJsonResponse(request, response) {
+  let body;
+  try {
+    body = await response.json();
+  } catch (_) {
+    body = { ok: false, error: 'Upstream Durable Object returned invalid JSON.' };
+  }
+  return jsonResponse(request, body, response.status);
+}
 async function hmacKey(secret) {
   return crypto.subtle.importKey(
     'raw',
@@ -620,15 +630,17 @@ async function handleMaintenanceBypass(request, env) {
 async function handleSiteState(request, env) {
   if (request.method !== 'GET') return jsonResponse(request, { ok: false }, 405);
   const registry = env.USERNAME_REGISTRY;
-  return registry.get(registry.idFromName('global')).fetch(new Request(new URL('/state', request.url), request));
+  const response = await registry.get(registry.idFromName('global')).fetch(new Request(new URL('/state', request.url), request));
+  return forwardJsonResponse(request, response);
 }
 
 async function handleAdminSiteState(request, env) {
   if (!(await verifyAdminSession(request, env))) return jsonResponse(request, { ok: false, error: 'unauthorized' }, 401);
   const registry = env.USERNAME_REGISTRY;
-  return registry.get(registry.idFromName('global')).fetch(
+  const response = await registry.get(registry.idFromName('global')).fetch(
     new Request(new URL('/admin-site-state', request.url), request)
   );
+  return forwardJsonResponse(request, response);
 }
 
 async function handleAdminAccounts(request, env) {
@@ -637,11 +649,13 @@ async function handleAdminAccounts(request, env) {
   const url = new URL(request.url);
   const id = registry.idFromName('global');
   if (url.pathname === '/api/admin/accounts') {
-    return registry.get(id).fetch(new Request(new URL('/list', request.url), request));
+    const response = await registry.get(id).fetch(new Request(new URL('/list', request.url), request));
+    return forwardJsonResponse(request, response);
   }
   if (url.pathname === '/api/admin/account') {
     const username = url.searchParams.get('username') || '';
-    return registry.get(id).fetch(new Request(new URL('/detail?username=' + encodeURIComponent(username), request.url), request));
+    const response = await registry.get(id).fetch(new Request(new URL('/detail?username=' + encodeURIComponent(username), request.url), request));
+    return forwardJsonResponse(request, response);
   }
   return jsonResponse(request, { ok: false, error: 'not-found' }, 404);
 }

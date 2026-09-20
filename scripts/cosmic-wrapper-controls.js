@@ -1,4 +1,10 @@
 (() => {
+  if(!window.__COSMIC_GLOBAL_STATE__&&!document.querySelector('script[data-cosmic-global-state]')){
+    const s=document.createElement('script');
+    s.dataset.cosmicGlobalState='1';
+    s.src=(location.hostname.endsWith('.github.io')?'/cosmic/':'/')+'scripts/cosmic-global-state.js?v=global-state';
+    (document.head||document.documentElement).appendChild(s);
+  }
   'use strict';
   if(window.__COSMIC_WRAPPER_CONTROLS__)return;
   window.__COSMIC_WRAPPER_CONTROLS__=true;

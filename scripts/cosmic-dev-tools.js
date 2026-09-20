@@ -442,6 +442,29 @@
     const signal=Number(g.global_reload||g.global_refresh||g.sync_signal||0); if(signal && signal!==window.__cosmicLastGlobalSignal){window.__cosmicLastGlobalSignal=signal;if(g.global_reload) location.reload();}
   }
 
+  async function syncGlobalState(){
+    try{
+      const response=await fetch(API+'/api/site-state?global-sync='+Date.now(),{cache:'no-store'});
+      if(!response.ok)return;
+      const data=await response.json();
+      renderGlobalState(data);
+      const g=data?.global||{};
+      setGlobalToggleState('/maintenance','',g.mode?.value==='maintenance');
+      const featured=Array.isArray(data?.featured)?data.featured:[];
+      const blacklisted=Array.isArray(data?.blacklisted)?data.blacklisted:[];
+      const disabled=Array.isArray(g.disabled_games)?g.disabled_games:[];
+      document.querySelectorAll('#cosmic-dev-panel .dev-command').forEach(button=>{
+        const command=button.dataset.command,args=(button.dataset.args||'').trim().toLowerCase();
+        if(command==='/maintenance')setGlobalToggleState(command,args,g.mode?.value==='maintenance');
+        if(command==='/feature')setGlobalToggleState(command,args,featured.some(x=>String(x?.name||'').toLowerCase()===args));
+        if(command==='/blacklist')setGlobalToggleState(command,args,blacklisted.some(x=>String(x?.target||'').toLowerCase()===args));
+        if(command==='/disablegame')setGlobalToggleState(command,args,disabled.some(x=>String(x).toLowerCase()===args));
+        if(command==='/enablegame')setGlobalToggleState(command,args,!disabled.some(x=>String(x).toLowerCase()===args));
+      });
+      refreshDevCommandButtons();
+    }catch(_){}
+  }
+
   async function accountsCommand(){
     const token=await adminToken(); if(!token)return;
     try{
@@ -726,6 +749,17 @@
     let token=await adminToken(); if(!token)return;
     const raw=(args||'').trim();
     const parts=raw.split(/\s+/); const first=parts.shift()||''; const rest=parts.join(' ');
+    const needsText=new Set(['/globalnotice','/sitebanner','/globalmessage','/broadcast','/globalbadge','/spotlight','/eventmessage','/announcement']);
+    const needsName=new Set(['/account','/userstats','/gameinfo','/feature','/unfeature','/disablegame','/enablegame','/blacklist']);
+    if(needsText.has(command)&&!raw){showToast('Enter the text for '+command+'.');return;}
+    if(needsName.has(command)&&!raw){showToast('Enter the name/target for '+command+'.');return;}
+    if(command==='/gameannounce'){
+      const test=raw.split(/\s*[|:]\s*/);
+      if(!test[0]||!test[1]){showToast('Use /gameannounce Game Name | announcement text.');return;}
+    }
+    if(command==='/globaltheme'&&!['nebula','deep-space','solar-flare','synthwave'].includes(first.toLowerCase())){showToast('Use /globaltheme nebula, deep-space, solar-flare, or synthwave.');return;}
+    if(command==='/sitemode'&&!['normal','maintenance'].includes(first.toLowerCase())){showToast('Use /sitemode normal or maintenance.');return;}
+    if((command==='/countdown'||command==='/eventtimer')&&(!Number.isFinite(Number(first))||Number(first)<=0)){showToast('Enter a positive number of minutes.');return;}
     let body={action:command.slice(1)};
     if(command==='/announcement') body={action:raw.toLowerCase()==='clear'?'announcement_clear':'announcement_set',...(raw.toLowerCase()==='clear'?{}:{text:raw})};
     else if(command==='/globalnotice') body={action:'global_notice_set',text:raw};
@@ -954,6 +988,8 @@
 
     document.body.append(fab,panel);
     refreshDevCommandButtons();
+  syncGlobalState();
+  setInterval(syncGlobalState,5000);
     dragElement(fab);
     const header=panel.querySelector('.dev-head');
     if(header)dragElement(panel,header);

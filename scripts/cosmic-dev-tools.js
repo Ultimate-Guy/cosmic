@@ -586,7 +586,7 @@
     document.querySelectorAll('#cosmic-dev-panel .dev-command').forEach(button=>{
       const command=button.dataset.command; if(!command)return;
       const toggleable=DEV_GLOBAL_TOGGLES.has(command)||localToggleCommands.has(command); if(!toggleable)return;
-      const on=DEV_GLOBAL_TOGGLES.has(command)?globalToggleIsOn(command,button.dataset.args||''):localCommandIsOn(command);
+      const effectiveArgs=button.dataset.args||getStoredToggleArg(command)||''; const on=DEV_GLOBAL_TOGGLES.has(command)?globalToggleIsOn(command,effectiveArgs):localCommandIsOn(command);
       const chip=button.querySelector('.dev-action'); if(chip){chip.hidden=!on;chip.textContent='Off';}
       button.classList.toggle('is-on',on);
     });
@@ -810,8 +810,23 @@
 
   const DEV_GLOBAL_TOGGLES = new Set(['/maintenance','/feature','/blacklist','/disablegame','/enablegame']);
   const devToggleState = Object.create(null);
+  const DEV_TOGGLE_ARGS_KEY='cosmicDevToggleArgsV1';
   function toggleKey(command,args){return command+'::'+String(args||'').trim().toLowerCase();}
-  function globalToggleIsOn(command,args){return !!devToggleState[toggleKey(command,args)];}
+  function getStoredToggleArg(command){
+    try{return JSON.parse(sessionStorage.getItem(DEV_TOGGLE_ARGS_KEY)||'{}')[command]||'';}catch(_){return '';}
+  }
+  function setStoredToggleArg(command,args){
+    try{const data=JSON.parse(sessionStorage.getItem(DEV_TOGGLE_ARGS_KEY)||'{}');data[command]=String(args||'').trim();sessionStorage.setItem(DEV_TOGGLE_ARGS_KEY,JSON.stringify(data));}catch(_){}
+  }
+  function globalToggleIsOn(command,args){
+    const effective=String(args||'').trim()||getStoredToggleArg(command);
+    return !!devToggleState[toggleKey(command,effective)];
+  }
+  function setGlobalToggleState(command,args,on){
+    const effective=String(args||'').trim()||getStoredToggleArg(command);
+    devToggleState[toggleKey(command,effective)]=!!on;
+    if(on && effective) setStoredToggleArg(command,effective);
+  }
   function setGlobalToggleState(command,args,on){devToggleState[toggleKey(command,args)]=!!on;}
 
   const SITE_STATE_GLOBAL_MUTATIONS=new Set([
@@ -843,15 +858,15 @@
     if((command==='/countdown'||command==='/eventtimer')&&(!Number.isFinite(Number(first))||Number(first)<=0)){showToast('Enter a positive number of minutes.');return;}
 
     let body={action:command.slice(1)};
-    if(command==='/announcement') body={action:raw.toLowerCase()==='clear'?'announcement_clear':'announcement_set',...(raw.toLowerCase()==='clear'?{}:{text:raw})};
-    else if(command==='/globalnotice') body={action:'global_notice_set',text:raw};
+    if(command==='/announcement') body=(!raw&&globalToggleIsOn('/announcement',''))?{action:'announcement_clear'}:({action:raw.toLowerCase()==='clear'?'announcement_clear':'announcement_set',...(raw.toLowerCase()==='clear'?{}:{text:raw})});
+    else if(command==='/globalnotice') body=!raw&&globalToggleIsOn('/globalnotice','')?{action:'global_notice_clear'}:{action:'global_notice_set',text:raw};
     else if(command==='/clearnotice') body={action:'global_notice_clear'};
     else if(command==='/sitebanner') body={action:'site_banner_set',text:raw};
-    else if(command==='/sitemode') body={action:'sitemode_set',mode:first||'normal'};
+    else if(command==='/sitemode') body=!raw&&globalToggleIsOn('/sitemode','')?{action:'sitemode_set',mode:'normal'}:{action:'sitemode_set',mode:first||'normal'};
     else if(command==='/globalrefresh') body={action:'global_refresh'};
     else if(command==='/globalreload') body={action:'global_reload'};
-    else if(command==='/globalmessage') body={action:'global_message_set',text:raw};
-    else if(command==='/broadcast') body={action:'broadcast_set',text:raw};
+    else if(command==='/globalmessage') body=!raw&&globalToggleIsOn('/globalmessage','')?{action:'global_message_clear'}:{action:'global_message_set',text:raw};
+    else if(command==='/broadcast') body=!raw&&globalToggleIsOn('/broadcast','')?{action:'broadcast_clear'}:{action:'broadcast_set',text:raw};
     else if(command==='/sync') body={action:'sync_signal'};
     else if(command==='/account'||command==='/userstats') body={action:command.slice(1),username:raw};
     else if(command==='/gameinfo') body={action:'gameinfo',name:raw};
@@ -863,11 +878,11 @@
     else if(command==='/disablegame') body={action:'disabled_game_toggle',name:raw};
     else if(command==='/enablegame') body={action:'disabled_game_enable',name:raw};
     else if(command==='/unfeature') body={action:'unfeature',name:raw};
-    else if(command==='/spotlight') body={action:'spotlight_set',name:raw};
-    else if(command==='/globalbadge') body={action:'global_badge_set',text:raw};
+    else if(command==='/spotlight') body=!raw&&globalToggleIsOn('/spotlight','')?{action:'spotlight_clear'}:{action:'spotlight_set',name:raw};
+    else if(command==='/globalbadge') body=!raw&&globalToggleIsOn('/globalbadge','')?{action:'global_badge_clear'}:{action:'global_badge_set',text:raw};
     else if(command==='/globaltheme') body={action:'global_theme_set',theme:first};
-    else if(command==='/countdown') body={action:'countdown_set',minutes:Number(first),label:rest||'Countdown'};
-    else if(command==='/event') body={action:'event_set',name:first||raw,message:rest};
+    else if(command==='/countdown') body=!raw&&globalToggleIsOn('/countdown','')?{action:'countdown_clear'}:{action:'countdown_set',minutes:Number(first),label:rest||'Countdown'};
+    else if(command==='/event') body=!raw&&globalToggleIsOn('/event','')?{action:'event_end'}:{action:'event_set',name:first||raw,message:rest};
     else if(command==='/eventmessage') body={action:'event_message',message:raw};
     else if(command==='/eventtimer') body={action:'event_timer',minutes:Number(first)};
     else if(command==='/endevent') body={action:'event_end'};
@@ -1099,6 +1114,7 @@
           const command=name.split(' ')[0];
           const args=name.includes('[')?window.prompt(command==='/gameannounce'?'Game name | announcement text':name+' argument:','')||'':'';
           b.dataset.args=args;
+          if(args&&DEV_GLOBAL_TOGGLES.has(command))setStoredToggleArg(command,args);
           confirmedRunCommand(command,args).finally(refreshDevCommandButtons);
         };
         section.appendChild(b);

@@ -139,24 +139,203 @@ class UsernameRegistry {
     });
   }
 
-  async siteState() {
-    const rows = await this.state.storage.sql.exec(
-      'SELECT key, value FROM site_state'
-    ).toArray();
-    const raw = Object.fromEntries(rows.map(row => [row.key, row.value]));
-    const parse = (key, fallback) => {
-      try { return raw[key] ? JSON.parse(raw[key]) : fallback; } catch (_) { return fallback; }
+  async sharedStateRead() {
+    const key='cosmicGlobalStateV2';
+    try{
+      const stored=await this.state.storage.get(key);
+      if(stored && typeof stored==='object') return {
+        blacklisted:Array.isArray(stored.blacklisted)?stored.blacklisted:[],
+        featured:Array.isArray(stored.featured)?stored.featured:[],
+        maintenance:!!stored.maintenance,
+        imported:Array.isArray(stored.imported)?stored.imported:[],
+        announcement:stored.announcement||null,
+        maintenance_message:typeof stored.maintenance_message==='string'?stored.maintenance_message:'',
+        global:stored.global&&typeof stored.global==='object'?stored.global:{}
+      };
+    }catch(_){}
+    const defaults={blacklisted:[],featured:[],maintenance:false,imported:[],announcement:null,maintenance_message:'',global:{}};
+    try{
+      const rows=await this.state.storage.sql.exec('SELECT key, value FROM site_state').toArray();
+      const raw=Object.fromEntries(rows.map(row=>[row.key,row.value]));
+      const parse=(k,f)=>{try{return raw[k]?JSON.parse(raw[k]):f}catch(_){return f}};
+      const migrated={
+        blacklisted:parse('blacklisted',[]),
+        featured:parse('featured',[]),
+        maintenance:!!parse('maintenance',false),
+        imported:parse('imported',[]),
+        announcement:parse('announcement',null),
+        maintenance_message:parse('maintenance_message',''),
+        global:parse('global_state',{})
+      };
+      try{await this.state.storage.put(key,migrated);}catch(_){}
+      return migrated;
+    }catch(_){
+      try{await this.state.storage.put(key,defaults);}catch(__){}
+      return defaults;
+    }
+  }
+
+  async sharedStateWrite(state) {
+    const normalized={
+      blacklisted:Array.isArray(state.blacklisted)?state.blacklisted:[],
+      featured:Array.isArray(state.featured)?state.featured:[],
+      maintenance:!!state.maintenance,
+      imported:Array.isArray(state.imported)?state.imported:[],
+      announcement:state.announcement||null,
+      maintenance_message:typeof state.maintenance_message==='string'?state.maintenance_message:'',
+      global:state.global&&typeof state.global==='object'?state.global:{}
     };
-    return this.json({
-      ok: true,
-      blacklisted: parse('blacklisted', []),
-      featured: parse('featured', []),
-      maintenance: !!parse('maintenance', false),
-      imported: parse('imported', []),
-      announcement: parse('announcement', null),
-      maintenance_message: parse('maintenance_message', ''),
-      global: parse('global_state', {})
-    });
+    await this.state.storage.put('cosmicGlobalStateV2',normalized);
+    return normalized;
+  }
+
+  async siteState() {
+    const state=await this.sharedStateRead();
+    return this.json({ok:true,...state});
+  }
+
+  async adminSharedState(request) {
+    let body;
+    try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const action=typeof body?.action==='string'?body.action:'';
+    const state=await this.sharedStateRead();
+    const global=state.global||{};
+    const now=Date.now();
+
+    if(action==='blacklist_toggle'){
+      const target=typeof body?.target==='string'?body.target.trim().slice(0,500):'';
+      if(!target)return this.json({ok:false,error:'missing-target'},400);
+      const idx=state.blacklisted.findIndex(x=>String(x?.target||'').toLowerCase()===target.toLowerCase());
+      if(idx>=0)state.blacklisted.splice(idx,1);
+      else state.blacklisted.push({target,created_at:now});
+    } else if(action==='unfeature'){
+      const name=typeof body?.name==='string'?body.name.trim().slice(0,160):'';
+      if(!name)return this.json({ok:false,error:'missing-name'},400);
+      state.featured=state.featured.filter(x=>String(x?.name||'').toLowerCase()!==name.toLowerCase());
+    } else if(action==='feature_toggle'){
+      const name=typeof body?.name==='string'?body.name.trim().slice(0,160):'';
+      if(!name)return this.json({ok:false,error:'missing-name'},400);
+      const idx=state.featured.findIndex(x=>String(x?.name||'').toLowerCase()===name.toLowerCase());
+      if(idx>=0)state.featured.splice(idx,1);
+      else state.featured.push({name,created_at:now});
+    } else if(action==='announcement_set'){
+      const text=typeof body?.text==='string'?body.text.trim().slice(0,1000):'';
+      if(!text)return this.json({ok:false,error:'missing-announcement'},400);
+      state.announcement={text,created_at:now};
+    } else if(action==='announcement_clear'){
+      state.announcement=null;
+    } else if(action==='maintenance_toggle'){
+      state.maintenance=!state.maintenance;
+      state.maintenance_message=state.maintenance&&typeof body?.message==='string'?body.message.trim().slice(0,500):'';
+      global.mode={value:state.maintenance?'maintenance':'normal',created_at:now};
+    } else if(action==='import'){
+      const incoming=Array.isArray(body?.items)?body.items:[];
+      if(!incoming.length)return this.json({ok:false,error:'no-items'},400);
+      const clean=incoming.slice(0,100).map(item=>{
+        const name=typeof item?.name==='string'?item.name.trim().slice(0,160):'';
+        const path=typeof item?.path==='string'?item.path.trim().slice(0,1000):'';
+        const kind=item?.kind==='app'?'app':'game';
+        if(!name||!path)return null;
+        return {
+          name,path,kind,
+          ...(typeof item?.entry==='string'&&item.entry.trim()?{entry:item.entry.trim().slice(0,300)}:{}),
+          ...(typeof item?.image==='string'&&item.image.trim()?{image:item.image.trim().slice(0,1000)}:{}),
+          ...(typeof item?.description==='string'?{description:item.description.trim().slice(0,500)}:{}),
+          ...(typeof item?.category==='string'?{category:item.category.trim().slice(0,60)}:{}),
+          tags:Array.isArray(item?.tags)?item.tags.map(x=>String(x).slice(0,40)).slice(0,10):[]
+        };
+      }).filter(Boolean);
+      if(!clean.length)return this.json({ok:false,error:'invalid-items'},400);
+      const merged=[...state.imported];
+      for(const item of clean){
+        const key=(item.kind+':'+item.name).toLowerCase();
+        const idx=merged.findIndex(x=>(x.kind+':'+x.name).toLowerCase()===key);
+        if(idx>=0)merged[idx]=item;else merged.push(item);
+      }
+      state.imported=merged.slice(-250);
+    } else if(action==='global_notice_set'||action==='site_banner_set'||action==='global_message_set'||action==='broadcast_set'){
+      const text=typeof body?.text==='string'?body.text.trim().slice(0,1000):'';
+      if(!text)return this.json({ok:false,error:'missing-text'},400);
+      const key={global_notice_set:'global_notice',site_banner_set:'site_banner',global_message_set:'global_message',broadcast_set:'broadcast'}[action];
+      global[key]={text,created_at:now};
+    } else if(action==='global_notice_clear'||action==='site_banner_clear'||action==='global_message_clear'||action==='broadcast_clear'||action==='global_badge_clear'||action==='spotlight_clear'||action==='countdown_clear'){
+      const key={global_notice_clear:'global_notice',site_banner_clear:'site_banner',global_message_clear:'global_message',broadcast_clear:'broadcast',global_badge_clear:'global_badge',spotlight_clear:'spotlight',countdown_clear:'countdown'}[action];
+      delete global[key];
+    } else if(action==='sitemode_set'){
+      const mode=typeof body?.mode==='string'?body.mode.trim().toLowerCase():'';
+      if(!['normal','maintenance'].includes(mode))return this.json({ok:false,error:'invalid-mode',allowed:['normal','maintenance']},400);
+      state.maintenance=mode==='maintenance';
+      state.maintenance_message=state.maintenance&&typeof body?.message==='string'?body.message.trim().slice(0,500):'';
+      global.mode={value:mode,created_at:now};
+    } else if(action==='global_theme_set'){
+      const theme=typeof body?.theme==='string'?body.theme.trim().toLowerCase():'';
+      if(!['nebula','deep-space','solar-flare','synthwave'].includes(theme))return this.json({ok:false,error:'invalid-theme'},400);
+      global.theme={value:theme,created_at:now};
+    } else if(action==='global_badge_set'){
+      const text=typeof body?.text==='string'?body.text.trim().slice(0,120):'';
+      if(!text)return this.json({ok:false,error:'missing-text'},400);
+      global.global_badge={text,created_at:now};
+    } else if(action==='spotlight_set'){
+      const name=typeof body?.name==='string'?body.name.trim().slice(0,160):'';
+      if(!name)return this.json({ok:false,error:'missing-name'},400);
+      global.spotlight={name,created_at:now};
+    } else if(action==='countdown_set'){
+      const minutes=Number(body?.minutes);
+      const target=Number(body?.target);
+      const label=typeof body?.label==='string'?body.label.trim().slice(0,160):'Countdown';
+      const end=Number.isFinite(target)&&target>now?target:(Number.isFinite(minutes)&&minutes>0?now+Math.min(minutes,7*24*60)*60000:0);
+      if(!end)return this.json({ok:false,error:'invalid-countdown'},400);
+      global.countdown={label,target:end,created_at:now};
+    } else if(action==='event_set'){
+      const name=typeof body?.name==='string'?body.name.trim().slice(0,160):'';
+      if(!name)return this.json({ok:false,error:'missing-name'},400);
+      global.event={name,message:typeof body?.message==='string'?body.message.trim().slice(0,500):'',target:Number(body?.target)>now?Number(body.target):null,created_at:now};
+    } else if(action==='event_message'){
+      if(!global.event)return this.json({ok:false,error:'no-event'},400);
+      global.event.message=typeof body?.message==='string'?body.message.trim().slice(0,500):'';
+      global.event.updated_at=now;
+    } else if(action==='event_timer'){
+      if(!global.event)return this.json({ok:false,error:'no-event'},400);
+      const minutes=Number(body?.minutes),target=Number(body?.target);
+      const end=Number.isFinite(target)&&target>now?target:(Number.isFinite(minutes)&&minutes>0?now+Math.min(minutes,7*24*60)*60000:0);
+      if(!end)return this.json({ok:false,error:'invalid-timer'},400);
+      global.event.target=end;global.event.updated_at=now;
+    } else if(action==='gameannounce_set'){
+      const game=typeof body?.game==='string'?body.game.trim().slice(0,160):'';
+      const text=typeof body?.text==='string'?body.text.trim().slice(0,500):'';
+      if(!game||!text)return this.json({ok:false,error:'missing-game-or-text'},400);
+      const list=Array.isArray(global.game_announcements)?global.game_announcements:[];
+      const idx=list.findIndex(x=>String(x?.game||'').toLowerCase()===game.toLowerCase());
+      const entry={game,text,created_at:now};
+      if(idx>=0)list[idx]=entry;else list.push(entry);
+      global.game_announcements=list.slice(-100);
+    } else if(action==='disabled_game_toggle'||action==='disabled_game_enable'){
+      const name=typeof body?.name==='string'?body.name.trim().slice(0,160):'';
+      if(!name)return this.json({ok:false,error:'missing-name'},400);
+      const list=Array.isArray(global.disabled_games)?global.disabled_games:[];
+      const idx=list.findIndex(x=>String(x).toLowerCase()===name.toLowerCase());
+      if(action==='disabled_game_enable'){if(idx>=0)list.splice(idx,1);}else if(idx>=0)list.splice(idx,1);else list.push(name);
+      global.disabled_games=list.slice(-250);
+    } else if(action==='maintenance_set'){
+      state.maintenance=body?.enabled!==false;
+      state.maintenance_message=typeof body?.message==='string'?body.message.trim().slice(0,500):'';
+      global.mode={value:state.maintenance?'maintenance':'normal',created_at:now};
+    } else if(action==='event_end'){
+      delete global.event;delete global.countdown;
+    } else if(action==='featured_rotate'){
+      if(state.featured.length>1)state.featured.push(state.featured.shift());
+      global.spotlight=state.featured[0]?{name:String(state.featured[0].name||''),created_at:now}:null;
+    } else if(action==='global_refresh'||action==='global_reload'||action==='sync_signal'){
+      global[action==='global_refresh'?'global_refresh':action==='global_reload'?'global_reload':'sync_signal']=now;
+    } else if(action==='clearall'){
+      state.blacklisted=[];state.featured=[];state.maintenance=false;state.imported=[];state.announcement=null;state.maintenance_message='';state.global={};
+    } else {
+      return this.json({ok:false,error:'unknown-action'},400);
+    }
+
+    state.global=global;
+    await this.sharedStateWrite(state);
+    return this.siteState();
   }
 
   async adminSiteState(request) {
@@ -407,7 +586,7 @@ class UsernameRegistry {
     if (url.pathname === '/detail' && request.method === 'GET') return this.adminDetail(url.searchParams.get('username') || '');
     if (url.pathname === '/analytics' && request.method === 'GET') return this.analytics();
     if (url.pathname === '/state' && request.method === 'GET') return this.siteState();
-    if (url.pathname === '/admin-site-state' && request.method === 'POST') return this.adminSiteState(request);
+    if (url.pathname === '/admin-site-state' && request.method === 'POST') return this.adminSharedState(request);
     return this.json({ ok: false, error: 'not-found' }, 404);
   }
 }

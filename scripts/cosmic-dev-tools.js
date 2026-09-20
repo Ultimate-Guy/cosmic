@@ -722,16 +722,35 @@
     });
   }
 
+  function entryGateReady(){
+    const gate=document.getElementById('password-gate');
+    const content=document.getElementById('site-content');
+    if(!gate || !content) return true;
+    const gateHidden=getComputedStyle(gate).display==='none';
+    const contentShown=getComputedStyle(content).display!=='none';
+    return gateHidden && contentShown;
+  }
+
   ensureStyle();
-  const bootDevMenu=()=>{ if(isDeveloper())createMenu(); };
+  const bootDevMenu=()=>{
+    if(!isDeveloper() || !entryGateReady()) return false;
+    createMenu();
+    return !!document.getElementById('cosmic-dev-fab');
+  };
   setTimeout(bootDevMenu,250);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootDevMenu,{once:true});
   else bootDevMenu();
-  // Keep the launcher available if another Cosmic script rebuilds the page body.
+
+  // The games Hub has a real entry gate that reveals the game list later.
+  // Re-check when that gate changes instead of trying to race it.
+  window.addEventListener('cosmic-entry-ready',bootDevMenu);
+  window.addEventListener('storage',bootDevMenu);
   let devMenuObserver;
   try {
-    devMenuObserver=new MutationObserver(()=>{if(isDeveloper()&&!document.getElementById('cosmic-dev-fab'))createMenu();});
-    devMenuObserver.observe(document.documentElement,{childList:true,subtree:true});
+    devMenuObserver=new MutationObserver(()=>{
+      if(isDeveloper() && !document.getElementById('cosmic-dev-fab')) bootDevMenu();
+    });
+    devMenuObserver.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
   } catch (_) {}
 
   window.CosmicDevTools={isDeveloper,commands:COMMANDS,runCommand,getHubCommands,adminToken,showToast};

@@ -415,14 +415,14 @@
     }catch(_){showToast('Screenshot cancelled or unavailable.');}
   }
 
-  const GLOBAL_ANNOUNCEMENT_DISMISS_KEY='cosmicGlobalAnnouncementDismissedV2';
+  const GLOBAL_ANNOUNCEMENT_DISMISS_KEY='cosmicGlobalAnnouncementDismissedV3';
 
   function renderGlobalAnnouncement(data){
     const announcement=data?.announcement;
     const existing=document.getElementById('cosmic-global-announcement');
     if(!announcement?.text){existing?.remove();return;}
     let dismissed='';
-    try{dismissed=sessionStorage.getItem(GLOBAL_ANNOUNCEMENT_DISMISS_KEY)||'';}catch(_){}
+    try{dismissed=localStorage.getItem(GLOBAL_ANNOUNCEMENT_DISMISS_KEY)||'';}catch(_){}
     const id=String(announcement.created_at||announcement.text);
     if(dismissed===id){existing?.remove();return;}
 
@@ -434,7 +434,7 @@
     const close=document.createElement('button');
     close.type='button';close.textContent='×';close.setAttribute('aria-label','Dismiss global announcement');
     close.style.cssText='position:absolute;right:10px;top:5px;width:34px;height:34px;border:1px solid rgba(45,204,255,.35);border-radius:8px;background:rgba(45,204,255,.07);color:#2dccff;font-size:21px;cursor:pointer';
-    close.onclick=()=>{try{sessionStorage.setItem(GLOBAL_ANNOUNCEMENT_DISMISS_KEY,id);}catch(_){}banner.remove();};
+    close.onclick=()=>{try{localStorage.setItem(GLOBAL_ANNOUNCEMENT_DISMISS_KEY,id);}catch(_){}banner.remove();};
     banner.append(message,close);
     if(!existing)document.body.appendChild(banner);
   }
@@ -476,9 +476,35 @@
       });
       const data=await response.json().catch(()=>({}));
       if(!response.ok||!data.ok)throw new Error(data.error||'Global announcement update failed.');
+      try{localStorage.removeItem(GLOBAL_ANNOUNCEMENT_DISMISS_KEY);}catch(_){}
       renderGlobalAnnouncement(data);
       showToast(text.toLowerCase()==='clear'?'Global announcement cleared.':'Global announcement published across Cosmic.');
     }catch(e){showToast('Global announcement failed: '+(e.message||e));}
+  }
+
+  async function accountsCommand(){
+    const token=await adminToken(); if(!token)return;
+    try{
+      const response=await fetch(API+'/api/admin/accounts',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok||!data.ok)throw new Error(data.error||'Could not load accounts.');
+      const accounts=Array.isArray(data.accounts)?data.accounts:[]; let page=0; const pageSize=8;
+      const modal=document.createElement('div'); modal.id='cosmic-dev-accounts-modal'; modal.style.cssText='position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.74);backdrop-filter:blur(8px)';
+      const shell=document.createElement('div'); shell.style.cssText='width:min(700px,95vw);max-height:86vh;overflow:hidden;border:2px solid #2dccff;border-radius:18px;background:#07131a;color:#f2f7fa;box-shadow:0 25px 90px rgba(0,0,0,.72)';
+      shell.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid rgba(45,204,255,.18)"><strong style="color:#2dccff">Cosmic • Accounts</strong><span data-account-count style="color:#8196a1;font-size:12px"></span><button data-close style="margin-left:auto;width:32px;height:32px;border:1px solid rgba(45,204,255,.35);border-radius:9px;background:rgba(45,204,255,.07);color:#2dccff;font-size:20px;cursor:pointer">×</button></div><div data-accounts-panel style="max-height:calc(86vh - 58px);overflow:auto;padding:14px"></div>';
+      modal.appendChild(shell); document.body.appendChild(modal);
+      const panel=modal.querySelector('[data-accounts-panel]');
+      const render=()=>{
+        const totalPages=Math.max(1,Math.ceil(accounts.length/pageSize)); page=Math.max(0,Math.min(page,totalPages-1)); const shown=accounts.slice(page*pageSize,(page+1)*pageSize);
+        modal.querySelector('[data-account-count]').textContent=accounts.length+' total • Page '+(page+1)+'/'+totalPages;
+        panel.innerHTML=(shown.length?shown.map(a=>'<button data-user="'+safe(a.username)+'" style="display:block;width:100%;margin:0 0 8px;padding:11px 12px;border:1px solid rgba(45,204,255,.2);border-radius:11px;background:rgba(45,204,255,.04);color:#f2f7fa;text-align:left;cursor:pointer"><b style="display:block">'+safe(a.username)+'</b><small style="display:block;margin-top:4px;color:#8da2ad">Created: '+safe(a.created_at?new Date(a.created_at).toLocaleString():'Unknown')+' • Opens: '+safe(a.total_opens??0)+' • Last active: '+safe(a.last_opened?new Date(a.last_opened).toLocaleString():'Never')+'</small></button>').join(''):'<div style="padding:18px;color:#8196a1;text-align:center">No Cosmic accounts exist yet.</div>')+'<div style="display:flex;justify-content:space-between;gap:8px;margin-top:12px"><button data-prev>Previous</button><button data-next>Next</button></div>';
+        const prev=panel.querySelector('[data-prev]'),next=panel.querySelector('[data-next]');
+        prev.disabled=page<=0; next.disabled=page>=totalPages-1; [prev,next].forEach(b=>{b.style.cssText='padding:9px 13px;border:1px solid #2dccff;border-radius:9px;background:#103441;color:#2dccff;cursor:pointer';});
+        prev.onclick=()=>{if(page>0){page--;render();}}; next.onclick=()=>{if(page<totalPages-1){page++;render();}};
+        panel.querySelectorAll('[data-user]').forEach(btn=>btn.onclick=async()=>{try{const rr=await fetch(API+'/api/admin/account?username='+encodeURIComponent(btn.dataset.user),{headers:{Authorization:'Bearer '+token},cache:'no-store'});const dd=await rr.json().catch(()=>({}));if(!rr.ok||!dd.ok)throw new Error(dd.error||'Could not load account details.');const a=dd.account||{},games=Array.isArray(a.games)?a.games:[];panel.innerHTML='<button data-back>← Back</button><h3 style="color:#2dccff">'+safe(a.username||btn.dataset.user)+'</h3><p>Created: '+safe(a.created_at?new Date(a.created_at).toLocaleString():'Unknown')+'</p><p>Games played: '+games.length+'</p><div>'+ (games.length?games.map(g=>'<div style="padding:9px;margin:6px 0;border:1px solid rgba(45,204,255,.14);border-radius:9px"><b>'+safe(g.game_name)+'</b><br><small>Opens: '+safe(g.opens)+' • Last opened: '+safe(g.last_opened?new Date(g.last_opened).toLocaleString():'Unknown')+'</small></div>').join(''):'No game activity recorded.')+'</div>';panel.querySelector('[data-back]').onclick=render;}catch(e){showToast('Account details failed: '+(e.message||e));}});
+      };
+      modal.querySelector('[data-close]').onclick=()=>modal.remove(); modal.onclick=e=>{if(e.target===modal)modal.remove();}; render();
+    }catch(e){showToast('Accounts failed: '+(e.message||e));}
   }
 
   function commandDescription(command) {
@@ -675,9 +701,9 @@
   }
 
   function resetEffectsCommand(){
-    document.documentElement.classList.remove('cosmic-dev-adblock','cosmic-dev-stretch','cosmic-dev-cleanui','cosmic-dev-compact','cosmic-dev-blur','cosmic-dev-grayscale');
+    document.documentElement.classList.remove('cosmic-dev-adblock','cosmic-dev-stretch','cosmic-dev-cleanui','cosmic-dev-compact','cosmic-dev-blur','cosmic-dev-grayscale','cosmic-dev-tilt','cosmic-dev-invert','cosmic-dev-retro','cosmic-dev-light-preview');
     document.documentElement.style.removeProperty('--cosmic-dev-font');
-    document.body.style.fontFamily='';
+    document.body.style.fontFamily='';document.body.style.backgroundImage='';document.documentElement.style.zoom='';document.querySelectorAll('#gamesgrid,#appsgrid').forEach(el=>el.style.gridTemplateColumns='');
     document.getElementById('cosmic-dev-injected-css')?.remove();
     document.getElementById('cosmic-dev-matrix')?.remove();
     document.getElementById('cosmic-dev-fake-loading')?.remove();
@@ -754,6 +780,7 @@
     else if(command==='/account'||command==='/userstats') body={action:command.slice(1),username:raw};
     else if(command==='/gameinfo') body={action:'gameinfo',name:raw};
     else if(command==='/gameannounce') { const split=raw.split(/\s*[|:]\s*/); body={action:'gameannounce_set',game:(split.shift()||''),text:split.join(' | ')||''}; }
+    else if(command==='/blacklist') body={action:'blacklist_toggle',target:raw};
     else if(command==='/disablegame') body={action:'disabled_game_toggle',name:raw};
     else if(command==='/enablegame') body={action:'disabled_game_enable',name:raw};
     else if(command==='/unfeature') body={action:'unfeature',name:raw};
@@ -807,7 +834,7 @@
       case '/pageinfo': return pageInfoCommand();
       case '/grid': return gridCommand(args);
       case '/home': return location.href=location.origin+(location.hostname.endsWith('.github.io')?'/cosmic/pages/lessons/lessons.html':'/pages/lessons/lessons.html');
-      case '/blacklist': return siteStateCommand('blacklist_toggle',{target:args});
+      case '/blacklist': return globalCommand('/blacklist',args);
       case '/feature': return globalCommand('/feature',args);
       case '/maintenance': return globalCommand('/maintenance',args);
       case '/import': return importCommand(args);

@@ -4,8 +4,6 @@
   const ADMIN_NAME = 'TheDevilAngel';
   const SESSION_KEY = 'cosmicCurrentUserV1';
   const TOKEN_KEY = 'cosmicDeveloperTokenV1';
-  const ADMIN_GATE_KEY = 'cosmicSecretAdminPasswordV1';
-  const ENTRY_KEY = 'cosmicGamesUnlocked';
   const API = location.origin;
 
   const safe = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({
@@ -15,17 +13,10 @@
   function currentUser() {
     try { return localStorage.getItem(SESSION_KEY) || 'Guest'; } catch (_) { return 'Guest'; }
   }
-  function hasAdminGateAuth() {
-    try {
-      return localStorage.getItem(ADMIN_GATE_KEY) === '1' &&
-        sessionStorage.getItem(ENTRY_KEY) === '1';
-    } catch (_) { return false; }
-  }
   function isDeveloper() {
-    // Account usernames are origin-scoped, so GitHub Pages and the Cloudflare
-    // Worker cannot share cosmicCurrentUserV1. The existing admin gate is the
-    // secure per-origin fallback after its admin password has been verified.
-    return currentUser() === ADMIN_NAME || hasAdminGateAuth();
+    // Developer commands are tied strictly to the active Cosmic account.
+    // An entry/admin password gate alone never grants developer UI access.
+    return currentUser() === ADMIN_NAME;
   }
   function isGameContext() {
     // Developer controls are intentionally global: the authenticated developer
@@ -754,23 +745,37 @@
   }
 
   ensureStyle();
-  const bootDevMenu=()=>{
-    if(!isDeveloper() || !entryGateReady()) return false;
+  const removeDeveloperMenu=()=>{
+    document.getElementById('cosmic-dev-panel')?.remove();
+    document.getElementById('cosmic-dev-fab')?.remove();
+    document.getElementById('cosmic-dev-tools-style')?.remove();
+  };
+  const syncDeveloperMenu=()=>{
+    if(!isDeveloper()){
+      removeDeveloperMenu();
+      return false;
+    }
+    if(!entryGateReady()) return false;
     createMenu();
     return !!document.getElementById('cosmic-dev-fab');
   };
+  const bootDevMenu=syncDeveloperMenu;
   setTimeout(bootDevMenu,250);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootDevMenu,{once:true});
   else bootDevMenu();
 
   // The games Hub has a real entry gate that reveals the game list later.
   // Re-check when that gate changes instead of trying to race it.
-  window.addEventListener('cosmic-entry-ready',bootDevMenu);
-  window.addEventListener('storage',bootDevMenu);
+  window.addEventListener('cosmic-entry-ready',syncDeveloperMenu);
+  window.addEventListener('cosmic-account-changed',syncDeveloperMenu);
+  window.addEventListener('storage',e=>{
+    if(e.key===SESSION_KEY || e.key===TOKEN_KEY || e.key===null) syncDeveloperMenu();
+  });
+  window.addEventListener('pageshow',syncDeveloperMenu);
   let devMenuObserver;
   try {
     devMenuObserver=new MutationObserver(()=>{
-      if(isDeveloper() && !document.getElementById('cosmic-dev-fab')) bootDevMenu();
+      syncDeveloperMenu();
     });
     devMenuObserver.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
   } catch (_) {}

@@ -6,6 +6,7 @@
   const allowed = () => user() === ADMIN;
   const clean = () => {
     if (allowed()) return;
+    document.querySelectorAll('#cosmic-dev-fab,#cosmic-dev-panel,#cosmic-dev-confirm,#cosmic-dev-accounts-modal,#cosmic-registry-preview,.cosmic-developer-only,[data-cosmic-developer-only]').forEach(el => el.remove());
     document.querySelectorAll('.cosmic-result').forEach(el => {
       if (/registry health check/i.test(el.textContent || '')) el.remove();
     });

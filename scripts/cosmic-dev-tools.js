@@ -431,19 +431,36 @@
     if(!existing)document.body.appendChild(banner);
   }
 
+  let lastGlobalRefreshSignal=0;
   function renderGlobalState(data){
     const global=data?.global||{};
+    if(global.theme?.value) document.body.dataset.cosmicTheme=String(global.theme.value);
+    let badge=document.getElementById('cosmic-global-badge');
+    if(global.global_badge?.text){
+      badge=badge||document.createElement('div'); badge.id='cosmic-global-badge'; badge.textContent=global.global_badge.text;
+      badge.style.cssText='position:fixed;right:14px;bottom:14px;z-index:2147483645;padding:7px 11px;border:1px solid #2dccff;border-radius:999px;background:rgba(5,12,18,.94);color:#2dccff;font:800 12px system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.4)';
+      if(!badge.parentNode)document.body.appendChild(badge);
+    } else badge?.remove();
+    let countdown=document.getElementById('cosmic-global-countdown');
+    if(global.countdown?.target && Number(global.countdown.target)>Date.now()){
+      countdown=countdown||document.createElement('div'); countdown.id='cosmic-global-countdown';
+      countdown.style.cssText='position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:2147483644;padding:8px 12px;border:1px solid #2dccff;border-radius:10px;background:rgba(5,12,18,.96);color:#f2f7fa;font:800 12px system-ui,sans-serif';
+      if(!countdown.parentNode)document.body.appendChild(countdown);
+      const tick=()=>{const left=Math.max(0,Number(global.countdown.target)-Date.now());const s=Math.floor(left/1000);countdown.textContent=(global.countdown.label||'Countdown')+' • '+Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0');if(left<=0){countdown.remove();}};tick();clearInterval(countdown.__timer);countdown.__timer=setInterval(tick,1000);
+    } else countdown?.remove();
     const items=[global.global_notice,global.site_banner,global.global_message,global.broadcast].filter(x=>x?.text);
-    const existing=document.getElementById('cosmic-global-state-stack'); if(!items.length){existing?.remove();return;}
-    const stack=existing||document.createElement('div'); stack.id='cosmic-global-state-stack';
-    stack.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:2147483645;display:grid;gap:8px;pointer-events:none;font:700 13px system-ui,sans-serif';
-    stack.innerHTML=''; items.forEach(item=>{const el=document.createElement('div');el.textContent=item.text;el.style.cssText='padding:10px 14px;border:1px solid #2dccff;border-radius:12px;background:rgba(5,12,18,.96);color:#f2f7fa;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)';stack.appendChild(el);});
-    if(!existing)document.body.appendChild(stack);
+    const existing=document.getElementById('cosmic-global-state-stack'); if(!items.length){existing?.remove();} else {
+      const stack=existing||document.createElement('div'); stack.id='cosmic-global-state-stack';
+      stack.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:2147483645;display:grid;gap:8px;pointer-events:none;font:700 13px system-ui,sans-serif'; stack.innerHTML='';
+      items.forEach(item=>{const el=document.createElement('div');el.textContent=item.text;el.style.cssText='padding:10px 14px;border:1px solid #2dccff;border-radius:12px;background:rgba(5,12,18,.96);color:#f2f7fa;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)';stack.appendChild(el);});
+      if(!existing)document.body.appendChild(stack);
+    }
+    const signal=Number(global.global_refresh||global.sync_signal||0); if(signal&&signal!==lastGlobalRefreshSignal){lastGlobalRefreshSignal=signal;if(global.global_refresh && document.visibilityState!=='hidden') location.reload();}
   }
 
   async function syncGlobalAnnouncement(){
     try{
-      const response=await fetch(API+'/api/site-state?announcement='+Date.now(),{cache:'no-store'});
+      const response=await fetch(API+'/api/site-state?global='+Date.now(),{cache:'no-store'});
       if(!response.ok)return;
       const data=await response.json(); renderGlobalAnnouncement(data); renderGlobalState(data);
     }catch(_){}

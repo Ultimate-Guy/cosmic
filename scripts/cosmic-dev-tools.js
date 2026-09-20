@@ -747,12 +747,13 @@
     else if(command==='/sitebanner') body={action:'site_banner_set',text:raw};
     else if(command==='/sitemode') body={action:'sitemode_set',mode:first||'normal'};
     else if(command==='/globalrefresh') body={action:'global_refresh'};
-    else if(command==='/globalreload') body={action:'global_refresh',reload:true};
+    else if(command==='/globalreload') body={action:'global_reload'};
     else if(command==='/globalmessage') body={action:'global_message_set',text:raw};
     else if(command==='/broadcast') body={action:'broadcast_set',text:raw};
     else if(command==='/sync') body={action:'sync_signal'};
-    else if(command==='/account'||command==='/userstats'||command==='/gameinfo') body={action:command.slice(1),username:command==='/account'||command==='/userstats'?raw:undefined,name:command==='/gameinfo'?raw:undefined};
-    else if(command==='/gameannounce') body={action:'gameannounce_set',game:first,text:rest};
+    else if(command==='/account'||command==='/userstats') body={action:command.slice(1),username:raw};
+    else if(command==='/gameinfo') body={action:'gameinfo',name:raw};
+    else if(command==='/gameannounce') { const split=raw.split(/\s*[|:]\s*/); body={action:'gameannounce_set',game:(split.shift()||''),text:split.join(' | ')||''}; }
     else if(command==='/disablegame') body={action:'disabled_game_toggle',name:raw};
     else if(command==='/enablegame') body={action:'disabled_game_enable',name:raw};
     else if(command==='/unfeature') body={action:'unfeature',name:raw};
@@ -950,7 +951,7 @@
         b.innerHTML='<b>'+safe(name)+'</b><small>'+safe(desc)+'</small>'+((DEV_GLOBAL_TOGGLES.has(command)||localToggleCommands.has(command))?'<span class="dev-action" hidden>Off</span>':'');
         b.onclick=()=>{
           const command=name.split(' ')[0];
-          const args=name.includes('[')?window.prompt(name+' argument:','')||'':'';
+          const args=name.includes('[')?window.prompt(command==='/gameannounce'?'Game name | announcement text':name+' argument:','')||'':'';
           b.dataset.args=args;
           confirmedRunCommand(command,args).finally(refreshDevCommandButtons);
         };

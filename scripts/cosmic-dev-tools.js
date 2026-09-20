@@ -462,7 +462,7 @@
     try{
       const response=await fetch(API+'/api/site-state?global='+Date.now(),{cache:'no-store'});
       if(!response.ok)return;
-      const data=await response.json(); renderGlobalAnnouncement(data); renderGlobalState(data);
+      const data=await response.json(); window.__cosmicGlobalState=data.global||{}; renderGlobalAnnouncement(data); renderGlobalState(data); refreshDevCommandButtons();
     }catch(_){}
   }
 
@@ -597,6 +597,9 @@
     if(command==='/matrix') return !!document.getElementById('cosmic-dev-matrix');
     if(command==='/fakeloading') return !!document.getElementById('cosmic-dev-fake-loading');
     if(command==='/locksite') return !!document.getElementById('cosmic-dev-locksite');
+    if(command==='/maintenance') return String(window.__cosmicGlobalState?.mode?.value||'')==='maintenance';
+    if(command==='/event') return !!window.__cosmicGlobalState?.event;
+    if(command==='/countdown') return !!window.__cosmicGlobalState?.countdown;
     return false;
   }
   function refreshDevCommandButtons(){
@@ -795,8 +798,9 @@
     else if(command==='/userstats') body={action:'userstats',username:raw};
     else if(command==='/gameinfo') body={action:'gameinfo',name:raw};
     else if(command==='/gameannounce') body={action:'gameannounce_set',game:first,text:restText};
-    else if(command==='/disablegame'||command==='/enablegame') body={action:'disabled_game_toggle',name:raw};
-    else if(command==='/unfeature') body={action:'feature_toggle',name:raw};
+    else if(command==='/disablegame') body={action:'disabled_game_toggle',name:raw};
+    else if(command==='/enablegame') body={action:'disabled_game_enable',name:raw};
+    else if(command==='/unfeature') body={action:'unfeature',name:raw};
     else if(command==='/spotlight') body={action:'spotlight_set',name:raw};
     else if(command==='/globalbadge') body={action:'global_badge_set',text:raw};
     else if(command==='/globaltheme') body={action:'global_theme_set',theme:first};

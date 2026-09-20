@@ -11,7 +11,11 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
 #home:active{cursor:grabbing}
 #game{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
 </style>
-</head>
+<style id="cosmic-recovery-focus-css">
+#cosmic-game-recovery{position:fixed;inset:0;z-index:2147483645;display:none;place-items:center;padding:24px;background:radial-gradient(circle at 50% 20%,rgba(45,204,255,.12),transparent 45%),#050c12;color:#f2f7fa;font-family:system-ui,sans-serif;text-align:center}
+#cosmic-game-recovery .cgr-card{width:min(560px,94vw);padding:28px;border:1px solid #2dccff;border-radius:22px;background:rgba(7,19,26,.96);box-shadow:0 25px 80px rgba(0,0,0,.6)}
+#cosmic-game-recovery h2{color:#2dccff;margin:0 0 10px}#cosmic-game-recovery p{opacity:.8;line-height:1.5}#cosmic-game-recovery button{border:1px solid #2dccff;border-radius:10px;padding:10px 14px;margin:4px;background:rgba(45,204,255,.1);color:#2dccff;cursor:pointer}#cosmic-game-recovery .primary{background:#2dccff;color:#031721;font-weight:800}
+</style></head>
 <body>
 <button id="home" type="button">← Home</button>
 <iframe id="game" allow="fullscreen; autoplay; gamepad; clipboard-read; clipboard-write" allowfullscreen></iframe>
@@ -89,5 +93,27 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
 <script src="../../scripts/cosmic-dev-tools.js?build=dev-commands"></script>
 <script src="../../scripts/cosmic-wrapper-controls.js?build=wrapper-v1"></script>
 <script src="../../scripts/cosmic-global-state.js?v=global-state"></script>
-</body>
+<script>
+(function(){
+  const frame=document.querySelector('iframe');
+  function showRecovery(){
+    let box=document.getElementById('cosmic-game-recovery');
+    if(!box){
+      box=document.createElement('div');box.id='cosmic-game-recovery';
+      box.innerHTML='<div class="cgr-card"><h2>Cosmic couldn’t start this game</h2><p>The game may have failed to load. You can retry it, open it in a blank tab, report the issue, or choose another game.</p><button class="primary" id="cgr-retry">Retry</button><button id="cgr-blank">Open Blank</button><button id="cgr-report">Report</button><button id="cgr-another">Try Another</button></div>';
+      document.body.appendChild(box);
+      box.querySelector('#cgr-retry').onclick=()=>{box.style.display='none';if(frame)frame.src=frame.src;};
+      box.querySelector('#cgr-blank').onclick=()=>{if(frame){const w=window.open('about:blank','_blank');if(w)w.location.href=frame.src;}};
+      box.querySelector('#cgr-report').onclick=()=>{window.open('https://docs.google.com/forms/d/e/1FAIpQLSfLFwfXdL_Fk8FGAAXPire3yIPX0qIoj3Ua1dAGQsw4pTb98Q/viewform','_blank');};
+      box.querySelector('#cgr-another').onclick=()=>{location.href='../lessons.html';};
+    }
+    box.style.display='grid';
+  }
+  if(frame){
+    let loaded=false;
+    frame.addEventListener('load',()=>{loaded=true;setTimeout(()=>{try{if(frame.contentDocument?.body?.innerText?.trim()==='')showRecovery();}catch(_){}} ,2500);});
+    setTimeout(()=>{if(!loaded)showRecovery();},10000);
+  }
+})();
+</script></body>
 </html>

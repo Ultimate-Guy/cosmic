@@ -174,7 +174,8 @@
     let dragging=false,moved=false,startX=0,startY=0,startLeft=0,startTop=0;
     handle.addEventListener('pointerdown', e => {
       if (e.button !== undefined && e.button !== 0) return;
-      if (e.target?.closest?.('button,input,textarea,select,a')) return;
+      const isLauncher = handle.id === 'cosmic-dev-fab' || e.target?.closest?.('#cosmic-dev-fab');
+      if (!isLauncher && e.target?.closest?.('button,input,textarea,select,a')) return;
       const r=el.getBoundingClientRect();
       dragging=true;moved=false;startX=e.clientX;startY=e.clientY;startLeft=r.left;startTop=r.top;
       handle.style.cursor='grabbing';

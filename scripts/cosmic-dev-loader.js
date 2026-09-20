@@ -2,6 +2,10 @@
   'use strict';
   if (window.__COSMIC_DEV_LOADER__) return;
   window.__COSMIC_DEV_LOADER__ = true;
+  const SESSION = 'cosmicCurrentUserV1';
+  let isDeveloper = false;
+  try { isDeveloper = localStorage.getItem(SESSION) === 'TheDevilAngel'; } catch (_) {}
+  if (!isDeveloper) return;
   const base = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
   const script = document.createElement('script');
   script.src = base + 'scripts/cosmic-dev-tools.js?build=dev-commands-global';

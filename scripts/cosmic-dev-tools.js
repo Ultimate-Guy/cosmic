@@ -44,26 +44,33 @@
     t.__hide = setTimeout(() => { t.style.opacity = '0'; }, 2200);
   }
 
-  async function adminToken() {
+  async function adminToken(force=false) {
     if (!isDeveloper()) return null;
     try {
-      const cached = sessionStorage.getItem(TOKEN_KEY);
-      if (cached) return cached;
-    } catch (_) {}
-    const password = window.prompt('Developer password:');
-    if (!password) return null;
-    try {
-      const response = await fetch(API + '/api/admin/session', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({password})
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.ok || !data.token) {
-        alert('Developer authentication failed.');
-        return null;
+      const cached=sessionStorage.getItem(TOKEN_KEY);
+      if (cached && !force) {
+        const dot=cached.indexOf('.');
+        if (dot>0) {
+          const encoded=cached.slice(0,dot).replace(/-/g,'+').replace(/_/g,'/');
+          const padded=encoded.padEnd(Math.ceil(encoded.length/4)*4,'=');
+          const payload=JSON.parse(atob(padded));
+          if(Number(payload.exp)>Date.now()+15000) return cached;
+        }
+        sessionStorage.removeItem(TOKEN_KEY);
       }
-      try { sessionStorage.setItem(TOKEN_KEY, data.token); } catch (_) {}
+    } catch (_) { try{sessionStorage.removeItem(TOKEN_KEY)}catch(__){} }
+    const password=window.prompt('Developer password:');
+    if(!password) return null;
+    try {
+      const response=await fetch(API+'/api/admin/session',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({password}),
+        cache:'no-store'
+      });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok||!data.ok||!data.token){alert(data.error==='server-not-configured'?'Developer service is not configured on the server.':'Developer authentication failed.');return null;}
+      try{sessionStorage.setItem(TOKEN_KEY,data.token)}catch(_){}
       return data.token;
     } catch (_) {
       alert('Could not reach the Cosmic developer service.');
@@ -716,7 +723,7 @@
   function setGlobalToggleState(command,args,on){devToggleState[toggleKey(command,args)]=!!on;}
 
   async function globalCommand(command,args=''){
-    const token=await adminToken(); if(!token)return;
+    let token=await adminToken(); if(!token)return;
     const raw=(args||'').trim();
     const parts=raw.split(/\s+/); const first=parts.shift()||''; const rest=parts.join(' ');
     let body={action:command.slice(1)};
@@ -750,7 +757,12 @@
     else if(command==='/feature') body={action:'feature_toggle',name:raw};
     else if(command==='/clearall') body={action:'clearall'};
     try{
-      const r=await fetch(API+'/api/admin/global',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body),cache:'no-store'});
+      let r=await fetch(API+'/api/admin/global',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body),cache:'no-store'});
+      if(r.status===401){
+        token=await adminToken(true);
+        if(!token)return;
+        r=await fetch(API+'/api/admin/global',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body),cache:'no-store'});
+      }
       const d=await r.json().catch(()=>({})); if(!r.ok||!d.ok)throw new Error(d.error||'Global command failed');
       if(DEV_GLOBAL_TOGGLES.has(command)) syncGlobalToggleState(command,args,d);
       if(command==='/globalreload') location.reload();

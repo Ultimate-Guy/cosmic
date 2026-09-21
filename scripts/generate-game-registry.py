@@ -90,7 +90,7 @@ def clean_game_page(folder):
   const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
   const files = [
     'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v2',
+    'scripts/cosmic-wrapper-controls.js?v=wrapper-v3',
     'scripts/cosmic-global-state.js?v=global-state',
     'scripts/cosmic-dev-tools.js?build=dev-commands'
   ];
@@ -105,12 +105,16 @@ def clean_game_page(folder):
   files.forEach(add);
 })();
 </script>\n'''
-    matches=list(re.finditer(r'</body>',cleaned,re.I))
-    if matches:
-        pos=matches[-1].start()
+    # Install the Cosmic runtime BEFORE any game JavaScript. Some games rebuild
+    # the document during boot, which can erase UI/scripts that load afterward.
+    runtime_pattern=re.compile(r'<script[^>]*id=["\']cosmic-game-runtime-loader["\'][^>]*>.*?</script>\s*',re.DOTALL|re.I)
+    cleaned=runtime_pattern.sub('',cleaned)
+    head_match=re.search(r'<head(?:\s[^>]*)?>',cleaned,re.I)
+    if head_match:
+        pos=head_match.end()
         cleaned=cleaned[:pos]+insertion+cleaned[pos:]
     else:
-        cleaned=cleaned+insertion
+        cleaned=insertion+cleaned
     # Game packages sometimes ship their own service-worker registration. Cosmic
     # owns the only service worker now; replace those calls with resolved promises
     # so the game code continues without registering another worker.

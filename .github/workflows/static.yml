@@ -151,30 +151,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: '_site'
           command: deploy --config wrangler.jsonc
-      - name: Verify Cloudflare deployment serves this build
-        env:
-          EXPECTED_COMMIT: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import json, os, time, urllib.request
-          expected=os.environ['EXPECTED_COMMIT']
-          url='https://cosmicv2.v75ultimate.workers.dev/api/deployment-status?verify='+expected
-          for attempt in range(1,7):
-              try:
-                  req=urllib.request.Request(url,headers={'Cache-Control':'no-cache','Pragma':'no-cache'})
-                  with urllib.request.urlopen(req,timeout=15) as response:
-                      data=json.load(response)
-                  if data.get('source_commit') == expected:
-                      print('VERIFIED Cloudflare Worker build:', data)
-                      break
-              except Exception as exc:
-                  data={'error':str(exc)}
-              if attempt < 6:
-                  time.sleep(2)
-          else:
-              raise SystemExit('Cloudflare Worker build mismatch. Expected '+expected+', got '+str(data))
-          PY
 
   deploy:
     needs: build

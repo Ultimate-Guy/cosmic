@@ -66,7 +66,21 @@
     if (document.getElementById('cosmic-wrapper-controls')) return true;
 
     const frame = findFrame();
-    if (!frame || !document.body) return false;
+    if (!document.body) return false;
+
+    if (!document.getElementById('cosmic-game-home')) {
+      const home = document.createElement('button');
+      home.id = 'cosmic-game-home';
+      home.type = 'button';
+      home.textContent = '← Home';
+      home.title = 'Return to Cosmic games';
+      home.setAttribute('aria-label', 'Return to Cosmic games');
+      home.style.cssText = 'position:fixed;top:12px;left:12px;z-index:2147483647;padding:9px 15px;border:2px solid #2dccff;border-radius:10px;background:#0d1a21;color:#2dccff;font:700 14px system-ui,sans-serif;cursor:pointer;user-select:none;touch-action:none;box-shadow:0 4px 16px rgba(0,0,0,.55)';
+      home.addEventListener('click', () => { location.href = cosmicRoot() + 'pages/lessons/lessons.html'; });
+      document.body.appendChild(home);
+    }
+
+    if (!frame) return false;
 
     const wrap = document.createElement('div');
     wrap.id = 'cosmic-wrapper-controls';

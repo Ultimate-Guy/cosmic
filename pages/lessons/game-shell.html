@@ -72,6 +72,13 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     // cross-origin iframe restrictions and lets the game use its normal
     // fullscreen/WebGL behavior. The Pages build adds the Home guard to the
     // game page separately. Cloudflare keeps the existing iframe shell.
+    // Ultrakill is a Unity WebGL build that works reliably as a top-level page,
+    // but can be mis-detected/blocked when kept inside the Cloudflare iframe shell.
+    if(/\/Ultrakill\//i.test(url.pathname)){
+      location.replace(url.href);
+      return;
+    }
+
     if(location.hostname.endsWith('.github.io')){
       if(url.hostname===workerHost){
         url.hostname=location.hostname;

@@ -36,7 +36,8 @@
     {page:'settings',selector:'#crosshair-style-select',title:'Custom Crosshair',text:'Pick a different crosshair style for Cosmic pages and games. This setting is saved locally.'},
     {page:'settings',selector:'#panicKeyInput',title:'Panic Shortcut',text:'Set a keyboard key and destination for a quick navigation shortcut. Make sure you can remember the key and destination you choose.'},
     {page:'settings',selector:'#backButton',title:'Back to the rest of the tour',text:'Use Cosmic’s real Back button to return to the previous page. The tour will remember where you were and continue with the other new features.'},
-    {page:'games',selector:'#cosmic-account',title:'Cosmic Accounts',text:'This button opens your local Cosmic profile/account tools. You can keep a separate profile on this browser without needing to use an online account for local features.'},
+    {page:'games',selector:'#pass-field',title:'Cosmic Entry',text:'This is the Cosmic entry password. Make sure you can remember your password so you can get back into the games area when you need it.'},
+    {page:'games',selector:'#cosmic-account',title:'Cosmic Accounts',text:'After entering Cosmic, this account button opens your local profile tools. You can create or log in to an account here. Make sure you can remember your account password.'},
     {page:'games',selector:'#cosmic-daily-quest',title:'Cosmic Daily Quest',text:'Daily Quest gives you a rotating reason to come back, such as trying a game you have not opened or improving a previous run.'},
     {page:'games',selector:'#cosmic-smart-pick',title:'Pick for Me',text:'Pick for Me uses local history, favorites, and your recent activity to recommend something to play so the library feels easier to explore.'},
     {page:'games',selector:'.play-btn',title:'Play a game',text:'Click Play on a game to launch it. Blank opens the game directly in a new tab, while Play uses Cosmic’s game shell with the extra in-game controls.'},
@@ -167,7 +168,7 @@
 
       if(target.id==='cc-dashboard'){
         state.awaitingEntry=true;
-        state.step=9;
+        state.step=10;
         saveState(state);
         removeTour();
         return;
@@ -196,7 +197,7 @@
       if(!state.active && !state.awaitingEntry)return;
       if(state.awaitingEntry){
         state.awaitingEntry=false;
-        state.step=9;
+        state.step=10;
         state.active=true;
         saveState(state);
         setTimeout(position,200);
@@ -220,7 +221,7 @@
 
   // If the user has not yet entered Cosmic, show the password step while the gate is visible.
   if(isGames && state.awaitingEntry){
-    state.step=9-1;
+    state.step=9;
     state.active=true;
     saveState(state);
   }

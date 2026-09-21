@@ -329,7 +329,7 @@
     "featured": false
   },
   {
-    "name": "Arthur\u2019s Nightmare",
+    "name": "Arthur’s Nightmare",
     "path": "pages/lessons/Arthur%E2%80%99s%20Nightmare/",
     "category": "Arcade",
     "tags": [],
@@ -420,14 +420,14 @@
     "featured": false
   },
   {
-    "name": "Baldi\u2019S Basics",
+    "name": "Baldi’S Basics",
     "path": "pages/lessons/Baldi%E2%80%99s%20Basics/",
     "category": "Arcade",
     "tags": [],
     "featured": false
   },
   {
-    "name": "Baldi\u2019S Basics Remastered",
+    "name": "Baldi’S Basics Remastered",
     "path": "pages/lessons/Baldi%E2%80%99s%20Basics%20Remastered/",
     "category": "Arcade",
     "tags": [],
@@ -743,5 +743,104 @@
     "category": "Arcade",
     "tags": [],
     "featured": false
+  },
+  {
+    "name": "OvO",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "platformer",
+      "cosmicgames"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Replku/Ovo@2b17271c24535b96a49c4d1b9f64cd998aa2d060/"
+  },
+  {
+    "name": "Temple Run 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "runner",
+      "cosmicgames"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/taskmaster773/google-class/temple-run-2/"
+  },
+  {
+    "name": "WebOsu 2.0!",
+    "path": "",
+    "category": "Rhythm",
+    "tags": [
+      "rhythm",
+      "cosmicgames"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/MartinMMCyt/osu@65e500d1cb100306acbfeffb310c84294da933c4/"
+  },
+  {
+    "name": "Chess Classic",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "chess",
+      "cosmicgames"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/chess-classic/"
+  },
+  {
+    "name": "Flappy Dunk",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "arcade",
+      "cosmicgames"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/flappy%20dunk/"
+  },
+  {
+    "name": "Guess Their Answer",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "trivia",
+      "cosmicgames"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/guess-their-answer/"
+  },
+  {
+    "name": "Harvest.io",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "arcade",
+      "cosmicgames"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/harvest-io/"
+  },
+  {
+    "name": "HCR Lite 1.0",
+    "path": "",
+    "category": "Racing",
+    "tags": [
+      "racing",
+      "cosmicgames"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@ed57fd6dbc91143221b05fdf61be73bacc375843/hill-climb-racing-lite/"
+  },
+  {
+    "name": "Pac-Man",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "arcade",
+      "cosmicgames"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/pac-man-superfast/"
   }
 ]

@@ -82,39 +82,16 @@ def clean_game_page(folder):
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script[^>]*src=["\'][^"\']*cosmic-dev-tools\.js[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL)
-    for loader in ('game-guard.js','cosmic-dev-loader.js','cosmic-dev-tools.js','cosmic-wrapper-controls.js','cosmic-global-state.js'):
+    for loader in ('game-guard.js','cosmic-dev-loader.js','cosmic-dev-tools.js'):
         cleaned=re.sub(r'\s*<script[^>]*src=["\'][^"\']*'+re.escape(loader)+r'[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script[^>]*id=["\']cosmic-game-runtime-loader["\'][^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
-    insertion='''\n<script id="cosmic-game-runtime-loader">
-(() => {
-  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
-  const files = [
-    'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v3',
-    'scripts/cosmic-global-state.js?v=global-state',
-    'scripts/cosmic-dev-tools.js?build=dev-commands'
-  ];
-  const add = (file) => {
-    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
-    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
-    const script = document.createElement('script');
-    script.dataset.cosmicRuntime = key;
-    script.src = root + file;
-    (document.head || document.documentElement).appendChild(script);
-  };
-  files.forEach(add);
-})();
-</script>\n'''
-    # Install the Cosmic runtime BEFORE any game JavaScript. Some games rebuild
-    # the document during boot, which can erase UI/scripts that load afterward.
-    runtime_pattern=re.compile(r'<script[^>]*id=["\']cosmic-game-runtime-loader["\'][^>]*>.*?</script>\s*',re.DOTALL|re.I)
-    cleaned=runtime_pattern.sub('',cleaned)
-    head_match=re.search(r'<head(?:\s[^>]*)?>',cleaned,re.I)
-    if head_match:
-        pos=head_match.end()
+    insertion='\n<script src="../../scripts/game-guard.js?v=guard"></script>\n<script src="../../scripts/cosmic-dev-tools.js?build=dev-commands"></script>\n'
+    matches=list(re.finditer(r'</body>',cleaned,re.I))
+    if matches:
+        pos=matches[-1].start()
         cleaned=cleaned[:pos]+insertion+cleaned[pos:]
     else:
-        cleaned=insertion+cleaned
+        cleaned=cleaned+insertion
     # Game packages sometimes ship their own service-worker registration. Cosmic
     # owns the only service worker now; replace those calls with resolved promises
     # so the game code continues without registering another worker.

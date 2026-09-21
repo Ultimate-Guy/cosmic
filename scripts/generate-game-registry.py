@@ -129,12 +129,30 @@ def clean_game_page(folder):
     cleaned=cleaned.replace('navigator.serviceWorker.register(', 'Promise.resolve(')
     if cleaned!=text:index.write_text(cleaned,encoding='utf-8')
 def registry_path(path):return urllib.parse.quote(path.relative_to(ROOT).as_posix(),safe='/')+'/'
+def extract_import_url(folder):
+    index=folder/'index.html'
+    if not index.is_file(): return None
+    try: text=index.read_text(encoding='utf-8')
+    except UnicodeDecodeError: return None
+    patterns=[
+        r'data-src=["\']([^"\']+)["\']',
+        r'const\s+gameUrl\s*=\s*["\']([^"\']+)["\']',
+        r'gameUrl\s*[:=]\s*["\']([^"\']+)["\']'
+    ]
+    for pattern in patterns:
+        match=re.search(pattern,text,re.I)
+        if match and re.match(r'^https?://',match.group(1)):
+            return match.group(1)
+    return None
+
 def build_game(folder,metadata):
     image=choose_image(folder,metadata); entry=choose_entry(folder,metadata); name=str(metadata.get('title',display_name(folder.name))); tags=metadata.get('tags',[])
     if not isinstance(tags,list):tags=[tags]
     game={'name':name,'path':registry_path(folder),'category':infer_category(name,metadata),'tags':[str(x) for x in tags],'featured':bool(metadata.get('featured',False))}
     if is_cosmic_imported_page(folder):
         game['mode']='cosmic-imported'
+        external=extract_import_url(folder)
+        if external: game['external']=external
     if entry:game['entry']=entry
     if image:game['image']=registry_path(image).rstrip('/')
     return game

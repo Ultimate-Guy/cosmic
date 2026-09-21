@@ -81,8 +81,11 @@
           return localUrl;
         }
         function shellUrl(game){
+          if(game.mode==='cosmic-imported' && game.external){
+            return game.external;
+          }
           const target=gameUrl(game);
-          return game.mode==='cosmic-imported' ? target : normalizeUrl('game-shell.html?game='+encodeURIComponent(target));
+          return normalizeUrl('game-shell.html?game='+encodeURIComponent(target));
         }
         function openBlank(url){const win=window.open('about:blank','_blank');if(win){win.location.href=url;}}
         function readCachedRegistry(){try{const parsed=JSON.parse(localStorage.getItem(REGISTRY_CACHE_KEY)||'null');return Array.isArray(parsed)&&parsed.length?parsed:null;}catch(e){return null;}}

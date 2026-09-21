@@ -181,7 +181,7 @@
       }
 
       if(target.id==='backButton' && isSettings){
-        state.step=1;
+        state.step=10;
         state.active=true;
         saveState(state);
         return;

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='cosmicSiteTourV3';
+  const VERSION='cosmicSiteTourV4';
   const STATE_KEY=VERSION+'State';
   const SESSION_KEY=VERSION+'Session';
   const MAX_OPENS=2;
@@ -197,13 +197,12 @@
       }
 
       if(target.id==='backButton' && isSettings){
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        state.step=stepIndex('Open the Cosmic Cloak');
+        // Let Settings' own Back handler restore the exact page the user came from.
+        // The tour state is set to the cloaked Dashboard step before navigation.
+        state.step=stepIndex('Cosmic Dashboard');
         state.active=true;
         state.awaitingEntry=false;
         saveState(state);
-        location.href=base;
         return;
       }
 

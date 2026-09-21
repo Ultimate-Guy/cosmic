@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='cosmicSiteTourV2';
+  const VERSION='cosmicSiteTourV3';
   const STATE_KEY=VERSION+'State';
   const SESSION_KEY=VERSION+'Session';
   const MAX_OPENS=2;
@@ -30,13 +30,14 @@
     {page:'command',selector:'.cc-news',title:'Updates are now here',text:'All the new Cosmic update messages live in this Updates panel on the Command Center. Check here to see what changed without waiting for a separate popup.'},
     {page:'command',selector:'.cc-actions [data-action="warp"]',title:'Warp Me Somewhere',text:'Warp picks a game for you and launches it quickly. It is a fast way to discover something without searching the whole library.'},
     {page:'command',selector:'.cc-actions [data-action="quick"]',title:'Quick Actions',text:'Quick Actions puts common Cosmic tools in one place, including Games, Apps, Warp, Missions, your local profile, Performance, and Settings.'},
-    {page:'command',selector:'.cc-actions [data-action="settings"]',title:'Settings',text:'Cosmic now has a full Settings area. Click Settings to see the new Auto Cloak, Tab Cloak, crosshair, background, music, panic shortcut, and data controls.'},
-    {page:'settings',selector:'#autoCloakGrid',title:'Auto Cloak',text:'Choose whether Cosmic automatically opens with an About:Blank or Blob cloak. You can also turn Auto Cloak off whenever you want.'},
-    {page:'settings',selector:'#cloakGrid',title:'Tab Cloak',text:'Tab Cloak lets you choose a Cosmic-made tab title/icon preset. Your choice stays local to this browser.'},
+    {page:'command',selector:'.cc-actions [data-action="settings"]',title:'Settings',text:'Cosmic now has a full Settings area. You can customize Auto Cloak, Tab Cloak, crosshairs, backgrounds, music, panic shortcuts, and other local preferences.'},
+    {page:'settings',selector:'#cloakGrid',title:'Tab Cloak',text:'Tab Cloak lets you choose a Cosmic-made tab title/icon preset. Auto Cloak is also available above it when you want Cosmic to automatically use a cloak on future visits.'},
     {page:'settings',selector:'#crosshair-style-select',title:'Custom Crosshair',text:'Pick a different crosshair style for Cosmic pages and games. This setting is saved locally.'},
     {page:'settings',selector:'#panicKeyInput',title:'Panic Shortcut',text:'Set a keyboard key and destination for a quick navigation shortcut. Make sure you can remember the key and destination you choose.'},
     {page:'settings',selector:'#backButton',title:'Back to the rest of the tour',text:'Use Cosmic’s real Back button to return to the previous page. The tour will remember where you were and continue with the other new features.'},
-    {page:'games',selector:'#pass-field',title:'Cosmic Entry',text:'This is the Cosmic entry password. Make sure you can remember your password so you can get back into the games area when you need it.'},
+    {page:'command',selector:'#cc-blank',title:'Open the Cosmic Cloak',text:'Click About:Blank Cloak to continue the tour in a cloaked Command Center. When the cloaked tab opens, the next tour step will point to the big Cosmic Dashboard button.'},
+    {page:'cloak',selector:'#cc-dashboard',title:'Cosmic Dashboard',text:'Click Cosmic Dashboard. This takes you to the Cosmic entry screen in the same cloaked tab. The tour will reappear there and explain the password.'},
+        {page:'games',selector:'#pass-field',title:'Cosmic Entry',text:'This is the Cosmic entry password. Make sure you can remember your password so you can get back into the games area when you need it.'},
     {page:'games',selector:'#cosmic-account',title:'Cosmic Accounts',text:'After entering Cosmic, this account button opens your local profile tools. You can create or log in to an account here. Make sure you can remember your account password.'},
     {page:'games',selector:'#cosmic-daily-quest',title:'Cosmic Daily Quest',text:'Daily Quest gives you a rotating reason to come back, such as trying a game you have not opened or improving a previous run.'},
     {page:'games',selector:'#cosmic-smart-pick',title:'Pick for Me',text:'Pick for Me uses local history, favorites, and your recent activity to recommend something to play so the library feels easier to explore.'},
@@ -49,13 +50,15 @@
   ];
 
   const findStepForPage=step=>{
-    if(step.page==='command' && isCommandCenter)return true;
+    if(step.page==='command' && isCommandCenter && !isCloakShell)return true;
+    if(step.page==='cloak' && isCloakShell)return true;
     if(step.page==='settings' && isSettings)return true;
     if(step.page==='games' && isGames)return true;
     if(step.page==='game' && isGameShell)return true;
     return false;
   };
 
+  function stepIndex(title){return steps.findIndex(s=>s.title===title);}
   function getCurrentStep(){
     let i=Math.max(0,Math.min(steps.length-1,Number(state.step)||0));
     for(let n=0;n<steps.length;n++){
@@ -149,8 +152,13 @@
       state.active=false;state.awaitingEntry=false;saveState(state);removeTour();return;
     }
     const targetPage=steps[next].page;
-    if((targetPage==='command'&&!isCommandCenter)||(targetPage==='settings'&&!isSettings)||(targetPage==='games'&&!isGames)||(targetPage==='game'&&!isGameShell)){
+    if((targetPage==='command'&&(!isCommandCenter||isCloakShell))||(targetPage==='cloak'&&!isCloakShell)||(targetPage==='settings'&&!isSettings)||(targetPage==='games'&&!isGames)||(targetPage==='game'&&!isGameShell)){
       state.step=next;state.active=true;saveState(state);
+      if(targetPage==='cloak'){
+        // Do not navigate directly into a cloak URL from the tour. The highlighted
+        // About:Blank button is responsible for creating the real cloaked tab.
+        return setTimeout(position,80);
+      }
       const target=targetPage==='command'?base:targetPage==='settings'?base+'settings/settings.html':targetPage==='games'?base+'pages/lessons/lessons.html':base+'pages/lessons/game-shell.html';
       location.href=target;
       return;
@@ -161,43 +169,54 @@
   function bindSpecialClicks(){
     document.addEventListener('click',event=>{
       if(!state.active)return;
-      const target=event.target.closest?.('#cc-dashboard,[data-action="settings"],#backButton,.play-btn');
+      const target=event.target.closest?.('#cc-dashboard,#cc-blank,[data-action="settings"],#backButton,.play-btn');
       if(!target)return;
-      const current=getCurrentStep();
-      if(current<0)return;
 
       if(target.id==='cc-dashboard'){
         state.awaitingEntry=true;
-        state.step=10;
+        state.step=stepIndex('Cosmic Entry');
+        state.active=true;
+        saveState(state);
+        removeTour();
+        return;
+      }
+
+      if(target.id==='cc-blank'){
+        state.step=stepIndex('Cosmic Dashboard');
+        state.active=true;
+        state.awaitingEntry=false;
         saveState(state);
         removeTour();
         return;
       }
 
       if(target.matches('[data-action="settings"]')){
-        const settingsIndex=steps.findIndex(s=>s.page==='settings');
+        const settingsIndex=stepIndex('Tab Cloak');
         if(settingsIndex>=0){state.step=settingsIndex;state.active=true;saveState(state);}
         return;
       }
 
       if(target.id==='backButton' && isSettings){
-        state.step=10;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        state.step=stepIndex('Open the Cosmic Cloak');
         state.active=true;
+        state.awaitingEntry=false;
         saveState(state);
+        location.href=base;
         return;
       }
 
       if(target.classList.contains('play-btn') && isGames){
-        const gameIndex=steps.findIndex(s=>s.page==='game' && s.title==='Home button');
+        const gameIndex=stepIndex('Home button');
         if(gameIndex>=0){state.step=gameIndex;state.active=true;saveState(state);}
       }
     },true);
 
     window.addEventListener('cosmic-entry-ready',()=>{
-      if(!state.active && !state.awaitingEntry)return;
       if(state.awaitingEntry){
         state.awaitingEntry=false;
-        state.step=10;
+        state.step=stepIndex('Cosmic Accounts');
         state.active=true;
         saveState(state);
         setTimeout(position,200);
@@ -221,7 +240,7 @@
 
   // If the user has not yet entered Cosmic, show the password step while the gate is visible.
   if(isGames && state.awaitingEntry){
-    state.step=9;
+    state.step=stepIndex('Cosmic Entry');
     state.active=true;
     saveState(state);
   }

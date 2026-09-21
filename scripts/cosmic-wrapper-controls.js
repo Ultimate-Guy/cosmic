@@ -9,7 +9,7 @@
   if(window.__COSMIC_WRAPPER_CONTROLS__)return;
   window.__COSMIC_WRAPPER_CONTROLS__=true;
 
-  const frame=document.querySelector('#game,#appframe');
+  const frame=document.querySelector('#game,#appframe,#unity-canvas,canvas');
   if(!frame)return;
 
   const wrap=document.createElement('div');

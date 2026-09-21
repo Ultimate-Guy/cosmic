@@ -7,28 +7,7 @@
 <html xmlns='https://www.w3.org/1999/xhtml' lang='' xml:lang=''>
 
 <head>
-<script id="cosmic-game-runtime-loader">
-(() => {
-  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
-  const files = [
-    'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v3',
-    'scripts/cosmic-global-state.js?v=global-state',
-    'scripts/cosmic-dev-tools.js?build=dev-commands'
-  ];
-  const add = (file) => {
-    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
-    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
-    const script = document.createElement('script');
-    script.dataset.cosmicRuntime = key;
-    script.src = root + file;
-    (document.head || document.documentElement).appendChild(script);
-  };
-  files.forEach(add);
-})();
-</script>
-
-	<meta name="robots" content="noindex,nofollow" />
+<meta name="robots" content="noindex,nofollow" />
 	<meta charset='utf-8' />
   <base href="https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@027a7fc4b20820dc401547a74cf4f2ee875cd3e2/super%20liquid%20soccer/"
 	<meta name='viewport' content='width=device-width, user-scalable=no' />
@@ -331,6 +310,9 @@
 		}
 //]]>
 		</script>
+
+<script src="../../scripts/game-guard.js?v=guard"></script>
+<script src="../../scripts/cosmic-dev-tools.js?build=dev-commands"></script>
 </body>
 
 </html>

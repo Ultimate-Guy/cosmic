@@ -5,26 +5,6 @@
 
 
 <html style="height: 100%;"><head>
-<script id="cosmic-game-runtime-loader">
-(() => {
-  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
-  const files = [
-    'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v3',
-    'scripts/cosmic-global-state.js?v=global-state',
-    'scripts/cosmic-dev-tools.js?build=dev-commands'
-  ];
-  const add = (file) => {
-    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
-    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
-    const script = document.createElement('script');
-    script.dataset.cosmicRuntime = key;
-    script.src = root + file;
-    (document.head || document.documentElement).appendChild(script);
-  };
-  files.forEach(add);
-})();
-</script>
 <script src="//www.google.com/jsapi"></script><script>window.parent.maeExportApis_();</script>
 
 
@@ -77,3 +57,6 @@
     <script src="https://284711640-164027483921740274.preview.editmysite.com/uploads/b/139890129-601329693740539694/files/js/ScenePlayoffBracket.js"></script>
     <script src="https://284711640-164027483921740274.preview.editmysite.com/uploads/b/139890129-601329693740539694/files/js/SceneGameOver.js"></script>
     <script src="https://284711640-164027483921740274.preview.editmysite.com/uploads/b/139890129-601329693740539694/files/js/4.js"></script>
+
+<script src="../../scripts/game-guard.js?v=guard"></script>
+<script src="../../scripts/cosmic-dev-tools.js?build=dev-commands"></script>

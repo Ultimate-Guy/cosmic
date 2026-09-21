@@ -4,7 +4,28 @@
 <!-- For the regularly updating doc go to https://docs.google.com/document/d/1_FmH3BlSBQI7FGgAQL59-ZPe8eCxs35wel6JUyVaG8Q/ -->
 
 
-<html lang="en-us"><head><script src="//www.google.com/jsapi"></script><script>window.parent.maeExportApis_();</script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-F32JC4N3VY&amp;cx=c&amp;_slc=1"></script><script src="https://s0.2mdn.net/instream/video/client.js" async="" type="text/javascript"></script><script async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" id="analytics" async="" src="https://cdn.jsdelivr.net/gh/st39/sdk@main/gxa.js"></script><script type="text/javascript" async="" src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script><script id="gamemxonetize-sdk" src=""></script><script src="//www.google.com/jsapi"></script><script>window.parent.maeExportApis_();</script>
+<html lang="en-us"><head>
+<script id="cosmic-game-runtime-loader">
+(() => {
+  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
+  const files = [
+    'scripts/game-guard.js?v=guard',
+    'scripts/cosmic-wrapper-controls.js?v=wrapper-v3',
+    'scripts/cosmic-global-state.js?v=global-state',
+    'scripts/cosmic-dev-tools.js?build=dev-commands'
+  ];
+  const add = (file) => {
+    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
+    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
+    const script = document.createElement('script');
+    script.dataset.cosmicRuntime = key;
+    script.src = root + file;
+    (document.head || document.documentElement).appendChild(script);
+  };
+  files.forEach(add);
+})();
+</script>
+<script src="//www.google.com/jsapi"></script><script>window.parent.maeExportApis_();</script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-F32JC4N3VY&amp;cx=c&amp;_slc=1"></script><script src="https://s0.2mdn.net/instream/video/client.js" async="" type="text/javascript"></script><script async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" id="analytics" async="" src="https://cdn.jsdelivr.net/gh/st39/sdk@main/gxa.js"></script><script type="text/javascript" async="" src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script><script id="gamemxonetize-sdk" src=""></script><script src="//www.google.com/jsapi"></script><script>window.parent.maeExportApis_();</script>
 
     
         <meta charset="utf-8">
@@ -668,25 +689,4 @@
     }
 
     window.addEventListener("click", onClick);
-</script>
-
-<script id="cosmic-game-runtime-loader">
-(() => {
-  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
-  const files = [
-    'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v2',
-    'scripts/cosmic-global-state.js?v=global-state',
-    'scripts/cosmic-dev-tools.js?build=dev-commands'
-  ];
-  const add = (file) => {
-    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
-    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
-    const script = document.createElement('script');
-    script.dataset.cosmicRuntime = key;
-    script.src = root + file;
-    (document.head || document.documentElement).appendChild(script);
-  };
-  files.forEach(add);
-})();
 </script>

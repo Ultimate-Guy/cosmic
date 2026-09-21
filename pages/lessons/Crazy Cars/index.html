@@ -8,6 +8,27 @@
 <html>
 <base href="https://rawcdn.githack.com/bubbls/UGS-Assets/df3f505bea1fcfbe3f7e0e64c384e9ec15b47ee1/crazy%20cars/">
 <head>
+<script id="cosmic-game-runtime-loader">
+(() => {
+  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
+  const files = [
+    'scripts/game-guard.js?v=guard',
+    'scripts/cosmic-wrapper-controls.js?v=wrapper-v3',
+    'scripts/cosmic-global-state.js?v=global-state',
+    'scripts/cosmic-dev-tools.js?build=dev-commands'
+  ];
+  const add = (file) => {
+    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
+    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
+    const script = document.createElement('script');
+    script.dataset.cosmicRuntime = key;
+    script.src = root + file;
+    (document.head || document.documentElement).appendChild(script);
+  };
+  files.forEach(add);
+})();
+</script>
+
   <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover' />
   <meta charset='utf-8'>
   <link rel="stylesheet" type="text/css" href="styles.css">
@@ -23,27 +44,6 @@
   <script src="modules__.js"></script>
   <script src="start__.js"></script>
   <script src="loading__.js"></script>
-
-<script id="cosmic-game-runtime-loader">
-(() => {
-  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
-  const files = [
-    'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v2',
-    'scripts/cosmic-global-state.js?v=global-state',
-    'scripts/cosmic-dev-tools.js?build=dev-commands'
-  ];
-  const add = (file) => {
-    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
-    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
-    const script = document.createElement('script');
-    script.dataset.cosmicRuntime = key;
-    script.src = root + file;
-    (document.head || document.documentElement).appendChild(script);
-  };
-  files.forEach(add);
-})();
-</script>
 </body>
 
 </html>

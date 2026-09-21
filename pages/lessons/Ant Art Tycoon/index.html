@@ -1,26 +1,12 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ant Art Tycoon</title>
-  <style>
-    html,body,iframe{width:100%;height:100%;margin:0;border:0;background:#000}
-  </style>
-</head>
-<body>
-  <iframe
-    src="https://drive.google.com/file/d/1EuABId80cKq1-FbHd8SO2j-p9d3mzDUC/preview"
-    title="Ant Art Tycoon"
-    allow="autoplay; fullscreen; gamepad; clipboard-read; clipboard-write"
-    allowfullscreen></iframe>
-
 <script id="cosmic-game-runtime-loader">
 (() => {
   const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
   const files = [
     'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v2',
+    'scripts/cosmic-wrapper-controls.js?v=wrapper-v3',
     'scripts/cosmic-global-state.js?v=global-state',
     'scripts/cosmic-dev-tools.js?build=dev-commands'
   ];
@@ -35,5 +21,19 @@
   files.forEach(add);
 })();
 </script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ant Art Tycoon</title>
+  <style>
+    html,body,iframe{width:100%;height:100%;margin:0;border:0;background:#000}
+  </style>
+</head>
+<body>
+  <iframe
+    src="https://drive.google.com/file/d/1EuABId80cKq1-FbHd8SO2j-p9d3mzDUC/preview"
+    title="Ant Art Tycoon"
+    allow="autoplay; fullscreen; gamepad; clipboard-read; clipboard-write"
+    allowfullscreen></iframe>
 </body>
 </html>

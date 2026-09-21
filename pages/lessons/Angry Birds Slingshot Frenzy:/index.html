@@ -5,6 +5,27 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script id="cosmic-game-runtime-loader">
+(() => {
+  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
+  const files = [
+    'scripts/game-guard.js?v=guard',
+    'scripts/cosmic-wrapper-controls.js?v=wrapper-v3',
+    'scripts/cosmic-global-state.js?v=global-state',
+    'scripts/cosmic-dev-tools.js?build=dev-commands'
+  ];
+  const add = (file) => {
+    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
+    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
+    const script = document.createElement('script');
+    script.dataset.cosmicRuntime = key;
+    script.src = root + file;
+    (document.head || document.documentElement).appendChild(script);
+  };
+  files.forEach(add);
+})();
+</script>
+
 <meta charset="UTF-8">
 <title>Angry Birds Slingshot Frenzy</title>
 <meta name="Title" content="Angry Birds Slingshot Frenzy">
@@ -101,26 +122,5 @@ Node.prototype.insertBefore = function(node, ref) {
 <script src="https://cdn.jsdelivr.net/gh/UGBONTOP/firebaseport-angrybirds-remaster/c2runtime.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/UGBONTOP/firebaseport-angrybirds-remaster/start.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/UGBONTOP/firebaseport-angrybirds-remaster/register-sw.js"></script>
-
-<script id="cosmic-game-runtime-loader">
-(() => {
-  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
-  const files = [
-    'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v2',
-    'scripts/cosmic-global-state.js?v=global-state',
-    'scripts/cosmic-dev-tools.js?build=dev-commands'
-  ];
-  const add = (file) => {
-    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
-    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
-    const script = document.createElement('script');
-    script.dataset.cosmicRuntime = key;
-    script.src = root + file;
-    (document.head || document.documentElement).appendChild(script);
-  };
-  files.forEach(add);
-})();
-</script>
 </body>
 </html>

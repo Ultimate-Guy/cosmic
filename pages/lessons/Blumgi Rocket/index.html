@@ -7,6 +7,27 @@
 
 
 <html><head>
+<script id="cosmic-game-runtime-loader">
+(() => {
+  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
+  const files = [
+    'scripts/game-guard.js?v=guard',
+    'scripts/cosmic-wrapper-controls.js?v=wrapper-v3',
+    'scripts/cosmic-global-state.js?v=global-state',
+    'scripts/cosmic-dev-tools.js?build=dev-commands'
+  ];
+  const add = (file) => {
+    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
+    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
+    const script = document.createElement('script');
+    script.dataset.cosmicRuntime = key;
+    script.src = root + file;
+    (document.head || document.documentElement).appendChild(script);
+  };
+  files.forEach(add);
+})();
+</script>
+
 <base href="https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@main/blumgi-rocket/">
 <style>
 canvas{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;outline:0;-webkit-tap-highlight-color:rgba(255,255,255,0)}
@@ -222,25 +243,4 @@ body{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none
 <script type="module" src="scripts/c3runtime.js"></script> 
 <script type="module" src="scripts/project/main2.js"></script>
 <script type="module" src="scripts/project/scriptsInEvents.js"></script>
-
-<script id="cosmic-game-runtime-loader">
-(() => {
-  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
-  const files = [
-    'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v2',
-    'scripts/cosmic-global-state.js?v=global-state',
-    'scripts/cosmic-dev-tools.js?build=dev-commands'
-  ];
-  const add = (file) => {
-    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
-    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
-    const script = document.createElement('script');
-    script.dataset.cosmicRuntime = key;
-    script.src = root + file;
-    (document.head || document.documentElement).appendChild(script);
-  };
-  files.forEach(add);
-})();
-</script>
 </body></html>

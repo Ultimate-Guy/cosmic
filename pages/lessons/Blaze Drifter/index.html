@@ -2,6 +2,27 @@
 <html>
     <base href = "https://cdn.jsdelivr.net/gh/cooldude2349/everything@main/blazedrift/">
 <head>
+<script id="cosmic-game-runtime-loader">
+(() => {
+  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
+  const files = [
+    'scripts/game-guard.js?v=guard',
+    'scripts/cosmic-wrapper-controls.js?v=wrapper-v3',
+    'scripts/cosmic-global-state.js?v=global-state',
+    'scripts/cosmic-dev-tools.js?build=dev-commands'
+  ];
+  const add = (file) => {
+    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
+    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
+    const script = document.createElement('script');
+    script.dataset.cosmicRuntime = key;
+    script.src = root + file;
+    (document.head || document.documentElement).appendChild(script);
+  };
+  files.forEach(add);
+})();
+</script>
+
 <meta charset="UTF-8"/>
 <title>Blaze Drifter</title>
 <style type="text/css">
@@ -94,26 +115,5 @@
   <!--<script type="text/javascript" src="main.js"></script>-->
   <script src="poki-sdk-edit3.js"></script>
   <script async="false" type="text/javascript" src="moonbird.js"></script>
-
-<script id="cosmic-game-runtime-loader">
-(() => {
-  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
-  const files = [
-    'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v2',
-    'scripts/cosmic-global-state.js?v=global-state',
-    'scripts/cosmic-dev-tools.js?build=dev-commands'
-  ];
-  const add = (file) => {
-    const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
-    if (document.querySelector('[data-cosmic-runtime="' + key + '"]')) return;
-    const script = document.createElement('script');
-    script.dataset.cosmicRuntime = key;
-    script.src = root + file;
-    (document.head || document.documentElement).appendChild(script);
-  };
-  files.forEach(add);
-})();
-</script>
 </body>
 </html>

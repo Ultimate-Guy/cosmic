@@ -180,8 +180,9 @@
       }
 
       if(target.id==='backButton' && isSettings){
-        const next=steps.findIndex(s=>s.page==='games' && s.title==='Cosmic Accounts');
-        if(next>=0){state.step=next;state.active=true;saveState(state);}
+        state.step=1;
+        state.active=true;
+        saveState(state);
         return;
       }
 

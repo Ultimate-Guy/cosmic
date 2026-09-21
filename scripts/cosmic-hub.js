@@ -19,6 +19,7 @@
   let bootStarted = false;
   let bootRetry = null;
   const base = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
+  const GAME_ORIGIN = 'https://cosmicv2.v75ultimate.workers.dev';
   const apiBase = location.origin;
   const safe = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const load = (k, fallback) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fallback; } catch (_) { return fallback; } };
@@ -75,7 +76,11 @@
   function detailModal(item,launch){const p=profile(),id=itemId(item),s=p.stats[id]||{},note=p.notes[id]||'';const m=openModal('cosmic-detail','',`<div class="cosmic-stat"><b>${safe(item.name)}</b><br/><small>${safe(item.kind)} • ${safe(item.category||inferCategory(item))}</small></div><label>Personal note<textarea id="cd-note" rows="3" placeholder="e.g. use for math">${safe(note)}</textarea></label>${item.kind==='game'?`<label>Last score<input id="cd-score" value="${safe(s.lastScore||'')}" inputmode="numeric" placeholder="Optional"></label><label>High score<input id="cd-high" value="${safe(s.highScore||'')}" inputmode="numeric" placeholder="Optional"></label>`:''}<p>Opened ${s.opens||0} time(s).</p><button class="cosmic-primary" id="cd-save">Save</button><button id="cd-launch">Open</button>`);m.querySelector('#cd-save').onclick=()=>{const q=profile();q.notes[id]=m.querySelector('#cd-note').value.slice(0,500);q.stats[id]=q.stats[id]||{};if(item.kind==='game'){q.stats[id].lastScore=m.querySelector('#cd-score').value.slice(0,40);q.stats[id].highScore=m.querySelector('#cd-high').value.slice(0,40);}writeProfile(q);m.style.display='none';};m.querySelector('#cd-launch').onclick=()=>{recordOpen(item);location.href=launch;};}
   function buildItemData(){return [...games.map(x=>normalize({...x,kind:'game'})),...apps.map(x=>normalize({...x,kind:'app'}))];}
   let allItems=[];function itemById(id){return allItems.find(x=>itemId(x)===id);}function renderMini(item){const b=document.createElement('button');b.className='cosmic-mini';b.type='button';b.innerHTML=`<b>${safe(item.name)}</b><small>${safe(item.category)}</small>`;b.onclick=()=>previewDrawer(item);return b;}
-  function gameTarget(item){return new URL(base+'pages/lessons/game-shell.html?game='+encodeURIComponent(new URL(item.path+(item.entry||''),location.href).href),location.origin).href;}
+  function gameTarget(item){
+    const pathPart=String(item.path||'').replace(/^\.?\//,'');
+    const target=new URL(GAME_ORIGIN+'/'+pathPart+(item.entry||''));
+    return new URL(base+'pages/lessons/game-shell.html?game='+encodeURIComponent(target.href),location.origin).href;
+  }
   function appTarget(item){const u=new URL(base+'apps/app.html',location.origin);u.searchParams.set('url',item.path+(item.entry||''));u.searchParams.set('name',item.name||'Cosmic App');return u.href;}
   function launchTarget(item){return item.kind==='game'?gameTarget(item):appTarget(item);}
   function renderHubSections(){const host=document.getElementById('cosmic-hub-tools');if(!host)return;const p=profile();host.querySelectorAll('.cosmic-dynamic').forEach(x=>x.remove());const pinned=p.favorites.map(itemById).filter(Boolean),recent=p.recent.map(itemById).filter(Boolean);const add=(title,list)=>{if(!list.length)return;const s=document.createElement('section');s.className='cosmic-section cosmic-dynamic';s.innerHTML=`<h3>${title}</h3>`;const r=document.createElement('div');r.className='cosmic-row';list.forEach(x=>r.appendChild(renderMini(x)));s.appendChild(r);host.appendChild(s);};add('★ Pinned',pinned);add('↻ Recently Played / Opened',recent);}

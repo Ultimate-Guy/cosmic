@@ -745,102 +745,3687 @@
     "featured": false
   },
   {
-    "name": "OvO",
+    "name": "1 DATE DANGER",
     "path": "",
     "category": "Arcade",
     "tags": [
-      "platformer",
-      "cosmicgames"
+      "cosmicgames",
+      "external"
     ],
     "featured": false,
-    "externalUrl": "https://cdn.jsdelivr.net/gh/Replku/Ovo@2b17271c24535b96a49c4d1b9f64cd998aa2d060/"
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/653-f.html",
+    "sourcePath": "653-f.html"
   },
   {
-    "name": "Temple Run 2",
+    "name": "17bucks",
     "path": "",
     "category": "Arcade",
     "tags": [
-      "runner",
-      "cosmicgames"
+      "cosmicgames",
+      "external"
     ],
     "featured": false,
-    "externalUrl": "https://cdn.jsdelivr.net/gh/taskmaster773/google-class/temple-run-2/"
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/498.html",
+    "sourcePath": "498.html"
   },
   {
-    "name": "WebOsu 2.0!",
+    "name": "8 Ball Billiards Classic",
     "path": "",
-    "category": "Rhythm",
+    "category": "Arcade",
     "tags": [
-      "rhythm",
-      "cosmicgames"
+      "cosmicgames",
+      "external"
     ],
     "featured": false,
-    "externalUrl": "https://cdn.jsdelivr.net/gh/MartinMMCyt/osu@65e500d1cb100306acbfeffb310c84294da933c4/"
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/146.html",
+    "sourcePath": "146.html"
+  },
+  {
+    "name": "A Game About Feeding A Black Hole",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/719-f.html",
+    "sourcePath": "719-f.html"
+  },
+  {
+    "name": "ABaF",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/258.html",
+    "sourcePath": "258.html"
+  },
+  {
+    "name": "Abandoned",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/432.html",
+    "sourcePath": "432.html"
+  },
+  {
+    "name": "Adventure Drivers",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/443-f.html",
+    "sourcePath": "443-f.html"
+  },
+  {
+    "name": "Angry Birds Chrome",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/316.html",
+    "sourcePath": "316.html"
+  },
+  {
+    "name": "AttackHole",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/13.html",
+    "sourcePath": "13.html"
+  },
+  {
+    "name": "autumn_webfishing_main",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/423-f.html",
+    "sourcePath": "423-f.html"
+  },
+  {
+    "name": "Bad Ice Cream",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/269-f.html",
+    "sourcePath": "269-f.html"
+  },
+  {
+    "name": "Bad Ice Cream 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/270-f.html",
+    "sourcePath": "270-f.html"
+  },
+  {
+    "name": "Bad Ice Cream 3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/271-f.html",
+    "sourcePath": "271-f.html"
+  },
+  {
+    "name": "Baldi's Basics",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/65-fixed.html",
+    "sourcePath": "65-fixed.html"
+  },
+  {
+    "name": "Ball Blast HTML5",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/149.html",
+    "sourcePath": "149.html"
+  },
+  {
+    "name": "BART BLAST (INDEV VERSION)",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/740-f.html",
+    "sourcePath": "740-f.html"
+  },
+  {
+    "name": "bartbash",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/775.html",
+    "sourcePath": "775.html"
+  },
+  {
+    "name": "Basketball Stars",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/272-ff.html",
+    "sourcePath": "272-ff.html"
+  },
+  {
+    "name": "beatblock",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/787.html",
+    "sourcePath": "787.html"
+  },
+  {
+    "name": "BERGENTRUCK_201X",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/455-f.html",
+    "sourcePath": "455-f.html"
+  },
+  {
+    "name": "Big Tower Tiny Square 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/170.html",
+    "sourcePath": "170.html"
+  },
+  {
+    "name": "Blockpost",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/273.html",
+    "sourcePath": "273.html"
+  },
+  {
+    "name": "Bob's Onslaught",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/618.html",
+    "sourcePath": "618.html"
+  },
+  {
+    "name": "BopCity",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/497.html",
+    "sourcePath": "497.html"
+  },
+  {
+    "name": "Bottle Jump 3D",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/30.html",
+    "sourcePath": "30.html"
+  },
+  {
+    "name": "Bouncemasters",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/437.html",
+    "sourcePath": "437.html"
+  },
+  {
+    "name": "Bowmasters",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/0.html",
+    "sourcePath": "0.html"
+  },
+  {
+    "name": "BreakLock",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/753.html",
+    "sourcePath": "753.html"
+  },
+  {
+    "name": "Candy Crush",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/171.html",
+    "sourcePath": "171.html"
+  },
+  {
+    "name": "Cannon Balls 3D",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/150.html",
+    "sourcePath": "150.html"
+  },
+  {
+    "name": "Cat Connection - V2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/536.html",
+    "sourcePath": "536.html"
+  },
+  {
+    "name": "CelesteWasm",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/623-work.html",
+    "sourcePath": "623-work.html"
+  },
+  {
+    "name": "Cell Machine",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/730.html",
+    "sourcePath": "730.html"
   },
   {
     "name": "Chess Classic",
     "path": "",
     "category": "Puzzle",
     "tags": [
-      "chess",
-      "cosmicgames"
+      "cosmicgames",
+      "external"
     ],
     "featured": false,
-    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/chess-classic/"
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/151.html",
+    "sourcePath": "151.html"
   },
   {
-    "name": "Flappy Dunk",
+    "name": "Chiikawa Puzzle",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/539.html",
+    "sourcePath": "539.html"
+  },
+  {
+    "name": "circloO",
     "path": "",
     "category": "Arcade",
     "tags": [
-      "arcade",
-      "cosmicgames"
+      "cosmicgames",
+      "external"
     ],
     "featured": false,
-    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/flappy%20dunk/"
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/274-f.html",
+    "sourcePath": "274-f.html"
+  },
+  {
+    "name": "circloO 2 Unblocked - ubg235 Poki",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/275.html",
+    "sourcePath": "275.html"
+  },
+  {
+    "name": "Class of '09",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/259-f.html",
+    "sourcePath": "259-f.html"
+  },
+  {
+    "name": "Clickteam Fusion Developer 2.5+ HTML5 Runtime",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/704-fix.html",
+    "sourcePath": "704-fix.html"
+  },
+  {
+    "name": "ColorWaterSort3D",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/15.html",
+    "sourcePath": "15.html"
+  },
+  {
+    "name": "CoolGames",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/147.html",
+    "sourcePath": "147.html"
+  },
+  {
+    "name": "Core Ball, Level 4",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/83-f.html",
+    "sourcePath": "83-f.html"
+  },
+  {
+    "name": "Crazy Cars! Unblocked",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/331.html",
+    "sourcePath": "331.html"
+  },
+  {
+    "name": "CrazyCattle3D",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/164-temp.html",
+    "sourcePath": "164-temp.html"
+  },
+  {
+    "name": "CrazyChicken3D",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/255.html",
+    "sourcePath": "255.html"
+  },
+  {
+    "name": "CrazyKitty3D",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/256.html",
+    "sourcePath": "256.html"
+  },
+  {
+    "name": "Created with GameMaker Studio 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/519-f.html",
+    "sourcePath": "519-f.html"
+  },
+  {
+    "name": "Created with GameMaker: Studio",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/522-f.html",
+    "sourcePath": "522-f.html"
+  },
+  {
+    "name": "Crossy Road",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/24.html",
+    "sourcePath": "24.html"
+  },
+  {
+    "name": "Cruelty Squad",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/825.html",
+    "sourcePath": "825.html"
+  },
+  {
+    "name": "Dadish",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/357.html",
+    "sourcePath": "357.html"
+  },
+  {
+    "name": "Dadish 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/355.html",
+    "sourcePath": "355.html"
+  },
+  {
+    "name": "Dadish 3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/356.html",
+    "sourcePath": "356.html"
+  },
+  {
+    "name": "DEAD PLATE",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/462-f.html",
+    "sourcePath": "462-f.html"
+  },
+  {
+    "name": "Death Run 3D",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/211-f.html",
+    "sourcePath": "211-f.html"
+  },
+  {
+    "name": "Desmos",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/556.html",
+    "sourcePath": "556.html"
+  },
+  {
+    "name": "Dig Deep",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/32.html",
+    "sourcePath": "32.html"
+  },
+  {
+    "name": "Do NOT Take This Cat Home",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/193-f.html",
+    "sourcePath": "193-f.html"
+  },
+  {
+    "name": "Dogeminer",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/511.html",
+    "sourcePath": "511.html"
+  },
+  {
+    "name": "doom 3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/626-f.html",
+    "sourcePath": "626-f.html"
+  },
+  {
+    "name": "Dragon Vs Bricks",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/210-f.html",
+    "sourcePath": "210-f.html"
+  },
+  {
+    "name": "Draw the Hill",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/209-f.html",
+    "sourcePath": "209-f.html"
+  },
+  {
+    "name": "Dreadhead Parkour",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/310.html",
+    "sourcePath": "310.html"
+  },
+  {
+    "name": "Drift Boss",
+    "path": "",
+    "category": "Racing",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/276-f.html",
+    "sourcePath": "276-f.html"
+  },
+  {
+    "name": "Eaglercraft 1.12",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/182-f.html",
+    "sourcePath": "182-f.html"
+  },
+  {
+    "name": "EaglercraftX 1.8",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/181-f.html",
+    "sourcePath": "181-f.html"
+  },
+  {
+    "name": "EasyRPG Player",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/629.html",
+    "sourcePath": "629.html"
+  },
+  {
+    "name": "Elastic Face",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/197.html",
+    "sourcePath": "197.html"
+  },
+  {
+    "name": "EmulatorJS | Demo",
+    "path": "",
+    "category": "Rhythm",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/87-f.html",
+    "sourcePath": "87-f.html"
+  },
+  {
+    "name": "Endless Aethos",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/496.html",
+    "sourcePath": "496.html"
+  },
+  {
+    "name": "Endoparasitic",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/286.html",
+    "sourcePath": "286.html"
+  },
+  {
+    "name": "Endoparasitic2",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/724.html",
+    "sourcePath": "724.html"
+  },
+  {
+    "name": "Escape Road",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/264.html",
+    "sourcePath": "264.html"
+  },
+  {
+    "name": "Escape Road 3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/792-ff.html",
+    "sourcePath": "792-ff.html"
+  },
+  {
+    "name": "Evil Glitch",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/277-f.html",
+    "sourcePath": "277-f.html"
+  },
+  {
+    "name": "Fashion Battle",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/127.html",
+    "sourcePath": "127.html"
+  },
+  {
+    "name": "Fear & Hunger 2: TERMINA",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/794-fixed.html",
+    "sourcePath": "794-fixed.html"
+  },
+  {
+    "name": "Fear Hunger",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/706-fix.html",
+    "sourcePath": "706-fix.html"
+  },
+  {
+    "name": "fih",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/797.html",
+    "sourcePath": "797.html"
+  },
+  {
+    "name": "Fireboy & Watergirl 2 Light Temple",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/88.html",
+    "sourcePath": "88.html"
+  },
+  {
+    "name": "Five Nights at Candy's 1",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/503.html",
+    "sourcePath": "503.html"
+  },
+  {
+    "name": "Five Nights at Candy's 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/504.html",
+    "sourcePath": "504.html"
+  },
+  {
+    "name": "Five Nights at Freddy's 1",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/38-f.html",
+    "sourcePath": "38-f.html"
+  },
+  {
+    "name": "Five Nights at Freddy's 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/39-f.html",
+    "sourcePath": "39-f.html"
+  },
+  {
+    "name": "Five Nights at Freddy's 3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/40-f.html",
+    "sourcePath": "40-f.html"
+  },
+  {
+    "name": "Five Nights at Freddy's 4",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/41-f.html",
+    "sourcePath": "41-f.html"
+  },
+  {
+    "name": "Five Nights at Freddy's 4 Halloween",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/428-f.html",
+    "sourcePath": "428-f.html"
+  },
+  {
+    "name": "Five Nights at Freddy's Pizzeria Simulator",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/191-f.html",
+    "sourcePath": "191-f.html"
+  },
+  {
+    "name": "Five Nights at Freddy's Sister Location",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/185-f.html",
+    "sourcePath": "185-f.html"
+  },
+  {
+    "name": "Five Nights at Freddy's UCN",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/192-f.html",
+    "sourcePath": "192-f.html"
+  },
+  {
+    "name": "Five Nights at Freddy's World",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/190-f.html",
+    "sourcePath": "190-f.html"
+  },
+  {
+    "name": "Five Nights at Shreks Hotel",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/764.html",
+    "sourcePath": "764.html"
+  },
+  {
+    "name": "Five Nights at Winston's",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/204-a.html",
+    "sourcePath": "204-a.html"
+  },
+  {
+    "name": "Flappy Bird Multiplayer",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/129.html",
+    "sourcePath": "129.html"
+  },
+  {
+    "name": "FNF SOFT Online (Friday Night Funkin')",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/509.html",
+    "sourcePath": "509.html"
+  },
+  {
+    "name": "FNF VS Shaggy",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/559.html",
+    "sourcePath": "559.html"
+  },
+  {
+    "name": "FNF: Cyber Sensation (Friday Night Funkin')",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/558.html",
+    "sourcePath": "558.html"
+  },
+  {
+    "name": "ForkNSausage",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/154.html",
+    "sourcePath": "154.html"
+  },
+  {
+    "name": "Friday Night Funkin'",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/474.html",
+    "sourcePath": "474.html"
+  },
+  {
+    "name": "Friday Night Funkin' (FNF) vs Tricky: Version 2, Phase 3 (w/ CHEAT BOT)",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/481.html",
+    "sourcePath": "481.html"
+  },
+  {
+    "name": "Friday Night Funkin' + Hatsune Miku",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/477.html",
+    "sourcePath": "477.html"
+  },
+  {
+    "name": "Friday Night Funkin' Lullaby",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/583.html",
+    "sourcePath": "583.html"
+  },
+  {
+    "name": "Friday Night Funkin' Vs Nonsense",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/644.html",
+    "sourcePath": "644.html"
+  },
+  {
+    "name": "Friday Night Funkin': AKAGE",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/690.html",
+    "sourcePath": "690.html"
+  },
+  {
+    "name": "Friday Night Funkin': Psych Engine",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/484.html",
+    "sourcePath": "484.html"
+  },
+  {
+    "name": "Friday Night Funkin': VS. Mario Ultra Rebooted",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/861.html",
+    "sourcePath": "861.html"
+  },
+  {
+    "name": "Friday Night Funkin\u2019 Sarvente's Mid-Fight Masses",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/480.html",
+    "sourcePath": "480.html"
+  },
+  {
+    "name": "Fruit Ninja",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/261.html",
+    "sourcePath": "261.html"
+  },
+  {
+    "name": "Fundamental Paper Novel",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/746.html",
+    "sourcePath": "746.html"
+  },
+  {
+    "name": "Fused 240",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/722.html",
+    "sourcePath": "722.html"
+  },
+  {
+    "name": "Game",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/375-f.html",
+    "sourcePath": "375-f.html"
+  },
+  {
+    "name": "Game 22417",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/619.html",
+    "sourcePath": "619.html"
+  },
+  {
+    "name": "Game 22445",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/633.html",
+    "sourcePath": "633.html"
+  },
+  {
+    "name": "Game 22456",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/639.html",
+    "sourcePath": "639.html"
+  },
+  {
+    "name": "Game 22808",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/608.html",
+    "sourcePath": "608.html"
+  },
+  {
+    "name": "Game 23776",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/863.html",
+    "sourcePath": "863.html"
+  },
+  {
+    "name": "Game 24781",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/864.html",
+    "sourcePath": "864.html"
+  },
+  {
+    "name": "Game 24790",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/636.html",
+    "sourcePath": "636.html"
+  },
+  {
+    "name": "Game 24807",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/600.html",
+    "sourcePath": "600.html"
+  },
+  {
+    "name": "Game 24859",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/616.html",
+    "sourcePath": "616.html"
+  },
+  {
+    "name": "Game 24882",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/634.html",
+    "sourcePath": "634.html"
+  },
+  {
+    "name": "Game 24899",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/555.html",
+    "sourcePath": "555.html"
+  },
+  {
+    "name": "Game 24919",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/657.html",
+    "sourcePath": "657.html"
+  },
+  {
+    "name": "Game 24949",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/610.html",
+    "sourcePath": "610.html"
+  },
+  {
+    "name": "Game 26556",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/642.html",
+    "sourcePath": "642.html"
+  },
+  {
+    "name": "Game 26642",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/613.html",
+    "sourcePath": "613.html"
+  },
+  {
+    "name": "Game 26947",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/714.html",
+    "sourcePath": "714.html"
+  },
+  {
+    "name": "Game 27060",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/601.html",
+    "sourcePath": "601.html"
+  },
+  {
+    "name": "Game 27062",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/582.html",
+    "sourcePath": "582.html"
+  },
+  {
+    "name": "Game 27400",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/700.html",
+    "sourcePath": "700.html"
+  },
+  {
+    "name": "Game 27472",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/836.html",
+    "sourcePath": "836.html"
+  },
+  {
+    "name": "Games",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/527.html",
+    "sourcePath": "527.html"
+  },
+  {
+    "name": "Geometry Dash",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/27-f.html",
+    "sourcePath": "27-f.html"
+  },
+  {
+    "name": "Gladihoppers",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/4-pf.html",
+    "sourcePath": "4-pf.html"
+  },
+  {
+    "name": "gn code editor",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/429-ff.html",
+    "sourcePath": "429-ff.html"
+  },
+  {
+    "name": "Gobble",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/37-f.html",
+    "sourcePath": "37-f.html"
+  },
+  {
+    "name": "Going Balls",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/332.html",
+    "sourcePath": "332.html"
+  },
+  {
+    "name": "GTA III",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/851.html",
+    "sourcePath": "851.html"
   },
   {
     "name": "Guess Their Answer",
     "path": "",
-    "category": "Puzzle",
+    "category": "Arcade",
     "tags": [
-      "trivia",
-      "cosmicgames"
+      "cosmicgames",
+      "external"
     ],
     "featured": false,
-    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/guess-their-answer/"
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/155.html",
+    "sourcePath": "155.html"
+  },
+  {
+    "name": "Happy Wheels",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/624.html",
+    "sourcePath": "624.html"
   },
   {
     "name": "Harvest.io",
     "path": "",
     "category": "Arcade",
     "tags": [
-      "arcade",
-      "cosmicgames"
+      "cosmicgames",
+      "external"
     ],
     "featured": false,
-    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/harvest-io/"
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/156.html",
+    "sourcePath": "156.html"
   },
   {
     "name": "HCR Lite 1.0",
     "path": "",
     "category": "Racing",
     "tags": [
-      "racing",
-      "cosmicgames"
+      "cosmicgames",
+      "external"
     ],
     "featured": false,
-    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@ed57fd6dbc91143221b05fdf61be73bacc375843/hill-climb-racing-lite/"
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/157.html",
+    "sourcePath": "157.html"
+  },
+  {
+    "name": "Heartbreak Havoc",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/691.html",
+    "sourcePath": "691.html"
+  },
+  {
+    "name": "Hit Single Real",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/483.html",
+    "sourcePath": "483.html"
+  },
+  {
+    "name": "HUMAN EXPENDITURE PROGRAM",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/482-2f.html",
+    "sourcePath": "482-2f.html"
+  },
+  {
+    "name": "I WANNA BE THE GUY: THE GAME: THE MOVIE",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/834.html",
+    "sourcePath": "834.html"
+  },
+  {
+    "name": "Idle breakout",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/362.html",
+    "sourcePath": "362.html"
+  },
+  {
+    "name": "Idle Dice",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/294.html",
+    "sourcePath": "294.html"
+  },
+  {
+    "name": "Idle Lumber Inc",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/363.html",
+    "sourcePath": "363.html"
+  },
+  {
+    "name": "Idle Mining Empire Unblocked - ClassRoom6x",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/364.html",
+    "sourcePath": "364.html"
+  },
+  {
+    "name": "Indie Cross",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/489.html",
+    "sourcePath": "489.html"
+  },
+  {
+    "name": "IRON LUNG",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/705-fix.html",
+    "sourcePath": "705-fix.html"
+  },
+  {
+    "name": "Jelly Mario",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/315.html",
+    "sourcePath": "315.html"
+  },
+  {
+    "name": "Jetpack Joyride",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/7-f.html",
+    "sourcePath": "7-f.html"
+  },
+  {
+    "name": "journey downhill",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/94.html",
+    "sourcePath": "94.html"
+  },
+  {
+    "name": "jumbo mario",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/712-f.html",
+    "sourcePath": "712-f.html"
+  },
+  {
+    "name": "Just Fall",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/365.html",
+    "sourcePath": "365.html"
+  },
+  {
+    "name": "Kitchen Bazar",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/325.html",
+    "sourcePath": "325.html"
+  },
+  {
+    "name": "KittyToy",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/441.html",
+    "sourcePath": "441.html"
+  },
+  {
+    "name": "Lacey's Flash Games",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/463-f.html",
+    "sourcePath": "463-f.html"
+  },
+  {
+    "name": "LETHAL APE",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/793.html",
+    "sourcePath": "793.html"
+  },
+  {
+    "name": "Little Runmo - The Game 1.3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/302.html",
+    "sourcePath": "302.html"
+  },
+  {
+    "name": "Lobotomy Dash Funkin'",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/499.html",
+    "sourcePath": "499.html"
+  },
+  {
+    "name": "Look Outside",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/649.html",
+    "sourcePath": "649.html"
+  },
+  {
+    "name": "Love Letters",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/538.html",
+    "sourcePath": "538.html"
+  },
+  {
+    "name": "Madalin Stunt Cars 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/278.html",
+    "sourcePath": "278.html"
+  },
+  {
+    "name": "Madalin Stunt Cars 3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/279.html",
+    "sourcePath": "279.html"
+  },
+  {
+    "name": "Maze Speedrun",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/324.html",
+    "sourcePath": "324.html"
+  },
+  {
+    "name": "Minecraft",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/754-f.html",
+    "sourcePath": "754-f.html"
+  },
+  {
+    "name": "MinesweeperPlus",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/604-a.html",
+    "sourcePath": "604-a.html"
+  },
+  {
+    "name": "Mob control",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/22.html",
+    "sourcePath": "22.html"
+  },
+  {
+    "name": "Monster Tracks",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/36-f.html",
+    "sourcePath": "36-f.html"
+  },
+  {
+    "name": "Moto X3M 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/97.html",
+    "sourcePath": "97.html"
+  },
+  {
+    "name": "Moto X3M 3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/98.html",
+    "sourcePath": "98.html"
+  },
+  {
+    "name": "Moto X3M Pool Party",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/124.html",
+    "sourcePath": "124.html"
+  },
+  {
+    "name": "MotoX3M 6 Spooky Land",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/99.html",
+    "sourcePath": "99.html"
+  },
+  {
+    "name": "Mountain Bike Racer",
+    "path": "",
+    "category": "Racing",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/774.html",
+    "sourcePath": "774.html"
+  },
+  {
+    "name": "MX OffRoad Mountain Bike",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/116.html",
+    "sourcePath": "116.html"
+  },
+  {
+    "name": "myTeardrop",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/540.html",
+    "sourcePath": "540.html"
+  },
+  {
+    "name": "Nickelodeon",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/528.html",
+    "sourcePath": "528.html"
+  },
+  {
+    "name": "Nijika's Ahoge",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/447-e.html",
+    "sourcePath": "447-e.html"
+  },
+  {
+    "name": "Ninja vs EVILCORP",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/101.html",
+    "sourcePath": "101.html"
+  },
+  {
+    "name": "Om Nom Run",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/328.html",
+    "sourcePath": "328.html"
+  },
+  {
+    "name": "OMORI",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/427-z.html",
+    "sourcePath": "427-z.html"
+  },
+  {
+    "name": "Oneshot Legacy",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/622.html",
+    "sourcePath": "622.html"
+  },
+  {
+    "name": "OneShot: World Machine Edition",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/846.html",
+    "sourcePath": "846.html"
+  },
+  {
+    "name": "Outhold",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/777.html",
+    "sourcePath": "777.html"
+  },
+  {
+    "name": "Overburden",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/760.html",
+    "sourcePath": "760.html"
+  },
+  {
+    "name": "OvO 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/2e.html",
+    "sourcePath": "2e.html"
   },
   {
     "name": "Pac-Man",
     "path": "",
     "category": "Arcade",
     "tags": [
-      "arcade",
-      "cosmicgames"
+      "cosmicgames",
+      "external"
     ],
     "featured": false,
-    "externalUrl": "https://cdn.jsdelivr.net/gh/bubbls/youtube-playables@main/pac-man-superfast/"
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/158.html",
+    "sourcePath": "158.html"
+  },
+  {
+    "name": "Paper.io 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/102.html",
+    "sourcePath": "102.html"
+  },
+  {
+    "name": "Papery Planes",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/280.html",
+    "sourcePath": "280.html"
+  },
+  {
+    "name": "Parking Fury 3D",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/367.html",
+    "sourcePath": "367.html"
+  },
+  {
+    "name": "Parking Rush",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/159.html",
+    "sourcePath": "159.html"
+  },
+  {
+    "name": "PEAK",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/847.html",
+    "sourcePath": "847.html"
+  },
+  {
+    "name": "PI Playables",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/17.html",
+    "sourcePath": "17.html"
+  },
+  {
+    "name": "Pibby Apocalypse",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/541.html",
+    "sourcePath": "541.html"
+  },
+  {
+    "name": "pibby slop",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/525.html",
+    "sourcePath": "525.html"
+  },
+  {
+    "name": "Plague Inc",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/805.html",
+    "sourcePath": "805.html"
+  },
+  {
+    "name": "PMKM",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/650-f.html",
+    "sourcePath": "650-f.html"
+  },
+  {
+    "name": "PortaBoy",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/514-f.html",
+    "sourcePath": "514-f.html"
+  },
+  {
+    "name": "POSTAL: Play FREE on the web",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/617-a.html",
+    "sourcePath": "617-a.html"
+  },
+  {
+    "name": "Pou",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/23.html",
+    "sourcePath": "23.html"
+  },
+  {
+    "name": "Quake III Arena",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/263-f.html",
+    "sourcePath": "263-f.html"
+  },
+  {
+    "name": "Race Master",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/160.html",
+    "sourcePath": "160.html"
+  },
+  {
+    "name": "Ragdoll Hit - Poki",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/44-fix.html",
+    "sourcePath": "44-fix.html"
+  },
+  {
+    "name": "really cool flash game",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/640.html",
+    "sourcePath": "640.html"
+  },
+  {
+    "name": "Recoil Unblocked",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/546.html",
+    "sourcePath": "546.html"
+  },
+  {
+    "name": "Retro Bowl",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/33-ff.html",
+    "sourcePath": "33-ff.html"
+  },
+  {
+    "name": "Retro Bowl College",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/34-fixed.html",
+    "sourcePath": "34-fixed.html"
+  },
+  {
+    "name": "Rio Rex on Silvergames.com",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/643.html",
+    "sourcePath": "643.html"
+  },
+  {
+    "name": "Ruffle Player",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/113.html",
+    "sourcePath": "113.html"
+  },
+  {
+    "name": "Run 3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/177.html",
+    "sourcePath": "177.html"
+  },
+  {
+    "name": "s l o w r o a d s",
+    "path": "",
+    "category": "Racing",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/369.html",
+    "sourcePath": "369.html"
+  },
+  {
+    "name": "sandspiel",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/317.html",
+    "sourcePath": "317.html"
+  },
+  {
+    "name": "Scratch Inc.",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/781.html",
+    "sourcePath": "781.html"
+  },
+  {
+    "name": "Shipo - v10.1",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/306.html",
+    "sourcePath": "306.html"
+  },
+  {
+    "name": "slither.io",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/461-f.html",
+    "sourcePath": "461-f.html"
+  },
+  {
+    "name": "Smash Karts",
+    "path": "",
+    "category": "Racing",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/370-f.html",
+    "sourcePath": "370-f.html"
+  },
+  {
+    "name": "SMB1R",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/736.html",
+    "sourcePath": "736.html"
+  },
+  {
+    "name": "SnowBattle.io",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/207-f.html",
+    "sourcePath": "207-f.html"
+  },
+  {
+    "name": "Soccer Random 1",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/739.html",
+    "sourcePath": "739.html"
+  },
+  {
+    "name": "Sonic 3 A.I.R.",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/550.html",
+    "sourcePath": "550.html"
+  },
+  {
+    "name": "Sonic Legacy",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/486.html",
+    "sourcePath": "486.html"
+  },
+  {
+    "name": "SpelunkyClassicHD",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/635.html",
+    "sourcePath": "635.html"
+  },
+  {
+    "name": "split",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/839.html",
+    "sourcePath": "839.html"
+  },
+  {
+    "name": "Stardew Valley",
+    "path": "",
+    "category": "Rhythm",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/789-fix.html",
+    "sourcePath": "789-fix.html"
+  },
+  {
+    "name": "state.io yt",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/161.html",
+    "sourcePath": "161.html"
+  },
+  {
+    "name": "Stickman Boost",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/372.html",
+    "sourcePath": "372.html"
+  },
+  {
+    "name": "Stickman Climb",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/373.html",
+    "sourcePath": "373.html"
+  },
+  {
+    "name": "Stickman Fight Ragdoll",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/371e.html",
+    "sourcePath": "371e.html"
+  },
+  {
+    "name": "Super Mario 64 on the Web!",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/588.html",
+    "sourcePath": "588.html"
+  },
+  {
+    "name": "Super Stickman Golf",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/374e2.html",
+    "sourcePath": "374e2.html"
+  },
+  {
+    "name": "SUPERHOT",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/233.html",
+    "sourcePath": "233.html"
+  },
+  {
+    "name": "survivor.io",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/709-fixagain2.html",
+    "sourcePath": "709-fixagain2.html"
+  },
+  {
+    "name": "Sushi Roll",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/322.html",
+    "sourcePath": "322.html"
+  },
+  {
+    "name": "Tag",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/627-f.html",
+    "sourcePath": "627-f.html"
+  },
+  {
+    "name": "Tasty Pastry Party",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/530.html",
+    "sourcePath": "530.html"
+  },
+  {
+    "name": "Tattletail",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/607-ef.html",
+    "sourcePath": "607-ef.html"
+  },
+  {
+    "name": "Temple Run 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/10-f.html",
+    "sourcePath": "10-f.html"
+  },
+  {
+    "name": "Terrarium",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/669.html",
+    "sourcePath": "669.html"
+  },
+  {
+    "name": "That's not my neighbor",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/216-f.html",
+    "sourcePath": "216-f.html"
+  },
+  {
+    "name": "The Deadseat",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/458-f.html",
+    "sourcePath": "458-f.html"
+  },
+  {
+    "name": "This minecraft version is broken, use either 1.8 or 1.12 sorry",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/183.html",
+    "sourcePath": "183.html"
+  },
+  {
+    "name": "Three Goblets",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/620.html",
+    "sourcePath": "620.html"
+  },
+  {
+    "name": "Tiny Fishing 1",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/108.html",
+    "sourcePath": "108.html"
+  },
+  {
+    "name": "Tower Crash 3D",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/162.html",
+    "sourcePath": "162.html"
+  },
+  {
+    "name": "traffic racer",
+    "path": "",
+    "category": "Racing",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/707-fixf.html",
+    "sourcePath": "707-fixf.html"
+  },
+  {
+    "name": "TTG - Jump Jousts 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/535.html",
+    "sourcePath": "535.html"
+  },
+  {
+    "name": "Tung Sahur Horror",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/744-a.html",
+    "sourcePath": "744-a.html"
+  },
+  {
+    "name": "Tunnel Rush",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/206-f.html",
+    "sourcePath": "206-f.html"
+  },
+  {
+    "name": "Turbo Stars",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/21.html",
+    "sourcePath": "21.html"
+  },
+  {
+    "name": "Twiddlefinger",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/500.html",
+    "sourcePath": "500.html"
+  },
+  {
+    "name": "Ultrapool",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/757-f.html",
+    "sourcePath": "757-f.html"
+  },
+  {
+    "name": "Unity Web Player | Hungry Lamu 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/799-fix.html",
+    "sourcePath": "799-fix.html"
+  },
+  {
+    "name": "Unity Web Player | Rocket Goal",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/800-fix.html",
+    "sourcePath": "800-fix.html"
+  },
+  {
+    "name": "Unity WebGL Player | A Difficult Game About Climbing",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/672-2.html",
+    "sourcePath": "672-2.html"
+  },
+  {
+    "name": "Unity WebGL Player | AdVenture Capitalist!",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/354-a.html",
+    "sourcePath": "354-a.html"
+  },
+  {
+    "name": "Unity WebGL Player | Apes vs Helium",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/783.html",
+    "sourcePath": "783.html"
+  },
+  {
+    "name": "Unity WebGL Player | Bad Parenting 1",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/166-f.html",
+    "sourcePath": "166-f.html"
+  },
+  {
+    "name": "Unity WebGL Player | Bad Piggies",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/752.html",
+    "sourcePath": "752.html"
+  },
+  {
+    "name": "Unity WebGL Player | CaseOhs Basics in Eating and Fast Food",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/758a.html",
+    "sourcePath": "758a.html"
+  },
+  {
+    "name": "Unity WebGL Player | Cluster Rush",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/81.html",
+    "sourcePath": "81.html"
+  },
+  {
+    "name": "Unity WebGL Player | Fears To Fathom: Home Alone",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/460-f.html",
+    "sourcePath": "460-f.html"
+  },
+  {
+    "name": "Unity WebGL Player | Game Inside a Game",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/729.html",
+    "sourcePath": "729.html"
+  },
+  {
+    "name": "Unity WebGL Player | gg kart",
+    "path": "",
+    "category": "Racing",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/495.html",
+    "sourcePath": "495.html"
+  },
+  {
+    "name": "Unity WebGL Player | gorilla tag web",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/668-fix2.html",
+    "sourcePath": "668-fix2.html"
+  },
+  {
+    "name": "Unity WebGL Player | Granny 3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/852.html",
+    "sourcePath": "852.html"
+  },
+  {
+    "name": "Unity WebGL Player | I woke up next to you again",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/491.html",
+    "sourcePath": "491.html"
+  },
+  {
+    "name": "Unity WebGL Player | Jelly Drift",
+    "path": "",
+    "category": "Racing",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/543-af.html",
+    "sourcePath": "543-af.html"
+  },
+  {
+    "name": "Unity WebGL Player | Karlson",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/542-af.html",
+    "sourcePath": "542-af.html"
+  },
+  {
+    "name": "Unity WebGL Player | LD47",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/521-f.html",
+    "sourcePath": "521-f.html"
+  },
+  {
+    "name": "Unity WebGL Player | Luminous Strike",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/518-f.html",
+    "sourcePath": "518-f.html"
+  },
+  {
+    "name": "Unity WebGL Player | Midnight Shift 1.2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/658.html",
+    "sourcePath": "658.html"
+  },
+  {
+    "name": "Unity WebGL Player | OldCh2RippedTwo",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/215-f.html",
+    "sourcePath": "215-f.html"
+  },
+  {
+    "name": "Unity WebGL Player | Raft",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/457-f.html",
+    "sourcePath": "457-f.html"
+  },
+  {
+    "name": "Unity WebGL Player | RERUN",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/260.html",
+    "sourcePath": "260.html"
+  },
+  {
+    "name": "Unity WebGL Player | Rolling Sky",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/553.html",
+    "sourcePath": "553.html"
+  },
+  {
+    "name": "Unity WebGL Player | Slender",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/451-f.html",
+    "sourcePath": "451-f.html"
+  },
+  {
+    "name": "Unity WebGL Player | Slope Plus",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/198.html",
+    "sourcePath": "198.html"
+  },
+  {
+    "name": "Unity WebGL Player | Sort the Court!",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/346.html",
+    "sourcePath": "346.html"
+  },
+  {
+    "name": "Unity WebGL Player | SpiderDoll",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/347.html",
+    "sourcePath": "347.html"
+  },
+  {
+    "name": "Unity WebGL Player | Station 141",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/452.html",
+    "sourcePath": "452.html"
+  },
+  {
+    "name": "Unity WebGL Player | Stick With It",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/502-fixed.html",
+    "sourcePath": "502-fixed.html"
+  },
+  {
+    "name": "Unity WebGL Player | TheManFromTheWindow",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/459-f.html",
+    "sourcePath": "459-f.html"
+  },
+  {
+    "name": "Unity WebGL Player | WhosYourDaddy",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/791-f.html",
+    "sourcePath": "791-f.html"
+  },
+  {
+    "name": "Vampire Survivors",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/804.html",
+    "sourcePath": "804.html"
+  },
+  {
+    "name": "Vena",
+    "path": "",
+    "category": "Sports",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/838.html",
+    "sourcePath": "838.html"
+  },
+  {
+    "name": "Vex 3",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/47-f.html",
+    "sourcePath": "47-f.html"
+  },
+  {
+    "name": "Vex 3 Xmas",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/48-f.html",
+    "sourcePath": "48-f.html"
+  },
+  {
+    "name": "Vex 4",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/49-f.html",
+    "sourcePath": "49-f.html"
+  },
+  {
+    "name": "Vex 5",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/50-f.html",
+    "sourcePath": "50-f.html"
+  },
+  {
+    "name": "Vex 6",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/51-f.html",
+    "sourcePath": "51-f.html"
+  },
+  {
+    "name": "Vex 7",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/52-f.html",
+    "sourcePath": "52-f.html"
+  },
+  {
+    "name": "Vex 8",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/53-f.html",
+    "sourcePath": "53-f.html"
+  },
+  {
+    "name": "Vex Challenges",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/54-f.html",
+    "sourcePath": "54-f.html"
+  },
+  {
+    "name": "Vex X3M",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/55-f.html",
+    "sourcePath": "55-f.html"
+  },
+  {
+    "name": "Vex X3M 2",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/56-f.html",
+    "sourcePath": "56-f.html"
+  },
+  {
+    "name": "Volley Random",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/786.html",
+    "sourcePath": "786.html"
+  },
+  {
+    "name": "Vs. QT Mod",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/487.html",
+    "sourcePath": "487.html"
+  },
+  {
+    "name": "Web Dashers",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/785-upd3.html",
+    "sourcePath": "785-upd3.html"
+  },
+  {
+    "name": "winter",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/100-f.html",
+    "sourcePath": "100-f.html"
+  },
+  {
+    "name": "Wordle",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/112-fix2.html",
+    "sourcePath": "112-fix2.html"
+  },
+  {
+    "name": "YandereSimulator",
+    "path": "",
+    "category": "Puzzle",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/554-f.html",
+    "sourcePath": "554-f.html"
+  },
+  {
+    "name": "Your Only Move Is HUSTLE",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/776.html",
+    "sourcePath": "776.html"
+  },
+  {
+    "name": "Youtube Playable",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/163.html",
+    "sourcePath": "163.html"
+  },
+  {
+    "name": "Yume Nikki",
+    "path": "",
+    "category": "Arcade",
+    "tags": [
+      "cosmicgames",
+      "external"
+    ],
+    "featured": false,
+    "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/433-f.html",
+    "sourcePath": "433-f.html"
   }
 ]

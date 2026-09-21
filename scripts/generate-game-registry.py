@@ -82,10 +82,26 @@ def clean_game_page(folder):
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script[^>]*src=["\'][^"\']*cosmic-dev-tools\.js[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL)
-    for loader in ('game-guard.js','cosmic-dev-loader.js','cosmic-dev-tools.js'):
+    for loader in ('game-guard.js','cosmic-dev-loader.js','cosmic-dev-tools.js','cosmic-wrapper-controls.js','cosmic-global-state.js'):
         cleaned=re.sub(r'\s*<script[^>]*src=["\'][^"\']*'+re.escape(loader)+r'[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script[^>]*id=["\']cosmic-game-runtime-loader["\'][^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
-    insertion='\n<script src="../../scripts/game-guard.js?v=guard"></script>\n<script src="../../scripts/cosmic-dev-tools.js?build=dev-commands"></script>\n'
+    insertion='''\n<script id="cosmic-game-runtime-loader">
+(() => {
+  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
+  const files = [
+    'scripts/game-guard.js?v=guard',
+    'scripts/cosmic-wrapper-controls.js?v=wrapper-v5',
+    'scripts/cosmic-global-state.js?v=global-state-v5',
+    'scripts/cosmic-dev-tools.js?build=dev-commands-v5'
+  ];
+  for (const file of files) {
+    const script = document.createElement('script');
+    script.src = root + file;
+    script.async = false;
+    (document.body || document.documentElement).appendChild(script);
+  }
+})();
+</script>\n'''
     matches=list(re.finditer(r'</body>',cleaned,re.I))
     if matches:
         pos=matches[-1].start()

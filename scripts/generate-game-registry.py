@@ -82,8 +82,9 @@ def clean_game_page(folder):
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script[^>]*src=["\'][^"\']*cosmic-dev-tools\.js[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL)
-    for loader in ('game-guard.js','cosmic-dev-loader.js','cosmic-dev-tools.js'):
+    for loader in ('game-guard.js','cosmic-dev-loader.js','cosmic-dev-tools.js','cosmic-wrapper-controls.js','cosmic-global-state.js'):
         cleaned=re.sub(r'\s*<script[^>]*src=["\'][^"\']*'+re.escape(loader)+r'[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL)
+    cleaned=re.sub(r'\s*<script[^>]*id=["\']cosmic-game-runtime-loader["\'][^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     insertion='''\n<script id="cosmic-game-runtime-loader">
 (() => {
   const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';

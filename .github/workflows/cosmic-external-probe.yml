@@ -1,0 +1,18 @@
+name: Temporary Cosmic game probe
+on:
+  push:
+    branches: ["master"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Probe imported game host
+        run: |
+          set -euxo pipefail
+          echo "=== minigamesville ==="
+          curl -sSIL --max-redirs 5 --max-time 20 https://minigamesville.com/play/100-days/ || true
+          echo "=== game HTML ==="
+          curl -sSL --max-redirs 5 --max-time 20 https://minigamesville.com/play/100-days/ | head -c 5000 || true

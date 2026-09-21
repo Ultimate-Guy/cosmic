@@ -157,12 +157,26 @@
     });
   }
 
+  function ensureControlsFallback() {
+    if (!document.body || document.getElementById('cosmic-wrapper-controls')) return;
+    const wrap=document.createElement('div');
+    wrap.id='cosmic-wrapper-controls';
+    wrap.style.cssText='position:fixed;top:12px;right:12px;z-index:2147483647;display:flex;gap:5px;align-items:center;padding:5px;border:1px solid rgba(45,204,255,.24);border-radius:11px;background:rgba(5,14,21,.92);backdrop-filter:blur(8px);box-shadow:0 6px 22px rgba(0,0,0,.5);cursor:grab;user-select:none;touch-action:none;';
+    const mk=(label,title,fn,warning)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.title=title;b.setAttribute('aria-label',title);b.style.cssText='width:34px;height:32px;border:1px solid '+(warning?'#ffb454':'#2dccff')+';border-radius:8px;background:'+(warning?'#241b0e':'#0d1a21')+';color:'+(warning?'#ffc66d':'#2dccff')+';font:700 15px system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.45);';b.onclick=fn;wrap.appendChild(b);};
+    mk('⛶','Fullscreen',()=>document.documentElement.requestFullscreen?.().catch(()=>{}));
+    mk('↻','Reload',()=>location.reload());
+    mk('↗','Pop out',()=>window.open(location.href,'_blank'));
+    mk('⚠','Report this game',()=>window.open('https://docs.google.com/forms/d/e/1FAIpQLSfLFwfXdL_Fk8FGAAXPire3yIPX0qIoj3Ua1dAGQsw4pTb98Q/viewform','_blank'),true);
+    document.body.appendChild(wrap);
+  }
+
   function install() {
     ensureButton();
     ensureRuntimeCompanions();
+    ensureControlsFallback();
     patchFullscreen();
     if (!document.__cosmicHomeObserver) {
-      document.__cosmicHomeObserver = new MutationObserver(() => ensureButton());
+      document.__cosmicHomeObserver = new MutationObserver(() => { ensureButton(); ensureControlsFallback(); });
       document.__cosmicHomeObserver.observe(document.documentElement, { childList: true, subtree: true });
     }
     if (!document.__cosmicFullscreenListenerInstalled) {

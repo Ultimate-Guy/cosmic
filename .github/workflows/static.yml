@@ -166,7 +166,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 deployments list --name cosmicv2
+          npx --yes wrangler@4.135.0 deployments list --name cosmicv2
           python3 - <<'PY'
           import json, os, urllib.request
           expected=os.environ['EXPECTED_COMMIT']

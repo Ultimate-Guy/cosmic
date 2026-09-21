@@ -68,33 +68,23 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
   try{
     const url=new URL(game,location.href);
 
-    // GitHub Pages must run the game as the top-level page. This avoids
-    // cross-origin iframe restrictions and lets the game use its normal
-    // fullscreen/WebGL behavior. The Pages build adds the Home guard to the
-    // game page separately. Cloudflare keeps the existing iframe shell.
-    // Ultrakill is a Unity WebGL build that works reliably as a top-level page,
-    // but other games should remain inside Cosmic's shell so the Home button and
-    // control bar stay attached to the game container.
-    if(/\/Ultrakill\//i.test(url.pathname)){
-      location.replace(url.href);
-      return;
-    }
-
-    if(location.hostname.endsWith('.github.io')){
-      if(url.hostname===workerHost){
-        url.hostname=location.hostname;
-        url.protocol=location.protocol;
-        url.port=location.port;
-      }
-      if(!url.pathname.startsWith('/cosmic/')){
-        url.pathname='/cosmic'+(url.pathname.startsWith('/')?'':'/')+url.pathname;
-      }
+    // Cosmic uses the Cloudflare Worker as the canonical game host on both
+    // GitHub Pages and Cloudflare. The parent Cosmic shell owns the controls,
+    // so games do not need to rewrite their own documents.
+    if(url.hostname===workerHost){
       document.getElementById('game').src=url.href;
-      return;
+    }else if(location.hostname.endsWith('.github.io')){
+      const canonical=new URL(url.href);
+      if(canonical.pathname.startsWith('/cosmic/')){
+        canonical.pathname=canonical.pathname.slice('/cosmic'.length);
+      }
+      canonical.hostname=workerHost;
+      canonical.protocol='https:';
+      canonical.port='';
+      document.getElementById('game').src=canonical.href;
+    }else{
+      document.getElementById('game').src=url.href;
     }
-
-    // Cloudflare keeps the original iframe behavior unchanged.
-    document.getElementById('game').src=url.href;
   }catch(e){location.replace(home);}
 })();
 </script>
@@ -118,9 +108,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     box.style.display='grid';
   }
   if(frame){
-    let loaded=false;
-    frame.addEventListener('load',()=>{loaded=true;setTimeout(()=>{try{if(frame.contentDocument?.body?.innerText?.trim()==='')showRecovery();}catch(_){}} ,2500);});
-    setTimeout(()=>{if(!loaded)showRecovery();},10000);
+    const loading=document.createElement('div');
+    loading.id='cosmic-game-loading';
+    loading.textContent='LOADING GAME…';
+    loading.style.cssText='position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;background:#050b10;color:#2dccff;font:800 15px system-ui,sans-serif;letter-spacing:.12em;pointer-events:none;transition:opacity .18s ease;';
+    document.body.appendChild(loading);
+    frame.addEventListener('load',()=>{loading.style.opacity='0';setTimeout(()=>loading.remove(),220);},{once:true});
   }
 })();
 </script><script src="../../scripts/cosmic-site-tour.js?v=2"></script>

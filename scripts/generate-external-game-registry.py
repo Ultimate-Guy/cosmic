@@ -24,18 +24,6 @@ BRANCH = "main"
 API_ROOT = f"https://api.github.com/repos/{REPO}"
 CDN_ROOT = f"https://cdn.jsdelivr.net/gh/{REPO}@{BRANCH}/"
 
-# Keep the safety filter scoped to the actual game identity, not arbitrary
-# JavaScript/CSS source. This avoids false positives such as "method" matching
-# "meth" or "console.warn" matching "war".
-BLOCKED = re.compile(
-    r"\b(casino|poker|blackjack|roulette|slots?|betting|gambling|"
-    r"porn|hentai|nude|nudity|xxx|adult|"
-    r"gun|guns|rifle|pistol|sniper|weapon|weapons|knife|knives|sword|"
-    r"shoot(?:er|ing)?|war|murder|kill|blood|gore|"
-    r"self[- ]?harm|suicide|drug|cocaine|meth|heroin)\b",
-    re.I,
-)
-
 def request(url, token=None, timeout=20):
     req = urllib.request.Request(
         url,
@@ -86,11 +74,9 @@ def fetch_entry(item):
         text = raw.decode("utf-8", errors="ignore")
         title = title_from_html(text)
         if not title:
-            # Some source files omit a <title>. Use the source filename so the
-            # game can still be cataloged without depending on arbitrary code.
+            # Some source files omit a <title>. Use the source filename so every
+            # HTML source can still be cataloged.
             title = Path(path).stem.replace("-", " ").replace("_", " ").strip()
-        if BLOCKED.search(f"{path} {title}"):
-            return None
         url = CDN_ROOT + urllib.parse.quote(path, safe="/")
         return {
             "name": title,

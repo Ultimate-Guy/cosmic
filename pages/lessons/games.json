@@ -329,7 +329,7 @@
     "featured": false
   },
   {
-    "name": "Arthur’s Nightmare",
+    "name": "Arthur\u2019s Nightmare",
     "path": "pages/lessons/Arthur%E2%80%99s%20Nightmare/",
     "category": "Arcade",
     "tags": [],
@@ -420,14 +420,14 @@
     "featured": false
   },
   {
-    "name": "Baldi’S Basics",
+    "name": "Baldi\u2019S Basics",
     "path": "pages/lessons/Baldi%E2%80%99s%20Basics/",
     "category": "Arcade",
     "tags": [],
     "featured": false
   },
   {
-    "name": "Baldi’S Basics Remastered",
+    "name": "Baldi\u2019S Basics Remastered",
     "path": "pages/lessons/Baldi%E2%80%99s%20Basics%20Remastered/",
     "category": "Arcade",
     "tags": [],

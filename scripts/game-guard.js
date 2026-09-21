@@ -4,6 +4,8 @@
   const STYLE_ID = 'cosmic-game-guard-style';
   const BUTTON_ID = 'cosmic-home-button';
   const SCRIPT_ID = 'cosmic-game-guard-loader';
+  const RUNTIME_MARK = 'data-cosmic-runtime';
+  const cosmicRoot = () => window.location.hostname.endsWith('github.io') ? '/cosmic/' : '/';
 
   function getHomeUrl() {
     const marker = '/pages/lessons/';
@@ -138,8 +140,26 @@
     patchFullscreenMethod(Element.prototype, 'msRequestFullscreen');
   }
 
+  function ensureRuntimeCompanions() {
+    const root = cosmicRoot();
+    const files = [
+      'scripts/cosmic-wrapper-controls.js?v=wrapper-v2',
+      'scripts/cosmic-global-state.js?v=global-state',
+      'scripts/cosmic-dev-tools.js?build=dev-commands'
+    ];
+    files.forEach(file => {
+      const key = 'cosmic-runtime-' + file.split('?')[0].replace(/[^a-z0-9]/gi, '-');
+      if (document.querySelector('[' + RUNTIME_MARK + '="' + key + '"]')) return;
+      const script = document.createElement('script');
+      script.setAttribute(RUNTIME_MARK, key);
+      script.src = root + file;
+      (document.head || document.documentElement).appendChild(script);
+    });
+  }
+
   function install() {
     ensureButton();
+    ensureRuntimeCompanions();
     patchFullscreen();
     if (!document.__cosmicHomeObserver) {
       document.__cosmicHomeObserver = new MutationObserver(() => ensureButton());
@@ -160,10 +180,8 @@
     Document.prototype.write = function (...args) {
       let html = args.join('');
       if (/<html(?:\s|>)/i.test(html) && !html.includes(SCRIPT_ID)) {
-        const scriptSrc = document.currentScript && document.currentScript.src
-          ? document.currentScript.src
-          : new URL('/cosmic/scripts/game-guard.js?v=guard', window.location.origin).href;
-        const reinject = `<script id="cosmic-game-guard-reinject" src="${scriptSrc}"><\\/script>`;
+        const root = cosmicRoot();
+        const reinject = `<script id="cosmic-game-guard-reinject" src="${root}scripts/game-guard.js?v=guard"><\\/script>`;
         html = /<head(?:\s|>)/i.test(html)
           ? html.replace(/<head(?:\s|>)/i, match => match + reinject)
           : reinject + html;

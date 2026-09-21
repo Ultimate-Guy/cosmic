@@ -74,10 +74,18 @@ def fix_updates_flow():
         if old in text:text=text.replace(old,new,1)
         LESSONS_PAGE.write_text(text,encoding='utf-8')
     normalize_loaders(LESSONS_PAGE,LESSONS_LOADERS); normalize_loaders(APPS_PAGE,APPS_LOADERS)
+def is_cosmic_imported_page(folder):
+    index=folder/'index.html'
+    if not index.is_file(): return False
+    try: text=index.read_text(encoding='utf-8')
+    except UnicodeDecodeError: return False
+    return 'data-cosmic-imported-game="minigamesville-v1"' in text or 'minigamesville.com/play/' in text
+
 def clean_game_page(folder):
     index=folder/'index.html'
     if not index.is_file():return
     text=index.read_text(encoding='utf-8')
+    imported=is_cosmic_imported_page(folder)
     cleaned=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
@@ -108,6 +116,13 @@ def clean_game_page(folder):
         cleaned=cleaned[:pos]+insertion+cleaned[pos:]
     else:
         cleaned=cleaned+insertion
+    # Imported cosmicgames pages already have a self-contained adapter. Load only
+    # Cosmic's guard there; it installs the wrapper/global/dev companions once.
+    if imported:
+        cleaned=re.sub(r'\s*<script[^>]*id=["\']cosmic-game-runtime-loader["\'][^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL|re.I)
+        cleaned=re.sub(r'\s*<script\s+[^>]*src=["\'][^"\']*scripts/game-guard\.js[^"\']*["\'][^>]*>\s*</script>\s*','\n',cleaned,flags=re.DOTALL|re.I)
+        guard='\n<script src="/scripts/game-guard.js?v=guard"></script>\n'
+        cleaned=re.sub(r'</body>',guard+'</body>',cleaned,count=1,flags=re.I) if re.search(r'</body>',cleaned,re.I) else cleaned+guard
     # Game packages sometimes ship their own service-worker registration. Cosmic
     # owns the only service worker now; replace those calls with resolved promises
     # so the game code continues without registering another worker.
@@ -118,6 +133,8 @@ def build_game(folder,metadata):
     image=choose_image(folder,metadata); entry=choose_entry(folder,metadata); name=str(metadata.get('title',display_name(folder.name))); tags=metadata.get('tags',[])
     if not isinstance(tags,list):tags=[tags]
     game={'name':name,'path':registry_path(folder),'category':infer_category(name,metadata),'tags':[str(x) for x in tags],'featured':bool(metadata.get('featured',False))}
+    if is_cosmic_imported_page(folder):
+        game['mode']='cosmic-imported'
     if entry:game['entry']=entry
     if image:game['image']=registry_path(image).rstrip('/')
     return game

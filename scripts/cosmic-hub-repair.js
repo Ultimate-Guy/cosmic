@@ -62,8 +62,11 @@
       const items = await getItems();
       if (!Array.isArray(items) || !items.length) return;
       const item = items[Math.floor(Date.now() / 86400000) % items.length];
-      const pathPart = String(item.path || '').replace(/^\.?\//, '');
-      const target = rootBase + pathPart + (item.entry || '');
+      let pathPart = String(item.path || '').replace(/^\.?\//, '');
+      const entry = String(item.entry || '');
+      if (!entry && pathPart.endsWith('/')) pathPart += 'index.html';
+      else if (!entry && !pathPart.endsWith('.html')) pathPart += '/index.html';
+      const target = rootBase + pathPart + entry;
       const shell = rootBase + 'pages/lessons/game-shell.html?game=' + encodeURIComponent(new URL(target, location.origin).href);
       window.location.href = shell;
     };

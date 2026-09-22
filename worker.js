@@ -622,6 +622,8 @@ class UsernameRegistry {
 const COSMIC_DEPLOYMENT_COMMIT = '__COSMIC_DEPLOYMENT_COMMIT__';
 const COSMIC_DEPLOYMENT_TIMESTAMP = '__COSMIC_DEPLOYMENT_TIMESTAMP__';
 
+const COSMIC_DEVELOPER_USERNAME = 'TheDevilAngel';
+
 const ALLOWED_ORIGINS = new Set([
   'https://ultimate-guy.github.io',
   'https://cosmicv2.v75ultimate.workers.dev'
@@ -678,8 +680,8 @@ function bytesFromBase64url(value) {
   return Uint8Array.from(raw, c => c.charCodeAt(0));
 }
 
-async function createAdminSession(secret) {
-  const payload = { role: 'developer', exp: Date.now() + 60 * 60 * 1000 };
+async function createAdminSession(secret, username) {
+  const payload = { role: 'developer', username: String(username || ''), exp: Date.now() + 60 * 60 * 1000 };
   const encoded = base64url(new TextEncoder().encode(JSON.stringify(payload)));
   const key = await hmacKey(secret);
   const signature = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(encoded)));
@@ -703,7 +705,7 @@ async function verifyAdminSession(request, env) {
   const signature = token.slice(dot + 1);
   try {
     const payload = JSON.parse(new TextDecoder().decode(bytesFromBase64url(encoded)));
-    if (payload.role !== 'developer' || Number(payload.exp) < Date.now()) return false;
+    if (payload.role !== 'developer' || payload.username !== COSMIC_DEVELOPER_USERNAME || Number(payload.exp) < Date.now()) return false;
     const key = await hmacKey(expected);
     return await crypto.subtle.verify('HMAC', key, bytesFromBase64url(signature), new TextEncoder().encode(encoded));
   } catch (_) {
@@ -717,12 +719,14 @@ async function handleAdminSession(request, env) {
   let data;
   try { data = await request.json(); } catch { return jsonResponse(request, { ok: false }, 400); }
   const password = typeof data?.password === 'string' ? data.password : '';
+  const username = typeof data?.username === 'string' ? data.username : '';
   const expected = env.COSMIC_ADMIN_PASSWORD;
   if (typeof expected !== 'string' || !expected) return jsonResponse(request, { ok: false, error: 'server-not-configured' }, 500);
+  if (username !== COSMIC_DEVELOPER_USERNAME) return jsonResponse(request, { ok: false, error: 'developer-account-required' }, 403);
   if (password !== expected) return jsonResponse(request, { ok: false, error: 'invalid-password' }, 401);
-  const token = await createAdminSession(expected);
+  const token = await createAdminSession(expected, username);
   const response = jsonResponse(request, { ok: true, token });
-  response.headers.append('Set-Cookie', 'cosmic_admin_session=' + encodeURIComponent(token) + '; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=Lax');
+  response.headers.append('Set-Cookie', 'cosmic_admin_session=' + encodeURIComponent(token) + '; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=None');
   return response;
 }
 

@@ -54,8 +54,8 @@ jobs:
           password=os.environ.get('PASSWORD_FOR_GAMES_UNLOCK')
           if not password: raise SystemExit('PASSWORD_FOR_GAMES_UNLOCK is not configured')
           lessons_text=lessons.read_text(encoding='utf-8')
-          if '__COSMIC_ENTRY_PASSWORD_JSON__' not in lessons_text: raise SystemExit('Cosmic entry password placeholder is missing')
-          lessons.write_text(lessons_text.replace('__COSMIC_ENTRY_PASSWORD_JSON__',json.dumps(password)),encoding='utf-8')
+          if 'PASSWORD_PLACEHOLDER' not in lessons_text: raise SystemExit('Game password placeholder is missing')
+          lessons.write_text(lessons_text.replace('PASSWORD_PLACEHOLDER',password),encoding='utf-8')
           required_assets=['.assetsignore','collections.json','cosmic-hub.css','cosmic-hub.html','cosmic-sw.js','index.html','manifest.json','offline.html','scripts/cosmic-hub.js','scripts/cosmic-hub-preflight.js','scripts/cosmic-hub-repair.js','sw.js']
           absent=[path for path in required_assets if not (site/path).is_file()]
           if absent: raise SystemExit('Cloudflare staging is missing hub assets: '+', '.join(absent))
@@ -86,8 +86,10 @@ jobs:
           if preflight_tag not in text:
               text=text.replace(hub_tag,preflight_tag+'\n'+hub_tag,1)
           if repair_tag not in text:
-              if '</body>' not in text: raise SystemExit('Cannot install Cosmic Hub repair loader: missing </body>')
-              text=text.replace('</body>',repair_tag+'\n</body>',1)
+              matches=list(re.finditer(r'</body>',text,re.I))
+              if not matches: raise SystemExit('Cannot install Cosmic Hub repair loader: missing </body>')
+              pos=matches[-1].start()
+              text=text[:pos]+repair_tag+'\n'+text[pos:]
           required=[preflight_tag,hub_tag,repair_tag]
           missing=[x for x in required if x not in text]
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))

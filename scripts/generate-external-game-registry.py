@@ -99,6 +99,9 @@ def fetch_entry(item):
 def normalize_name(value):
     return re.sub(r"\\s+", " ", re.sub(r"[^a-z0-9]+", " ", str(value or "").casefold())).strip()
 
+def normalize_name(value):
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", str(value or "").casefold())).strip()
+
 def main():
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     payload = json.loads(request(f"{API_ROOT}/git/trees/{BRANCH}?recursive=1", token=token))
@@ -108,61 +111,27 @@ def main():
     ]
     print(f"Found {len(files)} HTML source files in {REPO}.")
 
-    # Existing catalog entries are already integrated and must not be added again.
-    existing_catalog = json.loads(EXTERNAL_JSON.read_text(encoding="utf-8")) if EXTERNAL_JSON.exists() else []
-    existing_sources = {
-        str(entry.get("sourcePath", ""))
-        for entry in existing_catalog
-        if entry.get("sourcePath")
-    }
-    existing_names = {
-        normalize_name(entry.get("name", ""))
-        for entry in existing_catalog
-        if entry.get("name")
-    }
+    games = json.loads(GAMES_JSON.read_text(encoding="utf-8")) if GAMES_JSON.exists() else []
+    if not isinstance(games, list):
+        raise ValueError(f"{GAMES_JSON} must contain a JSON array")
 
-    games = json.loads(GAMES_JSON.read_text(encoding="utf-8"))
-    local_names = {
-        normalize_name(game.get("name", ""))
-        for game in games
-        if "cosmicgames" not in [str(tag).casefold() for tag in game.get("tags", [])]
-    }
-
+    seen_names = {normalize_name(game.get("name", "")) for game in games if game.get("name")}
     new_entries = []
-    seen_names = set(existing_names)
     with concurrent.futures.ThreadPoolExecutor(max_workers=16) as pool:
         for entry in pool.map(fetch_entry, files):
             if not entry:
                 continue
-            source_path = entry["sourcePath"]
-            name_key = normalize_name(entry["name"])
-            if source_path in existing_sources:
-                continue
-            if not name_key or name_key in local_names or name_key in seen_names:
+            key = normalize_name(entry["name"])
+            if not key or key in seen_names:
                 continue
             new_entries.append(entry)
-            seen_names.add(name_key)
+            seen_names.add(key)
 
     new_entries.sort(key=lambda x: str(x["sourcePath"]).casefold())
-    combined_catalog = existing_catalog + new_entries
-    EXTERNAL_JSON.write_text(json.dumps(combined_catalog, indent=2) + "\\n", encoding="utf-8")
+    games.extend(new_entries)
+    GAMES_JSON.write_text(json.dumps(games, indent=2) + "\n", encoding="utf-8")
 
-    existing_game_names = {
-        normalize_name(game.get("name", ""))
-        for game in games
-    }
-    for entry in new_entries:
-        name_key = normalize_name(entry["name"])
-        if name_key in existing_game_names:
-            continue
-        games.append(entry)
-        existing_game_names.add(name_key)
-    GAMES_JSON.write_text(json.dumps(games, indent=2) + "\\n", encoding="utf-8")
-
-    print(
-        f"Found {len(files)} source HTML files; added {len(new_entries)} new games; "
-        f"catalog now contains {len(combined_catalog)} integrated Cosmic Games entries."
-    )
+    print(f"Found {len(files)} source HTML files; added {len(new_entries)} new games; registry now contains {len(games)} games.")
 
 if __name__ == "__main__":
     main()

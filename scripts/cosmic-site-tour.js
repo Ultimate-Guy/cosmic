@@ -15,6 +15,9 @@
   const isGames=/\/pages\/lessons\/lessons\.html$/i.test(path);
   const isSettings=/\/settings\/settings\.html$/i.test(path);
   const isGameShell=/\/pages\/lessons\/game-shell\.html$/i.test(path);
+  // The tour needs to distinguish the normal Command Center from the cloaked shell.
+  // Game pages are never treated as cloaked tour pages.
+  const isCloakShell=isCommandCenter && document.documentElement?.dataset?.cosmicCloakShell === '1';
 
   const state=loadState()||{version:2,opens:0,active:false,step:0,awaitingEntry:false};
   if(isNewSession() && state.opens<MAX_OPENS){

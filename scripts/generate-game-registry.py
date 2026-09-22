@@ -126,6 +126,6 @@ def main():
     if LESSONS_DIR.is_dir():
         for folder in sorted(p for p in LESSONS_DIR.iterdir() if p.is_dir()):
             if folder.name.lower() in EXCLUDED_FOLDERS:continue
-            metadata=read_metadata(folder); clean_game_page(folder); games.append(build_game(folder,metadata))
+            metadata=read_metadata(folder); games.append(build_game(folder,metadata))
     OUTPUT.parent.mkdir(parents=True,exist_ok=True); OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8'); print(f'Generated {len(games)} game entries and normalized Cosmic Hub loaders')
 if __name__=='__main__':main()

@@ -5,7 +5,7 @@ import re
 import urllib.parse
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-LESSONS_DIR=ROOT/'pages'/'lessons'; OUTPUT=LESSONS_DIR/'games.json'; LESSONS_PAGE=LESSONS_DIR/'lessons.html'; APPS_PAGE=ROOT/'apps'/'apps.html'
+LESSONS_DIR=ROOT/'pages'/'lessons'; OUTPUT=LESSONS_DIR/'games.json'; EXTERNAL_GAMES_FILE=LESSONS_DIR/'cosmicgames.json'; LESSONS_PAGE=LESSONS_DIR/'lessons.html'; APPS_PAGE=ROOT/'apps'/'apps.html'
 IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}; EXCLUDED_FOLDERS={'img','apps'}
 LESSONS_LOADERS={'cosmic-dev-tools.js':'../../scripts/cosmic-dev-tools.js?build=dev-commands-v4','cosmic-hub.js':'../../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../../scripts/cosmic-admin-guard.js?v=3','cosmic-launch-fix.js':'../../scripts/cosmic-launch-fix.js?v=3','cosmic-feedback.js':'../../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../../scripts/cosmic-profile-widget.js?v=2'}
 APPS_LOADERS={'cosmic-dev-tools.js':'../scripts/cosmic-dev-tools.js?build=dev-commands-v4','cosmic-hub.js':'../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../scripts/cosmic-admin-guard.js?v=3','cosmic-pwa.js':'../scripts/cosmic-pwa.js?v=3','cosmic-feedback.js':'../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../scripts/cosmic-profile-widget.js?v=2'}
@@ -121,13 +121,13 @@ def build_game(folder,metadata):
     if entry:game['entry']=entry
     if image:game['image']=registry_path(image).rstrip('/')
     return game
-def read_existing_external_games():
-    if not OUTPUT.is_file():
+def read_external_games():
+    if not EXTERNAL_GAMES_FILE.is_file():
         return []
-    with OUTPUT.open(encoding='utf-8') as f:
+    with EXTERNAL_GAMES_FILE.open(encoding='utf-8') as f:
         data=json.load(f)
     if not isinstance(data,list):
-        raise ValueError(f'{OUTPUT} must contain a JSON array')
+        raise ValueError(f'{EXTERNAL_GAMES_FILE} must contain a JSON array')
     cleaned=[]
     for game in data:
         if not isinstance(game,dict):
@@ -153,9 +153,6 @@ def main():
             if folder.name.lower() in EXCLUDED_FOLDERS:continue
             metadata=read_metadata(folder); clean_game_page(folder); games.append(build_game(folder,metadata))
     existing_names={str(game.get('name','')).strip().lower() for game in games}
-    for game in read_existing_external_games():
-        if game['name'].lower() not in existing_names:
-            games.append(game)
-            existing_names.add(game['name'].lower())
+    games.extend(game for game in read_external_games() if game['name'].lower() not in existing_names)
     OUTPUT.parent.mkdir(parents=True,exist_ok=True); OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8'); print(f'Generated {len(games)} game entries and normalized Cosmic Hub loaders')
 if __name__=='__main__':main()

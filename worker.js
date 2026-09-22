@@ -832,7 +832,7 @@ async function isMaintenanceMode(env) {
     );
     const data = await response.json();
     return COSMIC_MAINTENANCE_FORCE_OFF ? false : !!data.maintenance;
-  } catch (_)
+  } catch (_) {
     return false;
   }
 }

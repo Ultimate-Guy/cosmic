@@ -37,13 +37,7 @@
 
 
   window.Crazygames.requestAd = (adType) => {
-    console.log("[Shim] Crazygames.requestAd called with type:", adType);
-	
-	
-	window.tre()
-
-    
-    setTimeout(() => {
+    console.log("[Shim] Crazygames.requestAd called with type:", adType); setTimeout(() => {
       console.log("[Shim] Sending AdEvent -> adStarted");
       window.unityGameInstance?.SendMessage("CrazySDK", "AdEvent", "adStarted");
     }, 200);

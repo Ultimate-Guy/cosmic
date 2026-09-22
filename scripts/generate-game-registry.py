@@ -5,7 +5,7 @@ import re
 import urllib.parse
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-LESSONS_DIR=ROOT/'pages'/'lessons'; OUTPUT=LESSONS_DIR/'games.json'; EXTERNAL_GAMES_FILE=LESSONS_DIR/'cosmicgames.json'; LESSONS_PAGE=LESSONS_DIR/'lessons.html'; APPS_PAGE=ROOT/'apps'/'apps.html'
+LESSONS_DIR=ROOT/'pages'/'lessons'; OUTPUT=LESSONS_DIR/'games.json'; LESSONS_PAGE=LESSONS_DIR/'lessons.html'; APPS_PAGE=ROOT/'apps'/'apps.html'
 IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}; EXCLUDED_FOLDERS={'img','apps'}
 LESSONS_LOADERS={'cosmic-dev-tools.js':'../../scripts/cosmic-dev-tools.js?build=dev-commands-v4','cosmic-hub.js':'../../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../../scripts/cosmic-admin-guard.js?v=3','cosmic-launch-fix.js':'../../scripts/cosmic-launch-fix.js?v=3','cosmic-feedback.js':'../../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../../scripts/cosmic-profile-widget.js?v=2'}
 APPS_LOADERS={'cosmic-dev-tools.js':'../scripts/cosmic-dev-tools.js?build=dev-commands-v4','cosmic-hub.js':'../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../scripts/cosmic-admin-guard.js?v=3','cosmic-pwa.js':'../scripts/cosmic-pwa.js?v=3','cosmic-feedback.js':'../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../scripts/cosmic-profile-widget.js?v=2'}
@@ -74,41 +74,10 @@ def fix_updates_flow():
         if old in text:text=text.replace(old,new,1)
         LESSONS_PAGE.write_text(text,encoding='utf-8')
     normalize_loaders(LESSONS_PAGE,LESSONS_LOADERS); normalize_loaders(APPS_PAGE,APPS_LOADERS)
-
-
-def normalize_unity_bootstrap(text):
-    # Unity WebGL packages sometimes instantiate against a container before the
-    # container exists in the DOM. Move that specific instantiate script after
-    # its referenced container without changing other game code.
-    pat=re.compile(
-        r'(<script[^>]*>.*?UnityLoader\.instantiate\(\s*["\']([^"\']+)["\'].*?</script>)',
-        re.DOTALL|re.I
-    )
-    for match in list(pat.finditer(text)):
-        script=match.group(1)
-        container_id=match.group(2)
-        if not re.search(r'id=["\']'+re.escape(container_id)+r'["\']', text[:match.start()], re.I):
-            container=re.search(r'(<[^>]+id=["\']'+re.escape(container_id)+r'["\'][^>]*>.*?</[^>]+>)', text, re.DOTALL|re.I)
-            if container:
-                text=text[:match.start()]+text[match.end():]
-                insert_pos=text.find(container.group(1))+len(container.group(1))
-                text=text[:insert_pos]+'\n'+script+text[insert_pos:]
-    return text
-def normalize_base_relative_assets(text):
-    # Game packages with an external <base> sometimes still use root-relative
-    # resource URLs. In Cosmic those resolve to the Worker root, so convert
-    # only resource src/href/url references when a base is declared.
-    if not re.search(r'<base\b[^>]*\bhref=["\'][^"\']+["\']', text, flags=re.I):
-        return text
-    text=re.sub(r'(\b(?:src|href)=["\'])/(?!/)', r'\1', text, flags=re.I)
-    text=re.sub(r'(url\(\s*["\'])/(?!/)', r'\1', text, flags=re.I)
-    return text
-
 def clean_game_page(folder):
     index=folder/'index.html'
     if not index.is_file():return
     text=index.read_text(encoding='utf-8')
-    text=normalize_base_relative_assets(text)
     cleaned=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
@@ -142,7 +111,6 @@ def clean_game_page(folder):
     # Game packages sometimes ship their own service-worker registration. Cosmic
     # owns the only service worker now; replace those calls with resolved promises
     # so the game code continues without registering another worker.
-    cleaned=normalize_unity_bootstrap(cleaned)
     cleaned=cleaned.replace('navigator.serviceWorker.register(', 'Promise.resolve(')
     if cleaned!=text:index.write_text(cleaned,encoding='utf-8')
 def registry_path(path):return urllib.parse.quote(path.relative_to(ROOT).as_posix(),safe='/')+'/'
@@ -153,38 +121,11 @@ def build_game(folder,metadata):
     if entry:game['entry']=entry
     if image:game['image']=registry_path(image).rstrip('/')
     return game
-def read_external_games():
-    if not EXTERNAL_GAMES_FILE.is_file():
-        return []
-    with EXTERNAL_GAMES_FILE.open(encoding='utf-8') as f:
-        data=json.load(f)
-    if not isinstance(data,list):
-        raise ValueError(f'{EXTERNAL_GAMES_FILE} must contain a JSON array')
-    cleaned=[]
-    for game in data:
-        if not isinstance(game,dict):
-            continue
-        name=str(game.get('name','')).strip()
-        external_url=str(game.get('externalUrl','')).strip()
-        if not name or not external_url:
-            continue
-        item=dict(game)
-        item['name']=name
-        item['externalUrl']=external_url
-        item.setdefault('path','')
-        item.setdefault('category','Arcade')
-        item.setdefault('tags',[])
-        item.setdefault('featured',False)
-        cleaned.append(item)
-    return cleaned
-
 def main():
     fix_updates_flow(); games=[]
     if LESSONS_DIR.is_dir():
         for folder in sorted(p for p in LESSONS_DIR.iterdir() if p.is_dir()):
             if folder.name.lower() in EXCLUDED_FOLDERS:continue
             metadata=read_metadata(folder); clean_game_page(folder); games.append(build_game(folder,metadata))
-    existing_names={str(game.get('name','')).strip().lower() for game in games}
-    games.extend(game for game in read_external_games() if game['name'].lower() not in existing_names)
     OUTPUT.parent.mkdir(parents=True,exist_ok=True); OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8'); print(f'Generated {len(games)} game entries and normalized Cosmic Hub loaders')
 if __name__=='__main__':main()

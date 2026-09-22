@@ -74,36 +74,6 @@ def fix_updates_flow():
         if old in text:text=text.replace(old,new,1)
         LESSONS_PAGE.write_text(text,encoding='utf-8')
     normalize_loaders(LESSONS_PAGE,LESSONS_LOADERS); normalize_loaders(APPS_PAGE,APPS_LOADERS)
-def normalize_unity_bootstrap(text):
-    # Unity WebGL packages sometimes instantiate against a container before the
-    # container exists in the DOM. Move that specific instantiate script after
-    # its referenced container without changing other game code.
-    pat=re.compile(
-        r'(<script[^>]*>.*?UnityLoader\\.instantiate\\(\\s*["\\']([^"\\']+)["\\'].*?</script>)',
-        re.DOTALL|re.I
-    )
-    for match in list(pat.finditer(text)):
-        script=match.group(1)
-        container_id=match.group(2)
-        if not re.search(r'id=["\\']'+re.escape(container_id)+r'["\\']', text[:match.start()], re.I):
-            container=re.search(r'(<[^>]+id=["\\']'+re.escape(container_id)+r'["\\'][^>]*>.*?</[^>]+>)', text, re.DOTALL|re.I)
-            if container:
-                text=text[:match.start()]+text[match.end():]
-                insert_pos=text.find(container.group(1))+len(container.group(1))
-                text=text[:insert_pos]+ '\\n'+script+text[insert_pos:]
-    return text
-
-def normalize_base_relative_assets(text):
-    # Many imported game pages declare an external <base href="..."> but still
-    # use root-relative src/href/url() references. Those /... references resolve
-    # against Cosmic's Worker root instead of the game's CDN base. When a base is
-    # present, make only those resource references relative so they resolve from
-    # the declared base without changing pages that don't use a base.
-    if not re.search(r'<base\b[^>]*\bhref=[\"\'][^\"\']+[\"\']', text, flags=re.I):
-        return text
-    text=re.sub(r'(?P<prefix>\b(?:src|href)=[\"\'])/(?!/)', r'\g<prefix>', text, flags=re.I)
-    text=re.sub(r'(?P<prefix>url\(\s*[\"\'])/(?!/)', r'\g<prefix>', text, flags=re.I)
-    return text
 
 def clean_game_page(folder):
     index=folder/'index.html'

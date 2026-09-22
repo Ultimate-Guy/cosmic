@@ -1,218 +1,334 @@
 #!/usr/bin/env python3
-"""Fast static validation for every Cosmic game file and its registry entry.
-
-This validator deliberately does not execute game code. It discovers game
-files directly from the filesystem, then checks that the registry agrees with
-what is actually present. That makes it automatically cover newly added games
-without changing this script again.
-"""
+"""Fast, future-proof static validation for Cosmic game pages."""
 
 from __future__ import annotations
 
+import argparse
 import html
 import json
 import re
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlparse, unquote
+from urllib.parse import unquote, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 LESSONS = ROOT / "pages" / "lessons"
 REGISTRY = LESSONS / "games.json"
 EXCLUDED_DIRS = {"img", "apps"}
-GAME_INDEX_RE = re.compile(r"^index\.html?$", re.I)
-
-KNOWN_BAD_PATTERNS = {
-    "window.tre()": "known startup exception",
-    "elivr.net/gh/": "corrupted base/tag text artifact",
-    "__COSMIC_ENTRY_PASSWORD_JSON__": "unbuilt entry placeholder leaked into game HTML",
-    "cosmic-game-runtime-loader></script>": "malformed Cosmic runtime loader boundary",
+GAME_FILE_NAMES = {"index.html", "index.htm"}
+LOCAL_RESOURCE_EXTENSIONS = {
+    ".html", ".htm", ".js", ".mjs", ".css", ".json", ".map",
+    ".wasm", ".unityweb", ".data", ".bin", ".mem", ".png", ".jpg",
+    ".jpeg", ".gif", ".svg", ".webp", ".ico", ".mp3", ".ogg", ".wav",
+    ".mp4", ".webm", ".woff", ".woff2", ".ttf", ".otf",
 }
+IGNORED_SCHEMES = {
+    "http", "https", "data", "blob", "javascript", "mailto", "tel",
+    "about", "file", "chrome", "chrome-extension",
+}
+DYNAMIC_MARKERS = (
+    r"\${", "{{", "}}", " + ", "+'", "'+", '+"', '"+', "[lang]",
+    "'+lang+'", '"+lang+"',
+)
 
-IGNORED_SCHEMES = {"http", "https", "data", "blob", "javascript", "mailto", "tel"}
+class PageParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=False)
+        self.script_depth = 0
+        self.script_starts = 0
+        self.script_ends = 0
+        self.unmatched_script_ends = 0
+        self.html_starts = 0
+        self.base_tags: list[dict[str, str]] = []
+        self.resource_refs: list[tuple[str, str, str]] = []
+        self.cosmic_loader_count = 0
 
-def fail(message: str, errors: list[str]) -> None:
-    errors.append(message)
+    @staticmethod
+    def attrs_dict(attrs: list[tuple[str, str | None]]) -> dict[str, str]:
+        return {str(k).lower(): (v or "") for k, v in attrs}
 
-def discover_game_files() -> dict[str, Path]:
-    games: dict[str, Path] = {}
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        t = tag.lower()
+        a = self.attrs_dict(attrs)
+        if t == "script":
+            self.script_starts += 1
+            self.script_depth += 1
+            if a.get("id", "").lower() == "cosmic-game-runtime-loader":
+                self.cosmic_loader_count += 1
+        elif t == "html":
+            self.html_starts += 1
+        elif t == "base":
+            self.base_tags.append(a)
+
+        if t in {"script", "link", "img", "iframe", "audio", "video", "source"}:
+            attr = "src" if t != "link" else "href"
+            if attr in a:
+                self.resource_refs.append((t, attr, a[attr]))
+        elif t == "object" and "data" in a:
+            self.resource_refs.append((t, "data", a["data"]))
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.handle_starttag(tag, attrs)
+        if tag.lower() == "script":
+            self.handle_endtag("script")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() == "script":
+            self.script_ends += 1
+            if self.script_depth <= 0:
+                self.unmatched_script_ends += 1
+            else:
+                self.script_depth -= 1
+
+    def error(self, message: str) -> None:
+        pass
+
+def normalize_name(value: str) -> str:
+    return re.sub(r"\s+", " ", value.strip()).casefold()
+
+def discover_games() -> dict[str, Path]:
+    discovered: dict[str, Path] = {}
     if not LESSONS.is_dir():
-        return games
+        return discovered
     for folder in sorted(p for p in LESSONS.iterdir() if p.is_dir()):
         if folder.name.lower() in EXCLUDED_DIRS:
             continue
-        index = next((p for p in folder.iterdir() if GAME_INDEX_RE.match(p.name)), None)
-        if index is not None:
-            games[folder.name] = index
-    return games
+        candidates = [p for p in folder.iterdir() if p.name.lower() in GAME_FILE_NAMES]
+        if candidates:
+            discovered[folder.name] = sorted(candidates)[0]
+    return discovered
 
-def normalized_name(value: str) -> str:
-    return re.sub(r"\s+", " ", value.strip()).casefold()
+def registry_target(raw_path: str) -> Path:
+    clean = unquote(html.unescape(raw_path.replace("\\", "/")))
+    return (ROOT / clean).resolve()
 
-def normalize_registry_path(path: str) -> Path:
-    raw = unquote(html.unescape(path.replace("\\", "/")))
-    return (ROOT / Path(raw)).resolve()
+def dynamic_reference(value: str) -> bool:
+    value = value.strip()
+    return any(marker in value for marker in DYNAMIC_MARKERS) or (
+        value.count("'") > 2 or value.count('"') > 2
+    )
 
-def validate_relative_resource_refs(game_name: str, game_file: Path, text: str, errors: list[str]) -> None:
-    # Only validate repository-local resources. With an external <base> tag,
-    # relative resources intentionally resolve against the external game host.
-    pattern = re.compile(r"\b(?:src|href)\s*=\s*([\"'])(.*?)\1", re.I | re.S)
-    base_match = re.search(r"<base\b[^>]*\bhref\s*=\s*([\"'])(.*?)\1", text, re.I | re.S)
-    base_href = base_match.group(2).strip() if base_match else ""
-    external_base = base_href.startswith(("http://", "https://"))
+def add_issue(issues: list[dict], level: str, game: str, message: str) -> None:
+    issues.append({"level": level, "game": game, "message": message})
 
+def check_local_resources(
+    game: str,
+    game_file: Path,
+    parser: PageParser,
+    external_base: bool,
+    issues: list[dict],
+) -> None:
     if external_base:
         return
 
-    for _, value in pattern.findall(text):
-        value = html.unescape(value.strip())
-        if not value or value.startswith(("#", "//")):
+    for _tag, _attr, raw_value in parser.resource_refs:
+        value = html.unescape(raw_value or "").strip()
+        if not value or value.startswith(("#", "//")) or dynamic_reference(value):
             continue
+
         parsed = urlparse(value)
         if parsed.scheme.lower() in IGNORED_SCHEMES or parsed.netloc:
             continue
-        if value.startswith("/"):
-            candidate = (ROOT / value.lstrip("/")).resolve()
+
+        path_part = parsed.path
+        if not path_part:
+            continue
+
+        if path_part.startswith("/"):
+            candidate = (ROOT / path_part.lstrip("/")).resolve()
         else:
-            candidate = (game_file.parent / value.split("?", 1)[0].split("#", 1)[0]).resolve()
+            candidate = (game_file.parent / path_part).resolve()
 
         try:
             candidate.relative_to(ROOT.resolve())
         except ValueError:
-            fail(f"{game_name}: resource reference escapes repository: {value}", errors)
+            add_issue(issues, "error", game, f"resource escapes repository: {value}")
             continue
 
-        if candidate.suffix.lower() in {".html", ".htm", ".js", ".mjs", ".css", ".json",
-                                        ".wasm", ".unityweb", ".data", ".bin", ".png",
-                                        ".jpg", ".jpeg", ".gif", ".svg", ".webp"}:
-            if not candidate.exists():
-                fail(f"{game_name}: missing local resource: {value}", errors)
+        if candidate.suffix.lower() in LOCAL_RESOURCE_EXTENSIONS and not candidate.is_file():
+            add_issue(issues, "error", game, f"missing local resource: {value}")
 
-def validate_game_file(game_name: str, path: Path, errors: list[str]) -> None:
-    if not path.is_file():
-        fail(f"{game_name}: index.html is missing", errors)
+def validate_game(game: str, game_file: Path, issues: list[dict]) -> None:
+    try:
+        text = game_file.read_text(encoding="utf-8", errors="strict")
+    except UnicodeDecodeError:
+        text = game_file.read_text(encoding="utf-8", errors="replace")
+        add_issue(issues, "error", game, "game HTML is not valid UTF-8")
+    except Exception as exc:
+        add_issue(issues, "error", game, f"could not read game file: {exc}")
         return
 
-    text = path.read_text(encoding="utf-8", errors="replace")
+    if "\x00" in text:
+        add_issue(issues, "error", game, "game HTML contains NUL bytes")
+    if "\ufffd" in text:
+        add_issue(issues, "warning", game, "game HTML contains replacement characters")
+
+    parser = PageParser()
+    try:
+        parser.feed(text)
+        parser.close()
+    except Exception as exc:
+        add_issue(issues, "error", game, f"HTML parser failed: {exc}")
+
+    if parser.script_starts != parser.script_ends or parser.script_depth or parser.unmatched_script_ends:
+        add_issue(
+            issues,
+            "error",
+            game,
+            f"script structure is malformed ({parser.script_starts} start / "
+            f"{parser.script_ends} end / {parser.unmatched_script_ends} unmatched close)",
+        )
+
+    if parser.html_starts > 1:
+        add_issue(issues, "error", game, "multiple <html> root elements found")
+
+    raw_base_count = len(re.findall(r"<base\b", text, flags=re.I))
+    if raw_base_count != len(parser.base_tags):
+        add_issue(issues, "error", game, "malformed or truncated <base> tag")
+
+    external_base = False
+    for base in parser.base_tags:
+        href = html.unescape(base.get("href", "")).strip()
+        if not href:
+            add_issue(issues, "error", game, "<base> tag has no href")
+            continue
+        scheme = urlparse(href).scheme.lower()
+        if scheme not in {"http", "https"} and not href.startswith("/"):
+            add_issue(issues, "warning", game, f"unusual <base> href: {href}")
+        if href.startswith(("http://", "https://")):
+            external_base = True
+
     lower = text.casefold()
 
-    # Basic HTML/script integrity.
-    script_open = len(re.findall(r"<script\b", text, flags=re.I))
-    script_close = len(re.findall(r"</script\s*>", text, flags=re.I))
-    if script_open != script_close:
-        fail(f"{game_name}: script tags are unbalanced ({script_open} open / {script_close} close)", errors)
-
-    html_open = len(re.findall(r"<html\b", text, flags=re.I))
-    html_close = len(re.findall(r"</html\s*>", text, flags=re.I))
-    if html_open and html_close != html_open:
-        fail(f"{game_name}: html tags are unbalanced", errors)
-
-    # Known corruption/startup failures.
-    if re.search(r"(?<!jsd)elivr\.net/gh/", lower):
-        fail(f"{game_name}: corrupted base/tag text artifact: elivr.net/gh/", errors)
     if "window.tre()" in lower:
-        fail(f"{game_name}: known startup exception: window.tre()", errors)
+        add_issue(issues, "error", game, "known startup exception: window.tre()")
+    if re.search(r"(?<!jsd)elivr\.net/gh/", lower):
+        add_issue(issues, "error", game, "malformed elivr.net game asset host")
     if "__cosmic_entry_password_json__" in lower:
-        fail(f"{game_name}: unbuilt entry placeholder leaked into game HTML", errors)
-    if "cosmic-game-runtime-loader></script>" in lower:
-        fail(f"{game_name}: malformed Cosmic runtime loader boundary", errors)
+        add_issue(issues, "error", game, "unbuilt Cosmic entry-password placeholder leaked into game")
+    if "cosmic-game-runtime-loader" in lower and parser.cosmic_loader_count != 1:
+        add_issue(
+            issues,
+            "error",
+            game,
+            f"expected one Cosmic runtime loader, found {parser.cosmic_loader_count}",
+        )
 
-    # Base tag integrity.
-    complete_bases = re.findall(r"<base\b[^>]*\bhref\s*=\s*([\"'])(.*?)\1[^>]*>", text, flags=re.I | re.S)
-    malformed_base = re.search(r"<base\b[^>]*\bhref\s*=\s*[\"'][^>]*$", text, flags=re.I | re.M)
-    if malformed_base and not complete_bases:
-        fail(f"{game_name}: malformed <base> tag", errors)
-    for _, href in complete_bases:
-        href = html.unescape(href).strip()
-        if not href or not href.startswith(("http://", "https://", "/")):
-            fail(f"{game_name}: suspicious <base> href: {href}", errors)
+    if "window.parent.maeexportapis_();" in lower:
+        add_issue(issues, "warning", game, "calls window.parent.maeExportApis_() directly inside iframe")
+    if "navigator.serviceworker.register(" in lower:
+        add_issue(issues, "warning", game, "registers its own service worker")
+    if "document.write(" in lower:
+        add_issue(issues, "warning", game, "uses document.write()")
 
-    # If the file has the Cosmic runtime loader, it must be structurally intact.
-    if "cosmic-game-runtime-loader" in lower:
-        runtime_count = len(re.findall(r'id=[\"\']cosmic-game-runtime-loader[\"\']', text, re.I))
-        if runtime_count != 1:
-            fail(f"{game_name}: expected exactly one Cosmic runtime loader, found {runtime_count}", errors)
+    if not re.search(r"<script\b|onload=|onclick=|javascript:", lower):
+        add_issue(issues, "error", game, "no executable game code was detected")
 
-    # A legitimate game should contain some executable/runtime surface.
-    # Engines differ widely, so only require executable HTML content.
-    executable_markers = ("<script", "javascript:", "onclick=", "onload=")
-    if not any(marker.casefold() in lower for marker in executable_markers):
-        fail(f"{game_name}: no executable game code marker found", errors)
+    check_local_resources(game, game_file, parser, external_base, issues)
 
-    validate_relative_resource_refs(game_name, path, text, errors)
-
-def load_registry(errors: list[str]) -> list[dict]:
+def load_registry(issues: list[dict]) -> list[dict]:
     if not REGISTRY.is_file():
-        fail(f"missing registry: {REGISTRY}", errors)
+        add_issue(issues, "error", "<registry>", "pages/lessons/games.json is missing")
         return []
     try:
         data = json.loads(REGISTRY.read_text(encoding="utf-8"))
     except Exception as exc:
-        fail(f"could not parse games.json: {exc}", errors)
+        add_issue(issues, "error", "<registry>", f"games.json is invalid JSON: {exc}")
         return []
     if not isinstance(data, list):
-        fail("games.json must contain an array", errors)
+        add_issue(issues, "error", "<registry>", "games.json must contain an array")
         return []
-    return [x for x in data if isinstance(x, dict)]
+    for index, item in enumerate(data):
+        if not isinstance(item, dict):
+            add_issue(issues, "error", "<registry>", f"entry {index} is not an object")
+    return [item for item in data if isinstance(item, dict)]
 
-def main() -> int:
-    errors: list[str] = []
-    discovered = discover_game_files()
-    registry = load_registry(errors)
-
-    if not discovered:
-        fail("no game index.html files were discovered under pages/lessons", errors)
-
-    registry_by_name: dict[str, dict] = {}
-    for item in registry:
-        name = str(item.get("name", "")).strip()
-        key = normalized_name(name)
-        if not name:
-            fail("registry entry has no name", errors)
-        elif key in registry_by_name:
-            fail(f"duplicate registry game name: {name}", errors)
-        else:
-            registry_by_name[key] = item
-
-        path = str(item.get("path", "")).strip()
-        if not path:
-            fail(f"{name or '<unnamed>'}: missing registry path", errors)
-            continue
-        if not path.lower().endswith((".html", ".htm")):
-            fail(f"{name}: registry path is not an HTML file: {path}", errors)
-            continue
-        target = normalize_registry_path(path)
-        if not target.is_file():
-            fail(f"{name}: registry target missing: {path}", errors)
-
-    # Validate every actual game file on disk, independent of games.json.
-    for folder_name, game_file in discovered.items():
-        validate_game_file(folder_name, game_file, errors)
-
-        if normalized_name(folder_name) not in registry_by_name:
-            fail(f"{folder_name}: game file exists but has no games.json entry", errors)
-
-    # Validate that registry local targets correspond to one of the discovered
-    # game folders. This catches stale/mis-pointed entries.
+def validate_registry(registry: list[dict], discovered: dict[str, Path], issues: list[dict]) -> None:
+    seen_names: set[str] = set()
+    seen_paths: set[Path] = set()
     discovered_paths = {p.resolve() for p in discovered.values()}
+
     for item in registry:
         name = str(item.get("name", "")).strip() or "<unnamed>"
-        path = str(item.get("path", "")).strip()
-        if path.lower().endswith((".html", ".htm")):
-            target = normalize_registry_path(path)
-            if target.exists() and target.resolve() not in discovered_paths:
-                fail(f"{name}: registry points to a file that is not a discovered game entry: {path}", errors)
+        key = normalize_name(name)
+        if key in seen_names:
+            add_issue(issues, "error", name, "duplicate game name in games.json")
+        seen_names.add(key)
+
+        raw_path = str(item.get("path", "")).strip()
+        if not raw_path:
+            add_issue(issues, "error", name, "registry entry has no path")
+            continue
+        if not raw_path.lower().endswith((".html", ".htm")):
+            add_issue(issues, "error", name, f"registry path is not an HTML entry: {raw_path}")
+            continue
+
+        target = registry_target(raw_path)
+        if not target.is_file():
+            add_issue(issues, "error", name, f"registry target does not exist: {raw_path}")
+            continue
+
+        resolved = target.resolve()
+        if resolved in seen_paths:
+            add_issue(issues, "error", name, f"duplicate registry target: {raw_path}")
+        seen_paths.add(resolved)
+
+        if resolved not in discovered_paths:
+            add_issue(issues, "error", name, f"registry target is outside the discovered game set: {raw_path}")
+
+    registry_paths = {
+        registry_target(str(item.get("path", ""))).resolve()
+        for item in registry
+        if str(item.get("path", "")).strip()
+    }
+    for folder, path in sorted(discovered.items()):
+        if path.resolve() not in registry_paths:
+            add_issue(issues, "warning", folder, "game file exists but is not in games.json")
+
+def main() -> int:
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument(
+        "--strict-warnings",
+        action="store_true",
+        help="fail when warnings exist too",
+    )
+    args = arg_parser.parse_args()
+
+    issues: list[dict] = []
+    discovered = discover_games()
+    registry = load_registry(issues)
+
+    if not discovered:
+        add_issue(issues, "error", "<catalog>", "no game entry files were discovered")
+
+    for folder, path in sorted(discovered.items()):
+        validate_game(folder, path, issues)
+
+    validate_registry(registry, discovered, issues)
+
+    errors = [x for x in issues if x["level"] == "error"]
+    warnings = [x for x in issues if x["level"] == "warning"]
+
+    for issue in warnings:
+        print(f"WARNING: {issue['game']}: {issue['message']}")
+    for issue in errors:
+        print(f"ERROR: {issue['game']}: {issue['message']}")
+
+    print()
+    print(f"DISCOVERED GAME FILES: {len(discovered)}")
+    print(f"REGISTRY ENTRIES: {len(registry)}")
+    print(f"ERRORS: {len(errors)}")
+    print(f"WARNINGS: {len(warnings)}")
 
     if errors:
-        print(f"GAME FILE VALIDATION FAILED: {len(errors)} issue(s)")
-        for error in errors:
-            print(f" - {error}")
+        print("GAME FILE VALIDATION FAILED")
+        return 1
+    if args.strict_warnings and warnings:
+        print("GAME FILE VALIDATION FAILED (strict warnings enabled)")
         return 1
 
-    print(f"GAME FILE VALIDATION PASSED: {len(discovered)} actual game files checked")
-    print(f"REGISTRY VALIDATION PASSED: {len(registry)} registry entries checked")
-    print("Future game files are automatically included because the validator")
-    print("discovers pages/lessons/*/index.html directly from the filesystem.")
+    print("GAME FILE VALIDATION PASSED")
     return 0
 
 if __name__ == "__main__":

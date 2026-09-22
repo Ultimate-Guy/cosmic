@@ -75,6 +75,17 @@ def fix_updates_flow():
         LESSONS_PAGE.write_text(text,encoding='utf-8')
     normalize_loaders(LESSONS_PAGE,LESSONS_LOADERS); normalize_loaders(APPS_PAGE,APPS_LOADERS)
 
+
+def normalize_base_relative_assets(text):
+    # Game packages with an external <base> sometimes still use root-relative
+    # resource URLs. In Cosmic those resolve to the Worker root, so convert
+    # only resource src/href/url references when a base is declared.
+    if not re.search(r'<base\b[^>]*\bhref=["\'][^"\']+["\']', text, flags=re.I):
+        return text
+    text=re.sub(r'(\b(?:src|href)=["\'])/(?!/)', r'\1', text, flags=re.I)
+    text=re.sub(r'(url\(\s*["\'])/(?!/)', r'\1', text, flags=re.I)
+    return text
+
 def clean_game_page(folder):
     index=folder/'index.html'
     if not index.is_file():return

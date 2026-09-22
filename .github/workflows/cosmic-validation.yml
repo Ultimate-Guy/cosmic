@@ -63,13 +63,16 @@ jobs:
             page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||'failed'}));
             const resp=await page.goto(target,{waitUntil:'domcontentloaded',timeout:30000});
             await page.waitForTimeout(15000);
+            const frameUrls = await page.locator('iframe').evaluateAll(fs => fs.map(f => f.src));
+            const direct = await page.request.get('https://cosmicv2.v75ultimate.workers.dev/pages/lessons/Snow%20Rider%203D/');
+            const directText = await direct.text();
+            const cdn = await page.request.get('https://cdn.jsdelivr.net/gh/Vrkids2009/snowrider3d@6b7c2b9167b592528b221428414e63f06c4640b9/Build/UnityLoader.js');
             const state=await page.evaluate(()=>({
               href:location.href,
               frameSrc:document.querySelector('#game')?.src||null,
-              frameReady:document.querySelector('#game')?.contentDocument?.readyState||null,
-              frameUrl:(()=>{try{return document.querySelector('#game')?.contentWindow?.location?.href||null}catch(e){return 'cross-origin'}})(),
-              bodyText:(document.body?.innerText||'').slice(0,1000),
-              frameCount:document.querySelectorAll('iframe').length
+              frameCount:document.querySelectorAll('iframe').length,
+              frameLoaded:document.querySelector('#game')?.complete ?? null,
+              frameUrls
             }));
             console.log(JSON.stringify({status:resp?.status(),target,state,consoleErrors,pageErrors,failed},null,2));
             await browser.close();

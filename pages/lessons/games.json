@@ -329,7 +329,7 @@
     "featured": false
   },
   {
-    "name": "Arthur’s Nightmare",
+    "name": "Arthur\u2019s Nightmare",
     "path": "pages/lessons/Arthur%E2%80%99s%20Nightmare/",
     "category": "Arcade",
     "tags": [],
@@ -420,14 +420,14 @@
     "featured": false
   },
   {
-    "name": "Baldi’S Basics",
+    "name": "Baldi\u2019S Basics",
     "path": "pages/lessons/Baldi%E2%80%99s%20Basics/",
     "category": "Arcade",
     "tags": [],
     "featured": false
   },
   {
-    "name": "Baldi’S Basics Remastered",
+    "name": "Baldi\u2019S Basics Remastered",
     "path": "pages/lessons/Baldi%E2%80%99s%20Basics%20Remastered/",
     "category": "Arcade",
     "tags": [],
@@ -2017,7 +2017,7 @@
     "sourcePath": "861.html"
   },
   {
-    "name": "Friday Night Funkin’ Sarvente's Mid-Fight Masses",
+    "name": "Friday Night Funkin\u2019 Sarvente's Mid-Fight Masses",
     "path": "",
     "category": "Arcade",
     "tags": [
@@ -6793,7 +6793,7 @@
     "sourcePath": "426-f.html"
   },
   {
-    "name": "Driven Wild! 🚗🌴",
+    "name": "Driven Wild! \ud83d\ude97\ud83c\udf34",
     "path": "",
     "category": "Puzzle",
     "tags": [
@@ -9613,7 +9613,7 @@
     "sourcePath": "850.html"
   },
   {
-    "name": "SCP – Containment Breach",
+    "name": "SCP \u2013 Containment Breach",
     "path": "",
     "category": "Arcade",
     "tags": [
@@ -9816,4 +9816,4 @@
     "externalUrl": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/96.html",
     "sourcePath": "96.html"
   }
-]
+]\n

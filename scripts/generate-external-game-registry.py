@@ -74,22 +74,27 @@ def fetch_entry(item):
         text = raw.decode("utf-8", errors="ignore")
         title = title_from_html(text)
         if not title:
-            # Some source files omit a <title>. Use the source filename so every
-            # HTML source can still be cataloged.
-            title = Path(path).stem.replace("-", " ").replace("_", " ").strip()
-        url = CDN_ROOT + urllib.parse.quote(path, safe="/")
+            title = Path(path).stem.replace("-", " ").replace("_", " ").strip() or "Cosmic Game"
         return {
             "name": title,
             "path": "",
             "category": category_for(title, text),
             "tags": ["cosmicgames", "external"],
             "featured": False,
-            "externalUrl": url,
+            "externalUrl": CDN_ROOT + urllib.parse.quote(path, safe="/"),
             "sourcePath": path,
         }
     except Exception as exc:
-        print(f"Skipping {path}: {exc}")
-        return None
+        # A metadata fetch failure must not drop the game from the catalog.
+        return {
+            "name": Path(path).stem.replace("-", " ").replace("_", " ").strip() or "Cosmic Game",
+            "path": "",
+            "category": "Arcade",
+            "tags": ["cosmicgames", "external"],
+            "featured": False,
+            "externalUrl": CDN_ROOT + urllib.parse.quote(path, safe="/"),
+            "sourcePath": path,
+        }
 
 def main():
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
@@ -106,15 +111,22 @@ def main():
             if entry:
                 entries.append(entry)
 
-    # Stable ordering and duplicate-name removal.
-    entries.sort(key=lambda x: (x["name"].casefold(), x["sourcePath"].casefold()))
-    seen = set()
+    # Stable ordering while preserving every source HTML file.
+    entries.sort(key=lambda x: x["sourcePath"].casefold())
+
+    # Give duplicate titles stable suffixes instead of dropping source files.
+    used = set()
     unique = []
     for entry in entries:
-        key = entry["name"].casefold()
-        if key not in seen:
-            seen.add(key)
-            unique.append(entry)
+        base = entry["name"] or Path(entry["sourcePath"]).stem
+        name = base
+        suffix = 2
+        while name.casefold() in used:
+            name = f"{base} ({suffix})"
+            suffix += 1
+        entry["name"] = name
+        used.add(name.casefold())
+        unique.append(entry)
 
     EXTERNAL_JSON.write_text(json.dumps(unique, indent=2) + "\n", encoding="utf-8")
 
@@ -124,7 +136,18 @@ def main():
         if "cosmicgames" not in [str(tag).casefold() for tag in game.get("tags", [])]
     ]
     existing = {str(game.get("name", "")).casefold() for game in games}
-    games.extend(entry for entry in unique if entry["name"].casefold() not in existing)
+    for entry in unique:
+        # Keep every source file, disambiguating only if a local game already
+        # uses the same display name.
+        base = entry["name"]
+        name = base
+        suffix = 2
+        while name.casefold() in existing:
+            name = f"{base} (Cosmic Games {suffix})"
+            suffix += 1
+        entry["name"] = name
+        existing.add(name.casefold())
+    games.extend(unique)
     GAMES_JSON.write_text(json.dumps(games, indent=2) + "\n", encoding="utf-8")
 
     print(f"Generated {len(unique)} Cosmic Games entries; registry now contains {len(games)} games.")

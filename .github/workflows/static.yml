@@ -54,8 +54,8 @@ jobs:
           password=os.environ.get('PASSWORD_FOR_GAMES_UNLOCK')
           if not password: raise SystemExit('PASSWORD_FOR_GAMES_UNLOCK is not configured')
           lessons_text=lessons.read_text(encoding='utf-8')
-          if 'PASSWORD_PLACEHOLDER' not in lessons_text: raise SystemExit('Game password placeholder is missing')
-          lessons.write_text(lessons_text.replace('PASSWORD_PLACEHOLDER',password),encoding='utf-8')
+          if '__COSMIC_ENTRY_PASSWORD_JSON__' not in lessons_text: raise SystemExit('Cosmic entry password placeholder is missing')
+          lessons.write_text(lessons_text.replace('__COSMIC_ENTRY_PASSWORD_JSON__',json.dumps(password)),encoding='utf-8')
           required_assets=['.assetsignore','collections.json','cosmic-hub.css','cosmic-hub.html','cosmic-sw.js','index.html','manifest.json','offline.html','scripts/cosmic-hub.js','scripts/cosmic-hub-preflight.js','scripts/cosmic-hub-repair.js','sw.js']
           absent=[path for path in required_assets if not (site/path).is_file()]
           if absent: raise SystemExit('Cloudflare staging is missing hub assets: '+', '.join(absent))

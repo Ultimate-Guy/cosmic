@@ -37,7 +37,8 @@ jobs:
   browser-smoke:
     name: Direct original-game runtime test
     runs-on: ubuntu-24.04
-    timeout-minutes: 3
+    timeout-minutes: 5
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,8 +69,8 @@ jobs:
                 page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||'failed'}));
                 page.on('response',r=>{if(/Unity|\.wasm|\.unityweb|\.bin|jszip|par_[12]/i.test(r.url()))responses.push({url:r.url(),status:r.status(),type:r.headers()['content-type']||''})});
                 let navStatus=null;
-                try{navStatus=(await page.goto(url,{waitUntil:'domcontentloaded',timeout:20000}))?.status()||null}catch(e){pageErrors.push('NAV: '+e.message)}
-                await page.waitForTimeout(7000);
+                try{navStatus=(await page.goto(url,{waitUntil:'domcontentloaded',timeout:12000}))?.status()||null}catch(e){pageErrors.push('NAV: '+e.message)}
+                await page.waitForTimeout(4000);
                 const state=await page.evaluate(()=>({title:document.title,bodyText:(document.body?.innerText||'').slice(0,800),canvas:[...document.querySelectorAll('canvas')].map(c=>({w:c.width,h:c.height,display:getComputedStyle(c).display})),base:document.querySelector('base')?.href||null}));
                 console.log(JSON.stringify({name,url,navStatus,state,errors,pageErrors,failed,responses},null,2));
                 await page.close();

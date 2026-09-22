@@ -622,6 +622,10 @@ class UsernameRegistry {
 const COSMIC_DEPLOYMENT_COMMIT = '__COSMIC_DEPLOYMENT_COMMIT__';
 const COSMIC_DEPLOYMENT_TIMESTAMP = '__COSMIC_DEPLOYMENT_TIMESTAMP__';
 
+// Temporarily force the public site to normal mode while maintenance is disabled.
+// Flip this back to false when Maintenance Mode should be honored again.
+const COSMIC_MAINTENANCE_FORCE_OFF = true;
+
 const COSMIC_DEVELOPER_USERNAME = 'TheDevilAngel';
 
 const ALLOWED_ORIGINS = new Set([
@@ -827,8 +831,8 @@ async function isMaintenanceMode(env) {
       new Request('https://internal/state')
     );
     const data = await response.json();
-    return !!data.maintenance;
-  } catch (_) {
+    return COSMIC_MAINTENANCE_FORCE_OFF ? false : !!data.maintenance;
+  } catch (_)
     return false;
   }
 }

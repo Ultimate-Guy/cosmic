@@ -25,7 +25,6 @@ GAME_INDEX_RE = re.compile(r"^index\.html?$", re.I)
 KNOWN_BAD_PATTERNS = {
     "window.tre()": "known startup exception",
     "elivr.net/gh/": "corrupted base/tag text artifact",
-    '<base href="https://cdn.jsd': "truncated <base> tag artifact",
     "__COSMIC_ENTRY_PASSWORD_JSON__": "unbuilt entry placeholder leaked into game HTML",
     "cosmic-game-runtime-loader></script>": "malformed Cosmic runtime loader boundary",
 }
@@ -55,11 +54,15 @@ def normalize_registry_path(path: str) -> Path:
     return (ROOT / Path(raw)).resolve()
 
 def validate_relative_resource_refs(game_name: str, game_file: Path, text: str, errors: list[str]) -> None:
-    # Only statically validate relative resource references. External URLs,
-    # protocol-relative URLs, fragments, data/blob URLs, and JS URLs are skipped.
+    # Only validate repository-local resources. With an external <base> tag,
+    # relative resources intentionally resolve against the external game host.
     pattern = re.compile(r"\b(?:src|href)\s*=\s*([\"'])(.*?)\1", re.I | re.S)
     base_match = re.search(r"<base\b[^>]*\bhref\s*=\s*([\"'])(.*?)\1", text, re.I | re.S)
     base_href = base_match.group(2).strip() if base_match else ""
+    external_base = base_href.startswith(("http://", "https://"))
+
+    if external_base:
+        return
 
     for _, value in pattern.findall(text):
         value = html.unescape(value.strip())
@@ -68,11 +71,7 @@ def validate_relative_resource_refs(game_name: str, game_file: Path, text: str, 
         parsed = urlparse(value)
         if parsed.scheme.lower() in IGNORED_SCHEMES or parsed.netloc:
             continue
-        # Root-relative resources are runtime-dependent when the game has an
-        # external <base>; do not falsely reject those.
         if value.startswith("/"):
-            if base_href.startswith(("http://", "https://")):
-                continue
             candidate = (ROOT / value.lstrip("/")).resolve()
         else:
             candidate = (game_file.parent / value.split("?", 1)[0].split("#", 1)[0]).resolve()
@@ -109,14 +108,14 @@ def validate_game_file(game_name: str, path: Path, errors: list[str]) -> None:
         fail(f"{game_name}: html tags are unbalanced", errors)
 
     # Known corruption/startup failures.
-    for pattern, reason in KNOWN_BAD_PATTERNS.items():
-        if pattern.casefold() == "elivr.net/gh/":
-            # Do not confuse the real jsDelivr host (cdn.jsdelivr.net/gh/)
-            # with the malformed elivr.net artifact.
-            if "elivr.net/gh/" in lower and "jsdelivr.net/gh/" not in lower:
-                fail(f"{game_name}: {reason}: {pattern}", errors)
-        elif pattern.casefold() in lower:
-            fail(f"{game_name}: {reason}: {pattern}", errors)
+    if re.search(r"(?<!jsd)elivr\.net/gh/", lower):
+        fail(f"{game_name}: corrupted base/tag text artifact: elivr.net/gh/", errors)
+    if "window.tre()" in lower:
+        fail(f"{game_name}: known startup exception: window.tre()", errors)
+    if "__cosmic_entry_password_json__" in lower:
+        fail(f"{game_name}: unbuilt entry placeholder leaked into game HTML", errors)
+    if "cosmic-game-runtime-loader></script>" in lower:
+        fail(f"{game_name}: malformed Cosmic runtime loader boundary", errors)
 
     # Base tag integrity.
     complete_bases = re.findall(r"<base\b[^>]*\bhref\s*=\s*([\"'])(.*?)\1[^>]*>", text, flags=re.I | re.S)

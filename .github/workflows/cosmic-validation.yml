@@ -36,7 +36,7 @@ jobs:
 
   browser-smoke:
     name: Browser game smoke test
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4

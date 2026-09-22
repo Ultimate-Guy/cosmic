@@ -116,7 +116,7 @@ def validate_game_file(game_name: str, path: Path, errors: list[str]) -> None:
             if "elivr.net/gh/" in lower and "jsdelivr.net/gh/" not in lower:
                 fail(f"{game_name}: {reason}: {pattern}", errors)
         elif pattern.casefold() in lower:
-            fail(f"{game_name}: {reason}: {pattern}")
+            fail(f"{game_name}: {reason}: {pattern}", errors)
 
     # Base tag integrity.
     complete_bases = re.findall(r"<base\b[^>]*\bhref\s*=\s*([\"'])(.*?)\1[^>]*>", text, flags=re.I | re.S)

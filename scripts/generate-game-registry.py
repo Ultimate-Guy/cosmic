@@ -74,6 +74,25 @@ def fix_updates_flow():
         if old in text:text=text.replace(old,new,1)
         LESSONS_PAGE.write_text(text,encoding='utf-8')
     normalize_loaders(LESSONS_PAGE,LESSONS_LOADERS); normalize_loaders(APPS_PAGE,APPS_LOADERS)
+def normalize_unity_bootstrap(text):
+    # Unity WebGL packages sometimes instantiate against a container before the
+    # container exists in the DOM. Move that specific instantiate script after
+    # its referenced container without changing other game code.
+    pat=re.compile(
+        r'(<script[^>]*>.*?UnityLoader\\.instantiate\\(\\s*["\\']([^"\\']+)["\\'].*?</script>)',
+        re.DOTALL|re.I
+    )
+    for match in list(pat.finditer(text)):
+        script=match.group(1)
+        container_id=match.group(2)
+        if not re.search(r'id=["\\']'+re.escape(container_id)+r'["\\']', text[:match.start()], re.I):
+            container=re.search(r'(<[^>]+id=["\\']'+re.escape(container_id)+r'["\\'][^>]*>.*?</[^>]+>)', text, re.DOTALL|re.I)
+            if container:
+                text=text[:match.start()]+text[match.end():]
+                insert_pos=text.find(container.group(1))+len(container.group(1))
+                text=text[:insert_pos]+ '\\n'+script+text[insert_pos:]
+    return text
+
 def clean_game_page(folder):
     index=folder/'index.html'
     if not index.is_file():return
@@ -111,6 +130,7 @@ def clean_game_page(folder):
     # Game packages sometimes ship their own service-worker registration. Cosmic
     # owns the only service worker now; replace those calls with resolved promises
     # so the game code continues without registering another worker.
+    cleaned=normalize_unity_bootstrap(cleaned)
     cleaned=cleaned.replace('navigator.serviceWorker.register(', 'Promise.resolve(')
     if cleaned!=text:index.write_text(cleaned,encoding='utf-8')
 def registry_path(path):return urllib.parse.quote(path.relative_to(ROOT).as_posix(),safe='/')+'/'

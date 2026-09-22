@@ -77,8 +77,11 @@
   function buildItemData(){return [...games.map(x=>normalize({...x,kind:'game'})),...apps.map(x=>normalize({...x,kind:'app'}))];}
   let allItems=[];function itemById(id){return allItems.find(x=>itemId(x)===id);}function renderMini(item){const b=document.createElement('button');b.className='cosmic-mini';b.type='button';b.innerHTML=`<b>${safe(item.name)}</b><small>${safe(item.category)}</small>`;b.onclick=()=>previewDrawer(item);return b;}
   function gameTarget(item){
-    const pathPart=String(item.path||'').replace(/^\.?\//,'');
-    const target=new URL(GAME_ORIGIN+'/'+pathPart+(item.entry||''));
+    let pathPart=String(item.path||'').replace(/^\.?\//,'');
+    const entry=String(item.entry||'');
+    if(!entry && pathPart.endsWith('/')) pathPart += 'index.html';
+    else if(!entry && !pathPart.endsWith('.html')) pathPart += '/index.html';
+    const target=new URL(GAME_ORIGIN+'/'+pathPart+entry);
     return new URL(base+'pages/lessons/game-shell.html?game='+encodeURIComponent(target.href),location.origin).href;
   }
   function appTarget(item){const u=new URL(base+'apps/app.html',location.origin);u.searchParams.set('url',item.path+(item.entry||''));u.searchParams.set('name',item.name||'Cosmic App');return u.href;}

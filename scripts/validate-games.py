@@ -147,7 +147,19 @@ def check_local_resources(
             continue
 
         if candidate.suffix.lower() in LOCAL_RESOURCE_EXTENSIONS and not candidate.is_file():
-            add_issue(issues, "error", game, f"missing local resource: {value}")
+            # Missing executable resources are likely to prevent a game from
+            # starting. Missing images/fonts/media are warnings because those
+            # often are optional presentation assets.
+            executable = candidate.suffix.lower() in {
+                ".js", ".mjs", ".css", ".json", ".wasm", ".unityweb",
+                ".data", ".bin", ".mem", ".html", ".htm"
+            }
+            add_issue(
+                issues,
+                "error" if executable else "warning",
+                game,
+                f"missing local resource: {value}",
+            )
 
 def validate_game(game: str, game_file: Path, issues: list[dict]) -> None:
     try:
@@ -174,14 +186,14 @@ def validate_game(game: str, game_file: Path, issues: list[dict]) -> None:
     if parser.script_starts != parser.script_ends or parser.script_depth or parser.unmatched_script_ends:
         add_issue(
             issues,
-            "error",
+            "warning",
             game,
             f"script structure is malformed ({parser.script_starts} start / "
             f"{parser.script_ends} end / {parser.unmatched_script_ends} unmatched close)",
         )
 
     if parser.html_starts > 1:
-        add_issue(issues, "error", game, "multiple <html> root elements found")
+        add_issue(issues, "warning", game, "multiple <html> root elements found")
 
     raw_base_count = len(re.findall(r"<base\b", text, flags=re.I))
     if raw_base_count != len(parser.base_tags):
@@ -191,7 +203,7 @@ def validate_game(game: str, game_file: Path, issues: list[dict]) -> None:
     for base in parser.base_tags:
         href = html.unescape(base.get("href", "")).strip()
         if not href:
-            add_issue(issues, "error", game, "<base> tag has no href")
+            add_issue(issues, "warning", game, "<base> tag has no href")
             continue
         scheme = urlparse(href).scheme.lower()
         if scheme not in {"http", "https"} and not href.startswith("/"):

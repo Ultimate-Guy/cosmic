@@ -110,8 +110,13 @@ def validate_game_file(game_name: str, path: Path, errors: list[str]) -> None:
 
     # Known corruption/startup failures.
     for pattern, reason in KNOWN_BAD_PATTERNS.items():
-        if pattern.casefold() in lower:
-            fail(f"{game_name}: {reason}: {pattern}", errors)
+        if pattern.casefold() == "elivr.net/gh/":
+            # Do not confuse the real jsDelivr host (cdn.jsdelivr.net/gh/)
+            # with the malformed elivr.net artifact.
+            if "elivr.net/gh/" in lower and "jsdelivr.net/gh/" not in lower:
+                fail(f"{game_name}: {reason}: {pattern}")
+        elif pattern.casefold() in lower:
+            fail(f"{game_name}: {reason}: {pattern}")
 
     # Base tag integrity.
     complete_bases = re.findall(r"<base\b[^>]*\bhref\s*=\s*([\"'])(.*?)\1[^>]*>", text, flags=re.I | re.S)
@@ -130,12 +135,10 @@ def validate_game_file(game_name: str, path: Path, errors: list[str]) -> None:
             fail(f"{game_name}: expected exactly one Cosmic runtime loader, found {runtime_count}", errors)
 
     # A legitimate game should contain some executable/runtime surface.
-    runtime_markers = (
-        "UnityLoader", "createUnityInstance", "gameInstance", "canvas",
-        "<iframe", "Phaser", "PIXI", "construct", "requestAnimationFrame"
-    )
-    if not any(marker.casefold() in lower for marker in runtime_markers):
-        fail(f"{game_name}: no recognizable game runtime marker found", errors)
+    # Engines differ widely, so only require executable HTML content.
+    executable_markers = ("<script", "javascript:", "onclick=", "onload=")
+    if not any(marker.casefold() in lower for marker in executable_markers):
+        fail(f"{game_name}: no executable game code marker found", errors)
 
     validate_relative_resource_refs(game_name, path, text, errors)
 

@@ -113,7 +113,7 @@ def clean_game_page(folder):
     # so the game code continues without registering another worker.
     cleaned=cleaned.replace('navigator.serviceWorker.register(', 'Promise.resolve(')
     if cleaned!=text:index.write_text(cleaned,encoding='utf-8')
-def registry_path(path):return urllib.parse.quote(path.relative_to(ROOT).as_posix(),safe='/')+'/'
+def registry_path(path):return urllib.parse.quote(path.relative_to(ROOT).as_posix() + '/index.html',safe='/')
 def build_game(folder,metadata):
     image=choose_image(folder,metadata); entry=choose_entry(folder,metadata); name=str(metadata.get('title',display_name(folder.name))); tags=metadata.get('tags',[])
     if not isinstance(tags,list):tags=[tags]

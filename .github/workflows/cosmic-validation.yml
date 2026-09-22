@@ -37,7 +37,8 @@ jobs:
   browser-smoke:
     name: Browser game smoke test
     runs-on: ubuntu-24.04
-    continue-on-error: true
+    timeout-minutes: 3
+    continue-on-error: false
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,35 +47,31 @@ jobs:
         run: |
           npm init -y >/dev/null 2>&1
           npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
-      - name: Test deployed game shell
+      - name: Test game directly and through shell
         run: |
           node <<'NODE'
           const { chromium } = require('playwright-core');
           const { execFileSync } = require('child_process');
           const chrome = execFileSync('bash',['-lc','command -v google-chrome || command -v chromium || command -v chromium-browser']).toString().trim();
-          const target = 'https://ultimate-guy.github.io/cosmic/pages/lessons/game-shell.html?game=' +
-            encodeURIComponent('https://cosmicv2.v75ultimate.workers.dev/pages/lessons/Snow%20Rider%203D/');
+          const game = 'https://cosmicv2.v75ultimate.workers.dev/pages/lessons/Snow%20Rider%203D/index.html';
+          const shell = 'https://ultimate-guy.github.io/cosmic/pages/lessons/game-shell.html?game=' + encodeURIComponent(game);
           (async()=>{
             const browser=await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=swiftshader']});
-            const page=await browser.newPage({viewport:{width:1365,height:768}});
-            const consoleErrors=[], pageErrors=[], failed=[];
-            page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
-            page.on('pageerror',e=>pageErrors.push(e.message));
-            page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||'failed'}));
-            const resp=await page.goto(target,{waitUntil:'domcontentloaded',timeout:30000});
-            await page.waitForTimeout(15000);
-            const frameUrls = await page.locator('iframe').evaluateAll(fs => fs.map(f => f.src));
-            const direct = await page.request.get('https://cosmicv2.v75ultimate.workers.dev/pages/lessons/Snow%20Rider%203D/');
-            const directText = await direct.text();
-            const cdn = await page.request.get('https://cdn.jsdelivr.net/gh/Vrkids2009/snowrider3d@6b7c2b9167b592528b221428414e63f06c4640b9/Build/UnityLoader.js');
-            const state=await page.evaluate(()=>({
-              href:location.href,
-              frameSrc:document.querySelector('#game')?.src||null,
-              frameCount:document.querySelectorAll('iframe').length,
-              frameLoaded:document.querySelector('#game')?.complete ?? null,
-              frameUrls
-            }));
-            console.log(JSON.stringify({status:resp?.status(),target,state,consoleErrors,pageErrors,failed},null,2));
-            await browser.close();
+            async function inspect(url,label){
+              const page=await browser.newPage({viewport:{width:1365,height:768}});
+              const errors=[], pageErrors=[], failed=[], responses=[];
+              page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+              page.on('pageerror',e=>pageErrors.push(e.message));
+              page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||'failed'}));
+              page.on('response',r=>{if(/SnowRider3D|UnityLoader|cdn.jsdelivr|index\.html/i.test(r.url())) responses.push({url:r.url(),status:r.status(),type:r.headers()['content-type']||''});});
+              let navStatus=null;
+              try{const resp=await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000}); navStatus=resp?.status()||null;}catch(e){pageErrors.push('NAVIGATION: '+e.message);}
+              await page.waitForTimeout(10000);
+              const state=await page.evaluate(()=>({href:location.href,title:document.title,bodyText:(document.body?.innerText||'').slice(0,1200),canvasCount:document.querySelectorAll('canvas').length,canvases:[...document.querySelectorAll('canvas')].map(c=>({w:c.width,h:c.height,display:getComputedStyle(c).display,visibility:getComputedStyle(c).visibility}))}));
+              console.log(JSON.stringify({label,url,navStatus,state,errors,pageErrors,failed,responses},null,2));
+              await page.close();
+            }
+            try{await inspect(game,'DIRECT_GAME');await inspect(shell,'GAME_SHELL');}
+            finally{await browser.close();}
           })().catch(e=>{console.error(e);process.exitCode=1});
           NODE

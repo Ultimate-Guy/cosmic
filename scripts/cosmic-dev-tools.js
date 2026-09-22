@@ -785,8 +785,13 @@
       const list=[...(Array.isArray(games)?games:[]).map(x=>({...x,kind:'game'})),...(Array.isArray(apps)?apps:[]).map(x=>({...x,kind:'app'}))];
       if(!list.length){showToast('No games or apps are available.');return;}
       const item=list[Math.floor(Math.random()*list.length)];
-      if(item.kind==='game') location.href=base+'pages/lessons/game-shell.html?game='+encodeURIComponent(new URL(base+item.path+(item.entry||''),location.href).href);
-      else {const u=new URL(base+'apps/app.html',location.origin);u.searchParams.set('url',new URL(item.path+(item.entry||''),location.href).href);u.searchParams.set('name',item.name||'Cosmic App');location.href=u.href;}
+      if(item.kind==='game'){
+        let pathPart=String(item.path||'').replace(/^\.?\//,'');
+        const entry=String(item.entry||'');
+        if(!entry && pathPart.endsWith('/')) pathPart+='index.html';
+        else if(!entry && !pathPart.endsWith('.html')) pathPart+='/index.html';
+        location.href=base+'pages/lessons/game-shell.html?game='+encodeURIComponent(new URL(base+pathPart+entry,location.href).href);
+      } else {const u=new URL(base+'apps/app.html',location.origin);u.searchParams.set('url',new URL(item.path+(item.entry||''),location.href).href);u.searchParams.set('name',item.name||'Cosmic App');location.href=u.href;}
     }catch(e){showToast('Random launch failed: '+(e.message||e));}
   }
 

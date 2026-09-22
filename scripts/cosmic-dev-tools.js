@@ -68,7 +68,7 @@
       const response=await fetch(API+'/api/admin/session',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({password}),
+        body:JSON.stringify({password,username:currentUser()}),
         cache:'no-store'
       });
       const data=await response.json().catch(()=>({}));
@@ -1056,13 +1056,13 @@
   async function blanket(){
     const token=await adminToken();if(!token)return;
     const code=window.prompt('Enter the developer/admin password to unlock the test screen later:');if(code===null)return;
-    const r=await fetch(API+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:code})});
+    const r=await fetch(API+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:code,username:currentUser()})});
     if(!r.ok){showToast('Password check failed.');return;}
     const old=document.getElementById('cosmic-dev-blanket');if(old)old.remove();
     const el=document.createElement('div');el.id='cosmic-dev-blanket';el.style.cssText='position:fixed;inset:0;z-index:2147483646;background:#f5f5f5;color:#222;display:grid;place-items:center;font:16px system-ui,sans-serif';
     el.innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:54px">⚠</div><h1>Something went wrong</h1><p>This is a local developer test screen.</p><button id="cosmic-blanket-unlock">Unlock</button></div>';
     document.body.appendChild(el);
-    el.querySelector('#cosmic-blanket-unlock').onclick=async()=>{const attempt=prompt('Admin password to unlock:');if(!attempt)return;const rr=await fetch(API+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:attempt})});if(rr.ok)el.remove();else alert('Incorrect password.');};
+    el.querySelector('#cosmic-blanket-unlock').onclick=async()=>{const attempt=prompt('Admin password to unlock:');if(!attempt)return;const rr=await fetch(API+'/api/admin/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:attempt,username:currentUser()})});if(rr.ok)el.remove();else alert('Incorrect password.');};
   }
 
   async function benchmark(){

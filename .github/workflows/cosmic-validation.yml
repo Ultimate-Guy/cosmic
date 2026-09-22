@@ -42,44 +42,36 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Install browser test tools
+      - name: Install browser driver
         run: |
           npm init -y >/dev/null 2>&1
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
-      - name: Test representative deployed games
+          npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
+      - name: Test deployed game shell
         run: |
           node <<'NODE'
-          const { chromium } = require('playwright');
-          const games = [
-            ['Snow Rider 3D','https://cosmicv2.v75ultimate.workers.dev/pages/lessons/Snow%20Rider%203D/index.html'],
-            ['2048','https://cosmicv2.v75ultimate.workers.dev/pages/lessons/2048/index.html'],
-            ['A Dance of Fire and Ice','https://cosmicv2.v75ultimate.workers.dev/pages/lessons/A%20Dance%20of%20Fire%20and%20Ice/index.html']
-          ];
-          (async () => {
-            const browser = await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=swiftshader']});
-            try {
-              for (const [name,url] of games) {
-                const page = await browser.newPage({viewport:{width:1365,height:768}});
-                const errors = [];
-                const failed = [];
-                page.on('console', msg => { if (msg.type()==='error') errors.push(msg.text()); });
-                page.on('pageerror', err => errors.push('PAGEERROR: '+err.message));
-                page.on('requestfailed', req => failed.push(req.url()+' :: '+(req.failure()?.errorText||'failed')));
-                const response = await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
-                await page.waitForTimeout(10000);
-                const state = await page.evaluate(() => ({
-                  status: document.readyState,
-                  canvasCount: document.querySelectorAll('canvas').length,
-                  canvases: [...document.querySelectorAll('canvas')].map(c=>({w:c.width,h:c.height,clientW:c.clientWidth,clientH:c.clientHeight})),
-                  bodyText: (document.body?.innerText||'').slice(0,500),
-                  background: getComputedStyle(document.body).backgroundColor
-                }));
-                console.log(JSON.stringify({name,url,status:response?.status(),state,errors,failed},null,2));
-                await page.close();
-              }
-            } finally {
-              await browser.close();
-            }
-          })().catch(err=>{console.error(err);process.exitCode=1;});
+          const { chromium } = require('playwright-core');
+          const { execFileSync } = require('child_process');
+          const chrome = execFileSync('bash',['-lc','command -v google-chrome || command -v chromium || command -v chromium-browser']).toString().trim();
+          const target = 'https://ultimate-guy.github.io/cosmic/pages/lessons/game-shell.html?game=' +
+            encodeURIComponent('https://cosmicv2.v75ultimate.workers.dev/pages/lessons/Snow%20Rider%203D/');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=swiftshader']});
+            const page=await browser.newPage({viewport:{width:1365,height:768}});
+            const consoleErrors=[], pageErrors=[], failed=[];
+            page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
+            page.on('pageerror',e=>pageErrors.push(e.message));
+            page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||'failed'}));
+            const resp=await page.goto(target,{waitUntil:'domcontentloaded',timeout:30000});
+            await page.waitForTimeout(15000);
+            const state=await page.evaluate(()=>({
+              href:location.href,
+              frameSrc:document.querySelector('#game')?.src||null,
+              frameReady:document.querySelector('#game')?.contentDocument?.readyState||null,
+              frameUrl:(()=>{try{return document.querySelector('#game')?.contentWindow?.location?.href||null}catch(e){return 'cross-origin'}})(),
+              bodyText:(document.body?.innerText||'').slice(0,1000),
+              frameCount:document.querySelectorAll('iframe').length
+            }));
+            console.log(JSON.stringify({status:resp?.status(),target,state,consoleErrors,pageErrors,failed},null,2));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exitCode=1});
           NODE

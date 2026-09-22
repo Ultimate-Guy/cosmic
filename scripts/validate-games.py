@@ -114,7 +114,7 @@ def validate_game_file(game_name: str, path: Path, errors: list[str]) -> None:
             # Do not confuse the real jsDelivr host (cdn.jsdelivr.net/gh/)
             # with the malformed elivr.net artifact.
             if "elivr.net/gh/" in lower and "jsdelivr.net/gh/" not in lower:
-                fail(f"{game_name}: {reason}: {pattern}")
+                fail(f"{game_name}: {reason}: {pattern}", errors)
         elif pattern.casefold() in lower:
             fail(f"{game_name}: {reason}: {pattern}")
 

@@ -93,10 +93,23 @@ def normalize_unity_bootstrap(text):
                 text=text[:insert_pos]+ '\\n'+script+text[insert_pos:]
     return text
 
+def normalize_base_relative_assets(text):
+    # Many imported game pages declare an external <base href="..."> but still
+    # use root-relative src/href/url() references. Those /... references resolve
+    # against Cosmic's Worker root instead of the game's CDN base. When a base is
+    # present, make only those resource references relative so they resolve from
+    # the declared base without changing pages that don't use a base.
+    if not re.search(r'<base\\b[^>]*\\bhref=[\"\'][^\"\']+[\"\']', text, flags=re.I):
+        return text
+    text=re.sub(r'(?P<prefix>\\b(?:src|href)=[\"\'])/(?!/)', r'\\g<prefix>', text, flags=re.I)
+    text=re.sub(r'(?P<prefix>url\\(\\s*[\\"\'])/(?!/)', r'\\g<prefix>', text, flags=re.I)
+    return text
+
 def clean_game_page(folder):
     index=folder/'index.html'
     if not index.is_file():return
     text=index.read_text(encoding='utf-8')
+    text=normalize_base_relative_assets(text)
     cleaned=re.sub(r'\s*<script id="cosmic-settings-engine(?:-loader)?"[^>]*>.*?</script>\s*','\n',text,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard-loader"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     cleaned=re.sub(r'\s*<script id="cosmic-game-guard(?:-reinject)?"[^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)

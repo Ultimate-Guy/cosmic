@@ -220,7 +220,7 @@ async function inspectBrowserGame(browser, game) {
       return result;
     }
 
-    const frame = await iframeHandle.contentFrame();
+    let frame = await iframeHandle.contentFrame();
     if (!frame) {
       result.reason = 'iframe child frame was not created';
       return result;
@@ -232,35 +232,61 @@ async function inspectBrowserGame(browser, game) {
 
     await page.waitForTimeout(LOAD_WAIT);
 
-    const state = await iframeHandle.evaluate(el => {
-      const doc = el.contentDocument;
-      const rect = el.getBoundingClientRect();
+    async function readFrameState() {
+      const handle = await page.$('#game');
+      if (!handle) return {retryable:false, state:null};
+      try {
+        const currentSrc = await handle.getAttribute('src');
+        const state = await handle.evaluate(el => {
+          const doc = el.contentDocument;
+          const rect = el.getBoundingClientRect();
 
-      if (!doc) {
-        return {
-          hasDocument:false,
-          readyState:null,
-          bodyChildren:0,
-          htmlLength:0,
-          canvasCount:0,
-          width:rect.width,
-          height:rect.height
-        };
+          if (!doc) {
+            return {
+              hasDocument:false,
+              readyState:null,
+              bodyChildren:0,
+              htmlLength:0,
+              canvasCount:0,
+              width:rect.width,
+              height:rect.height
+            };
+          }
+
+          return {
+            hasDocument:true,
+            readyState:doc.readyState,
+            bodyChildren:doc.body?.children.length || 0,
+            htmlLength:doc.documentElement?.outerHTML?.length || 0,
+            canvasCount:doc.querySelectorAll('canvas').length,
+            width:rect.width,
+            height:rect.height,
+            frameUrl: doc.location?.href || ''
+          };
+        });
+        return {retryable:false, state:{src:currentSrc, ...state}};
+      } catch (error) {
+        const message = String(error?.message || error);
+        if (/Execution context was destroyed|frame was detached|Target page, context or browser has been closed/i.test(message)) {
+          return {retryable:true, state:null};
+        }
+        throw error;
       }
+    }
 
-      return {
-        hasDocument:true,
-        readyState:doc.readyState,
-        bodyChildren:doc.body?.children.length || 0,
-        htmlLength:doc.documentElement?.outerHTML?.length || 0,
-        canvasCount:doc.querySelectorAll('canvas').length,
-        width:rect.width,
-        height:rect.height
-      };
-    });
+    let read = await readFrameState();
+    if (read.retryable) {
+      await page.waitForTimeout(800);
+      read = await readFrameState();
+    }
+    if (read.retryable) {
+      result.reason = 'iframe kept navigating and could not be inspected';
+      return result;
+    }
 
+    const state = read.state;
     result.shell = shell;
-    result.iframe = {src, ...state};
+    result.iframe = state;
 
     if (state.width < 10 || state.height < 10) {
       result.reason = 'iframe has invalid dimensions';

@@ -85,27 +85,62 @@ function profileModal(){const p=profile();const m=modal('<h2>Local Cosmic Profil
 function performanceModal(){const current=load('cosmicPerformanceModeV1','Balanced');const m=modal('<h2>Adaptive Performance</h2><p>Low reduces animation and effects. Balanced keeps the normal Cosmic experience. Full keeps visual effects enabled.</p>'+['Low','Balanced','Full'].map(x=>'<button class="cc-btn '+(x===current?'primary':'')+'" data-mode="'+x+'" style="width:100%;margin:4px 0;text-align:left">'+x+'</button>').join(''));m.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{save('cosmicPerformanceModeV1',b.dataset.mode);document.documentElement.style.scrollBehavior=b.dataset.mode==='Low'?'auto':'smooth';m.classList.remove('show');toast('Performance mode: '+b.dataset.mode)})}
 function quick(){const m=modal('<h2>Quick Actions</h2><div class="cc-grid">'+[['games','Open Games'],['apps','Open Apps'],['warp','Warp Me Somewhere'],['missions','Missions'],['profile','Local Profile'],['performance','Performance'],['settings','Settings']].map(x=>'<button class="cc-quick" data-q="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>');m.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{m.classList.remove('show');action(b.dataset.q)})}
 function dashboardTarget(){return new URL(BASE+'pages/lessons/lessons.html',location.href).href}
+function showPopupBlockedNotice(type){
+  const mode=type==='blank'?'About:Blank':'Blob';
+  const m=modal('<h2>Popups are blocked</h2><p>Cosmic Auto Cloak needs popups to open its cloaked window.</p><p><b>Allow popups for Cosmic</b> in your browser, then press <b>Try Again</b>.</p><p style="color:#8199a5;font-size:.78rem">In Chrome, use the pop-up blocked icon in the address bar or Site settings and allow pop-ups for this site.</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="cc-btn" id="cc-popup-cancel">Not now</button><button class="cc-btn primary" id="cc-popup-retry">Try Again</button></div>');
+  m.querySelector('#cc-popup-cancel').onclick=()=>m.classList.remove('show');
+  m.querySelector('#cc-popup-retry').onclick=()=>{
+    m.classList.remove('show');
+    const ok=launchCloakShell(type,true,true);
+    if(!ok) showPopupBlockedNotice(type);
+  };
+  return m;
+}
+function testPopupAccess(){
+  try{
+    const test=window.open('about:blank','_blank');
+    if(!test) return false;
+    try{test.close();}catch(_){}
+    return true;
+  }catch(_){return false}
+}
 function commandCenterShellUrl(type){const u=new URL(location.href);u.searchParams.set(CLOAK_SHELL_PARAM,'1');u.searchParams.set(CLOAK_MODE_PARAM,type);return u.href}
 function cloakShellHtml(commandCenterUrl,entryUrl){return '<!doctype html><html><head><meta charset="utf-8"><title>Cosmic</title><style>html,body{margin:0;width:100%;height:100%;background:#000;overflow:hidden}iframe{display:block;border:0;width:100%;height:100%}</style></head><body><script src="https://ultimate-guy.github.io/cosmic/scripts/cosmic-global-state.js?v=global-state"></script><iframe id="cosmic-frame" allowfullscreen src="'+commandCenterUrl+'"></iframe><script>window.addEventListener("message",function(e){if(e&&e.data&&e.data.type==="cosmic-dashboard"){document.getElementById("cosmic-frame").src='+JSON.stringify(entryUrl)+'}});<\/script></body></html>'}
 function dashboardFromShell(){if(window.parent&&window.parent!==window){window.parent.postMessage({type:'cosmic-dashboard'},'*')}else{location.href=dashboardTarget()}}
-function launchCloakShell(type,redirectCurrent){const commandCenterUrl=commandCenterShellUrl(type),entryUrl=dashboardTarget(),html=cloakShellHtml(commandCenterUrl,entryUrl);
-if(type==='blank'){
-  const win=window.open('about:blank','_blank');
-  if(!win)return false;
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
+function launchCloakShell(type,redirectCurrent,fromUserGesture){
+  const commandCenterUrl=commandCenterShellUrl(type),entryUrl=dashboardTarget(),html=cloakShellHtml(commandCenterUrl,entryUrl);
+  if(!fromUserGesture && !testPopupAccess()){
+    showPopupBlockedNotice(type);
+    return false;
+  }
+  if(type==='blank'){
+    const win=window.open('about:blank','_blank');
+    if(!win){
+      if(!fromUserGesture)showPopupBlockedNotice(type);
+      return false;
+    }
+    try{
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
+    }catch(_){
+      try{win.location.href=commandCenterUrl;}catch(__){}
+    }
+    if(redirectCurrent)window.location.replace('https://www.google.com');
+    return true;
+  }
+  const blobUrl=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  const win=window.open(blobUrl,'_blank');
+  if(!win){
+    URL.revokeObjectURL(blobUrl);
+    if(!fromUserGesture)showPopupBlockedNotice(type);
+    return false;
+  }
   if(redirectCurrent)window.location.replace('https://www.google.com');
   return true;
 }
-const blobUrl=URL.createObjectURL(new Blob([html],{type:'text/html'}));
-const win=window.open(blobUrl,'_blank');
-if(!win)return false;
-if(redirectCurrent)window.location.replace('https://www.google.com');
-return true;
-}
-function autoCloak(type){return launchCloakShell(type,true)}
-function cloak(type){return launchCloakShell(type,true)}
+function autoCloak(type){return launchCloakShell(type,true,false)}
+function cloak(type){return launchCloakShell(type,true,true)}
 function render(){
 const root=document.getElementById('cc-root');
 if(!root)return;
@@ -118,7 +153,7 @@ const pref=autoCloakPreference();
 const showQuickLaunch=!(pref&&pref.enabled);
 const shellBar=isCloakShell()?'<section class="cc-dashboard-bar"><div><strong>Cosmic is running in cloak mode</strong><span>Choose Cosmic Dashboard to continue to the Cosmic entry screen in this same cloaked tab.</span></div><button class="cc-dashboard-btn" id="cc-dashboard">Cosmic Dashboard</button></section>':'';
 
-const quickLaunch=showQuickLaunch?'<section class="cc-launch"><div class="cc-launch-head"><p class="cc-launch-kicker">Quick Launch</p><h2>Choose how to open Cosmic</h2><p>Use the same launch modes from the classic Cosmic home screen, now built directly into the Command Center.</p></div><div class="cc-launch-body"><div class="cc-cloak-grid"><button class="cc-cloak-btn" id="cc-blank"><strong>About:Blank Cloak</strong><span>Open Cosmic in a clean about:blank launcher.</span></button><button class="cc-cloak-btn" id="cc-blob"><strong>Blob Cloak</strong><span>Open Cosmic through a temporary Blob URL launcher.</span></button></div><a class="cc-no-cloak" href="'+BASE+'pages/lessons/lessons.html">Open Cosmic without cloak</a></div></section>':'';
+const quickLaunch=showQuickLaunch?'<section class="cc-launch"><div class="cc-launch-head"><p class="cc-launch-kicker">Quick Launch</p><h2>Choose how to open Cosmic</h2><p>Use the same launch modes from the classic Cosmic home screen, now built directly into the Command Center.</p></div><div class="cc-launch-body"><div class="cc-cloak-grid"><button class="cc-cloak-btn" id="cc-blank"><strong>About:Blank Cloak</strong><span>Open Cosmic in a clean about:blank launcher. Popups must be allowed for this to work.</span></button><button class="cc-cloak-btn" id="cc-blob"><strong>Blob Cloak</strong><span>Open Cosmic through a temporary Blob URL launcher. Popups must be allowed for this to work.</span></button></div><a class="cc-no-cloak" href="'+BASE+'pages/lessons/lessons.html">Open Cosmic without cloak</a></div></section>':'';
 
 root.innerHTML='<div class="cc-shell"><header class="cc-top"><div class="cc-brand"><img class="cc-logo" src="'+BASE+'imgs/cosmic.png"><div><h1>Cosmic</h1><p>'+safe(p.localName||user())+' • '+gameCount+' g-mes</p></div></div><div class="cc-actions"><button class="cc-btn primary" data-action="games">Games</button><button class="cc-btn" data-action="apps">Apps</button><button class="cc-btn" data-action="warp">⌁ Warp</button><button class="cc-btn" data-action="quick">⌘ Quick Actions</button><button class="cc-btn" data-action="settings">Settings</button>'+(isDev()?'<button class="cc-btn" data-action="doctor">Cosmic Doctor</button>':'')+'</div></header>'+shellBar+quickLaunch+'<main class="cc-layout"><div style="display:flex;flex-direction:column;gap:14px"><section class="cc-panel"><div class="cc-feature"><span class="cc-tag">Featured</span><h2>'+safe(f?.name||'Explore Cosmic')+'</h2><p>'+safe(f?.description||'A rotating pick from the Cosmic library.')+'</p><div><button class="cc-btn primary" id="cc-feature-launch">Launch</button> <button class="cc-btn" id="cc-next">Next</button></div></div></section><section class="cc-panel"><div class="cc-head">Continue where you left off</div><div class="cc-body" id="cc-continue"></div></section><section class="cc-panel"><div class="cc-head">★ Pinned</div><div class="cc-body">'+(pin.length?'<div class="cc-row">'+pin.slice(0,10).map(x=>mini(x,true)).join('')+'</div>':'<div class="cc-empty">Pin games and apps to keep them here.</div>')+'</div></section><section class="cc-panel"><div class="cc-head">↻ Recently Opened</div><div class="cc-body">'+(recent.length?'<div class="cc-row">'+recent.slice(0,10).map(x=>mini(x,false)).join('')+'</div>':'<div class="cc-empty">Your recent launches will appear here.</div>')+'</div></section></div><div style="display:flex;flex-direction:column;gap:14px"><section class="cc-panel"><div class="cc-head">Updates</div><div class="cc-body"><div class="cc-news">'+(news.length?news.slice(0,5).map(n=>'<article><span>'+safe(n.tag)+' • '+safe(n.date)+'</span><b>'+safe(n.title)+'</b><p>'+safe(n.text)+'</p></article>').join(''):'<div class="cc-empty">No news yet.</div>')+'</div></div></section><section class="cc-panel"><div class="cc-head">Quick Actions</div><div class="cc-body"><div class="cc-grid"><button class="cc-quick" data-action="warp">⌁ Random Warp</button><button class="cc-quick" data-action="missions">✦ Missions</button><button class="cc-quick" data-action="profile">◉ Local Profile</button><button class="cc-quick" data-action="performance">⚙ Performance</button></div></div></section></div></main><div class="cc-footer"></div></div><div id="cc-modal" class="cc-modal"><div class="cc-dialog"></div></div>';
 
@@ -138,7 +173,7 @@ if(showQuickLaunch){
 }
 document.getElementById('cc-dashboard')?.addEventListener('click',dashboardFromShell);
 }
-function autoCloakPrompt(){if(isCloakShell()||load(AUTO_CLOAK_PROMPT,false))return;const m=modal('', '<div class="cc-prompt"><h2>Enable Auto Cloak?</h2><p>Would you like Cosmic to automatically enter cloak mode on future visits? Choose a cloak below. About:Blank is selected by default.</p><div class="cc-prompt-options"><button class="cc-prompt-choice default" id="cc-auto-blank"><strong>About:Blank Cloak</strong><small>Default • opens the Command Center inside an about:blank shell first.</small></button><button class="cc-prompt-choice" id="cc-auto-blob"><strong>Blob Cloak</strong><small>Opens the Command Center inside a temporary Blob URL shell first.</small></button></div><button class="cc-btn" id="cc-auto-none">No auto cloak</button><div class="cc-prompt-note">After cloaking, use the big Cosmic Dashboard button to enter Cosmic in the same cloaked tab.</div></div>');const finish=(type)=>{save(AUTO_CLOAK_PROMPT,true);save(AUTO_CLOAK_PREF,{enabled:type!=='none',type:type==='none'?'blank':type});m.classList.remove('show');if(type==='none'){toast('Auto cloak disabled.');return}toast('Auto cloak enabled for '+(type==='blank'?'About:Blank':'Blob')+'.');setTimeout(()=>autoCloak(type),120)};m.querySelector('#cc-auto-blank').onclick=()=>finish('blank');m.querySelector('#cc-auto-blob').onclick=()=>finish('blob');m.querySelector('#cc-auto-none').onclick=()=>finish('none')}
+function autoCloakPrompt(){if(isCloakShell()||load(AUTO_CLOAK_PROMPT,false))return;const m=modal('', '<div class="cc-prompt"><h2>Enable Auto Cloak?</h2><p>Would you like Cosmic to automatically enter cloak mode on future visits? Choose a cloak below. About:Blank is selected by default.</p><div class="cc-prompt-options"><button class="cc-prompt-choice default" id="cc-auto-blank"><strong>About:Blank Cloak</strong><small>Default • opens the Command Center inside an about:blank shell first.</small></button><button class="cc-prompt-choice" id="cc-auto-blob"><strong>Blob Cloak</strong><small>Opens the Command Center inside a temporary Blob URL shell first.</small></button></div><button class="cc-btn" id="cc-auto-none">No auto cloak</button><div class="cc-prompt-note">After cloaking, use the big Cosmic Dashboard button to enter Cosmic in the same cloaked tab.</div></div>');const finish=(type)=>{save(AUTO_CLOAK_PROMPT,true);save(AUTO_CLOAK_PREF,{enabled:type!=='none',type:type==='none'?'blank':type});m.classList.remove('show');if(type==='none'){toast('Auto cloak disabled.');return}toast('Auto cloak enabled for '+(type==='blank'?'About:Blank':'Blob')+'.');autoCloak(type)};m.querySelector('#cc-auto-blank').onclick=()=>finish('blank');m.querySelector('#cc-auto-blob').onclick=()=>finish('blob');m.querySelector('#cc-auto-none').onclick=()=>finish('none')}
 async function commandCenterDeveloper(){try{return localStorage.getItem('cosmicCurrentUserV1')==='TheDevilAngel';}catch(_){return false;}}
 function renderCosmicPortals(){
   if(document.getElementById('cosmic-portals'))return;

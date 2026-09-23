@@ -47,7 +47,7 @@ jobs:
   iframe-smoke:
     name: Game iframe smoke test
     runs-on: ubuntu-26.04
-    timeout-minutes: 6
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v4
         with:
@@ -58,10 +58,13 @@ jobs:
           npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
       - name: Test every game iframe
         env:
-          COSMIC_GAME_CONCURRENCY: "6"
-          COSMIC_GAME_NAV_TIMEOUT: "10000"
-          COSMIC_GAME_FRAME_WAIT: "7000"
-          COSMIC_GAME_LOAD_WAIT: "2500"
+          COSMIC_TARGET_CONCURRENCY: "48"
+          COSMIC_GAME_HTTP_TIMEOUT: "6000"
+          COSMIC_BROWSER_CONCURRENCY: "8"
+          COSMIC_GAME_NAV_TIMEOUT: "5000"
+          COSMIC_GAME_FRAME_WAIT: "2500"
+          COSMIC_GAME_LOAD_WAIT: "500"
+          COSMIC_BROWSER_SAMPLE: "12"
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME"

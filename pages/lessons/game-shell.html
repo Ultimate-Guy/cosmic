@@ -100,6 +100,23 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
   const gameFrame=document.getElementById('game');
   installFramePanic(gameFrame);
 
+  function syncPanicToGame(){
+    if(!gameFrame?.contentWindow)return;
+    let key='',url='';
+    try{
+      key=localStorage.getItem('cosmic-panic-key')||'';
+      url=localStorage.getItem('cosmic-panic-url')||'';
+    }catch(_){}
+    try{
+      gameFrame.contentWindow.postMessage({type:'cosmic-panic-config',key,url},'*');
+    }catch(_){}
+  }
+  gameFrame?.addEventListener('load',syncPanicToGame,true);
+  syncPanicToGame();
+  window.addEventListener('storage',e=>{
+    if(e.key==='cosmic-panic-key'||e.key==='cosmic-panic-url')syncPanicToGame();
+  });
+
   const params=new URLSearchParams(location.search);
   const game=params.get('game');
   if(!game){location.replace(home);return;}

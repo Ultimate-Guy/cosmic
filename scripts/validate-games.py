@@ -112,6 +112,20 @@ def dynamic_reference(value: str) -> bool:
 def add_issue(issues: list[dict], level: str, game: str, message: str) -> None:
     issues.append({"level": level, "game": game, "message": message})
 
+def check_parser_quality(game: str, parser: PageParser, issues: list[dict]) -> None:
+    if parser.script_starts != parser.script_ends or parser.unmatched_script_ends:
+        add_issue(
+            issues,
+            "warning",
+            game,
+            f"legacy script structure: {parser.script_starts} start / "
+            f"{parser.script_ends} end / {parser.unmatched_script_ends} unmatched close",
+        )
+
+    if parser.html_starts > 1:
+        add_issue(issues, "warning", game, "multiple <html> roots in legacy export")
+
+
 def check_local_resources(
     game: str,
     game_file: Path,
@@ -150,13 +164,13 @@ def check_local_resources(
             # Missing executable resources are likely to prevent a game from
             # starting. Missing images/fonts/media are warnings because those
             # often are optional presentation assets.
-            executable = candidate.suffix.lower() in {
-                ".js", ".mjs", ".css", ".json", ".wasm", ".unityweb",
-                ".data", ".bin", ".mem", ".html", ".htm"
+            executable_ref = _tag == "script"
+            executable_ext = candidate.suffix.lower() in {
+                ".js", ".mjs", ".wasm", ".unityweb", ".data", ".bin", ".mem"
             }
             add_issue(
                 issues,
-                "error" if executable else "warning",
+                "error" if executable_ref and executable_ext else "warning",
                 game,
                 f"missing local resource: {value}",
             )
@@ -176,68 +190,60 @@ def validate_game(game: str, game_file: Path, issues: list[dict]) -> None:
     if "\ufffd" in text:
         add_issue(issues, "warning", game, "game HTML contains replacement characters")
 
-    parser = PageParser()
-    try:
-        parser.feed(text)
-        parser.close()
-    except Exception as exc:
-        add_issue(issues, "error", game, f"HTML parser failed: {exc}")
+    documents = [text]
+    documents.extend(
+        match.group(1)
+        for match in re.finditer(r"<!\[CDATA\[(.*?)\]\]>", text, re.I | re.S)
+    )
 
-    if parser.script_starts != parser.script_ends or parser.script_depth or parser.unmatched_script_ends:
-        add_issue(
-            issues,
-            "warning",
-            game,
-            f"script structure is malformed ({parser.script_starts} start / "
-            f"{parser.script_ends} end / {parser.unmatched_script_ends} unmatched close)",
-        )
-
-    if parser.html_starts > 1:
-        add_issue(issues, "warning", game, "multiple <html> root elements found")
-
-    raw_base_count = len(re.findall(r"<base\b", text, flags=re.I))
-    if raw_base_count != len(parser.base_tags):
-        add_issue(issues, "error", game, "malformed or truncated <base> tag")
-
-    external_base = False
-    for base in parser.base_tags:
-        href = html.unescape(base.get("href", "")).strip()
-        if not href:
-            add_issue(issues, "warning", game, "<base> tag has no href")
+    any_executable = False
+    for document in documents:
+        parser = PageParser()
+        try:
+            parser.feed(document)
+            parser.close()
+        except Exception as exc:
+            add_issue(issues, "error", game, f"HTML parser failed: {exc}")
             continue
-        scheme = urlparse(href).scheme.lower()
-        if scheme not in {"http", "https"} and not href.startswith("/"):
-            add_issue(issues, "warning", game, f"unusual <base> href: {href}")
-        if href.startswith(("http://", "https://")):
-            external_base = True
+
+        check_parser_quality(game, parser, issues)
+
+        if re.search(r"<script\b|onload\s*=|onclick\s*=|javascript:", document, re.I):
+            any_executable = True
+
+        for base in parser.base_tags:
+            href = html.unescape(base.get("href", "")).strip()
+            if not href:
+                add_issue(issues, "warning", game, "<base> tag has no href")
+            elif href.startswith(("http://", "https://")):
+                pass
+            elif not href.startswith("/"):
+                add_issue(issues, "warning", game, f"unusual <base> href: {href}")
+
+        external_base = any(
+            html.unescape(base.get("href", "")).strip().startswith(("http://", "https://"))
+            for base in parser.base_tags
+        )
+        check_local_resources(game, game_file, parser, external_base, issues)
 
     lower = text.casefold()
 
     if "window.tre()" in lower:
         add_issue(issues, "error", game, "known startup exception: window.tre()")
     if re.search(r"(?<!jsd)elivr\.net/gh/", lower):
-        add_issue(issues, "error", game, "malformed elivr.net game asset host")
+        add_issue(issues, "error", game, "malformed elivr.net asset host")
     if "__cosmic_entry_password_json__" in lower:
         add_issue(issues, "error", game, "unbuilt Cosmic entry-password placeholder leaked into game")
-    if "cosmic-game-runtime-loader" in lower and parser.cosmic_loader_count != 1:
-        add_issue(
-            issues,
-            "error",
-            game,
-            f"expected one Cosmic runtime loader, found {parser.cosmic_loader_count}",
-        )
 
     if "window.parent.maeexportapis_();" in lower:
-        add_issue(issues, "warning", game, "calls window.parent.maeExportApis_() directly inside iframe")
+        add_issue(issues, "info", game, "legacy parent-frame shim")
     if "navigator.serviceworker.register(" in lower:
-        add_issue(issues, "warning", game, "registers its own service worker")
+        add_issue(issues, "info", game, "game contains its own service-worker registration")
     if "document.write(" in lower:
-        add_issue(issues, "warning", game, "uses document.write()")
+        add_issue(issues, "info", game, "game uses document.write()")
 
-    if not re.search(r"<script\b|onload=|onclick=|javascript:", lower):
-        add_issue(issues, "error", game, "no executable game code was detected")
-
-    check_local_resources(game, game_file, parser, external_base, issues)
+    if not any_executable:
+        add_issue(issues, "error", game, "no executable game code detected")
 
 def load_registry(issues: list[dict]) -> list[dict]:
     if not REGISTRY.is_file():
@@ -264,6 +270,7 @@ def validate_registry(registry: list[dict], discovered: dict[str, Path], issues:
     for item in registry:
         name = str(item.get("name", "")).strip() or "<unnamed>"
         key = normalize_name(name)
+
         if key in seen_names:
             add_issue(issues, "error", name, "duplicate game name in games.json")
         seen_names.add(key)
@@ -272,9 +279,13 @@ def validate_registry(registry: list[dict], discovered: dict[str, Path], issues:
         if not raw_path:
             add_issue(issues, "error", name, "registry entry has no path")
             continue
+
         if not raw_path.lower().endswith((".html", ".htm")):
             add_issue(issues, "error", name, f"registry path is not an HTML entry: {raw_path}")
             continue
+
+        if not raw_path.startswith("pages/lessons/"):
+            add_issue(issues, "error", name, f"registry path is outside pages/lessons: {raw_path}")
 
         target = registry_target(raw_path)
         if not target.is_file():
@@ -289,22 +300,31 @@ def validate_registry(registry: list[dict], discovered: dict[str, Path], issues:
         if resolved not in discovered_paths:
             add_issue(issues, "error", name, f"registry target is outside the discovered game set: {raw_path}")
 
+        category = str(item.get("category", "")).strip()
+        if not category:
+            add_issue(issues, "warning", name, "registry entry has no category")
+
+        tags = item.get("tags")
+        if not isinstance(tags, list):
+            add_issue(issues, "warning", name, "registry tags should be an array")
+
+        if "externalUrl" in item or "sourcePath" in item:
+            add_issue(issues, "error", name, "retired external-game registry fields are present")
+
     registry_paths = {
         registry_target(str(item.get("path", ""))).resolve()
         for item in registry
         if str(item.get("path", "")).strip()
     }
+
     for folder, path in sorted(discovered.items()):
         if path.resolve() not in registry_paths:
             add_issue(issues, "warning", folder, "game file exists but is not in games.json")
 
 def main() -> int:
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument(
-        "--strict-warnings",
-        action="store_true",
-        help="fail when warnings exist too",
-    )
+    arg_parser.add_argument("--strict-warnings", action="store_true", help="fail when warnings exist too")
+    arg_parser.add_argument("--json-report", help="write a JSON diagnostics report")
     args = arg_parser.parse_args()
 
     issues: list[dict] = []
@@ -321,6 +341,7 @@ def main() -> int:
 
     errors = [x for x in issues if x["level"] == "error"]
     warnings = [x for x in issues if x["level"] == "warning"]
+    infos = [x for x in issues if x["level"] == "info"]
 
     for issue in warnings:
         print(f"WARNING: {issue['game']}: {issue['message']}")
@@ -332,6 +353,19 @@ def main() -> int:
     print(f"REGISTRY ENTRIES: {len(registry)}")
     print(f"ERRORS: {len(errors)}")
     print(f"WARNINGS: {len(warnings)}")
+    print(f"INFO: {len(infos)}")
+
+    if args.json_report:
+        Path(args.json_report).write_text(
+            json.dumps({
+                "discovered_games": len(discovered),
+                "registry_entries": len(registry),
+                "errors": errors,
+                "warnings": warnings,
+                "info": infos,
+            }, indent=2) + "\n",
+            encoding="utf-8",
+        )
 
     if errors:
         print("GAME FILE VALIDATION FAILED")

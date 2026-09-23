@@ -4,11 +4,27 @@
   window.__COSMIC_GLOBAL_STATE__ = true;
   const API = location.hostname.endsWith('.github.io') ? 'https://cosmicv2.v75ultimate.workers.dev' : location.origin;
   const DISMISS_PREFIX = 'cosmicGlobalMessageDismissedV4';
+  const ANNOUNCEMENT_SESSION_KEY = 'cosmicAnnouncementSessionV1';
+  function sessionStart(){
+    try{
+      const existing=Number(sessionStorage.getItem(ANNOUNCEMENT_SESSION_KEY));
+      if(Number.isFinite(existing)&&existing>0)return existing;
+      const now=Date.now();
+      sessionStorage.setItem(ANNOUNCEMENT_SESSION_KEY,String(now));
+      return now;
+    }catch(_){ return Date.now(); }
+  }
+  const SITE_SESSION_STARTED_AT=sessionStart();
   function dismissalKey(kind,id){return DISMISS_PREFIX+'::'+kind+'::'+id;}
   function renderMessages(data){
     const global=data?.global||{};
     const messages=[];
-    if(data?.announcement?.text) messages.push({kind:'announcement',label:'Announcement',item:data.announcement});
+    const announcementCreated=Number(data?.announcement?.created_at||0);
+    // /announcement is live-only: an open Cosmic session sees announcements
+    // created after that session started. A later visit does not replay it.
+    if(data?.announcement?.text && announcementCreated>=SITE_SESSION_STARTED_AT){
+      messages.push({kind:'announcement',label:'Live Announcement',item:data.announcement});
+    }
     if(global.site_banner?.text) messages.push({kind:'site_banner',label:'Site Banner',item:global.site_banner});
     if(global.global_notice?.text) messages.push({kind:'global_notice',label:'Global Notice',item:global.global_notice});
     if(global.global_message?.text) messages.push({kind:'global_message',label:'Global Message',item:global.global_message});

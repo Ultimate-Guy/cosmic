@@ -6,6 +6,40 @@
   const SCRIPT_ID = 'cosmic-game-guard-loader';
   const RUNTIME_MARK = 'data-cosmic-runtime';
   const cosmicRoot = () => window.location.origin + '/';
+
+  // Panic key must also work while focus is inside the game iframe. For
+  // cross-origin GitHub Pages -> Worker launches, the shell sends this config
+  // through postMessage; for same-origin launches we also read localStorage.
+  (() => {
+    let panicKey = '';
+    let panicUrl = '';
+    const readPanic = () => {
+      try {
+        panicKey = localStorage.getItem('cosmic-panic-key') || panicKey;
+        panicUrl = localStorage.getItem('cosmic-panic-url') || panicUrl;
+      } catch (_) {}
+    };
+    const navigatePanic = () => {
+      if (!panicUrl) return;
+      try { window.top.location.assign(panicUrl); } catch (_) { try { location.assign(panicUrl); } catch (__) {} }
+    };
+    readPanic();
+    window.addEventListener('message', event => {
+      const data = event.data;
+      if (!data || data.type !== 'cosmic-panic-config') return;
+      if (typeof data.key === 'string') panicKey = data.key;
+      if (typeof data.url === 'string') panicUrl = data.url;
+    });
+    window.addEventListener('keydown', event => {
+      if (!panicKey || event.key !== panicKey) return;
+      const target = event.target;
+      if (target && (target.isContentEditable || ['INPUT','TEXTAREA','SELECT'].includes(target.tagName))) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      navigatePanic();
+    }, true);
+  })();
+
   // The game shell already owns Cosmic's controls. Do not inject or patch the
   // embedded game's runtime, because Unity/HTML5 games may rely on native
   // document.write/fullscreen behavior and can break when patched from inside.

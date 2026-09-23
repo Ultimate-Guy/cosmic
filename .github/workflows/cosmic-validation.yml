@@ -58,6 +58,8 @@ jobs:
           npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
       - name: Test every game iframe
         env:
+          GITHUB_SHA: ${{ github.sha }}
+          COSMIC_DEPLOYMENT_WAIT: "180000"
           COSMIC_TARGET_CONCURRENCY: "48"
           COSMIC_GAME_HTTP_TIMEOUT: "6000"
           COSMIC_BROWSER_CONCURRENCY: "8"

@@ -135,7 +135,7 @@ async function inspectBrowserGame(browser, game) {
     }
   });
 
-  const result = {name, url, ok:false, iframe:null, errors, failed, reason:null};
+  const result = {name, url, ok:false, shell:null, iframe:null, errors, failed, reason:null};
 
   try {
     const response = await page.goto(url, {
@@ -148,10 +148,22 @@ async function inspectBrowserGame(browser, game) {
       return result;
     }
 
-    const iframe = page.locator('#game');
-    await iframe.waitFor({state:'attached', timeout:4000});
+    const shellState = await page.evaluate(() => ({
+      href: location.href,
+      title: document.title,
+      hasGameIframe: !!document.querySelector('#game'),
+      iframeCount: document.querySelectorAll('iframe').length,
+      bodyLength: document.body?.innerHTML?.length || 0
+    }));
 
-    const src = await iframe.getAttribute('src');
+    if (!shellState.hasGameIframe) {
+      result.reason = 'Cosmic shell did not contain #game iframe';
+      result.shell = shellState;
+      return result;
+    }
+
+    const iframe = page.locator('#game');
+    const src = await iframe.getAttribute('src', { timeout: 1500 });
     if (!src) {
       result.reason = 'iframe src is empty';
       return result;
@@ -196,6 +208,7 @@ async function inspectBrowserGame(browser, game) {
       };
     });
 
+    result.shell = shellState;
     result.iframe = {src, ...state};
 
     if (state.width < 10 || state.height < 10) {

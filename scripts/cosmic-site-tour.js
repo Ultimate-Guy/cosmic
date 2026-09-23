@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='cosmicSiteTourV4';
+  const VERSION='cosmicSiteTourV5';
   const STATE_KEY=VERSION+'State';
   const SESSION_KEY=VERSION+'Session';
   const MAX_OPENS=2;

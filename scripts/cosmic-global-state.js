@@ -2,6 +2,20 @@
   'use strict';
   if (window.__COSMIC_GLOBAL_STATE__) return;
   window.__COSMIC_GLOBAL_STATE__ = true;
+  function installPanicKey(){
+    if(window.__COSMIC_PANIC_GLOBAL__) return;
+    window.__COSMIC_PANIC_GLOBAL__=true;
+    window.addEventListener('keydown',e=>{
+      let key='',url='';
+      try{key=localStorage.getItem('cosmic-panic-key')||'';url=localStorage.getItem('cosmic-panic-url')||'';}catch(_){}
+      if(!key||!url||e.key!==key)return;
+      const t=e.target;
+      if(t&&(t.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(t.tagName)))return;
+      e.preventDefault();e.stopImmediatePropagation();
+      try{window.top.location.assign(url);}catch(_){try{location.assign(url);}catch(__){}}
+    },true);
+  }
+  installPanicKey();
   const API = location.hostname.endsWith('.github.io') ? 'https://cosmicv2.v75ultimate.workers.dev' : location.origin;
   const DISMISS_PREFIX = 'cosmicGlobalMessageDismissedV4';
   const ANNOUNCEMENT_SESSION_KEY = 'cosmicAnnouncementSessionV1';

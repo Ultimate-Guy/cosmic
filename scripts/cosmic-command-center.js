@@ -87,7 +87,7 @@ function quick(){const m=modal('<h2>Quick Actions</h2><div class="cc-grid">'+[['
 function dashboardTarget(){return new URL(BASE+'pages/lessons/lessons.html',location.href).href}
 function showPopupBlockedNotice(type){
   const mode=type==='blank'?'About:Blank':'Blob';
-  const m=modal('<h2>Popups are blocked</h2><p>Cosmic Auto Cloak needs popups to open its cloaked window.</p><p><b>Allow popups for Cosmic</b> in your browser, then press <b>Try Again</b>.</p><p style="color:#8199a5;font-size:.78rem">In Chrome, use the pop-up blocked icon in the address bar or Site settings and allow pop-ups for this site.</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="cc-btn" id="cc-popup-cancel">Not now</button><button class="cc-btn primary" id="cc-popup-retry">Try Again</button></div>');
+  const m=modal('', '<h2>Popups are blocked</h2><p>Cosmic Auto Cloak needs popups to open its cloaked window.</p><p><b>Allow popups for Cosmic</b> in your browser, then press <b>Try Again</b>.</p><p style="color:#8199a5;font-size:.78rem">In Chrome, use the pop-up blocked icon in the address bar or Site settings and allow pop-ups for this site.</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="cc-btn" id="cc-popup-cancel">Not now</button><button class="cc-btn primary" id="cc-popup-retry">Try Again</button></div>');
   m.querySelector('#cc-popup-cancel').onclick=()=>m.classList.remove('show');
   m.querySelector('#cc-popup-retry').onclick=()=>{
     m.classList.remove('show');

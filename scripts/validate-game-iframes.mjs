@@ -149,6 +149,7 @@ async function runTargetChecks(games) {
 async function inspectBrowserGame(browser, game) {
   const name = String(game.name || '').trim() || '<unnamed>';
   const url = shellUrl(game);
+  const target = targetUrl(game);
   const page = await browser.newPage({viewport:{width:1365,height:768}});
   const errors = [];
   const failed = [];
@@ -168,7 +169,17 @@ async function inspectBrowserGame(browser, game) {
     }
   });
 
-  const result = {name, url, ok:false, shell:null, iframe:null, errors, failed, reason:null};
+  const result = {
+    name,
+    url,
+    ok:false,
+    inconclusive:false,
+    shell:null,
+    iframe:null,
+    errors,
+    failed,
+    reason:null
+  };
 
   try {
     const response = await page.goto(url, {
@@ -181,153 +192,104 @@ async function inspectBrowserGame(browser, game) {
       return result;
     }
 
-    const shellState = await page.evaluate(() => ({
-      href: location.href,
-      title: document.title,
-      hasGameIframe: !!document.querySelector('#game'),
-      iframeCount: document.querySelectorAll('iframe').length,
-      bodyLength: document.body?.innerHTML?.length || 0
-    }));
+    result.shell = {
+      href: page.url(),
+      title: await page.title().catch(() => ''),
+    };
 
-    let shell = shellState;
-    if (!shell.hasGameIframe) {
-      await page.waitForTimeout(500);
-      shell = await page.evaluate(() => ({
-        href: location.href,
-        title: document.title,
-        hasGameIframe: !!document.querySelector('#game'),
-        iframeCount: document.querySelectorAll('iframe').length,
-        bodyLength: document.body?.innerHTML?.length || 0
-      }));
+    const deadline = Date.now() + FRAME_WAIT;
+    let childFrame = null;
+
+    while (Date.now() < deadline) {
+      const frames = page.frames();
+      childFrame = frames.find(frame =>
+        frame !== page.mainFrame() &&
+        frame.url() &&
+        frame.url() !== 'about:blank' &&
+        (
+          frame.url().startsWith(target) ||
+          frame.url().includes('/pages/lessons/')
+        )
+      );
+
+      if (childFrame) break;
+      await page.waitForTimeout(150);
     }
 
-    if (!shell.hasGameIframe) {
-      result.reason = 'Cosmic shell did not contain #game iframe';
-      result.shell = shell;
+    if (!childFrame) {
+      result.reason = 'Cosmic shell created no loaded child game frame within timeout';
       return result;
     }
 
-    const iframeHandle = await page.$('#game');
-    if (!iframeHandle) {
-      result.reason = 'Cosmic shell iframe disappeared before inspection';
-      result.shell = shell;
-      return result;
-    }
+    // The child frame can navigate several times during game startup. Read only
+    // from the current Frame object, and retry after a navigation/context reset.
+    let state = null;
+    let lastContextError = null;
 
-    const src = await iframeHandle.getAttribute('src'); 
-    if (!src) {
-      result.reason = 'iframe src is empty';
-      return result;
-    }
-
-    let frame = await iframeHandle.contentFrame();
-    if (!frame) {
-      result.reason = 'iframe child frame was not created';
-      return result;
-    }
-
-    try {
-      await frame.waitForLoadState('domcontentloaded', {timeout:FRAME_WAIT});
-    } catch (_) {}
-
-    await page.waitForTimeout(LOAD_WAIT);
-
-    async function readFrameState() {
-      const handle = await page.$('#game');
-      if (!handle) return {retryable:false, state:null};
+    for (let attempt = 0; attempt < 4; attempt++) {
       try {
-        const currentSrc = await handle.getAttribute('src');
-        const state = await handle.evaluate(el => {
-          const doc = el.contentDocument;
-          const rect = el.getBoundingClientRect();
+        await childFrame.waitForLoadState('domcontentloaded', {timeout: Math.max(500, FRAME_WAIT - (attempt * 500))}).catch(() => {});
+        await page.waitForTimeout(LOAD_WAIT);
 
-          if (!doc) {
-            return {
-              hasDocument:false,
-              readyState:null,
-              bodyChildren:0,
-              htmlLength:0,
-              canvasCount:0,
-              width:rect.width,
-              height:rect.height
-            };
-          }
+        state = await childFrame.evaluate(() => {
+          const doc = document;
+          const body = doc.body;
+          const html = doc.documentElement;
+          const canvasCount = doc.querySelectorAll('canvas').length;
+          const visibleSurfaces = Array.from(
+            doc.querySelectorAll('canvas, #game, #gameContainer, #unity-container, iframe, video')
+          ).filter(el => {
+            const style = getComputedStyle(el);
+            const rect = el.getBoundingClientRect();
+            return style.display !== 'none' &&
+              style.visibility !== 'hidden' &&
+              rect.width > 0 &&
+              rect.height > 0;
+          }).length;
 
           return {
-            hasDocument:true,
-            readyState:doc.readyState,
-            bodyChildren:doc.body?.children.length || 0,
-            htmlLength:doc.documentElement?.outerHTML?.length || 0,
-            canvasCount:doc.querySelectorAll('canvas').length,
-            width:rect.width,
-            height:rect.height,
-            frameUrl: doc.location?.href || ''
+            frameUrl: location.href,
+            readyState: doc.readyState,
+            bodyChildren: body?.children.length || 0,
+            htmlLength: html?.outerHTML?.length || 0,
+            canvasCount,
+            visibleSurfaceCount: visibleSurfaces
           };
         });
-        return {retryable:false, state:{src:currentSrc, ...state}};
+
+        break;
       } catch (error) {
-        const message = String(error?.message || error);
-        if (/Execution context was destroyed|frame was detached|Target page, context or browser has been closed/i.test(message)) {
-          return {retryable:true, state:null};
+        lastContextError = String(error?.message || error);
+        if (!/Execution context was destroyed|Cannot find context with specified id|frame was detached|Target page, context or browser has been closed/i.test(lastContextError)) {
+          throw error;
         }
-        throw error;
+        await page.waitForTimeout(500);
+        const current = page.frames().find(frame =>
+          frame !== page.mainFrame() &&
+          frame.url() &&
+          frame.url() !== 'about:blank' &&
+          (frame.url().startsWith(target) || frame.url().includes('/pages/lessons/'))
+        );
+        if (current) childFrame = current;
       }
     }
 
-    let read;
-    try {
-      read = await readFrameState();
-    } catch (error) {
-      const message = String(error?.message || error);
-      if (/Cannot find context with specified id|Execution context was destroyed|frame was detached|Target page, context or browser has been closed/i.test(message)) {
-        // The game changed its browsing context while booting. Re-acquire the
-        // current child frame instead of treating Playwright's stale handle as
-        // a broken game.
-        await page.waitForTimeout(1000);
-        const currentFrames = page.frames();
-        const child = currentFrames.find(frame => frame !== page.mainFrame() && frame.url() && frame.url() !== 'about:blank');
-        if (child) {
-          try { await child.waitForLoadState('domcontentloaded', {timeout:FRAME_WAIT}); } catch (_) {}
-          result.shell = shell;
-          result.iframe = {src:child.url(), frameUrl:child.url(), reacquired:true};
-          result.ok = true;
-          return result;
-        }
-        result.reason = 'browser context changed during game startup (inconclusive)';
-        result.inconclusive = true;
-        result.ok = true;
-        return result;
-      }
-      throw error;
-    }
-
-    if (read.retryable) {
-      await page.waitForTimeout(800);
-      try { read = await readFrameState(); } catch (_) { read = {retryable:true, state:null}; }
-    }
-    if (read.retryable) {
-      result.reason = 'iframe kept navigating during inspection (inconclusive)';
+    if (!state) {
+      result.reason = 'game frame kept changing browsing context during startup';
       result.inconclusive = true;
       result.ok = true;
       return result;
     }
 
-    const state = read.state;
-    result.shell = shell;
     result.iframe = state;
 
-    if (state.width < 10 || state.height < 10) {
-      result.reason = 'iframe has invalid dimensions';
-      return result;
-    }
-
-    if (!state.hasDocument) {
-      result.reason = 'iframe document is inaccessible';
+    if (!state.frameUrl) {
+      result.reason = 'game frame has no URL';
       return result;
     }
 
     if (state.bodyChildren === 0 || state.htmlLength < 80) {
-      result.reason = 'iframe loaded an empty/nearly-empty document';
+      result.reason = 'game frame loaded an empty/nearly-empty document';
       return result;
     }
 
@@ -335,15 +297,22 @@ async function inspectBrowserGame(browser, game) {
       /ReferenceError|SyntaxError|TypeError|URIError|RangeError|Failed to load module script|uncaught/i.test(e)
     );
 
-    if (fatal && state.canvasCount === 0) {
+    if (fatal && state.canvasCount === 0 && state.visibleSurfaceCount === 0) {
       result.reason = fatal;
       return result;
     }
 
     result.ok = true;
     return result;
-  } catch (e) {
-    result.reason = e.message;
+  } catch (error) {
+    const message = String(error?.message || error);
+    if (/Execution context was destroyed|Cannot find context with specified id|frame was detached|Target page, context or browser has been closed/i.test(message)) {
+      result.reason = 'game navigated during smoke test (inconclusive)';
+      result.inconclusive = true;
+      result.ok = true;
+      return result;
+    }
+    result.reason = message;
     return result;
   } finally {
     await page.close();

@@ -156,14 +156,32 @@ async function inspectBrowserGame(browser, game) {
       bodyLength: document.body?.innerHTML?.length || 0
     }));
 
-    if (!shellState.hasGameIframe) {
+    let shell = shellState;
+    if (!shell.hasGameIframe) {
+      await page.waitForTimeout(500);
+      shell = await page.evaluate(() => ({
+        href: location.href,
+        title: document.title,
+        hasGameIframe: !!document.querySelector('#game'),
+        iframeCount: document.querySelectorAll('iframe').length,
+        bodyLength: document.body?.innerHTML?.length || 0
+      }));
+    }
+
+    if (!shell.hasGameIframe) {
       result.reason = 'Cosmic shell did not contain #game iframe';
-      result.shell = shellState;
+      result.shell = shell;
       return result;
     }
 
-    const iframe = page.locator('#game');
-    const src = await iframe.getAttribute('src', { timeout: 1500 });
+    const iframeHandle = await page.$('#game');
+    if (!iframeHandle) {
+      result.reason = 'Cosmic shell iframe disappeared before inspection';
+      result.shell = shell;
+      return result;
+    }
+
+    const src = await iframeHandle.getAttribute('src'); 
     if (!src) {
       result.reason = 'iframe src is empty';
       return result;
@@ -208,7 +226,7 @@ async function inspectBrowserGame(browser, game) {
       };
     });
 
-    result.shell = shellState;
+    result.shell = shell;
     result.iframe = {src, ...state};
 
     if (state.width < 10 || state.height < 10) {

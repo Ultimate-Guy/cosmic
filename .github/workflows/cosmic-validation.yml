@@ -43,3 +43,26 @@ jobs:
           fetch-depth: 1
       - name: Validate all original games
         run: python3 scripts/validate-games.py
+
+  iframe-smoke:
+    name: Game iframe smoke test
+    runs-on: ubuntu-26.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Install browser test dependencies
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
+      - name: Test every game iframe
+        env:
+          COSMIC_GAME_CONCURRENCY: "6"
+          COSMIC_GAME_NAV_TIMEOUT: "10000"
+          COSMIC_GAME_FRAME_WAIT: "7000"
+          COSMIC_GAME_LOAD_WAIT: "2500"
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME"
+          CHROME_PATH="$CHROME" node scripts/validate-game-iframes.mjs

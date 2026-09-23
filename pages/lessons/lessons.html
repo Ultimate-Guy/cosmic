@@ -43,6 +43,8 @@
             .password-card{padding:25px}.admin-note{font-size:.68rem}
         }
     </style>
+
+<script src="../../scripts/cosmic-panic.js?v=panic-v1"></script>
 </head>
 <body>
     <div id="password-gate"><div class="password-card"><h2 style="color:var(--accent);letter-spacing:2px;">COSMIC ENTRY</h2><div class="pass-input-container"><input type="password" id="pass-field" placeholder="Enter Password..." autocomplete="off"/><button class="blank-btn" style="width:45px;flex:none;" onclick="togglePass()" aria-label="Show password"><i id="eye-icon" class="fas fa-eye"></i></button><button class="play-btn" style="width:80px;flex:none;" onclick="checkPass()">Enter</button></div><p id="error-msg" style="color:#ff4d4d;font-size:.8rem;display:none;">Invalid Access Code.</p></div></div>

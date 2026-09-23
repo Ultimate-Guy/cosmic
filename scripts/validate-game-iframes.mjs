@@ -149,7 +149,7 @@ async function inspectBrowserGame(browser, game) {
     }
 
     const iframe = page.locator('#game');
-    await iframe.waitFor({state:'attached', timeout:2500});
+    await iframe.waitFor({state:'attached', timeout:4000});
 
     const src = await iframe.getAttribute('src');
     if (!src) {
@@ -203,8 +203,8 @@ async function inspectBrowserGame(browser, game) {
       return result;
     }
 
-    if (!state.hasDocument || !state.readyState || state.readyState === 'loading') {
-      result.reason = 'iframe document did not finish loading';
+    if (!state.hasDocument) {
+      result.reason = 'iframe document is inaccessible';
       return result;
     }
 

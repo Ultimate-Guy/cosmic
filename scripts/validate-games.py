@@ -168,9 +168,20 @@ def check_local_resources(
             executable_ext = candidate.suffix.lower() in {
                 ".js", ".mjs", ".wasm", ".unityweb", ".data", ".bin", ".mem"
             }
+
+            # Construct 2 exports commonly reference offlineClient.js for
+            # optional offline caching. Its absence does not prevent the game
+            # runtime from booting, so do not treat it as a hard dependency.
+            optional_offline = candidate.name.casefold() in {
+                "offlineclient.js", "offline.js", "service-worker2.js"
+            }
+
+            severity = "info" if optional_offline else (
+                "error" if executable_ref and executable_ext else "warning"
+            )
             add_issue(
                 issues,
-                "error" if executable_ref and executable_ext else "warning",
+                severity,
                 game,
                 f"missing local resource: {value}",
             )

@@ -87,7 +87,7 @@ def clean_game_page(folder):
     cleaned=re.sub(r'\s*<script[^>]*id=["\']cosmic-game-runtime-loader["\'][^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     insertion='''\n<script id="cosmic-game-runtime-loader">
 (() => {
-  const root = location.hostname.endsWith('.github.io') ? '/cosmic/' : '/';
+  const root = location.origin + '/';
   const files = [
     'scripts/game-guard.js?v=guard',
     'scripts/cosmic-wrapper-controls.js?v=wrapper-v5',

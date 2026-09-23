@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const { chromium } = require('playwright-core');
-const fs = require('fs');
+import { chromium } from 'playwright-core';
+import fs from 'node:fs';
 
 const REGISTRY = 'pages/lessons/games.json';
 const GAME_ORIGIN = process.env.COSMIC_GAME_ORIGIN || 'https://cosmicv2.v75ultimate.workers.dev';
@@ -70,7 +70,9 @@ async function inspectGame(browser, game) {
 async function main() {
   const games=readGames();
   console.log('Testing ' + games.length + ' games through ' + GAME_ORIGIN);
-  const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=swiftshader']});
+  const executablePath = process.env.CHROME_PATH;
+  if (!executablePath) throw new Error('CHROME_PATH is not set');
+  const browser=await chromium.launch({headless:true, executablePath, args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=swiftshader']});
   const results=[]; let next=0;
   async function worker(){ while(true){ const i=next++; if(i>=games.length) return; const r=await inspectGame(browser,games[i]); results[i]=r; process.stdout.write(r.ok?'.':'F'); } }
   try { await Promise.all(Array.from({length:Math.min(CONCURRENCY,games.length)},worker)); } finally { await browser.close(); }

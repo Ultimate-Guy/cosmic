@@ -87,19 +87,10 @@ def clean_game_page(folder):
     cleaned=re.sub(r'\s*<script[^>]*id=["\']cosmic-game-runtime-loader["\'][^>]*>.*?</script>\s*','\n',cleaned,flags=re.DOTALL)
     insertion='''\n<script id="cosmic-game-runtime-loader">
 (() => {
-  const root = location.origin + '/';
-  const files = [
-    'scripts/game-guard.js?v=guard',
-    'scripts/cosmic-wrapper-controls.js?v=wrapper-v5',
-    'scripts/cosmic-global-state.js?v=global-state-v5',
-    'scripts/cosmic-dev-tools.js?build=dev-commands-v5'
-  ];
-  for (const file of files) {
-    const script = document.createElement('script');
-    script.src = root + file;
-    script.async = false;
-    (document.body || document.documentElement).appendChild(script);
-  }
+  const script = document.createElement('script');
+  script.src = location.origin + '/scripts/game-guard.js?v=guard';
+  script.async = false;
+  (document.body || document.documentElement).appendChild(script);
 })();
 </script>\n'''
     matches=list(re.finditer(r'</body>',cleaned,re.I))

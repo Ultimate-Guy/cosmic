@@ -12,6 +12,39 @@ const NAV_TIMEOUT = Number(process.env.COSMIC_GAME_NAV_TIMEOUT || 5000);
 const FRAME_WAIT = Number(process.env.COSMIC_GAME_FRAME_WAIT || 2500);
 const LOAD_WAIT = Number(process.env.COSMIC_GAME_LOAD_WAIT || 500);
 const BROWSER_SAMPLE = Number(process.env.COSMIC_BROWSER_SAMPLE || 12);
+const EXPECTED_COMMIT = process.env.GITHUB_SHA || '';
+const DEPLOYMENT_URL = process.env.COSMIC_DEPLOYMENT_URL || GAME_ORIGIN.replace(/\/+$/, '') + '/deployment.json';
+
+async function waitForDeployment() {
+  if (!EXPECTED_COMMIT) return;
+  const deadline = Date.now() + Number(process.env.COSMIC_DEPLOYMENT_WAIT || 180000);
+  let last = null;
+  while (Date.now() < deadline) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      const response = await fetch(DEPLOYMENT_URL + '?verify=' + encodeURIComponent(EXPECTED_COMMIT) + '&t=' + Date.now(), {
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: {'Cache-Control':'no-cache','Pragma':'no-cache'}
+      });
+      clearTimeout(timer);
+      if (response.ok) {
+        const data = await response.json();
+        last = data;
+        if (data.source_commit === EXPECTED_COMMIT) {
+          console.log('LIVE DEPLOYMENT VERIFIED: ' + EXPECTED_COMMIT);
+          return;
+        }
+      }
+    } catch (e) {
+      last = String(e);
+    }
+    await new Promise(resolve => setTimeout(resolve, 5000));
+  }
+  throw new Error('Live Worker deployment did not reach expected commit ' + EXPECTED_COMMIT + '; last=' + JSON.stringify(last));
+}
+
 
 function readGames() {
   const data = JSON.parse(fs.readFileSync(REGISTRY, 'utf8'));
@@ -187,7 +220,7 @@ async function inspectBrowserGame(browser, game) {
       return result;
     }
 
-    const frame = await iframe.contentFrame();
+    const frame = await iframeHandle.contentFrame();
     if (!frame) {
       result.reason = 'iframe child frame was not created';
       return result;
@@ -199,7 +232,7 @@ async function inspectBrowserGame(browser, game) {
 
     await page.waitForTimeout(LOAD_WAIT);
 
-    const state = await iframe.evaluate(el => {
+    const state = await iframeHandle.evaluate(el => {
       const doc = el.contentDocument;
       const rect = el.getBoundingClientRect();
 
@@ -299,6 +332,8 @@ async function runBrowserChecks(games) {
 
 async function main() {
   const games = readGames();
+  console.log('WAITING FOR LIVE DEPLOYMENT');
+  await waitForDeployment();
   console.log('FAST TARGET TEST: ' + games.length + ' games, concurrency ' + TARGET_CONCURRENCY);
 
   const targetResults = await runTargetChecks(games);

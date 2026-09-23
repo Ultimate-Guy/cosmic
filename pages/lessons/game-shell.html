@@ -76,6 +76,30 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     }
   },true);
 
+  function installFramePanic(frame){
+    if(!frame)return;
+    const bind=()=>{
+      try{
+        const win=frame.contentWindow;
+        if(!win||win.__COSMIC_PANIC_BOUND__)return;
+        win.__COSMIC_PANIC_BOUND__=true;
+        win.addEventListener('keydown',e=>{
+          let key='',url='';
+          try{key=localStorage.getItem('cosmic-panic-key')||'';url=localStorage.getItem('cosmic-panic-url')||'';}catch(_){}
+          if(!key||!url||e.key!==key)return;
+          const t=e.target;
+          if(t&&(t.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(t.tagName)))return;
+          e.preventDefault();e.stopImmediatePropagation();
+          try{window.top.location.assign(url);}catch(_){location.assign(url);}
+        },true);
+      }catch(_){}
+    };
+    frame.addEventListener('load',bind,true);
+    bind();
+  }
+  const gameFrame=document.getElementById('game');
+  installFramePanic(gameFrame);
+
   const params=new URLSearchParams(location.search);
   const game=params.get('game');
   if(!game){location.replace(home);return;}

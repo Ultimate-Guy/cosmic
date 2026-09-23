@@ -5,7 +5,7 @@
   const BUTTON_ID = 'cosmic-home-button';
   const SCRIPT_ID = 'cosmic-game-guard-loader';
   const RUNTIME_MARK = 'data-cosmic-runtime';
-  const cosmicRoot = () => window.location.hostname.endsWith('github.io') ? '/cosmic/' : '/';
+  const cosmicRoot = () => window.location.origin + '/';
   // The game shell already owns Cosmic's controls. Do not inject or patch the
   // embedded game's runtime, because Unity/HTML5 games may rely on native
   // document.write/fullscreen behavior and can break when patched from inside.

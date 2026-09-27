@@ -991,11 +991,13 @@ async function serveGfiles(request, env) {
 
   const githubPath = parts.map(part => encodeURIComponent(part)).join('/');
   const upstream = await fetch(
-    'https://raw.githubusercontent.com/' + repo + '/main/' + githubPath,
+    'https://api.github.com/repos/' + repo + '/contents/' + githubPath + '?ref=main',
     {
       headers: {
+        Accept: 'application/vnd.github.raw+json',
         Authorization: 'Bearer ' + token,
-        'User-Agent': 'Cosmic-gfiles-proxy'
+        'User-Agent': 'Cosmic-gfiles-proxy',
+        'X-GitHub-Api-Version': '2022-11-28'
       },
       cf: { cacheTtl: 3600, cacheEverything: true }
     }

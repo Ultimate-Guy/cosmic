@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: ["master"]
   workflow_dispatch:
+    inputs:
+      audit_gfiles:
+        description: "Also audit the private gfiles through gfiles5 sources"
+        required: false
+        type: boolean
+        default: false
   workflow_run:
     workflows: ["Deploy static content to pages"]
     types: [completed]
@@ -15,12 +21,17 @@ permissions:
 
 jobs:
   validate:
-    if: ${{ github.event_name != 'workflow_run' }}
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    name: Registry, core, game, and optional gfiles validation
     runs-on: ubuntu-26.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
       - name: Validate registries
         run: |
           python3 - <<'PY'
@@ -34,6 +45,7 @@ jobs:
               assert len(names)==len(set(names)), f'{f} contains duplicate names'
           print('Cosmic registries are valid.')
           PY
+
       - name: Check core files
         run: |
           test -f index.html
@@ -43,28 +55,11 @@ jobs:
           test -f pages/lessons/game-shell.html
           echo "Core Cosmic files are present."
 
-  validate-games:
-    if: ${{ github.event_name != 'workflow_run' }}
-    name: Fast original-game validation
-    runs-on: ubuntu-26.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
       - name: Validate all original games
         run: python3 scripts/validate-games.py
 
-  gfiles-audit:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
-    name: Audit gfiles sources
-    runs-on: ubuntu-26.04
-    timeout-minutes: 15
-    steps:
-      - name: Checkout Cosmic
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
       - name: Checkout gfiles
+        if: ${{ inputs.audit_gfiles }}
         uses: actions/checkout@v4
         with:
           repository: Ultimate-Guy/gfiles
@@ -72,7 +67,9 @@ jobs:
           token: ${{ secrets.GFILES_READ_TOKEN }}
           path: .gfiles/gfiles
           fetch-depth: 1
+
       - name: Checkout gfiles2
+        if: ${{ inputs.audit_gfiles }}
         uses: actions/checkout@v4
         with:
           repository: Ultimate-Guy/gfiles2
@@ -80,7 +77,9 @@ jobs:
           token: ${{ secrets.GFILES_READ_TOKEN }}
           path: .gfiles/gfiles2
           fetch-depth: 1
+
       - name: Checkout gfiles3
+        if: ${{ inputs.audit_gfiles }}
         uses: actions/checkout@v4
         with:
           repository: Ultimate-Guy/gfiles3
@@ -88,7 +87,9 @@ jobs:
           token: ${{ secrets.GFILES_READ_TOKEN }}
           path: .gfiles/gfiles3
           fetch-depth: 1
+
       - name: Checkout gfiles4
+        if: ${{ inputs.audit_gfiles }}
         uses: actions/checkout@v4
         with:
           repository: Ultimate-Guy/gfiles4
@@ -96,7 +97,9 @@ jobs:
           token: ${{ secrets.GFILES_READ_TOKEN }}
           path: .gfiles/gfiles4
           fetch-depth: 1
+
       - name: Checkout gfiles5
+        if: ${{ inputs.audit_gfiles }}
         uses: actions/checkout@v4
         with:
           repository: Ultimate-Guy/gfiles5
@@ -104,9 +107,13 @@ jobs:
           token: ${{ secrets.GFILES_READ_TOKEN }}
           path: .gfiles/gfiles5
           fetch-depth: 1
-      - name: Audit source repositories
+
+      - name: Audit gfiles sources
+        if: ${{ inputs.audit_gfiles }}
         run: python3 scripts/audit-gfiles.py
-      - name: Upload audit report
+
+      - name: Upload gfiles audit report
+        if: ${{ inputs.audit_gfiles }}
         uses: actions/upload-artifact@v4
         with:
           name: gfiles-audit-report
@@ -116,7 +123,7 @@ jobs:
 
   iframe-smoke:
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
-    name: Game iframe smoke test
+    name: Deployed game iframe smoke test
     runs-on: ubuntu-26.04
     timeout-minutes: 6
     steps:
@@ -125,10 +132,12 @@ jobs:
         with:
           fetch-depth: 1
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
       - name: Install browser test dependencies
         run: |
           npm init -y >/dev/null 2>&1
           npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
+
       - name: Test game iframes
         env:
           GITHUB_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}

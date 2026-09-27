@@ -1,121 +1,103 @@
 #!/usr/bin/env python3
-"""Build a tiny manifest of game folders stored in private gfiles repositories.
+"""Add lightweight private-gfiles entries to Cosmic's games registry.
 
-This never copies game files into Cosmic. It only records the repository, pinned
-commit, game folder, and entry file needed by the Cloudflare Worker proxy.
+The private repositories stay outside Cosmic. Only catalog metadata is written
+to games.json; no game source/assets are copied into Cosmic.
 """
 
 from __future__ import annotations
 
 import json
-import os
-import sys
-import urllib.error
-import urllib.request
+import re
 from pathlib import Path
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / ".build" / "gfiles-manifest.json"
-TOKEN = os.environ.get("GFILES_READ_TOKEN", "").strip()
-
+REGISTRY = ROOT / "pages" / "lessons" / "games.json"
 SOURCES = [
-    ("gfiles", "Ultimate-Guy/gfiles"),
-    ("gfiles2", "Ultimate-Guy/gfiles2"),
-    ("gfiles3", "Ultimate-Guy/gfiles3"),
-    ("gfiles4", "Ultimate-Guy/gfiles4"),
-    ("gfiles5", "Ultimate-Guy/gfiles5"),
+    ("gfiles", ROOT / ".gfiles" / "gfiles", "Ultimate-Guy/gfiles"),
+    ("gfiles2", ROOT / ".gfiles" / "gfiles2", "Ultimate-Guy/gfiles2"),
+    ("gfiles3", ROOT / ".gfiles" / "gfiles3", "Ultimate-Guy/gfiles3"),
+    ("gfiles4", ROOT / ".gfiles" / "gfiles4", "Ultimate-Guy/gfiles4"),
+    ("gfiles5", ROOT / ".gfiles" / "gfiles5", "Ultimate-Guy/gfiles5"),
 ]
-EXCLUDED = {
-    ".git", ".github", "patch", "build", "frame",
-    "warning", "warnings", "404", "408", "offline",
-}
+EXCLUDED = {".git", ".github", "patch", "build", "frame", "warning", "warnings", "404", "408", "offline"}
 
 
-def gh_json(url: str) -> dict:
-    if not TOKEN:
-        raise SystemExit("GFILES_READ_TOKEN is not configured")
-    req = urllib.request.Request(
-        url,
-        headers={
-            "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {TOKEN}",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": "Cosmic-Gfiles-Importer",
-        },
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=30) as response:
-            return json.load(response)
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", "replace")[:500]
-        raise SystemExit(f"GitHub API request failed ({exc.code}): {body}") from exc
-    except Exception as exc:
-        raise SystemExit(f"GitHub API request failed: {exc}") from exc
+def normalize(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", value.casefold())
 
 
 def display_name(folder: str) -> str:
-    import re
     value = re.sub(r"([a-z])([A-Z])", r"\1 \2", folder)
     value = re.sub(r"[_-]+", " ", value).strip()
     value = re.sub(r"\s+", " ", value)
     return value.title() or folder
 
 
+def discover(source: Path) -> list[str]:
+    if not source.is_dir():
+        raise SystemExit(f"Missing checked-out source: {source}")
+    return sorted(
+        p.name
+        for p in source.iterdir()
+        if p.is_dir()
+        and p.name.casefold() not in EXCLUDED
+        and (p / "index.html").is_file()
+    )
+
+
 def main() -> int:
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    manifest = {"version": 1, "sources": []}
-    total = 0
+    data = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    if not isinstance(data, list):
+        raise SystemExit("games.json must contain an array")
 
-    for source_id, repo in SOURCES:
-        commit = gh_json(f"https://api.github.com/repos/{repo}/commits/main")
-        commit_sha = str(commit.get("sha", "")).strip()
-        if not commit_sha:
-            raise SystemExit(f"{repo}: could not determine main commit")
+    # Existing Cosmic games always win when a gfiles name collides.
+    seen_names = {normalize(str(item.get("name", ""))) for item in data}
+    seen_source_paths = set()
+    added = 0
+    duplicates = 0
+    per_source = {}
 
-        tree = gh_json(
-            f"https://api.github.com/repos/{repo}/git/trees/{commit_sha}?recursive=1"
-        )
-        if tree.get("truncated"):
-            raise SystemExit(
-                f"{repo}: GitHub returned a truncated tree; refusing to build an incomplete game catalog"
-            )
-
-        games = {}
-        for entry in tree.get("tree", []):
-            path = str(entry.get("path", ""))
-            if entry.get("type") != "blob" or not path.lower().endswith("/index.html"):
+    for source_id, source, repo in SOURCES:
+        source_added = 0
+        for folder in discover(source):
+            name = display_name(folder)
+            key = normalize(name)
+            source_key = f"{source_id}:{folder}".casefold()
+            if not key or key in seen_names or source_key in seen_source_paths:
+                duplicates += 1
                 continue
 
-            parts = path.split("/")
-            if len(parts) != 2:
-                continue
+            data.append({
+                "name": name,
+                "path": f"gfiles/{source_id}/{quote(folder, safe='')}/index.html",
+                "category": "Arcade",
+                "tags": ["gfiles"],
+                "featured": False,
+                "source": source_id,
+                "source_repo": repo,
+                "source_path": f"{folder}/index.html",
+            })
+            seen_names.add(key)
+            seen_source_paths.add(source_key)
+            source_added += 1
+            added += 1
 
-            root = parts[0]
-            if root.casefold() in EXCLUDED:
-                continue
+        per_source[source_id] = source_added
 
-            games[root] = {
-                "name": display_name(root),
-                "root": root,
-                "entry": "index.html",
-            }
+    local = [x for x in data if not str(x.get("source", "")).startswith("gfiles")]
+    remote = [x for x in data if str(x.get("source", "")).startswith("gfiles")]
+    remote.sort(key=lambda x: (normalize(str(x.get("name", ""))), str(x.get("source", ""))))
+    REGISTRY.write_text(json.dumps(local + remote, indent=2) + "\n", encoding="utf-8")
 
-        items = sorted(games.values(), key=lambda x: x["name"].casefold())
-        manifest["sources"].append(
-            {
-                "id": source_id,
-                "repo": repo,
-                "ref": commit_sha,
-                "games": items,
-            }
-        )
-        total += len(items)
-        print(f"{source_id}: {len(items)} games @ {commit_sha}")
-
-    manifest["totals"] = {"games": total, "sources": len(SOURCES)}
-    OUT.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    print(f"TOTAL PRIVATE GFILES GAMES: {total}")
-    print(f"MANIFEST: {OUT}")
+    print("PRIVATE GFILES CATALOG")
+    for source_id, count in per_source.items():
+        print(f"{source_id}: +{count}")
+    print(f"Added: {added}")
+    print(f"Deduplicated: {duplicates}")
+    print(f"Final catalog: {len(local) + len(remote)}")
+    print("Game source/assets copied into Cosmic: 0")
     return 0
 
 

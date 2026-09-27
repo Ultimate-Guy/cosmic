@@ -26,20 +26,55 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
   const path=location.pathname||'';
   const index=path.indexOf(marker);
   const prefix=index>=0?path.slice(0,index):(location.hostname.endsWith('.github.io')?'/cosmic':'');
-  const home=location.origin+prefix+marker+'lessons.html';
+  const params=new URLSearchParams(location.search);
+  const requestedHome=params.get('return')||'';
+  const defaultHome=location.origin+prefix+marker+'lessons.html';
+  let home=defaultHome;
+  try{
+    const candidate=new URL(requestedHome,location.origin);
+    const allowed=candidate.protocol==='https:'&&(
+      candidate.hostname===workerHost ||
+      (candidate.hostname.endsWith('.github.io')&&candidate.pathname.includes('/cosmic/'))
+    );
+    if(allowed) home=candidate.href;
+  }catch(e){}
   const homeButton=document.getElementById('home');
+  const HOME_POS_KEY='cosmicGameHomeButtonPositionV2';
+  try{
+    const saved=JSON.parse(localStorage.getItem(HOME_POS_KEY)||'null');
+    if(saved&&Number.isFinite(saved.left)&&Number.isFinite(saved.top)){
+      const maxLeft=Math.max(0,window.innerWidth-homeButton.offsetWidth);
+      const maxTop=Math.max(0,window.innerHeight-homeButton.offsetHeight);
+      homeButton.style.left=Math.max(0,Math.min(maxLeft,saved.left))+'px';
+      homeButton.style.top=Math.max(0,Math.min(maxTop,saved.top))+'px';
+    }
+  }catch(e){}
   homeButton.addEventListener('click',function(){
     if(homeButton.dataset.dragged==='1'){homeButton.dataset.dragged='0';return;}
-    try{sessionStorage.setItem('cosmicReturnFromGame','1');}catch(e){}
-    location.assign(home);
+    const destination=new URL(home);
+    destination.searchParams.set('fromGame','1');
+    try{
+      sessionStorage.setItem('cosmicReturnFromGame','1');
+      sessionStorage.setItem('cosmicGamesUnlocked','1');
+    }catch(e){}
+    try{localStorage.setItem('cosmicGamesUnlocked','1');}catch(e){}
+    location.assign(destination.href);
   });
 
-    let dragging=false,moved=false,startX=0,startY=0,startLeft=0,startTop=0;
+  let dragging=false,moved=false,startX=0,startY=0,startLeft=0,startTop=0;
   const stopDragging=()=>{
     if(!dragging)return;
     dragging=false;
     homeButton.style.cursor='grab';
-    if(moved) homeButton.dataset.dragged='1';
+    if(moved){
+      homeButton.dataset.dragged='1';
+      try{
+        localStorage.setItem(HOME_POS_KEY,JSON.stringify({
+          left:parseFloat(homeButton.style.left)||0,
+          top:parseFloat(homeButton.style.top)||0
+        }));
+      }catch(e){}
+    }
   };
   homeButton.addEventListener('pointerdown',function(e){
     if(e.button!==undefined&&e.button!==0)return;
@@ -48,10 +83,11 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     startX=e.clientX;startY=e.clientY;
     startLeft=r.left;startTop=r.top;
     homeButton.style.cursor='grabbing';
+    try{homeButton.setPointerCapture(e.pointerId);}catch(_){}
     e.preventDefault();
     e.stopPropagation();
   });
-  window.addEventListener('pointermove',function(e){
+  homeButton.addEventListener('pointermove',function(e){
     if(!dragging)return;
     const dx=e.clientX-startX,dy=e.clientY-startY;
     if(!moved&&(Math.abs(dx)>3||Math.abs(dy)>3))moved=true;
@@ -61,20 +97,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     homeButton.style.left=Math.max(0,Math.min(maxLeft,startLeft+dx))+'px';
     homeButton.style.top=Math.max(0,Math.min(maxTop,startTop+dy))+'px';
     e.preventDefault();
-  },true);
-  window.addEventListener('pointerup',function(e){
+  });
+  homeButton.addEventListener('pointerup',function(e){
     if(!dragging)return;
     stopDragging();
+    try{homeButton.releasePointerCapture(e.pointerId);}catch(_){}
     e.preventDefault();
-  },true);
-  window.addEventListener('pointercancel',stopDragging,true);
-  homeButton.addEventListener('click',function(e){
-    if(homeButton.dataset.dragged==='1'){
-      homeButton.dataset.dragged='0';
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  },true);
+  });
+  homeButton.addEventListener('pointercancel',stopDragging);
 
   function installFramePanic(frame){
     if(!frame)return;

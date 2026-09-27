@@ -1100,7 +1100,10 @@ export default {
       if (maintenance && !bypass && !isMaintenanceAsset && !url.pathname.startsWith('/api/')) {
         return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cosmic • Maintenance</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050c12;color:#f2f7fa;font:16px system-ui,sans-serif;text-align:center}main{max-width:560px;padding:32px;border:1px solid #2dccff;border-radius:22px;background:#07131a;box-shadow:0 25px 80px rgba(0,0,0,.55)}h1{color:#2dccff}</style></head><body><main><div style="font-size:48px">☄</div><h1>Cosmic is under maintenance</h1><p>${await getMaintenanceMessage(env)}</p></main></body></html>`,{status:503,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'no-store'}});
       }
-      if (url.pathname.startsWith('/gfiles/')) {\n        const gfiles = await serveGfiles(request, env);\n        if (gfiles) return gfiles;\n      }\n      const hub = await serveHub(request, env);
+      if (url.pathname.startsWith('/gfiles/')) {
+        const gfiles = await serveGfiles(request, env);
+        if (gfiles) return gfiles;
+      }\n      const hub = await serveHub(request, env);
       if (hub) return hub;
       return fetchAsset(request, env);
     }

@@ -1,0 +1,53 @@
+name: Cosmic iframe validation
+
+on:
+  workflow_run:
+    workflows: ["Deploy static content to pages"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cosmic-iframe-validation
+  cancel-in-progress: true
+
+jobs:
+  iframe-smoke:
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'master') ||
+      github.event_name == 'workflow_dispatch'
+    name: Game iframe smoke test
+    runs-on: ubuntu-26.04
+    timeout-minutes: 6
+
+    steps:
+      - name: Checkout the exact deployed commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Install browser test dependencies
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
+
+      - name: Test game targets and iframe samples
+        env:
+          GITHUB_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          COSMIC_DEPLOYMENT_WAIT: "30000"
+          COSMIC_GAME_HTTP_TIMEOUT: "6000"
+          COSMIC_TARGET_CONCURRENCY: "48"
+          COSMIC_BROWSER_CONCURRENCY: "8"
+          COSMIC_GAME_NAV_TIMEOUT: "5000"
+          COSMIC_GAME_FRAME_WAIT: "5000"
+          COSMIC_GAME_LOAD_WAIT: "500"
+          COSMIC_BROWSER_SAMPLE: "12"
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME"
+          CHROME_PATH="$CHROME" node scripts/validate-game-iframes.mjs

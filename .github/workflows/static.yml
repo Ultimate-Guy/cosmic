@@ -35,6 +35,18 @@ jobs:
           file_pattern: 'pages/lessons/**'
           skip_dirty_check: false
           skip_fetch: true
+      - name: Sync private gfiles catalog
+        env:
+          GFILES_READ_TOKEN: ${{ secrets.GFILES_READ_TOKEN }}
+        run: python3 scripts/import-gfiles-registry.py
+      - name: Sync gfiles runtime secret to Cloudflare
+        env:
+          GFILES_READ_TOKEN: ${{ secrets.GFILES_READ_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$GFILES_READ_TOKEN" | npx wrangler secret put GFILES_READ_TOKEN --config wrangler.jsonc --api-token "$CLOUDFLARE_API_TOKEN" --account-id "$CLOUDFLARE_ACCOUNT_ID"
       - name: Prepare identical deployment files
         env:
           PASSWORD_FOR_GAMES_UNLOCK: ${{ secrets.PASSWORD_FOR_GAMES_UNLOCK }}

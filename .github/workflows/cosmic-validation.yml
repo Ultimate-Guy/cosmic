@@ -5,13 +5,6 @@ on:
     workflows: ["Deploy static content to pages"]
     types: [completed]
   workflow_dispatch:
-    inputs:
-      audit_gfiles:
-        description: "Also audit the private gfiles through gfiles5 sources"
-        required: false
-        type: boolean
-        default: false
-
 permissions:
   contents: read
 
@@ -53,9 +46,6 @@ jobs:
 
       - name: Validate all original games
         run: python3 scripts/validate-games.py
-
-          if-no-files-found: error
-          retention-days: 14
 
       - name: Install browser test dependencies
         run: |

@@ -1,13 +1,21 @@
 name: Cosmic validation
+
 on:
   push:
     branches: ["master"]
   pull_request:
     branches: ["master"]
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy static content to pages"]
+    types: [completed]
+
+permissions:
+  contents: read
 
 jobs:
   validate:
+    if: ${{ github.event_name != 'workflow_run' }}
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +44,7 @@ jobs:
           echo "Core Cosmic files are present."
 
   validate-games:
+    if: ${{ github.event_name != 'workflow_run' }}
     name: Fast original-game validation
     runs-on: ubuntu-26.04
     steps:
@@ -44,3 +53,94 @@ jobs:
           fetch-depth: 1
       - name: Validate all original games
         run: python3 scripts/validate-games.py
+
+  gfiles-audit:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    name: Audit gfiles sources
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Cosmic
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Checkout gfiles
+        uses: actions/checkout@v4
+        with:
+          repository: Ultimate-Guy/gfiles
+          ref: main
+          token: ${{ secrets.GFILES_READ_TOKEN }}
+          path: .gfiles/gfiles
+          fetch-depth: 1
+      - name: Checkout gfiles2
+        uses: actions/checkout@v4
+        with:
+          repository: Ultimate-Guy/gfiles2
+          ref: main
+          token: ${{ secrets.GFILES_READ_TOKEN }}
+          path: .gfiles/gfiles2
+          fetch-depth: 1
+      - name: Checkout gfiles3
+        uses: actions/checkout@v4
+        with:
+          repository: Ultimate-Guy/gfiles3
+          ref: main
+          token: ${{ secrets.GFILES_READ_TOKEN }}
+          path: .gfiles/gfiles3
+          fetch-depth: 1
+      - name: Checkout gfiles4
+        uses: actions/checkout@v4
+        with:
+          repository: Ultimate-Guy/gfiles4
+          ref: main
+          token: ${{ secrets.GFILES_READ_TOKEN }}
+          path: .gfiles/gfiles4
+          fetch-depth: 1
+      - name: Checkout gfiles5
+        uses: actions/checkout@v4
+        with:
+          repository: Ultimate-Guy/gfiles5
+          ref: main
+          token: ${{ secrets.GFILES_READ_TOKEN }}
+          path: .gfiles/gfiles5
+          fetch-depth: 1
+      - name: Audit source repositories
+        run: python3 scripts/audit-gfiles.py
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gfiles-audit-report
+          path: gfiles-audit-report.json
+          if-no-files-found: error
+          retention-days: 14
+
+  iframe-smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+    name: Game iframe smoke test
+    runs-on: ubuntu-26.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout exact deployed commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - name: Install browser test dependencies
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
+      - name: Test game iframes
+        env:
+          GITHUB_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          COSMIC_DEPLOYMENT_WAIT: "30000"
+          COSMIC_GAME_HTTP_TIMEOUT: "5000"
+          COSMIC_TARGET_CONCURRENCY: "48"
+          COSMIC_BROWSER_CONCURRENCY: "8"
+          COSMIC_GAME_NAV_TIMEOUT: "5000"
+          COSMIC_GAME_FRAME_WAIT: "5000"
+          COSMIC_GAME_LOAD_WAIT: "500"
+          COSMIC_BROWSER_SAMPLE: "12"
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME"
+          CHROME_PATH="$CHROME" node scripts/validate-game-iframes.mjs

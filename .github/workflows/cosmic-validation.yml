@@ -1,10 +1,9 @@
 name: Cosmic validation
 
 on:
-  push:
-    branches: ["master"]
-  pull_request:
-    branches: ["master"]
+  workflow_run:
+    workflows: ["Deploy static content to pages"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       audit_gfiles:
@@ -12,21 +11,18 @@ on:
         required: false
         type: boolean
         default: false
-  workflow_run:
-    workflows: ["Deploy static content to pages"]
-    types: [completed]
 
 permissions:
   contents: read
 
 jobs:
   validate:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
-    name: Registry, core, game, and optional gfiles validation
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    name: Validate Cosmic and deployed game iframes
     runs-on: ubuntu-26.04
-    timeout-minutes: 20
+    timeout-minutes: 26
     steps:
-      - name: Checkout exact commit
+      - name: Checkout exact deployed commit
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -121,24 +117,12 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  iframe-smoke:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
-    name: Deployed game iframe smoke test
-    runs-on: ubuntu-26.04
-    timeout-minutes: 6
-    steps:
-      - name: Checkout exact deployed commit
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
-
       - name: Install browser test dependencies
         run: |
           npm init -y >/dev/null 2>&1
           npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
 
-      - name: Test game iframes
+      - name: Verify live deployment and test every game target
         env:
           GITHUB_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
           COSMIC_DEPLOYMENT_WAIT: "30000"

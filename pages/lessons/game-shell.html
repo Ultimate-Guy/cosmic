@@ -26,8 +26,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
   const path=location.pathname||'';
   const index=path.indexOf(marker);
   const prefix=index>=0?path.slice(0,index):(location.hostname.endsWith('.github.io')?'/cosmic':'');
-  const params=new URLSearchParams(location.search);
-  const requestedHome=params.get('return')||'';
+  const shellParams=new URLSearchParams(location.search);
+  const requestedHome=shellParams.get('return')||'';
   const defaultHome=location.origin+prefix+marker+'lessons.html';
   let home=defaultHome;
   try{

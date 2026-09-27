@@ -46,7 +46,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          printf '%s' "$GFILES_READ_TOKEN" | npx wrangler secret put GFILES_READ_TOKEN --config wrangler.jsonc --api-token "$CLOUDFLARE_API_TOKEN" --account-id "$CLOUDFLARE_ACCOUNT_ID"
+          printf '%s' "$GFILES_READ_TOKEN" | npx wrangler secret put GFILES_READ_TOKEN --config wrangler.jsonc
       - name: Prepare identical deployment files
         env:
           PASSWORD_FOR_GAMES_UNLOCK: ${{ secrets.PASSWORD_FOR_GAMES_UNLOCK }}

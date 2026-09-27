@@ -1103,7 +1103,8 @@ export default {
       if (url.pathname.startsWith('/gfiles/')) {
         const gfiles = await serveGfiles(request, env);
         if (gfiles) return gfiles;
-      }\n      const hub = await serveHub(request, env);
+      }
+      const hub = await serveHub(request, env);
       if (hub) return hub;
       return fetchAsset(request, env);
     }

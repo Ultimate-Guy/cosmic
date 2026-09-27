@@ -955,6 +955,76 @@ async function handleAI(request, env) {
   }
 }
 
+
+const GFILES_REPOS = {
+  gfiles: 'Ultimate-Guy/gfiles',
+  gfiles2: 'Ultimate-Guy/gfiles2',
+  gfiles3: 'Ultimate-Guy/gfiles3',
+  gfiles4: 'Ultimate-Guy/gfiles4',
+  gfiles5: 'Ultimate-Guy/gfiles5'
+};
+
+function rewriteGfilesHtml(html, source, folder) {
+  const rootPrefix = '/gfiles/' + encodeURIComponent(source) + '/';
+  return html.replace(/(["'(])\/(?!\/)/g, '$1' + rootPrefix);
+}
+
+async function serveGfiles(request, env) {
+  const url = new URL(request.url);
+  const match = url.pathname.match(/^\/gfiles\/(gfiles|gfiles2|gfiles3|gfiles4|gfiles5)\/(.+)$/);
+  if (!match) return null;
+
+  const source = match[1];
+  const repo = GFILES_REPOS[source];
+  const token = typeof env.GFILES_READ_TOKEN === 'string' ? env.GFILES_READ_TOKEN.trim() : '';
+  if (!repo || !token) {
+    return new Response('Cosmic gfiles runtime is not configured.', {
+      status: 503,
+      headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' }
+    });
+  }
+
+  const parts = match[2].split('/').map(part => decodeURIComponent(part));
+  if (!parts.length || parts.some(part => !part || part === '.' || part === '..' || part.includes('\\'))) {
+    return new Response('Invalid gfiles path.', { status: 400 });
+  }
+
+  const githubPath = parts.map(part => encodeURIComponent(part)).join('/');
+  const upstream = await fetch(
+    'https://raw.githubusercontent.com/' + repo + '/main/' + githubPath,
+    {
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'User-Agent': 'Cosmic-gfiles-proxy'
+      },
+      cf: { cacheTtl: 3600, cacheEverything: true }
+    }
+  );
+
+  if (!upstream.ok) {
+    return new Response('Gfiles asset not found.', {
+      status: upstream.status,
+      headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' }
+    });
+  }
+
+  const headers = new Headers(upstream.headers);
+  headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+  headers.delete('Set-Cookie');
+
+  const type = headers.get('content-type') || '';
+  if (type.includes('text/html')) {
+    const html = await upstream.text();
+    const folder = parts[0] || '';
+    return new Response(rewriteGfilesHtml(html, source, folder), {
+      status: upstream.status,
+      headers
+    });
+  }
+
+  return new Response(upstream.body, { status: upstream.status, headers });
+}
+
 function assetResponse(response) {
   const headers = new Headers(response.headers);
   headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -1030,7 +1100,7 @@ export default {
       if (maintenance && !bypass && !isMaintenanceAsset && !url.pathname.startsWith('/api/')) {
         return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cosmic • Maintenance</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050c12;color:#f2f7fa;font:16px system-ui,sans-serif;text-align:center}main{max-width:560px;padding:32px;border:1px solid #2dccff;border-radius:22px;background:#07131a;box-shadow:0 25px 80px rgba(0,0,0,.55)}h1{color:#2dccff}</style></head><body><main><div style="font-size:48px">☄</div><h1>Cosmic is under maintenance</h1><p>${await getMaintenanceMessage(env)}</p></main></body></html>`,{status:503,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'no-store'}});
       }
-      const hub = await serveHub(request, env);
+      if (url.pathname.startsWith('/gfiles/')) {\n        const gfiles = await serveGfiles(request, env);\n        if (gfiles) return gfiles;\n      }\n      const hub = await serveHub(request, env);
       if (hub) return hub;
       return fetchAsset(request, env);
     }

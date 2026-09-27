@@ -965,7 +965,7 @@ const GFILES_REPOS = {
 };
 
 function rewriteGfilesHtml(html, source, folder) {
-  const rootPrefix = '/gfiles/' + encodeURIComponent(source) + '/';
+  const rootPrefix = '/gfiles/' + encodeURIComponent(source) + '/' + encodeURIComponent(folder) + '/';
   return html.replace(/(["'(])\/(?!\/)/g, '$1' + rootPrefix);
 }
 

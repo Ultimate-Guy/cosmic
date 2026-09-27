@@ -1,0 +1,78 @@
+name: Gfiles source audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gfiles-source-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Cosmic
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Checkout gfiles
+        uses: actions/checkout@v4
+        with:
+          repository: Ultimate-Guy/gfiles
+          ref: main
+          token: ${{ secrets.GFILES_READ_TOKEN }}
+          path: .gfiles/gfiles
+          fetch-depth: 1
+
+      - name: Checkout gfiles2
+        uses: actions/checkout@v4
+        with:
+          repository: Ultimate-Guy/gfiles2
+          ref: main
+          token: ${{ secrets.GFILES_READ_TOKEN }}
+          path: .gfiles/gfiles2
+          fetch-depth: 1
+
+      - name: Checkout gfiles3
+        uses: actions/checkout@v4
+        with:
+          repository: Ultimate-Guy/gfiles3
+          ref: main
+          token: ${{ secrets.GFILES_READ_TOKEN }}
+          path: .gfiles/gfiles3
+          fetch-depth: 1
+
+      - name: Checkout gfiles4
+        uses: actions/checkout@v4
+        with:
+          repository: Ultimate-Guy/gfiles4
+          ref: main
+          token: ${{ secrets.GFILES_READ_TOKEN }}
+          path: .gfiles/gfiles4
+          fetch-depth: 1
+
+      - name: Checkout gfiles5
+        uses: actions/checkout@v4
+        with:
+          repository: Ultimate-Guy/gfiles5
+          ref: main
+          token: ${{ secrets.GFILES_READ_TOKEN }}
+          path: .gfiles/gfiles5
+          fetch-depth: 1
+
+      - name: Audit source repositories
+        run: python3 scripts/audit-gfiles.py
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gfiles-audit-report
+          path: gfiles-audit-report.json
+          if-no-files-found: error
+          retention-days: 14

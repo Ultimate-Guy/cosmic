@@ -5,7 +5,7 @@ import re
 import urllib.parse
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-LESSONS_DIR=ROOT/'pages'/'lessons'; OUTPUT=LESSONS_DIR/'games.json'; LESSONS_PAGE=LESSONS_DIR/'lessons.html'; APPS_PAGE=ROOT/'apps'/'apps.html'
+LESSONS_DIR=ROOT/'pages'/'lessons'; OUTPUT=LESSONS_DIR/'games.json'; UGS_REGISTRY=LESSONS_DIR/'ugs-games.json'; LESSONS_PAGE=LESSONS_DIR/'lessons.html'; APPS_PAGE=ROOT/'apps'/'apps.html'
 IMAGE_EXTENSIONS={'.gif','.jpeg','.jpg','.png','.svg','.webp'}; EXCLUDED_FOLDERS={'img','apps'}
 LESSONS_LOADERS={'cosmic-dev-tools.js':'../../scripts/cosmic-dev-tools.js?build=dev-commands-v4','cosmic-hub.js':'../../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../../scripts/cosmic-admin-guard.js?v=3','cosmic-launch-fix.js':'../../scripts/cosmic-launch-fix.js?v=3','cosmic-feedback.js':'../../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../../scripts/cosmic-profile-widget.js?v=2'}
 APPS_LOADERS={'cosmic-dev-tools.js':'../scripts/cosmic-dev-tools.js?build=dev-commands-v4','cosmic-hub.js':'../scripts/cosmic-hub.js?v=3','cosmic-admin-guard.js':'../scripts/cosmic-admin-guard.js?v=3','cosmic-pwa.js':'../scripts/cosmic-pwa.js?v=3','cosmic-feedback.js':'../scripts/cosmic-feedback.js?v=2','cosmic-profile-widget.js':'../scripts/cosmic-profile-widget.js?v=2'}
@@ -118,5 +118,39 @@ def main():
         for folder in sorted(p for p in LESSONS_DIR.iterdir() if p.is_dir()):
             if folder.name.lower() in EXCLUDED_FOLDERS:continue
             metadata=read_metadata(folder); games.append(build_game(folder,metadata))
-    OUTPUT.parent.mkdir(parents=True,exist_ok=True); OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8'); print(f'Generated {len(games)} game entries and normalized Cosmic Hub loaders')
+
+    seen={str(item.get('name','')).strip().casefold() for item in games}
+    ugs_added=0
+    if UGS_REGISTRY.is_file():
+        data=json.loads(UGS_REGISTRY.read_text(encoding='utf-8'))
+        if not isinstance(data,list): raise ValueError('ugs-games.json must contain an array')
+        for item in data:
+            if not isinstance(item,dict): continue
+            name=str(item.get('name','')).strip() or 'Untitled UGS Game'
+            candidate=name
+            suffix=1
+            while candidate.casefold() in seen:
+                candidate=f'{name} (UGS)' if suffix==1 else f'{name} (UGS {suffix})'
+                suffix+=1
+            raw_path=str(item.get('path','')).strip()
+            if not re.match(r'^https?://',raw_path,re.I):
+                raise ValueError(f'UGS game path is not absolute: {raw_path}')
+            tags=item.get('tags',[])
+            entry={
+                'name':candidate,
+                'path':raw_path,
+                'category':str(item.get('category','Arcade')).strip() or 'Arcade',
+                'tags':[str(x) for x in tags] if isinstance(tags,list) else ['UGS'],
+                'featured':bool(item.get('featured',False)),
+                'source':'UGS',
+            }
+            if item.get('source_path'): entry['source_path']=str(item['source_path'])
+            games.append(entry)
+            seen.add(candidate.casefold())
+            ugs_added+=1
+
+    games.sort(key=lambda item:(str(item.get('name','')).casefold(),str(item.get('path','')).casefold()))
+    OUTPUT.parent.mkdir(parents=True,exist_ok=True)
+    OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8')
+    print(f'Generated {len(games)} game entries ({ugs_added} UGS) and normalized Cosmic Hub loaders')
 if __name__=='__main__':main()

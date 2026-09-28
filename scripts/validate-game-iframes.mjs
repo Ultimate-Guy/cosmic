@@ -90,6 +90,7 @@ function sampleGames(games) {
 
 async function checkTarget(game) {
   const name = String(game.name || '').trim() || '<unnamed>';
+  const rawPath = String(game.path || '').trim();
   const url = targetUrl(game);
   const result = {name, url, ok:false, status:null, contentType:null, reason:null};
 
@@ -110,14 +111,13 @@ async function checkTarget(game) {
     try { await response.body?.cancel(); } catch (_) {}
 
     if (!response.ok) {
-      result.reason = 'target returned HTTP ' + response.status;
+      result.reason = isCosmicGamesUrl(rawPath)
+        ? 'UGS proxy returned HTTP ' + response.status
+        : 'target returned HTTP ' + response.status;
       return result;
     }
 
-    const isExternal = /^https?:\/\//i.test(String(game.path || '').trim());
-    // External UGS HTML is sometimes served as text/plain by the CDN.
-    // The browser smoke test is the authoritative launch check for it.
-    if (!isExternal && result.contentType && !/text\/html|application\/xhtml\+xml/i.test(result.contentType)) {
+    if (!isCosmicGamesUrl(rawPath) && result.contentType && !/text\/html|application\/xhtml\+xml/i.test(result.contentType)) {
       result.reason = 'target did not return HTML content (' + result.contentType + ')';
       return result;
     }
@@ -125,7 +125,9 @@ async function checkTarget(game) {
     result.ok = true;
     return result;
   } catch (e) {
-    result.reason = e.name === 'AbortError' ? 'target request timed out' : e.message;
+    result.reason = e.name === 'AbortError'
+      ? (isCosmicGamesUrl(rawPath) ? 'UGS proxy request timed out' : 'target request timed out')
+      : e.message;
     return result;
   } finally {
     clearTimeout(timer);

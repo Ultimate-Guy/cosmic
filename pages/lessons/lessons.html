@@ -131,6 +131,16 @@
                     console.error('Cosmic registry error:',error);
                 });
         }
+        searchInput.addEventListener('input',e=>{
+            const val=e.target.value.trim().toLowerCase();
+            let matches=0;
+            for(const card of cards){
+                const show=!val||card.name.includes(val);
+                card.element.style.display=show?'flex':'none';
+                if(show)matches++;
+            }
+            noResults.style.display=matches||!cards.length?'none':'block';
+        });
     </script>
 <link rel="manifest" href="../../manifest.json">
 <script src="../../scripts/cosmic-hub.js?v=3"></script>

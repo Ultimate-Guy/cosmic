@@ -1,38 +1,5 @@
 [
   {
-    "name": "1 on 1 Soccer",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/1-9/1%20on%201%20Soccer.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/1-9/1 on 1 Soccer.html"
-  },
-  {
-    "name": "13 Bones",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/1-9/13%20Bones.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/1-9/13 Bones.html"
-  },
-  {
-    "name": "3 Pandas",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/1-9/3%20Pandas.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/1-9/3 Pandas.html"
-  },
-  {
     "name": "3 Pandas in Fantasy",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/1-9/3%20Pandas%20in%20Fantasy.html",
     "category": "Arcade",
@@ -1923,17 +1890,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/a_unsorted/clappleworm.html"
-  },
-  {
-    "name": "clarcadevolley",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/a_unsorted/clarcadevolley.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/a_unsorted/clarcadevolley.html"
   },
   {
     "name": "clarceuslegend",
@@ -4730,17 +4686,6 @@
     "source_path": "assets/UGS/unsorted/c_unsorted/clcontra3.html"
   },
   {
-    "name": "clcontraforce",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/c_unsorted/clcontraforce.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/c_unsorted/clcontraforce.html"
-  },
-  {
     "name": "clcookieclicker",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/c_unsorted/clcookieclicker.html",
     "category": "Arcade",
@@ -7489,17 +7434,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/f_unsorted/clfeedus3.html"
-  },
-  {
-    "name": "clfeedus4",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/f_unsorted/clfeedus4.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/f_unsorted/clfeedus4.html"
   },
   {
     "name": "clfeedus5",
@@ -10318,17 +10252,6 @@
     "source_path": "assets/UGS/unsorted/h_unsorted/clhauntedschool.html"
   },
   {
-    "name": "clhauntthehouse",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/h_unsorted/clhauntthehouse.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/h_unsorted/clhauntthehouse.html"
-  },
-  {
     "name": "clheartandsoul(1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/h_unsorted/clheartandsoul(1).html",
     "category": "Arcade",
@@ -13132,17 +13055,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/m_unsorted/clmegachess.html"
-  },
-  {
-    "name": "clmegaclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/m_unsorted/clmegaclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/m_unsorted/clmegaclient.html"
   },
   {
     "name": "clmegaman2",
@@ -15994,17 +15906,6 @@
     "source_path": "assets/UGS/unsorted/p_unsorted/clpiecesofcake.html"
   },
   {
-    "name": "clpilotwings64",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clpilotwings64.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/p_unsorted/clpilotwings64.html"
-  },
-  {
     "name": "clpingpongchaos",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clpingpongchaos.html",
     "category": "Arcade",
@@ -18797,17 +18698,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/r_unsorted/clrocketleague.html"
-  },
-  {
-    "name": "clrocketpult",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/r_unsorted/clrocketpult.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/r_unsorted/clrocketpult.html"
   },
   {
     "name": "clrocketsoccerderby",
@@ -21624,17 +21514,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/s_unsorted/clstickminfleecomplex.html"
-  },
-  {
-    "name": "clstickslasher",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/s_unsorted/clstickslasher.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/s_unsorted/clstickslasher.html"
   },
   {
     "name": "clstickwar",

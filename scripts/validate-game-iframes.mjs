@@ -78,7 +78,7 @@ function sampleGames(games) {
   add(games[games.length - 1]);
 
   const external = games.filter(g => /^https?:\/\//i.test(String(g.path || '').trim()));
-  for (const game of external) add(game);
+  for (const game of external.slice(0, 3)) add(game);
 
   const step = Math.max(1, Math.floor(games.length / (BROWSER_SAMPLE - 2)));
   for (let i = step; i < games.length - 1 && chosen.length < BROWSER_SAMPLE; i += step) {

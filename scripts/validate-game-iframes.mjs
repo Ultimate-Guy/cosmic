@@ -114,7 +114,10 @@ async function checkTarget(game) {
       return result;
     }
 
-    if (result.contentType && !/text\/html|application\/xhtml\+xml/i.test(result.contentType)) {
+    const isExternal = /^https?:\/\//i.test(String(game.path || '').trim());
+    // External UGS HTML is sometimes served as text/plain by the CDN.
+    // The browser smoke test is the authoritative launch check for it.
+    if (!isExternal && result.contentType && !/text\/html|application\/xhtml\+xml/i.test(result.contentType)) {
       result.reason = 'target did not return HTML content (' + result.contentType + ')';
       return result;
     }

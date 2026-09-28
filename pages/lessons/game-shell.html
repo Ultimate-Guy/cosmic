@@ -198,12 +198,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     const shim='<script>window.maeExportApis_=window.maeExportApis_||function(){};<\/script>\n';
     const policy='<script src="https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmic@master/scripts/cosmic-ugs-ad-policy.js"><\/script>\n';
     if(/<head\b[^>]*>/i.test(html)){
-      html=html.replace(/<head\b[^>]*>/i,'    const shim='<script>window.maeExportApis_=window.maeExportApis_||function(){};<\/script>\n';
-    if(/<head\b[^>]*>/i.test(html)){
-      html=html.replace(/<head\b[^>]*>/i,'$&\n'+shim);
-    }else{
-      html=shim+html;
-    }\n'+shim+policy);
+      html=html.replace(/<head\b[^>]*>/i,'$&\n'+shim+policy);
     }else{
       html=shim+policy+html;
     }

@@ -152,7 +152,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
   if(!game){location.replace(home);return;}
 
   function isExternalGameUrl(url){
-    return /^https?:\\/\\//i.test(url.href) && url.hostname!==workerHost;
+    return /^https?:\/\//i.test(url.href) && url.hostname!==workerHost;
   }
 
   async function loadExternalHtml(url){
@@ -162,12 +162,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     if(!html.trim()) throw new Error('External game returned an empty document');
 
     const sourceDir=new URL('./',url.href).href;
-    const hasBase=/<base\\b[^>]*\\bhref\\s*=|<base\\s/i.test(html);
+    const hasBase=/<base\b[^>]*\bhref\\s*=|<base\s/i.test(html);
     let documentText=html;
     if(!hasBase){
       const baseTag='<base href="'+sourceDir.replace(/"/g,'&quot;')+'">\\n';
-      if(/<head\\b[^>]*>/i.test(documentText)){
-        documentText=documentText.replace(/<head\\b[^>]*>/i,'$&\\n'+baseTag);
+      if(/<head\b[^>]*>/i.test(documentText)){
+        documentText=documentText.replace(/<head\b[^>]*>/i,'$&\\n'+baseTag);
       }else{
         documentText='<!doctype html><html><head>'+baseTag+'</head><body>'+documentText+'</body></html>';
       }

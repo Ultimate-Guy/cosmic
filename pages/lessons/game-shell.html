@@ -155,6 +155,16 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     return /^https?:\/\//i.test(url.href) && url.hostname!==workerHost;
   }
 
+  function isCosmicGamesCdnUrl(url){
+    return url.hostname==='cdn.jsdelivr.net' && /^\/gh\/Ultimate-Guy\/cosmicgames@/i.test(url.pathname);
+  }
+
+  function loadCosmicGamesHtml(url){
+    const frame=document.getElementById('game');
+    frame.src=url.href;
+    frame.dataset.cosmicExternalUrl=url.href;
+  }
+
   async function loadExternalHtml(url){
     const response=await fetch(url.href,{credentials:'omit',cache:'no-store',redirect:'follow'});
     if(!response.ok) throw new Error('External game returned HTTP '+response.status);
@@ -182,7 +192,11 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     try{
       const url=new URL(game,location.href);
       if(isExternalGameUrl(url)){
-        await loadExternalHtml(url);
+        if(isCosmicGamesCdnUrl(url)){
+          loadCosmicGamesHtml(url);
+        }else{
+          await loadExternalHtml(url);
+        }
         return;
       }
 

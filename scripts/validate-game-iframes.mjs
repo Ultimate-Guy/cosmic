@@ -52,8 +52,26 @@ function readGames() {
   return data;
 }
 
+function isCosmicGamesUrl(rawPath) {
+  return /^https?:\/\/cdn\.jsdelivr\.net\/gh\/Ultimate-Guy\/cosmicgames@/i.test(String(rawPath || '').trim())
+    && /\/UGS-Files\//i.test(String(rawPath || ''));
+}
+
+function cosmicGamesProxyUrl(rawPath) {
+  const source = new URL(String(rawPath).trim());
+  const marker = '/UGS-Files/';
+  const idx = source.pathname.indexOf(marker);
+  if (idx < 0) throw new Error('Invalid CosmicGames source URL');
+  const filename = decodeURIComponent(source.pathname.slice(idx + marker.length));
+  if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+    throw new Error('Invalid CosmicGames filename');
+  }
+  return GAME_ORIGIN.replace(/\/+$/, '') + '/api/ugs/' + encodeURIComponent(filename);
+}
+
 function targetUrl(game) {
   const rawPath = String(game.path || '').trim();
+  if (isCosmicGamesUrl(rawPath)) return cosmicGamesProxyUrl(rawPath);
   if (/^https?:\/\//i.test(rawPath)) return rawPath;
   return GAME_ORIGIN.replace(/\/+$/, '') + '/' + rawPath.replace(/^\/+/, '');
 }

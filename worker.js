@@ -965,6 +965,53 @@ function assetResponse(response) {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
+async function serveUgsFile(request) {
+  const url = new URL(request.url);
+  const prefix = '/api/ugs/';
+  if (!url.pathname.startsWith(prefix)) return null;
+
+  let relative;
+  try {
+    relative = decodeURIComponent(url.pathname.slice(prefix.length));
+  } catch (_) {
+    return new Response('Bad UGS path.', { status: 400, headers: { 'Content-Type': 'text/plain; charset=UTF-8' } });
+  }
+
+  // The proxy is intentionally limited to the UGS-Files tree in the pinned public repo.
+  if (!relative || relative.includes('..') || relative.startsWith('/') || relative.includes('\\')) {
+    return new Response('Invalid UGS path.', { status: 400, headers: { 'Content-Type': 'text/plain; charset=UTF-8' } });
+  }
+
+  const upstream = 'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/' + relative;
+  try {
+    const source = await fetch(upstream, {
+      method: request.method,
+      headers: request.headers,
+      redirect: 'follow',
+      cache: 'no-store'
+    });
+
+    const headers = new Headers(source.headers);
+    if (/\\.html?$/i.test(relative)) {
+      headers.set('Content-Type', 'text/html; charset=UTF-8');
+    }
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Cache-Control', 'public, max-age=300');
+    headers.set('CDN-Cache-Control', 'public, max-age=300');
+    headers.delete('Content-Security-Policy');
+    return new Response(source.body, {
+      status: source.status,
+      statusText: source.statusText,
+      headers
+    });
+  } catch (error) {
+    return new Response('UGS upstream fetch failed: ' + String(error?.message || error), {
+      status: 502,
+      headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' }
+    });
+  }
+}
+
 async function fetchAsset(request, env) {
   if (!env?.ASSETS?.fetch) {
     return new Response('Cosmic static asset binding is unavailable.', {
@@ -1030,6 +1077,10 @@ export default {
         /^(\/scripts\/cosmic-dev-tools\.js|\/worker\.js|\/sw\.js)$/i.test(url.pathname);
       if (maintenance && !bypass && !isMaintenanceAsset && !url.pathname.startsWith('/api/')) {
         return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cosmic • Maintenance</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050c12;color:#f2f7fa;font:16px system-ui,sans-serif;text-align:center}main{max-width:560px;padding:32px;border:1px solid #2dccff;border-radius:22px;background:#07131a;box-shadow:0 25px 80px rgba(0,0,0,.55)}h1{color:#2dccff}</style></head><body><main><div style="font-size:48px">☄</div><h1>Cosmic is under maintenance</h1><p>${await getMaintenanceMessage(env)}</p></main></body></html>`,{status:503,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'no-store'}});
+      }
+      if (url.pathname.startsWith('/api/ugs/')) {
+        const ugs = await serveUgsFile(request);
+        if (ugs) return ugs;
       }
       if (url.pathname.startsWith('/gfiles/')) {
         const gfiles = await serveGfiles(request, env);

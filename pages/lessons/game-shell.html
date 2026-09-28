@@ -161,17 +161,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
 
   function loadCosmicGamesHtml(url){
     const frame=document.getElementById('game');
-    const marker='/UGS-Files/';
-    const idx=url.pathname.indexOf(marker);
-    if(idx<0) throw new Error('Invalid CosmicGames URL');
-    const filename=decodeURIComponent(url.pathname.slice(idx+marker.length));
-    if(!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-      throw new Error('Invalid CosmicGames filename');
-    }
-    const proxy=new URL('https://cosmicv2.v75ultimate.workers.dev/api/ugs/'+encodeURIComponent(filename));
-    frame.src=proxy.href;
+    frame.src=url.href;
     frame.dataset.cosmicExternalUrl=url.href;
-    frame.dataset.cosmicProxyUrl=proxy.href;
   }
 
   async function loadExternalHtml(url){

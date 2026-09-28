@@ -950,23 +950,12 @@
 	    }
 
 	    function ShowAdBreak() {
-	      //check if the adslib is loaded correctly or blocked by adblockers etc.
-	      if (typeof gCrazySDK !== 'undefined') {
-	        Main.DoneInterstitialAd(false);
-	        return;
-	      }
+      if (typeof Main !== 'undefined' && typeof Main.DoneInterstitialAd === 'function') {
+        Main.DoneInterstitialAd(true);
+      }
+    }
 
-	      if (typeof adplayer === 'undefined') {
-	        Main.DoneInterstitialAd(true);
-	        return;
-	      }
-	      aiptag.cmd.player.push(function() {
-	        adplayer.startAdBreak();
-	      });
-	    }
-
-
-	    document.getElementById("openfl-content").addEventListener("wheel", doScroll);
+    document.getElementById("openfl-content").addEventListener("wheel", doScroll);
 	    document.getElementById("more").addEventListener("wheel", doScroll);
 
 	    function doScroll(event) {

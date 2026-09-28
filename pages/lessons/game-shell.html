@@ -21,6 +21,9 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
 <iframe id="game" allow="fullscreen; autoplay; gamepad; clipboard-read; clipboard-write" allowfullscreen></iframe>
 <script>
 (function(){
+  // Compatibility shim used by some legacy UGS exports.
+  window.maeExportApis_ = window.maeExportApis_ || function() {};
+
   const marker='/pages/lessons/';
   const workerHost='cosmicv2.v75ultimate.workers.dev';
   const path=location.pathname||'';
@@ -159,10 +162,47 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     return url.hostname==='cdn.jsdelivr.net' && /^\/gh\/Ultimate-Guy\/cosmicgames@/i.test(url.pathname);
   }
 
-  function loadCosmicGamesHtml(url){
+  async function loadCosmicGamesHtml(url){
     const frame=document.getElementById('game');
-    frame.src=url.href;
+    const response=await fetch(url.href,{credentials:'omit',cache:'no-store',redirect:'follow'});
+    if(!response.ok) throw new Error('UGS game returned HTTP '+response.status);
+    let html=await response.text();
+    if(!html.trim()) throw new Error('UGS game returned an empty document');
+
+    // UGS's own launcher fetches the single-file HTML and writes it into a
+    // fresh blank document. Match that behavior instead of navigating the
+    // iframe directly to the CDN URL.
+    if(!/<base\b[^>]*\bhref\s*=|<base\s/i.test(html)){
+      const baseTag='<base href="'+new URL('./',url.href).href.replace(/"/g,'&quot;')+'">\n';
+      if(/<head\b[^>]*>/i.test(html)){
+        html=html.replace(/<head\b[^>]*>/i,'$&\n'+baseTag);
+      }else{
+        html='<!doctype html><html><head>'+baseTag+'</head><body>'+html+'</body></html>';
+      }
+    }
+
+    const shim='<script>window.maeExportApis_=window.maeExportApis_||function(){};<\/script>\n';
+    if(/<head\b[^>]*>/i.test(html)){
+      html=html.replace(/<head\b[^>]*>/i,'$&\n'+shim);
+    }else{
+      html=shim+html;
+    }
+
+    frame.src='about:blank';
+    await new Promise(resolve=>{
+      const done=()=>{frame.removeEventListener('load',done);resolve();};
+      frame.addEventListener('load',done,{once:true});
+      setTimeout(done,500);
+    });
+
+    const doc=frame.contentDocument || frame.contentWindow?.document;
+    if(!doc) throw new Error('UGS iframe document is unavailable');
+    doc.open();
+    doc.write(html);
+    doc.close();
+
     frame.dataset.cosmicExternalUrl=url.href;
+    frame.dataset.cosmicLaunchMode='ugs-document-write';
   }
 
   async function loadExternalHtml(url){
@@ -193,7 +233,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
       const url=new URL(game,location.href);
       if(isExternalGameUrl(url)){
         if(isCosmicGamesCdnUrl(url)){
-          loadCosmicGamesHtml(url);
+          await loadCosmicGamesHtml(url);
         }else{
           await loadExternalHtml(url);
         }

@@ -21,6 +21,9 @@ jobs:
           fetch-depth: 1
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
+      - name: Generate registries and clean generated game pages
+        run: python3 scripts/generate-game-registry.py
+
       - name: Validate registries
         run: |
           python3 - <<'PY'

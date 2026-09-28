@@ -37,14 +37,9 @@ jobs:
           fetch-depth: 1
       - name: Generate game registry and clean legacy injections
         run: python3 scripts/generate-game-registry.py
-      - name: Commit generated registry and game cleanup
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Clean legacy game injections and update registry [skip ci]"
-          file_pattern: 'pages/lessons/**'
-          skip_dirty_check: false
-          skip_fetch: true
-
+      # Registry/game-page generation is part of the deployment build.
+      # Do not create a second commit here: the deployment must correspond exactly
+      # to the push SHA that triggered this workflow.
       - name: Prepare identical deployment files
         env:
           PASSWORD_FOR_GAMES_UNLOCK: ${{ secrets.PASSWORD_FOR_GAMES_UNLOCK }}

@@ -162,7 +162,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     if(!html.trim()) throw new Error('External game returned an empty document');
 
     const sourceDir=new URL('./',url.href).href;
-    const hasBase=/<base\b[^>]*\bhref\\s*=|<base\s/i.test(html);
+    const hasBase=/<base\b[^>]*\bhref\s*=|<base\s/i.test(html);
     let documentText=html;
     if(!hasBase){
       const baseTag='<base href="'+sourceDir.replace(/"/g,'&quot;')+'">\\n';

@@ -291,25 +291,39 @@ def validate_registry(registry: list[dict], discovered: dict[str, Path], issues:
             add_issue(issues, "error", name, "registry entry has no path")
             continue
 
-        if not raw_path.lower().endswith((".html", ".htm")):
-            add_issue(issues, "error", name, f"registry path is not an HTML entry: {raw_path}")
-            continue
+        parsed_path = urlparse(raw_path)
+        is_external = parsed_path.scheme.lower() in {"http", "https"} and bool(parsed_path.netloc)
 
-        if not raw_path.startswith("pages/lessons/"):
-            add_issue(issues, "error", name, f"registry path is outside pages/lessons: {raw_path}")
+        if is_external:
+            if parsed_path.scheme.lower() != "https":
+                add_issue(issues, "error", name, f"external registry path must use HTTPS: {raw_path}")
+            if not parsed_path.path.lower().endswith((".html", ".htm")):
+                add_issue(issues, "error", name, f"external registry path is not an HTML entry: {raw_path}")
+            if str(item.get("source", "")).strip().upper() == "UGS" and "cdn.jsdelivr.net" not in parsed_path.netloc:
+                add_issue(issues, "warning", name, "UGS entry is not hosted through jsDelivr")
+            if "externalUrl" in item or "sourcePath" in item:
+                add_issue(issues, "error", name, "retired external-game registry fields are present")
+        else:
+            if not raw_path.lower().endswith((".html", ".htm")):
+                add_issue(issues, "error", name, f"registry path is not an HTML entry: {raw_path}")
+                continue
 
-        target = registry_target(raw_path)
-        if not target.is_file():
-            add_issue(issues, "error", name, f"registry target does not exist: {raw_path}")
-            continue
+            if not raw_path.startswith("pages/lessons/"):
+                add_issue(issues, "error", name, f"registry path is outside pages/lessons: {raw_path}")
+                continue
 
-        resolved = target.resolve()
-        if resolved in seen_paths:
-            add_issue(issues, "error", name, f"duplicate registry target: {raw_path}")
-        seen_paths.add(resolved)
+            target = registry_target(raw_path)
+            if not target.is_file():
+                add_issue(issues, "error", name, f"registry target does not exist: {raw_path}")
+                continue
 
-        if resolved not in discovered_paths:
-            add_issue(issues, "error", name, f"registry target is outside the discovered game set: {raw_path}")
+            resolved = target.resolve()
+            if resolved in seen_paths:
+                add_issue(issues, "error", name, f"duplicate registry target: {raw_path}")
+            seen_paths.add(resolved)
+
+            if resolved not in discovered_paths:
+                add_issue(issues, "error", name, f"registry target is outside the discovered game set: {raw_path}")
 
         category = str(item.get("category", "")).strip()
         if not category:
@@ -319,13 +333,11 @@ def validate_registry(registry: list[dict], discovered: dict[str, Path], issues:
         if not isinstance(tags, list):
             add_issue(issues, "warning", name, "registry tags should be an array")
 
-        if "externalUrl" in item or "sourcePath" in item:
-            add_issue(issues, "error", name, "retired external-game registry fields are present")
-
     registry_paths = {
         registry_target(str(item.get("path", ""))).resolve()
         for item in registry
         if str(item.get("path", "")).strip()
+        and not urlparse(str(item.get("path", "")).strip()).netloc
     }
 
     for folder, path in sorted(discovered.items()):

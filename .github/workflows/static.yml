@@ -35,6 +35,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+      - name: Sync UGS catalog from cosmicgames UGS-Files only
+        run: python3 scripts/sync-ugs-catalog.py
       - name: Generate game registry and clean legacy injections
         run: python3 scripts/generate-game-registry.py
       # Registry/game-page generation is part of the deployment build.

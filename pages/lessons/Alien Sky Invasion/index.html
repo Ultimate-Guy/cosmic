@@ -126,7 +126,7 @@
             gameInstance.SendMessage('FreezeNovaAPI', 'AdMessage', 'onOpen');
 
             try {
-              window[preroll.config.loaderObjectName].refetchAd(ExternEvalResumeGame);
+              ExternEvalResumeGame();
             } catch (err) {
               console.log(err.message);
               gameInstance.SendMessage('FreezeNovaAPI', 'AdMessage', 'onClose');

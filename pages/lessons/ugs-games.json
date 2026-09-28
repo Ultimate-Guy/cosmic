@@ -2013,17 +2013,6 @@
     "source_path": "assets/UGS/unsorted/a_unsorted/classesmentexaminationque.html"
   },
   {
-    "name": "classroommaxxing",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/a_unsorted/classroommaxxing.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/a_unsorted/classroommaxxing.html"
-  },
-  {
     "name": "clasteroids",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/a_unsorted/clasteroids.html",
     "category": "Arcade",
@@ -2055,28 +2044,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/a_unsorted/clasteroidsarcade.html"
-  },
-  {
-    "name": "clastraclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/a_unsorted/clastraclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/a_unsorted/clastraclient.html"
-  },
-  {
-    "name": "clastrawasm",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/a_unsorted/clastrawasm.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/a_unsorted/clastrawasm.html"
   },
   {
     "name": "clattackhole",
@@ -6732,17 +6699,6 @@
     "source_path": "assets/UGS/unsorted/e_unsorted/clEaglercraftL_19_v0_7_0_Offline_Signed(1).html"
   },
   {
-    "name": "cleaglercraftlite",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/e_unsorted/cleaglercraftlite.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/e_unsorted/cleaglercraftlite.html"
-  },
-  {
     "name": "cleaglercraftnebula",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/e_unsorted/cleaglercraftnebula.html",
     "category": "Arcade",
@@ -6752,72 +6708,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/e_unsorted/cleaglercraftnebula.html"
-  },
-  {
-    "name": "cleaglercraftshadow",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/e_unsorted/cleaglercraftshadow.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/e_unsorted/cleaglercraftshadow.html"
-  },
-  {
-    "name": "clEaglerCraftTech",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/e_unsorted/clEaglerCraftTech.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/e_unsorted/clEaglerCraftTech.html"
-  },
-  {
-    "name": "clEaglercraftX-188u29",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/e_unsorted/clEaglercraftX-188u29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/e_unsorted/clEaglercraftX-188u29.html"
-  },
-  {
-    "name": "clEaglercraftX188(u29)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/e_unsorted/clEaglercraftX188(u29).html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/e_unsorted/clEaglercraftX188(u29).html"
-  },
-  {
-    "name": "clEaglercraftZ_1112",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/e_unsorted/clEaglercraftZ_1112.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/e_unsorted/clEaglercraftZ_1112.html"
-  },
-  {
-    "name": "clEaglercraftZ_1112(1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/e_unsorted/clEaglercraftZ_1112(1).html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/e_unsorted/clEaglercraftZ_1112(1).html"
   },
   {
     "name": "cleagleride",
@@ -7313,17 +7203,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/e_unsorted/clexitpath.html"
-  },
-  {
-    "name": "clexploremodpack",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/e_unsorted/clexploremodpack.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/e_unsorted/clexploremodpack.html"
   },
   {
     "name": "clextremerun3d",
@@ -9460,17 +9339,6 @@
     "source_path": "assets/UGS/unsorted/g_unsorted/clgarfcaughtinact.html"
   },
   {
-    "name": "clgdsubzero",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/g_unsorted/clgdsubzero.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/g_unsorted/clgdsubzero.html"
-  },
-  {
     "name": "clgenericfightermaybe",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/g_unsorted/clgenericfightermaybe.html",
     "category": "Arcade",
@@ -10186,17 +10054,6 @@
     "source_path": "assets/UGS/unsorted/g_unsorted/clgunsmoke.html"
   },
   {
-    "name": "clGXclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/g_unsorted/clGXclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/g_unsorted/clGXclient.html"
-  },
-  {
     "name": "clgymstack",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/g_unsorted/clgymstack.html",
     "category": "Arcade",
@@ -10635,17 +10492,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/h_unsorted/clhighwayracer2.html"
-  },
-  {
-    "name": "clHil ClimbRacing2",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/h_unsorted/clHil%20ClimbRacing2.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/h_unsorted/clHil ClimbRacing2.html"
   },
   {
     "name": "clhillclimbracinglite",
@@ -11649,17 +11495,6 @@
     "source_path": "assets/UGS/unsorted/j_unsorted/cljusthitthebutton.html"
   },
   {
-    "name": "cljustinclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/j_unsorted/cljustinclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/j_unsorted/cljustinclient.html"
-  },
-  {
     "name": "cljustoneboss",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/j_unsorted/cljustoneboss.html",
     "category": "Arcade",
@@ -12010,17 +11845,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/l_unsorted/cllaceysflashgames.html"
-  },
-  {
-    "name": "cllambdaclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/l_unsorted/cllambdaclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/l_unsorted/cllambdaclient.html"
   },
   {
     "name": "cllastfirered",
@@ -16236,17 +16060,6 @@
     "source_path": "assets/UGS/unsorted/p_unsorted/clpixelbattlegroundsio.html"
   },
   {
-    "name": "clpixelclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clpixelclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/p_unsorted/clpixelclient.html"
-  },
-  {
     "name": "clpixelcombat2",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clpixelcombat2.html",
     "category": "Arcade",
@@ -17941,17 +17754,6 @@
     "source_path": "assets/UGS/unsorted/p_unsorted/clprimary.html"
   },
   {
-    "name": "clprismclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clprismclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/p_unsorted/clprismclient.html"
-  },
-  {
     "name": "clprodigyentrapta",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clprodigyentrapta.html",
     "category": "Arcade",
@@ -18458,17 +18260,6 @@
     "source_path": "assets/UGS/unsorted/r_unsorted/clrealflightsim.html"
   },
   {
-    "name": "clrebornclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/r_unsorted/clrebornclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/r_unsorted/clrebornclient.html"
-  },
-  {
     "name": "clrebuild",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/r_unsorted/clrebuild.html",
     "category": "Arcade",
@@ -18610,17 +18401,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/r_unsorted/clrepobad.html"
-  },
-  {
-    "name": "clresentclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/r_unsorted/clresentclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/r_unsorted/clresentclient.html"
   },
   {
     "name": "clresidentevil",
@@ -20603,17 +20383,6 @@
     "source_path": "assets/UGS/unsorted/s_unsorted/clsodasimulator.html"
   },
   {
-    "name": "clsolarclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/s_unsorted/clsolarclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/s_unsorted/clsolarclient.html"
-  },
-  {
     "name": "clsolarsandbox",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/s_unsorted/clsolarsandbox.html",
     "category": "Arcade",
@@ -21580,17 +21349,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/s_unsorted/clstarfoxsfx2.html"
-  },
-  {
-    "name": "clstarlike",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/s_unsorted/clstarlike.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/s_unsorted/clstarlike.html"
   },
   {
     "name": "clstarraiders",
@@ -24222,28 +23980,6 @@
     "source_path": "assets/UGS/unsorted/t_unsorted/cltubejumpers.html"
   },
   {
-    "name": "clTuff_Client_Offline_WASM",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/t_unsorted/clTuff_Client_Offline_WASM.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/t_unsorted/clTuff_Client_Offline_WASM.html"
-  },
-  {
-    "name": "clTuff_Client_Offline_WASM(1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/t_unsorted/clTuff_Client_Offline_WASM(1).html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/t_unsorted/clTuff_Client_Offline_WASM(1).html"
-  },
-  {
     "name": "cltungtungtungsahurobby",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/t_unsorted/cltungtungtungsahurobby.html",
     "category": "Arcade",
@@ -24486,17 +24222,6 @@
     "source_path": "assets/UGS/unsorted/u_unsorted/cluno.html"
   },
   {
-    "name": "clunonomercy",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/u_unsorted/clunonomercy.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/u_unsorted/clunonomercy.html"
-  },
-  {
     "name": "clunownking",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/u_unsorted/clunownking.html",
     "category": "Arcade",
@@ -24583,17 +24308,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/u_unsorted/clUvuvwevwevweOnyetenvewveUgwemubwemOssas.html"
-  },
-  {
-    "name": "cluwuclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/u_unsorted/cluwuclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/u_unsorted/cluwuclient.html"
   },
   {
     "name": "clUZG",
@@ -26244,17 +25958,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/E/Earn to Die.html"
-  },
-  {
-    "name": "EB.Client.V1.0.0R2.WASM",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/i_unsorted/EB.Client.V1.0.0R2.WASM.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/i_unsorted/EB.Client.V1.0.0R2.WASM.html"
   },
   {
     "name": "Edelweiss",

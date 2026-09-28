@@ -12,10 +12,10 @@
         #site-content{width:100%;max-width:100%;overflow-x:hidden;}
         main,#gamesgrid{width:100%;max-width:100%;box-sizing:border-box;}
         :root { --card-bg: rgba(6, 20, 16, 0.76); --accent: #2dccff; --card-border: rgba(45, 204, 255, 0.42); --card-hover: rgba(127, 255, 212, 0.16); }
-        #gamesgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:14px; align-items:stretch; }
-        .game-card { display:flex; flex-direction:column; gap:8px; padding:10px; border-radius:16px; background:var(--card-bg); border:1px solid var(--card-border); box-shadow:0 8px 24px rgba(0,0,0,.22); content-visibility:auto; contain:layout paint style; contain-intrinsic-size:320px; }
+        #gamesgrid { position:relative; display:block; width:100%; min-height:120px; }
+        .game-card { position:absolute; box-sizing:border-box; display:flex; flex-direction:column; gap:8px; padding:10px; border-radius:16px; background:var(--card-bg); border:1px solid var(--card-border); box-shadow:0 4px 14px rgba(0,0,0,.20); contain:layout paint style; overflow:hidden; }
         .game-thumb { display:block; width:100%; aspect-ratio:1/1; border-radius:12px; object-fit:cover; background:#07131a; }
-        .game-title { font-size:.85rem; line-height:1.2; text-align:center; min-height:2.2em; display:grid; place-items:center; }
+        .game-title { font-size:.85rem; line-height:1.2; height:2.4em; overflow:hidden; text-align:center; display:grid; place-items:center; }
         .card-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
         .play-btn,.blank-btn { width:100%; height:36px; font-size:.72rem; border-radius:999px; cursor:pointer; font-weight:bold; }
         .play-btn { background:var(--accent); color:#031721; border:none; }
@@ -52,7 +52,7 @@
     <div id="admin-password-gate"><div class="password-card"><h2 style="color:var(--accent);letter-spacing:2px;">Secret Admin Password</h2><span class="admin-note">(Don't worry users, this is just a precaution so that if a user tells someone else, they wanna-be user still won't be able to access it because they can't do this admin password part. Also this will only appear once.)</span><div class="pass-input-container"><input type="password" id="admin-pass-field" placeholder="Enter Admin Password..." autocomplete="off"/><button class="blank-btn" style="width:45px;flex:none;" onclick="toggleAdminPass()" aria-label="Show admin password"><i id="admin-eye-icon" class="fas fa-eye"></i></button><button class="play-btn" style="width:80px;flex:none;" onclick="checkAdminPass()">Enter</button></div><p id="admin-error-msg" style="color:#ff4d4d;font-size:.8rem;display:none;">Invalid Admin Password.</p></div></div>
     <div id="site-content" style="display:none;"><header id="top-bar"><div class="brand"><img src="../../imgs/cosmic.png" width="45" height="45" alt="Logo"/><h1>Cosmic</h1></div><div class="nav-links"><button class="apps-trigger" onclick="window.location.href='../../apps/apps.html'">Apps</button><button class="youtube-trigger" onclick="window.location.href='../../youtube/youtube.html'">YouTube</button><button class="settings-trigger" onclick="window.location.href='../../settings/settings.html'">Settings</button></div></header><main><form id="gamesearchform" onsubmit="return false;"><input id="gamesearchinput" autocomplete="off" type="text" placeholder="Search Cosmic games..."/></form><div id="gamesgrid"><p id="loading">Connecting to Registry...</p><p id="no-results" style="display:none;grid-column:1/-1;text-align:center;">No results...</p></div></main></div>
     <script>
-        const searchInput=document.getElementById('gamesearchinput'); const grid=document.getElementById('gamesgrid'); const noResults=document.getElementById('no-results'); let cards=[]; const SESSION_KEY='cosmicGamesUnlocked'; const RETURN_KEY='cosmicReturnFromGame'; const ADMIN_SEEN_KEY='cosmicSecretAdminPasswordV1'; const WORKER_ORIGIN='https://cosmicv2.v75ultimate.workers.dev'; const ADMIN_VERIFY_ENDPOINT=WORKER_ORIGIN+'/api/admin-auth';
+        const searchInput=document.getElementById('gamesearchinput'); const grid=document.getElementById('gamesgrid'); const noResults=document.getElementById('no-results'); let allGames=[]; let filteredGames=[]; const cardPool=[]; let layoutState={cols:1,cardWidth:170,rowHeight:292,gridTop:0}; const SESSION_KEY='cosmicGamesUnlocked'; const RETURN_KEY='cosmicReturnFromGame'; const ADMIN_SEEN_KEY='cosmicSecretAdminPasswordV1'; const WORKER_ORIGIN='https://cosmicv2.v75ultimate.workers.dev'; const ADMIN_VERIFY_ENDPOINT=WORKER_ORIGIN+'/api/admin-auth';
         function isUnlocked(){try{return sessionStorage.getItem(SESSION_KEY)==='1';}catch(e){return false;}} function hasCompletedAdminGate(){try{return localStorage.getItem(ADMIN_SEEN_KEY)==='1';}catch(e){return false;}} function markAdminGateComplete(){try{localStorage.setItem(ADMIN_SEEN_KEY,'1');}catch(e){}} function showGames(){document.getElementById('password-gate').style.display='none';document.getElementById('admin-password-gate').style.display='none';document.getElementById('site-content').style.display='block';document.body.style.overflow='auto';try{window.dispatchEvent(new Event('cosmic-entry-ready'));}catch(e){}}
         async function finishEntry(){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}showGames();loadRegistry();}
         async function openAdminGate(){document.getElementById('password-gate').style.display='none';document.getElementById('admin-password-gate').style.display='grid';document.getElementById('site-content').style.display='none';document.body.style.overflow='hidden';setTimeout(()=>document.getElementById('admin-pass-field').focus(),50);}
@@ -61,71 +61,130 @@
         function checkPass(){const field=document.getElementById('pass-field'),error=document.getElementById('error-msg');if(field.value==='PASSWORD_PLACEHOLDER'){error.style.display='none';if(hasCompletedAdminGate())finishEntry();else openAdminGate();}else error.style.display='block';}
         document.getElementById('pass-field').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPass();}}); document.getElementById('admin-pass-field').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkAdminPass();}});
         function normalizeUrl(url){return new URL(url,window.location.href).href;} function gameUrl(game){const rawPath=String(game?.path||'');if(/^https?:\/\//i.test(rawPath)){return rawPath+(game.entry||'');} const localUrl=normalizeUrl('../../'+rawPath+(game.entry||''));if(window.location.hostname.endsWith('.github.io')){const url=new URL(localUrl);const marker='/pages/lessons/';const index=url.pathname.indexOf(marker);if(index>=0){url.pathname=url.pathname.slice(index);url.hostname=new URL(WORKER_ORIGIN).hostname;url.protocol='https:';url.port='';return url.href;}}return localUrl;} function shellUrl(game){const target=gameUrl(game);return normalizeUrl('game-shell.html?game='+encodeURIComponent(target));} function openBlank(url){const win=window.open('about:blank','_blank');if(win){win.location.href=url;}}
+        function makeCard(){
+            const card=document.createElement("article");
+            card.className="game-card";
+            const img=document.createElement("img");
+            img.className="game-thumb";
+            img.alt="";
+            img.loading="lazy";
+            img.decoding="async";
+            const thumb=document.createElement("div");
+            thumb.className="game-thumb";
+            thumb.style.display="none";
+            thumb.style.placeItems="center";
+            thumb.textContent="No Image";
+            const title=document.createElement("div");
+            title.className="game-title";
+            const actions=document.createElement("div");
+            actions.className="card-actions";
+            const play=document.createElement("button");
+            play.className="play-btn";
+            play.type="button";
+            play.dataset.action="play";
+            play.textContent="Play";
+            const blank=document.createElement("button");
+            blank.className="blank-btn";
+            blank.type="button";
+            blank.dataset.action="blank";
+            blank.textContent="Blank";
+            actions.append(play,blank);
+            card.append(img,thumb,title,actions);
+            card._img=img; card._thumb=thumb; card._title=title;
+            card._game=null;
+            return card;
+        }
+
+        function updateLayout(){
+            const width=Math.max(1,grid.clientWidth);
+            const gap=14;
+            const minCard=170;
+            const cols=Math.max(1,Math.floor((width+gap)/(minCard+gap)));
+            const cardWidth=Math.floor((width-(cols-1)*gap)/cols);
+            const cardHeight=cardWidth+104;
+            layoutState={cols,cardWidth,rowHeight:cardHeight+gap,gridTop:grid.getBoundingClientRect().top+window.scrollY};
+            grid.style.height=Math.max(120, filteredGames.length ? Math.ceil(filteredGames.length/cols)*layoutState.rowHeight-gap : 120)+"px";
+        }
+
+        function renderViewport(force=false){
+            updateLayout();
+            const {cols,cardWidth,rowHeight,gridTop}=layoutState;
+            const viewportTop=Math.max(0,window.scrollY-gridTop);
+            const firstRow=Math.max(0,Math.floor(viewportTop/rowHeight)-4);
+            const visibleRows=Math.ceil(window.innerHeight/rowHeight)+8;
+            const firstIndex=firstRow*cols;
+            const wantedCount=Math.min(filteredGames.length-firstIndex,visibleRows*cols);
+
+            if(wantedCount<=0){
+                cardPool.forEach(card=>card.style.display="none");
+                return;
+            }
+
+            while(cardPool.length<wantedCount){
+                const card=makeCard();
+                grid.appendChild(card);
+                cardPool.push(card);
+            }
+
+            for(let i=0;i<cardPool.length;i++){
+                const card=cardPool[i];
+                const dataIndex=firstIndex+i;
+                if(i>=wantedCount || dataIndex>=filteredGames.length){
+                    card.style.display="none";
+                    card._game=null;
+                    continue;
+                }
+                const game=filteredGames[dataIndex];
+                const col=dataIndex%cols;
+                const row=Math.floor(dataIndex/cols);
+                const url=gameUrl(game);
+                const launch=shellUrl(game);
+                card.style.display="flex";
+                card.style.left=(col*(cardWidth+14))+"px";
+                card.style.top=(row*rowHeight)+"px";
+                card.style.width=cardWidth+"px";
+                card.style.height=(rowHeight-14)+"px";
+                card._game=game;
+                card._img.src=game.image ? gameUrl({path:game.image}) : "";
+                card._img.style.display=game.image ? "block" : "none";
+                card._thumb.style.display=game.image ? "none" : "grid";
+                card._title.textContent=String(game.name||"Untitled Game");
+                card.dataset.url=url;
+                card.dataset.launch=launch;
+            }
+            noResults.style.display="none";
+        }
+
         function loadRegistry(){
-            fetch("games.json?nocache="+Date.now(),{cache:"no-store"})
+            fetch("games.json",{cache:"default"})
               .then(res=>{if(!res.ok)throw new Error("Registry request failed: "+res.status);return res.json();})
               .then(games=>{
                 document.getElementById("loading")?.remove();
-                const batchSize=80;
-                let index=0;
-                const renderBatch=()=>{
-                  const fragment=document.createDocumentFragment();
-                  const end=Math.min(index+batchSize,games.length);
-                  for(;index<end;index++){
-                    const game=games[index];
-                    const card=document.createElement("article");
-                    card.className="game-card";
-                    const url=gameUrl(game);
-                    const launch=shellUrl(game);
-                    if(game.image){
-                      const img=document.createElement("img");
-                      img.className="game-thumb";
-                      img.alt="";
-                      img.loading="lazy";
-                      img.decoding="async";
-                      img.fetchPriority=index<24?"high":"low";
-                      img.src=gameUrl({path:game.image});
-                      card.appendChild(img);
-                    }else{
-                      const thumb=document.createElement("div");
-                      thumb.className="game-thumb";
-                      thumb.style.display="grid";
-                      thumb.style.placeItems="center";
-                      thumb.textContent="No Image";
-                      card.appendChild(thumb);
-                    }
-                    const title=document.createElement("div");
-                    title.className="game-title";
-                    title.textContent=String(game.name||"Untitled Game");
-                    const actions=document.createElement("div");
-                    actions.className="card-actions";
-                    const play=document.createElement("button");
-                    play.className="play-btn";
-                    play.type="button";
-                    play.textContent="Play";
-                    play.addEventListener("click",()=>{window.location.href=launch;});
-                    const blank=document.createElement("button");
-                    blank.className="blank-btn";
-                    blank.type="button";
-                    blank.textContent="Blank";
-                    blank.addEventListener("click",()=>openBlank(url));
-                    actions.append(play,blank);
-                    card.append(title,actions);
-                    fragment.appendChild(card);
-                    cards.push({element:card,name:String(game.name||"").toLowerCase()});
-                  }
-                  grid.appendChild(fragment);
-                  if(index<games.length){
-                    (window.requestIdleCallback||function(cb){setTimeout(cb,0);})(renderBatch);
-                  }else{
-                    noResults.style.display=games.length?"none":"block";
-                  }
-                };
-                renderBatch();
+                allGames=Array.isArray(games)?games:[];
+                filteredGames=allGames.slice();
+                renderViewport(true);
+                noResults.style.display=filteredGames.length?"none":"block";
               })
               .catch(error=>{document.getElementById("loading").textContent="Could not load the game registry. Please refresh.";console.error("Cosmic registry error:",error);});
         }
-        const returningFromGame=(()=>{try{const value=sessionStorage.getItem(RETURN_KEY);sessionStorage.removeItem(RETURN_KEY);return value==='1';}catch(e){return false;}})(); if(isUnlocked()||returningFromGame){showGames();if(!isUnlocked()){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}}loadRegistry();}else{document.getElementById('password-gate').style.display='grid';document.getElementById('site-content').style.display='none';} searchInput.addEventListener('input',e=>{const val=e.target.value.toLowerCase();let matches=0;cards.forEach(c=>{const show=c.name.includes(val);c.element.style.display=show?'flex':'none';if(show)matches++;});noResults.style.display=matches===0&&cards.length?'block':'none';});
+
+        grid.addEventListener("click",event=>{
+            const button=event.target.closest("button[data-action]");
+            if(!button) return;
+            const card=button.closest(".game-card");
+            if(!card || !card._game) return;
+            if(button.dataset.action==="play") window.location.href=card.dataset.launch;
+            else if(button.dataset.action==="blank") openBlank(card.dataset.url);
+        });
+
+        let scrollFrame=0;
+        function scheduleViewport(){
+            if(scrollFrame)return;
+            scrollFrame=requestAnimationFrame(()=>{scrollFrame=0;renderViewport();});
+        }
+        window.addEventListener("scroll",scheduleViewport,{passive:true});
+        window.addEventListener("resize",scheduleViewport,{passive:true});
+        const returningFromGame=(()=>{try{const value=sessionStorage.getItem(RETURN_KEY);sessionStorage.removeItem(RETURN_KEY);return value==='1';}catch(e){return false;}})(); if(isUnlocked()||returningFromGame){showGames();if(!isUnlocked()){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}}loadRegistry();}else{document.getElementById('password-gate').style.display='grid';document.getElementById('site-content').style.display='none';} searchInput.addEventListener("input",e=>{const val=String(e.target.value||"").trim().toLowerCase();filteredGames=val?allGames.filter(game=>String(game.name||"").toLowerCase().includes(val)):allGames.slice();window.scrollTo({top:Math.max(0,grid.getBoundingClientRect().top+window.scrollY-18),behavior:"auto"});renderViewport(true);noResults.style.display=filteredGames.length?"none":"block";});
     </script>
 <link rel="manifest" href="../../manifest.json">
 <script src="../../scripts/cosmic-hub.js?v=3"></script>

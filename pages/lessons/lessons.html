@@ -12,14 +12,12 @@
         html,body{overflow-x:hidden;}
         body{min-height:100%;overscroll-behavior-x:none;}
         main{width:100%;box-sizing:border-box;}
-        #gamesgrid{position:relative;width:100%;box-sizing:border-box;min-height:320px;overflow:visible;contain:layout style;}
-        #games-render{position:absolute;inset:0;pointer-events:none;}
-        .game-card{position:absolute;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;height:var(--game-card-height,306px);padding:10px;border-radius:16px;background:rgba(6,20,16,.92);border:1px solid var(--card-border);box-shadow:0 6px 16px rgba(0,0,0,.22);contain:layout paint;pointer-events:auto;overflow:hidden;}
+        #gamesgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;align-items:stretch;width:100%;box-sizing:border-box;}
+        .game-card{box-sizing:border-box;display:flex;flex-direction:column;gap:8px;min-width:0;padding:10px;border-radius:16px;background:rgba(6,20,16,.92);border:1px solid var(--card-border);box-shadow:0 6px 16px rgba(0,0,0,.22);contain:layout paint;overflow:hidden;content-visibility:auto;contain-intrinsic-size:306px;}
         .game-thumb{display:block;width:100%;aspect-ratio:1/1;height:auto;flex:none;border-radius:12px;object-fit:cover;background:#000;}
         .game-title{font-size:.85rem;line-height:1.2;height:2.45em;min-height:2.45em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-align:center;align-items:center;justify-content:center;overflow-wrap:anywhere;}
         .card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;}
-        .game-card img{content-visibility:auto;}
-        #virtual-load-status{position:absolute;left:0;right:0;bottom:10px;text-align:center;color:rgba(185,199,209,.72);font-size:.72rem;pointer-events:none;}
+        .game-card img{display:block;}
         .play-btn,.blank-btn { width:100%; height:36px; font-size:.72rem; border-radius:999px; cursor:pointer; font-weight:bold; }
         .play-btn { background:var(--accent); color:#031721; border:none; }
         .blank-btn { background:transparent; border:1px solid var(--accent); color:var(--accent); }
@@ -65,29 +63,11 @@
         function checkPass(){const field=document.getElementById('pass-field'),error=document.getElementById('error-msg');if(field.value==='PASSWORD_PLACEHOLDER'){error.style.display='none';if(hasCompletedAdminGate())finishEntry();else openAdminGate();}else error.style.display='block';}
         document.getElementById('pass-field').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPass();}}); document.getElementById('admin-pass-field').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkAdminPass();}});
         function normalizeUrl(url){return new URL(url,window.location.href).href;} function gameUrl(game){const rawPath=String(game?.path||'');if(/^https?:\/\//i.test(rawPath)){return rawPath+(game.entry||'');} const localUrl=normalizeUrl('../../'+rawPath+(game.entry||''));if(window.location.hostname.endsWith('.github.io')){const url=new URL(localUrl);const marker='/pages/lessons/';const index=url.pathname.indexOf(marker);if(index>=0){url.pathname=url.pathname.slice(index);url.hostname=new URL(WORKER_ORIGIN).hostname;url.protocol='https:';url.port='';return url.href;}}return localUrl;} function shellUrl(game){const target=gameUrl(game);return normalizeUrl('game-shell.html?game='+encodeURIComponent(target));} function openBlank(url){const win=window.open('about:blank','_blank');if(win){win.location.href=url;}}
-        function loadRegistry(){
-            fetch('games.json?nocache='+Date.now(),{cache:'no-store'})
-                .then(res=>{if(!res.ok)throw new Error('Registry request failed: '+res.status);return res.json();})
-                .then(games=>{
-                    document.getElementById('loading')?.remove();
-                    initVirtualGameGrid(Array.isArray(games)?games:[]);
-                })
-                .catch(error=>{
-                    document.getElementById('loading').textContent='Could not load the game registry. Please refresh.';
-                    console.error('Cosmic registry error:',error);
-                });
-        }
-
-        let allGames=[],filteredGames=[],renderedNodes=new Map(),renderFrame=0,resizeObserver=null,gridMetrics=null;
-        const VIRTUAL_OVERSCAN=3;
-
+        let cards=[];
         function buildGameCard(game){
             const card=document.createElement('article');
             card.className='game-card';
-            card.dataset.gameName=String(game?.name||'');
-            card.title=String(game?.name||'');
-            const url=gameUrl(game);
-            const launch=shellUrl(game);
+            const url=gameUrl(game),launch=shellUrl(game);
 
             if(game?.image){
                 const img=document.createElement('img');
@@ -117,144 +97,39 @@
             play.className='play-btn';
             play.type='button';
             play.textContent='Play';
-            play.addEventListener('click',()=>{window.location.href=launch;},{passive:true});
+            play.addEventListener('click',()=>{window.location.href=launch});
 
             const blank=document.createElement('button');
             blank.className='blank-btn';
             blank.type='button';
             blank.textContent='Blank';
-            blank.addEventListener('click',()=>openBlank(url),{passive:true});
+            blank.addEventListener('click',()=>openBlank(url));
 
             actions.append(play,blank);
             card.appendChild(actions);
             return card;
         }
 
-        function getGridMetrics(){
-            const width=Math.max(1,grid.clientWidth);
-            const styles=getComputedStyle(grid);
-            const gap=parseFloat(styles.columnGap)||14;
-            const minCard=window.innerWidth<=600?140:170;
-            const columns=Math.max(1,Math.floor((width+gap)/(minCard+gap)));
-            const cardWidth=(width-gap*(columns-1))/columns;
-            const cardHeight=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--game-card-height')) ||
-                (window.innerWidth<=600?272:306);
-            const rowHeight=cardHeight+gap;
-            return {width,gap,columns,cardWidth,cardHeight,rowHeight};
-        }
-
-        function applyVirtualLayout(){
-            gridMetrics=getGridMetrics();
-            const totalRows=Math.ceil(filteredGames.length/gridMetrics.columns);
-            const totalHeight=Math.max(320,totalRows*gridMetrics.rowHeight-Math.max(0,gridMetrics.gap));
-            grid.style.height=totalHeight+'px';
-            return totalRows;
-        }
-
-        function renderVirtualWindow(){
-            renderFrame=0;
-            if(!gridMetrics)applyVirtualLayout();
-
-            const gridTop=grid.getBoundingClientRect().top+window.scrollY;
-            const viewTop=Math.max(0,window.scrollY-gridTop);
-            const viewBottom=viewTop+window.innerHeight;
-            const startRow=Math.max(0,Math.floor(viewTop/gridMetrics.rowHeight)-VIRTUAL_OVERSCAN);
-            const endRow=Math.min(
-                Math.max(0,Math.ceil(viewBottom/gridMetrics.rowHeight)+VIRTUAL_OVERSCAN),
-                Math.ceil(filteredGames.length/gridMetrics.columns)
-            );
-            const startIndex=startRow*gridMetrics.columns;
-            const endIndex=Math.min(filteredGames.length,endRow*gridMetrics.columns);
-            const needed=new Set();
-
-            const render=document.getElementById('games-render');
-            for(let index=startIndex;index<endIndex;index++){
-                needed.add(index);
-                let card=renderedNodes.get(index);
-                if(!card){
-                    card=buildGameCard(filteredGames[index]);
-                    render.appendChild(card);
-                    renderedNodes.set(index,card);
-                }
-                const row=Math.floor(index/gridMetrics.columns);
-                const col=index%gridMetrics.columns;
-                card.style.width=gridMetrics.cardWidth+'px';
-                card.style.height=gridMetrics.cardHeight+'px';
-                card.style.left=(col*(gridMetrics.cardWidth+gridMetrics.gap))+'px';
-                card.style.top=(row*gridMetrics.rowHeight)+'px';
-            }
-
-            for(const [index,card] of renderedNodes){
-                if(!needed.has(index)){
-                    card.remove();
-                    renderedNodes.delete(index);
-                }
-            }
-
-            const status=document.getElementById('virtual-load-status');
-            if(status){
-                status.textContent=filteredGames.length>0
-                    ? ('Showing '+Math.min(endIndex,filteredGames.length)+' of '+filteredGames.length)
-                    : '';
-            }
-        }
-
-        function scheduleVirtualRender(){
-            if(renderFrame)return;
-            renderFrame=requestAnimationFrame(renderVirtualWindow);
-        }
-
-        function updateVirtualFilter(value){
-            const query=String(value||'').trim().toLowerCase();
-            filteredGames=query
-                ? allGames.filter(game=>String(game?.name||'').toLowerCase().includes(query))
-                : allGames.slice();
-
-            for(const card of renderedNodes.values())card.remove();
-            renderedNodes.clear();
-            window.scrollTo({top:0,behavior:'auto'});
-            applyVirtualLayout();
-            noResults.style.display=filteredGames.length?'none':'block';
-            scheduleVirtualRender();
-        }
-
-        function initVirtualGameGrid(games){
-            allGames=Array.isArray(games)?games:[];
-            filteredGames=allGames.slice();
-
-            if(!document.getElementById('games-render')){
-                const render=document.createElement('div');
-                render.id='games-render';
-                const status=document.createElement('div');
-                status.id='virtual-load-status';
-                grid.append(render,status);
-            }
-
-            applyVirtualLayout();
-            noResults.style.display=filteredGames.length?'none':'block';
-            scheduleVirtualRender();
-
-            searchInput.addEventListener('input',e=>updateVirtualFilter(e.target.value));
-
-            if('ResizeObserver' in window){
-                resizeObserver=new ResizeObserver(()=>{
-                    const oldColumns=gridMetrics?.columns;
-                    applyVirtualLayout();
-                    if(oldColumns!==gridMetrics?.columns){
-                        for(const card of renderedNodes.values())card.remove();
-                        renderedNodes.clear();
+        function loadRegistry(){
+            fetch('games.json?nocache='+Date.now(),{cache:'no-store'})
+                .then(res=>{if(!res.ok)throw new Error('Registry request failed: '+res.status);return res.json();})
+                .then(games=>{
+                    document.getElementById('loading')?.remove();
+                    const list=Array.isArray(games)?games:[];
+                    const fragment=document.createDocumentFragment();
+                    cards=[];
+                    for(const game of list){
+                        const element=buildGameCard(game);
+                        fragment.appendChild(element);
+                        cards.push({element,name:String(game?.name||'').toLowerCase()});
                     }
-                    scheduleVirtualRender();
+                    grid.appendChild(fragment);
+                    noResults.style.display=list.length?'none':'block';
+                })
+                .catch(error=>{
+                    document.getElementById('loading').textContent='Could not load the game registry. Please refresh.';
+                    console.error('Cosmic registry error:',error);
                 });
-                resizeObserver.observe(grid);
-            }else{
-                window.addEventListener('resize',()=>{
-                    applyVirtualLayout();
-                    scheduleVirtualRender();
-                },{passive:true});
-            }
-
-            window.addEventListener('scroll',scheduleVirtualRender,{passive:true});
         }
     </script>
 <link rel="manifest" href="../../manifest.json">

@@ -215,7 +215,8 @@ async function inspectBrowserGame(browser, game) {
         frame.url() !== 'about:blank' &&
         (
           frame.url().startsWith(target) ||
-          frame.url().includes('/pages/lessons/')
+          frame.url().includes('/pages/lessons/') ||
+          (/^https?:\/\//i.test(target) && frame.url().startsWith('blob:'))
         )
       );
 
@@ -275,7 +276,8 @@ async function inspectBrowserGame(browser, game) {
           frame !== page.mainFrame() &&
           frame.url() &&
           frame.url() !== 'about:blank' &&
-          (frame.url().startsWith(target) || frame.url().includes('/pages/lessons/'))
+          (frame.url().startsWith(target) || frame.url().includes('/pages/lessons/') ||
+            (/^https?:\/\//i.test(target) && frame.url().startsWith('blob:')))
         );
         if (current) childFrame = current;
       }

@@ -52,26 +52,8 @@ function readGames() {
   return data;
 }
 
-function isCosmicGamesUrl(rawPath) {
-  return /^https?:\/\/cdn\.jsdelivr\.net\/gh\/Ultimate-Guy\/cosmicgames@/i.test(String(rawPath || '').trim())
-    && /\/UGS-Files\//i.test(String(rawPath || ''));
-}
-
-function cosmicGamesProxyUrl(rawPath) {
-  const source = new URL(String(rawPath).trim());
-  const marker = '/UGS-Files/';
-  const idx = source.pathname.indexOf(marker);
-  if (idx < 0) throw new Error('Invalid CosmicGames source URL');
-  const filename = decodeURIComponent(source.pathname.slice(idx + marker.length));
-  if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-    throw new Error('Invalid CosmicGames filename');
-  }
-  return GAME_ORIGIN.replace(/\/+$/, '') + '/api/ugs/' + encodeURIComponent(filename);
-}
-
 function targetUrl(game) {
   const rawPath = String(game.path || '').trim();
-  if (isCosmicGamesUrl(rawPath)) return cosmicGamesProxyUrl(rawPath);
   if (/^https?:\/\//i.test(rawPath)) return rawPath;
   return GAME_ORIGIN.replace(/\/+$/, '') + '/' + rawPath.replace(/^\/+/, '');
 }
@@ -129,13 +111,13 @@ async function checkTarget(game) {
     try { await response.body?.cancel(); } catch (_) {}
 
     if (!response.ok) {
-      result.reason = isCosmicGamesUrl(rawPath)
-        ? 'UGS proxy returned HTTP ' + response.status
+      result.reason = false
+        ? 'target returned HTTP ' + response.status
         : 'target returned HTTP ' + response.status;
       return result;
     }
 
-    if (!isCosmicGamesUrl(rawPath) && result.contentType && !/text\/html|application\/xhtml\+xml/i.test(result.contentType)) {
+    if (!false && result.contentType && !/text\/html|application\/xhtml\+xml/i.test(result.contentType)) {
       result.reason = 'target did not return HTML content (' + result.contentType + ')';
       return result;
     }
@@ -144,7 +126,7 @@ async function checkTarget(game) {
     return result;
   } catch (e) {
     result.reason = e.name === 'AbortError'
-      ? (isCosmicGamesUrl(rawPath) ? 'UGS proxy request timed out' : 'target request timed out')
+      ? (false ? 'target request timed out' : 'target request timed out')
       : e.message;
     return result;
   } finally {

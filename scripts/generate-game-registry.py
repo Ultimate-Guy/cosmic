@@ -126,7 +126,39 @@ def main():
         if not isinstance(data,list): raise ValueError('ugs-games.json must contain an array')
         for item in data:
             if not isinstance(item,dict): continue
-            name=str(item.get('name','')).strip() or 'Untitled UGS Game'
+            source_path=str(item.get('source_path','')).strip()
+            filename=Path(source_path).name if source_path else ''
+            filename=re.sub(r'\\.html?
+            suffix=1
+            while candidate.casefold() in seen:
+                candidate=f'{name} (UGS)' if suffix==1 else f'{name} (UGS {suffix})'
+                suffix+=1
+            raw_path=str(item.get('path','')).strip()
+            if not re.match(r'^https?://',raw_path,re.I):
+                raise ValueError(f'UGS game path is not absolute: {raw_path}')
+            tags=item.get('tags',[])
+            entry={
+                'name':candidate,
+                'path':raw_path,
+                'category':str(item.get('category','Arcade')).strip() or 'Arcade',
+                'tags':[str(x) for x in tags] if isinstance(tags,list) else ['UGS'],
+                'featured':bool(item.get('featured',False)),
+                'source':'UGS',
+            }
+            if item.get('source_path'): entry['source_path']=str(item['source_path'])
+            games.append(entry)
+            seen.add(candidate.casefold())
+            ugs_added+=1
+
+    games.sort(key=lambda item:(str(item.get('name','')).casefold(),str(item.get('path','')).casefold()))
+    OUTPUT.parent.mkdir(parents=True,exist_ok=True)
+    OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8')
+    print(f'Generated {len(games)} game entries ({ugs_added} UGS) and normalized Cosmic Hub loaders')
+if __name__=='__main__':main()
+, '', filename, flags=re.I)
+            if filename.lower().startswith('cl') and len(filename)>2:
+                filename=filename[2:]
+            name=re.sub(r'[_-]+',' ',filename).strip() or str(item.get('name','')).strip() or 'Untitled UGS Game'
             candidate=name
             suffix=1
             while candidate.casefold() in seen:

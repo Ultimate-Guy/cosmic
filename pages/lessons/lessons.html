@@ -65,51 +65,19 @@
         function normalizeUrl(url){return new URL(url,window.location.href).href;} function gameUrl(game){const rawPath=String(game?.path||'');if(/^https?:\/\//i.test(rawPath)){return rawPath+(game.entry||'');} const localUrl=normalizeUrl('../../'+rawPath+(game.entry||''));if(window.location.hostname.endsWith('.github.io')){const url=new URL(localUrl);const marker='/pages/lessons/';const index=url.pathname.indexOf(marker);if(index>=0){url.pathname=url.pathname.slice(index);url.hostname=new URL(WORKER_ORIGIN).hostname;url.protocol='https:';url.port='';return url.href;}}return localUrl;} function shellUrl(game){const target=gameUrl(game);return normalizeUrl('game-shell.html?game='+encodeURIComponent(target));} function openBlank(url){const win=window.open('about:blank','_blank');if(win){win.location.href=url;}}
         let cards=[];
         function buildGameCard(game){
-            const card=document.createElement('article');
-            card.className='game-card';
-            const url=gameUrl(game),launch=shellUrl(game);
-
-            if(game?.image){
-                const img=document.createElement('img');
-                img.className='game-thumb';
-                img.alt='';
-                img.loading='lazy';
-                img.decoding='async';
-                img.src=gameUrl({path:game.image});
-                card.appendChild(img);
-            }else{
-                const thumb=document.createElement('div');
-                thumb.className='game-thumb';
-                thumb.style.cssText='background:#000;display:grid;place-items:center;color:#7f919b;font-size:.7rem;';
-                thumb.textContent='No Image';
-                card.appendChild(thumb);
-            }
-
-            const title=document.createElement('div');
-            title.className='game-title';
-            title.textContent=String(game?.name||'Untitled Game');
-            card.appendChild(title);
-
-            const actions=document.createElement('div');
-            actions.className='card-actions';
-
-            const play=document.createElement('button');
-            play.className='play-btn';
-            play.type='button';
-            play.textContent='Play';
-            play.addEventListener('click',()=>{window.location.href=launch});
-
-            const blank=document.createElement('button');
-            blank.className='blank-btn';
-            blank.type='button';
-            blank.textContent='Blank';
-            blank.addEventListener('click',()=>openBlank(url));
-
-            actions.append(play,blank);
-            card.appendChild(actions);
-            return card;
+            const name=String(game?.name||'Untitled Game');
+            const url=gameUrl(game);
+            const launch=shellUrl(game);
+            const image=game?.image?'<img class="game-thumb" loading="lazy" decoding="async" alt="" src="'+gameUrl({path:game.image}).replace(/"/g,'&quot;')+'">':'<div class="game-thumb" style="background:#000;display:grid;place-items:center;color:#7f919b;font-size:.7rem">No Image</div>';
+            const article=document.createElement('article');
+            article.className='game-card';
+            article.dataset.name=name;
+            article.dataset.launch=launch;
+            article.dataset.blank=url;
+            article.innerHTML=image+'<div class="game-title"></div><div class="card-actions"><button class="play-btn" type="button" data-game-action="play">Play</button><button class="blank-btn" type="button" data-game-action="blank">Blank</button></div>';
+            article.querySelector('.game-title').textContent=name;
+            return article;
         }
-
         function loadRegistry(){
             fetch('games.json?nocache='+Date.now(),{cache:'no-store'})
                 .then(res=>{if(!res.ok)throw new Error('Registry request failed: '+res.status);return res.json();})
@@ -131,6 +99,16 @@
                     console.error('Cosmic registry error:',error);
                 });
         }
+
+        grid.addEventListener('click',e=>{
+            const button=e.target.closest?.('[data-game-action]');
+            if(!button)return;
+            const card=button.closest('.game-card');
+            if(!card)return;
+            if(button.dataset.gameAction==='play')window.location.href=card.dataset.launch;
+            if(button.dataset.gameAction==='blank')openBlank(card.dataset.blank);
+        });
+
         searchInput.addEventListener('input',e=>{
             const val=e.target.value.trim().toLowerCase();
             let matches=0;
@@ -141,6 +119,28 @@
             }
             noResults.style.display=matches||!cards.length?'none':'block';
         });
+
+        const returningFromGame=(()=>{
+            try{
+                const value=sessionStorage.getItem(RETURN_KEY);
+                sessionStorage.removeItem(RETURN_KEY);
+                return value==='1';
+            }catch(e){
+                return false;
+            }
+        })();
+
+        if(isUnlocked()||returningFromGame){
+            showGames();
+            if(!isUnlocked()){
+                try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}
+            }
+            loadRegistry();
+        }else{
+            document.getElementById('password-gate').style.display='grid';
+            document.getElementById('site-content').style.display='none';
+            document.body.style.overflow='hidden';
+        }
     </script>
 <link rel="manifest" href="../../manifest.json">
 <script src="../../scripts/cosmic-hub.js?v=3"></script>

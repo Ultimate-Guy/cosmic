@@ -5,8 +5,8 @@ import fs from 'node:fs';
 
 const REGISTRY = 'pages/lessons/games.json';
 const GAME_ORIGIN = process.env.COSMIC_GAME_ORIGIN || 'https://cosmicv2.v75ultimate.workers.dev';
-const TARGET_CONCURRENCY = Number(process.env.COSMIC_TARGET_CONCURRENCY || 48);
-const HTTP_TIMEOUT = Number(process.env.COSMIC_GAME_HTTP_TIMEOUT || 6000);
+const TARGET_CONCURRENCY = Number(process.env.COSMIC_TARGET_CONCURRENCY || 64);
+const HTTP_TIMEOUT = Number(process.env.COSMIC_GAME_HTTP_TIMEOUT || 4500);
 const BROWSER_CONCURRENCY = Number(process.env.COSMIC_BROWSER_CONCURRENCY || 8);
 const NAV_TIMEOUT = Number(process.env.COSMIC_GAME_NAV_TIMEOUT || 5000);
 const FRAME_WAIT = Number(process.env.COSMIC_GAME_FRAME_WAIT || 2500);
@@ -53,8 +53,9 @@ function readGames() {
 }
 
 function targetUrl(game) {
-  const rawPath = String(game.path || '').replace(/^\/+/, '');
-  return GAME_ORIGIN.replace(/\/+$/, '') + '/' + rawPath;
+  const rawPath = String(game.path || '').trim();
+  if (/^https?:\/\//i.test(rawPath)) return rawPath;
+  return GAME_ORIGIN.replace(/\/+$/, '') + '/' + rawPath.replace(/^\/+/, '');
 }
 
 function shellUrl(game) {
@@ -75,6 +76,9 @@ function sampleGames(games) {
 
   add(games[0]);
   add(games[games.length - 1]);
+
+  const external = games.filter(g => /^https?:\/\//i.test(String(g.path || '').trim()));
+  for (const game of external) add(game);
 
   const step = Math.max(1, Math.floor(games.length / (BROWSER_SAMPLE - 2)));
   for (let i = step; i < games.length - 1 && chosen.length < BROWSER_SAMPLE; i += step) {
@@ -357,7 +361,9 @@ async function main() {
   const games = readGames();
   console.log('WAITING FOR LIVE DEPLOYMENT');
   await waitForDeployment();
-  console.log('FAST TARGET TEST: ' + games.length + ' games, concurrency ' + TARGET_CONCURRENCY);
+  const external = games.filter(g => /^https?:\/\//i.test(String(g.path || '').trim()));
+  const local = games.length - external.length;
+  console.log('FAST TARGET TEST: ' + games.length + ' games (' + local + ' local, ' + external.length + ' external), concurrency ' + TARGET_CONCURRENCY);
 
   const targetResults = await runTargetChecks(games);
   const targetFailures = targetResults.filter(r => !r.ok);
@@ -369,7 +375,7 @@ async function main() {
 
   const samples = sampleGames(games);
   console.log('\nBROWSER IFRAME SAMPLE: ' + samples.length + ' games, concurrency ' + BROWSER_CONCURRENCY);
-  console.log('Sample includes the catalog edges and evenly spaced games.');
+  console.log('Sample includes catalog edges, evenly spaced games, and a few external UGS entries when present.');
 
   const browserResults = await runBrowserChecks(samples);
   const browserFailures = browserResults.filter(r => !r.ok && !r.inconclusive);

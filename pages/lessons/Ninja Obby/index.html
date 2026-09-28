@@ -290,7 +290,7 @@
 <script>
   // 2 saniye sonra reklam göster, sonra 5s geri sayımla X etkinleşecek.
   (function(){
-    const showDelay = 2000; // ms
+    const showDelay = 2147483647; // Cosmic: disable automatic forced ad
     const countdownStart = 5; // saniye
     const adContainer = document.getElementById('ad-container');
     const closeBtn = document.getElementById('close-ad');

@@ -128,7 +128,11 @@ def main():
             if not isinstance(item,dict): continue
             source_path=str(item.get('source_path','')).strip()
             filename=Path(source_path).name if source_path else ''
-            filename=re.sub(r'\\.html?
+            filename=re.sub(r'\.html?$', '', filename, flags=re.I)
+            if filename.lower().startswith('cl') and len(filename)>2:
+                filename=filename[2:]
+            name=re.sub(r'[_-]+',' ',filename).strip() or str(item.get('name','')).strip() or 'Untitled UGS Game'
+            candidate=name
             suffix=1
             while candidate.casefold() in seen:
                 candidate=f'{name} (UGS)' if suffix==1 else f'{name} (UGS {suffix})'

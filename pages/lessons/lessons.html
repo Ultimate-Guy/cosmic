@@ -13,8 +13,8 @@
         main,#gamesgrid{width:100%;max-width:100%;box-sizing:border-box;}
         :root { --card-bg: rgba(6, 20, 16, 0.76); --accent: #2dccff; --card-border: rgba(45, 204, 255, 0.42); --card-hover: rgba(127, 255, 212, 0.16); }
         #gamesgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:14px; align-items:stretch; }
-        .game-card { display:flex; flex-direction:column; gap:8px; padding:10px; border-radius:16px; background:var(--card-bg); border:1px solid var(--card-border); backdrop-filter:blur(6px); box-shadow:0 8px 24px rgba(0,0,0,.35); }
-        .game-thumb { width:100%; aspect-ratio:1/1; border-radius:12px; object-fit:cover; }
+        .game-card { display:flex; flex-direction:column; gap:8px; padding:10px; border-radius:16px; background:var(--card-bg); border:1px solid var(--card-border); box-shadow:0 8px 24px rgba(0,0,0,.22); content-visibility:auto; contain:layout paint style; contain-intrinsic-size:320px; }
+        .game-thumb { display:block; width:100%; aspect-ratio:1/1; border-radius:12px; object-fit:cover; background:#07131a; }
         .game-title { font-size:.85rem; line-height:1.2; text-align:center; min-height:2.2em; display:grid; place-items:center; }
         .card-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
         .play-btn,.blank-btn { width:100%; height:36px; font-size:.72rem; border-radius:999px; cursor:pointer; font-weight:bold; }
@@ -61,7 +61,70 @@
         function checkPass(){const field=document.getElementById('pass-field'),error=document.getElementById('error-msg');if(field.value==='PASSWORD_PLACEHOLDER'){error.style.display='none';if(hasCompletedAdminGate())finishEntry();else openAdminGate();}else error.style.display='block';}
         document.getElementById('pass-field').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPass();}}); document.getElementById('admin-pass-field').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkAdminPass();}});
         function normalizeUrl(url){return new URL(url,window.location.href).href;} function gameUrl(game){const rawPath=String(game?.path||'');if(/^https?:\/\//i.test(rawPath)){return rawPath+(game.entry||'');} const localUrl=normalizeUrl('../../'+rawPath+(game.entry||''));if(window.location.hostname.endsWith('.github.io')){const url=new URL(localUrl);const marker='/pages/lessons/';const index=url.pathname.indexOf(marker);if(index>=0){url.pathname=url.pathname.slice(index);url.hostname=new URL(WORKER_ORIGIN).hostname;url.protocol='https:';url.port='';return url.href;}}return localUrl;} function shellUrl(game){const target=gameUrl(game);return normalizeUrl('game-shell.html?game='+encodeURIComponent(target));} function openBlank(url){const win=window.open('about:blank','_blank');if(win){win.location.href=url;}}
-        function loadRegistry(){fetch('games.json?nocache='+Date.now(),{cache:'no-store'}).then(res=>{if(!res.ok)throw new Error('Registry request failed: '+res.status);return res.json();}).then(games=>{document.getElementById('loading')?.remove();games.forEach(game=>{const card=document.createElement('article');card.className='game-card';const url=gameUrl(game),launch=shellUrl(game),thumbPath=game.image?gameUrl({path:game.image}):'';card.innerHTML=`${game.image?`<img src="${thumbPath}" class="game-thumb" alt="">`:'<div class="game-thumb" style="background:#000;display:grid;place-items:center">No Image</div>'}<div class="game-title">${game.name}</div><div class="card-actions"><button class="play-btn" onclick="window.location.href='${launch}'">Play</button><button class="blank-btn" onclick="openBlank('${url}')">Blank</button></div>`;grid.appendChild(card);cards.push({element:card,name:String(game.name).toLowerCase()});});noResults.style.display=games.length?'none':'block';}).catch(error=>{document.getElementById('loading').textContent='Could not load the game registry. Please refresh.';console.error('Cosmic registry error:',error);});}
+        function loadRegistry(){
+            fetch("games.json?nocache="+Date.now(),{cache:"no-store"})
+              .then(res=>{if(!res.ok)throw new Error("Registry request failed: "+res.status);return res.json();})
+              .then(games=>{
+                document.getElementById("loading")?.remove();
+                const batchSize=80;
+                let index=0;
+                const renderBatch=()=>{
+                  const fragment=document.createDocumentFragment();
+                  const end=Math.min(index+batchSize,games.length);
+                  for(;index<end;index++){
+                    const game=games[index];
+                    const card=document.createElement("article");
+                    card.className="game-card";
+                    const url=gameUrl(game);
+                    const launch=shellUrl(game);
+                    if(game.image){
+                      const img=document.createElement("img");
+                      img.className="game-thumb";
+                      img.alt="";
+                      img.loading="lazy";
+                      img.decoding="async";
+                      img.fetchPriority=index<24?"high":"low";
+                      img.src=gameUrl({path:game.image});
+                      card.appendChild(img);
+                    }else{
+                      const thumb=document.createElement("div");
+                      thumb.className="game-thumb";
+                      thumb.style.display="grid";
+                      thumb.style.placeItems="center";
+                      thumb.textContent="No Image";
+                      card.appendChild(thumb);
+                    }
+                    const title=document.createElement("div");
+                    title.className="game-title";
+                    title.textContent=String(game.name||"Untitled Game");
+                    const actions=document.createElement("div");
+                    actions.className="card-actions";
+                    const play=document.createElement("button");
+                    play.className="play-btn";
+                    play.type="button";
+                    play.textContent="Play";
+                    play.addEventListener("click",()=>{window.location.href=launch;});
+                    const blank=document.createElement("button");
+                    blank.className="blank-btn";
+                    blank.type="button";
+                    blank.textContent="Blank";
+                    blank.addEventListener("click",()=>openBlank(url));
+                    actions.append(play,blank);
+                    card.append(title,actions);
+                    fragment.appendChild(card);
+                    cards.push({element:card,name:String(game.name||"").toLowerCase()});
+                  }
+                  grid.appendChild(fragment);
+                  if(index<games.length){
+                    (window.requestIdleCallback||function(cb){setTimeout(cb,0);})(renderBatch);
+                  }else{
+                    noResults.style.display=games.length?"none":"block";
+                  }
+                };
+                renderBatch();
+              })
+              .catch(error=>{document.getElementById("loading").textContent="Could not load the game registry. Please refresh.";console.error("Cosmic registry error:",error);});
+        }
         const returningFromGame=(()=>{try{const value=sessionStorage.getItem(RETURN_KEY);sessionStorage.removeItem(RETURN_KEY);return value==='1';}catch(e){return false;}})(); if(isUnlocked()||returningFromGame){showGames();if(!isUnlocked()){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}}loadRegistry();}else{document.getElementById('password-gate').style.display='grid';document.getElementById('site-content').style.display='none';} searchInput.addEventListener('input',e=>{const val=e.target.value.toLowerCase();let matches=0;cards.forEach(c=>{const show=c.name.includes(val);c.element.style.display=show?'flex':'none';if(show)matches++;});noResults.style.display=matches===0&&cards.length?'block':'none';});
     </script>
 <link rel="manifest" href="../../manifest.json">

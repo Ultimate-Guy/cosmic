@@ -1,16 +1,5 @@
 [
   {
-    "name": "1 on 1 Soccer",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/1-9/1%20on%201%20Soccer.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/1-9/1 on 1 Soccer.html"
-  },
-  {
     "name": "10 103 Null Kevin",
     "path": "pages/lessons/10-103%20Null%20Kevin/index.html",
     "category": "Arcade",
@@ -30,17 +19,6 @@
     "category": "Multiplayer",
     "tags": [],
     "featured": false
-  },
-  {
-    "name": "13 Bones",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/1-9/13%20Bones.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/1-9/13 Bones.html"
   },
   {
     "name": "1V1.Lol",
@@ -69,17 +47,6 @@
     "category": "Arcade",
     "tags": [],
     "featured": false
-  },
-  {
-    "name": "3 Pandas",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/1-9/3%20Pandas.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/1-9/3 Pandas.html"
   },
   {
     "name": "3 Pandas in Fantasy",
@@ -527,7 +494,7 @@
     "source_path": "assets/UGS/A/Arthur's Nightmare.html"
   },
   {
-    "name": "Arthur\u2019s Nightmare",
+    "name": "Arthur’s Nightmare",
     "path": "pages/lessons/Arthur%E2%80%99s%20Nightmare/index.html",
     "category": "Arcade",
     "tags": [],
@@ -783,14 +750,14 @@
     "featured": false
   },
   {
-    "name": "Baldi\u2019S Basics",
+    "name": "Baldi’S Basics",
     "path": "pages/lessons/Baldi%E2%80%99s%20Basics/index.html",
     "category": "Arcade",
     "tags": [],
     "featured": false
   },
   {
-    "name": "Baldi\u2019S Basics Remastered",
+    "name": "Baldi’S Basics Remastered",
     "path": "pages/lessons/Baldi%E2%80%99s%20Basics%20Remastered/index.html",
     "category": "Arcade",
     "tags": [],
@@ -2513,17 +2480,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/a_unsorted/clappleworm.html"
-  },
-  {
-    "name": "clarcadevolley",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/a_unsorted/clarcadevolley.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/a_unsorted/clarcadevolley.html"
   },
   {
     "name": "clarceuslegend",
@@ -5327,17 +5283,6 @@
     "source_path": "assets/UGS/unsorted/c_unsorted/clcontra3.html"
   },
   {
-    "name": "clcontraforce",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/c_unsorted/clcontraforce.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/c_unsorted/clcontraforce.html"
-  },
-  {
     "name": "clcookieclicker",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/c_unsorted/clcookieclicker.html",
     "category": "Arcade",
@@ -8086,17 +8031,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/f_unsorted/clfeedus3.html"
-  },
-  {
-    "name": "clfeedus4",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/f_unsorted/clfeedus4.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/f_unsorted/clfeedus4.html"
   },
   {
     "name": "clfeedus5",
@@ -10915,17 +10849,6 @@
     "source_path": "assets/UGS/unsorted/h_unsorted/clhauntedschool.html"
   },
   {
-    "name": "clhauntthehouse",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/h_unsorted/clhauntthehouse.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/h_unsorted/clhauntthehouse.html"
-  },
-  {
     "name": "clheartandsoul(1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/h_unsorted/clheartandsoul(1).html",
     "category": "Arcade",
@@ -13729,17 +13652,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/m_unsorted/clmegachess.html"
-  },
-  {
-    "name": "clmegaclient",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/m_unsorted/clmegaclient.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/m_unsorted/clmegaclient.html"
   },
   {
     "name": "clmegaman2",
@@ -16580,17 +16492,6 @@
     "source_path": "assets/UGS/unsorted/p_unsorted/clpiecesofcake.html"
   },
   {
-    "name": "clpilotwings64",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clpilotwings64.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/p_unsorted/clpilotwings64.html"
-  },
-  {
     "name": "clpingpongchaos",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clpingpongchaos.html",
     "category": "Arcade",
@@ -17955,7 +17856,7 @@
     "source_path": "assets/UGS/unsorted/p_unsorted/clpokeyellowlegacy.html"
   },
   {
-    "name": "clPok\u00e9mon Emerald Rush Edition (2.0)",
+    "name": "clPokémon Emerald Rush Edition (2.0)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clPok%C3%A9mon%20Emerald%20Rush%20Edition%20(2.0).html",
     "category": "Arcade",
     "tags": [
@@ -17963,10 +17864,10 @@
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "assets/UGS/unsorted/p_unsorted/clPok\u00e9mon Emerald Rush Edition (2.0).html"
+    "source_path": "assets/UGS/unsorted/p_unsorted/clPokémon Emerald Rush Edition (2.0).html"
   },
   {
-    "name": "clPok\u00e9mon Emerald Rush Edition (20)",
+    "name": "clPokémon Emerald Rush Edition (20)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clPok%C3%A9mon%20Emerald%20Rush%20Edition%20(20).html",
     "category": "Arcade",
     "tags": [
@@ -17974,10 +17875,10 @@
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "assets/UGS/unsorted/p_unsorted/clPok\u00e9mon Emerald Rush Edition (20).html"
+    "source_path": "assets/UGS/unsorted/p_unsorted/clPokémon Emerald Rush Edition (20).html"
   },
   {
-    "name": "clPok\u00e9mon Trade&_Stache (V11)",
+    "name": "clPokémon Trade&_Stache (V11)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clPok%C3%A9mon%20Trade%26_Stache%20(V11).html",
     "category": "Arcade",
     "tags": [
@@ -17985,10 +17886,10 @@
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "assets/UGS/unsorted/p_unsorted/clPok\u00e9mon Trade&_Stache (V11).html"
+    "source_path": "assets/UGS/unsorted/p_unsorted/clPokémon Trade&_Stache (V11).html"
   },
   {
-    "name": "clPok\u00e9mon TWO (v1.1)",
+    "name": "clPokémon TWO (v1.1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clPok%C3%A9mon%20TWO%20(v1.1).html",
     "category": "Arcade",
     "tags": [
@@ -17996,10 +17897,10 @@
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "assets/UGS/unsorted/p_unsorted/clPok\u00e9mon TWO (v1.1).html"
+    "source_path": "assets/UGS/unsorted/p_unsorted/clPokémon TWO (v1.1).html"
   },
   {
-    "name": "clPok\u00e9mon TWO (v11)",
+    "name": "clPokémon TWO (v11)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/p_unsorted/clPok%C3%A9mon%20TWO%20(v11).html",
     "category": "Arcade",
     "tags": [
@@ -18007,7 +17908,7 @@
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "assets/UGS/unsorted/p_unsorted/clPok\u00e9mon TWO (v11).html"
+    "source_path": "assets/UGS/unsorted/p_unsorted/clPokémon TWO (v11).html"
   },
   {
     "name": "clpolicepursuit2",
@@ -19383,17 +19284,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/r_unsorted/clrocketleague.html"
-  },
-  {
-    "name": "clrocketpult",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/r_unsorted/clrocketpult.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/r_unsorted/clrocketpult.html"
   },
   {
     "name": "clrocketsoccerderby",
@@ -22210,17 +22100,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "assets/UGS/unsorted/s_unsorted/clstickminfleecomplex.html"
-  },
-  {
-    "name": "clstickslasher",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/s_unsorted/clstickslasher.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "assets/UGS/unsorted/s_unsorted/clstickslasher.html"
   },
   {
     "name": "clstickwar",
@@ -26029,7 +25908,7 @@
     "source_path": "assets/UGS/unsorted/z_unsorted/clzumashooter.html"
   },
   {
-    "name": "cl\u00d6oo",
+    "name": "clÖoo",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/%C3%B6_unsorted/cl%C3%96oo.html",
     "category": "Arcade",
     "tags": [
@@ -26037,10 +25916,10 @@
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "assets/UGS/unsorted/\u00f6_unsorted/cl\u00d6oo.html"
+    "source_path": "assets/UGS/unsorted/ö_unsorted/clÖoo.html"
   },
   {
-    "name": "cl\u0298",
+    "name": "clʘ",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/unsorted/%CA%98_unsorted/cl%CA%98.html",
     "category": "Arcade",
     "tags": [
@@ -26048,7 +25927,7 @@
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "assets/UGS/unsorted/\u0298_unsorted/cl\u0298.html"
+    "source_path": "assets/UGS/unsorted/ʘ_unsorted/clʘ.html"
   },
   {
     "name": "COD Defiance",
@@ -27746,7 +27625,7 @@
     "source_path": "assets/UGS/P/Pizza Tower.html"
   },
   {
-    "name": "Pok\u00e9mon Black",
+    "name": "Pokémon Black",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/P/Pok%C3%A9mon%20Black.html",
     "category": "Arcade",
     "tags": [
@@ -27754,10 +27633,10 @@
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "assets/UGS/P/Pok\u00e9mon Black.html"
+    "source_path": "assets/UGS/P/Pokémon Black.html"
   },
   {
-    "name": "Pok\u00e9mon Blue",
+    "name": "Pokémon Blue",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/assets/UGS/P/Pok%C3%A9mon%20Blue.html",
     "category": "Arcade",
     "tags": [
@@ -27765,7 +27644,7 @@
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "assets/UGS/P/Pok\u00e9mon Blue.html"
+    "source_path": "assets/UGS/P/Pokémon Blue.html"
   },
   {
     "name": "Ragdoll Archers",

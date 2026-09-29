@@ -71,7 +71,7 @@
   function loginForm(){const m=openModal('cosmic-account-modal','Log in',`<label>Username<input id="ca-user" autocomplete="username"></label><label>Password<input id="ca-pass" type="password" autocomplete="current-password"></label><p id="ca-msg"></p><button class="cosmic-primary" id="ca-go">Log in</button>`);m.querySelector('#ca-go').onclick=async()=>{const u=m.querySelector('#ca-user').value.trim(),p=m.querySelector('#ca-pass').value,accounts=load(ACCOUNTS,{}),msg=m.querySelector('#ca-msg');if(!/^[A-Za-z0-9_]{3,24}$/.test(u)){msg.textContent='Use 3–24 letters, numbers, or underscores.';return;}const a=accounts[u.toLowerCase()];if(!a){msg.textContent='Account not found.';return;}const h=await passwordHash(p,a.salt);if(h!==a.hash){msg.textContent='Incorrect password.';return;}localStorage.setItem(SESSION,a.username);location.reload();};}
   async function reserveUsername(username){try{const r=await fetch(apiBase+'/api/usernames/reserve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username})});const data=await r.json().catch(()=>({}));return {ok:r.ok && data.ok,error:data.error||''};}catch(_){return {ok:false,error:'network'};}}
   function createForm(){const m=openModal('cosmic-account-modal','Create account',`<label>Username<input id="cc-user" autocomplete="username" maxlength="24"></label><label>Password<input id="cc-pass" type="password" autocomplete="new-password"></label><label>Confirm password<input id="cc-pass2" type="password" autocomplete="new-password"></label><p id="cc-msg">Usernames are unique across Cosmic.</p><button class="cosmic-primary" id="cc-go">Create account</button>`);m.querySelector('#cc-go').onclick=async()=>{const u=m.querySelector('#cc-user').value.trim(),p=m.querySelector('#cc-pass').value,p2=m.querySelector('#cc-pass2').value,msg=m.querySelector('#cc-msg'),go=m.querySelector('#cc-go');if(!/^[A-Za-z0-9_]{3,24}$/.test(u)){msg.textContent='Use 3–24 letters, numbers, or underscores.';return;}if(p.length<6){msg.textContent='Password must be at least 6 characters.';return;}if(p!==p2){msg.textContent='Passwords do not match.';return;}const accounts=load(ACCOUNTS,{}),key=u.toLowerCase();if(accounts[key]){msg.textContent='That username is already taken on this device.';return;}go.disabled=true;msg.textContent='Checking username…';const reserved=await reserveUsername(u);if(!reserved.ok){go.disabled=false;msg.textContent=reserved.error==='taken'?'That username is already taken.':'Could not check username availability. Please try again.';return;}const salt=crypto.getRandomValues(new Uint8Array(16));const saltText=Array.from(salt).map(x=>x.toString(16).padStart(2,'0')).join('');accounts[key]={username:u,salt:saltText,hash:await passwordHash(p,saltText),accountToken:reserved.account_token,createdAt:Date.now()};save(ACCOUNTS,accounts);localStorage.setItem(SESSION,u);location.reload();};}
-  function decorateCard(card,item,launch){if(card.dataset.cosmicEnhanced)return;card.dataset.cosmicEnhanced='1';card.dataset.cosmicItemId=itemId(item);card.style.position='relative';const star=document.createElement('button');star.className='cosmic-star';star.type='button';star.title='Pin';star.setAttribute('aria-label','Pin');star.textContent='☆';const more=document.createElement('button');more.className='cosmic-more';more.type='button';more.textContent='Notes & stats';card.append(star,more);const id=itemId(item);const p=profile();const pinned=p.favorites.includes(id);star.textContent=pinned?'★':'☆';star.onclick=e=>{e.stopPropagation();const q=profile(),i=q.favorites.indexOf(id);if(i>=0)q.favorites.splice(i,1);else q.favorites.unshift(id);writeProfile(q);star.textContent=q.favorites.includes(id)?'★':'☆';renderHubSections();};more.onclick=e=>{e.stopPropagation();detailModal(item,launch);};// Keep Play/Open interactions out of the critical event path. Launch tracking is deferred.}
+  function decorateCard(card,item,launch){if(card.dataset.cosmicEnhanced)return;card.dataset.cosmicEnhanced='1';card.dataset.cosmicItemId=itemId(item);card.style.position='relative';const star=document.createElement('button');star.className='cosmic-star';star.type='button';star.title='Pin';star.setAttribute('aria-label','Pin');star.textContent='☆';const more=document.createElement('button');more.className='cosmic-more';more.type='button';more.textContent='Notes & stats';card.append(star,more);const id=itemId(item);const p=profile();const pinned=p.favorites.includes(id);star.textContent=pinned?'★':'☆';star.onclick=e=>{e.stopPropagation();const q=profile(),i=q.favorites.indexOf(id);if(i>=0)q.favorites.splice(i,1);else q.favorites.unshift(id);writeProfile(q);star.textContent=q.favorites.includes(id)?'★':'☆';renderHubSections();};more.onclick=e=>{e.stopPropagation();detailModal(item,launch);};card.addEventListener('click',e=>{if(e.target.closest('button'))return;recordOpen(item);},{capture:true});card.querySelectorAll('button').forEach(btn=>{if(!btn.dataset.cosmicTracked){btn.dataset.cosmicTracked='1';btn.addEventListener('click',()=>{if(btn!==star&&btn!==more)recordOpen(item);},{capture:true});}});}
   function recordOpen(item){
     const defer=cb=>{if('requestIdleCallback' in window)requestIdleCallback(cb,{timeout:1200});else setTimeout(cb,150);};
     defer(()=>{
@@ -83,11 +83,8 @@
       if(username!=='Guest'&&account?.accountToken&&item.kind==='game'){
         const payload=JSON.stringify({username,account_token:account.accountToken,game_name:item.name});
         try{
-          if(navigator.sendBeacon){
-            navigator.sendBeacon(apiBase+'/api/accounts/activity',new Blob([payload],{type:'application/json'}));
-          }else{
-            fetch(apiBase+'/api/accounts/activity',{method:'POST',headers:{'Content-Type':'application/json'},body:payload,keepalive:true}).catch(()=>{});
-          }
+          if(navigator.sendBeacon) navigator.sendBeacon(apiBase+'/api/accounts/activity',new Blob([payload],{type:'application/json'}));
+          else fetch(apiBase+'/api/accounts/activity',{method:'POST',headers:{'Content-Type':'application/json'},body:payload,keepalive:true}).catch(()=>{});
         }catch(_){}
       }
       renderHubSections();
@@ -124,17 +121,16 @@
   function smartPick(){
     if(!allItems.length)return null;
     const p=profile(), recent=new Set(p.recent||[]), fav=new Set(p.favorites||[]);
-    let best=allItems[0],bestScore=-Infinity;
-    for(const item of allItems){
-      const id=itemId(item),stats=p.stats[id]||{};
+    const scored=allItems.map(item=>{
+      const id=itemId(item),s=p.stats[id]||{};
       let score=Math.random()*4;
       if(recent.has(id))score-=7;
       if(fav.has(id))score+=5;
-      score+=Math.min(Number(stats.opens||0),5);
+      score+=Math.min(Number(s.opens||0),5);
       if(item.kind==='game')score+=2;
-      if(score>bestScore){bestScore=score;best=item;}
-    }
-    return best;
+      return {item,score};
+    }).sort((a,b)=>b.score-a.score);
+    return scored[0]?.item||allItems[0];
   }
 
   function launchItem(item){
@@ -264,6 +260,6 @@
       return;
     }
     bootStarted=true;
-    applyTheme();registerPwa();addAccountButton();addTools();filters();installShortcuts();const data=await Promise.all([getJson(base+'pages/lessons/games.json',[]),getJson(base+'apps/apps.json',[]),getJson(base+'collections.json',[])]);games=Array.isArray(data[0])?data[0]:[];apps=Array.isArray(data[1])?data[1]:[];collections=Array.isArray(data[2])?data[2]:[];allItems=buildItemData();allItemsById=new Map(allItems.map(x=>[itemId(x),x]));renderHubSections();const deferMission=()=>mission();if("requestIdleCallback" in window)requestIdleCallback(deferMission,{timeout:1800});else setTimeout(deferMission,1200);const observer=new MutationObserver(records=>{for(const record of records){for(const node of record.addedNodes){if(node.nodeType===1)wireExistingCards(node);}}});observer.observe(document.getElementById(isGames?'gamesgrid':'appsgrid')||document.body,{childList:true,subtree:true});wireExistingCards();window.addEventListener('message',e=>{if(e.data?.type!=='cosmic-score')return;const name=e.data.name||document.title,id=`game:${name}`,p=profile();p.stats[id]=p.stats[id]||{};p.stats[id].lastScore=String(e.data.score??'').slice(0,40);const n=Number(e.data.score);if(Number.isFinite(n)&&(!Number.isFinite(Number(p.stats[id].highScore))||n>Number(p.stats[id].highScore)))p.stats[id].highScore=String(n);writeProfile(p);});}
+    applyTheme();registerPwa();addAccountButton();addTools();filters();installShortcuts();const data=await Promise.all([getJson(base+'pages/lessons/games.json',[]),getJson(base+'apps/apps.json',[]),getJson(base+'collections.json',[])]);games=Array.isArray(data[0])?data[0]:[];apps=Array.isArray(data[1])?data[1]:[];collections=Array.isArray(data[2])?data[2]:[];allItems=buildItemData();allItemsById=new Map(allItems.map(x=>[itemId(x),x]));mission();renderHubSections();const observer=new MutationObserver(records=>{for(const record of records){for(const node of record.addedNodes){if(node.nodeType===1)wireExistingCards(node);}}});observer.observe(document.getElementById(isGames?'gamesgrid':'appsgrid')||document.body,{childList:true,subtree:true});wireExistingCards();window.addEventListener('message',e=>{if(e.data?.type!=='cosmic-score')return;const name=e.data.name||document.title,id=`game:${name}`,p=profile();p.stats[id]=p.stats[id]||{};p.stats[id].lastScore=String(e.data.score??'').slice(0,40);const n=Number(e.data.score);if(Number.isFinite(n)&&(!Number.isFinite(Number(p.stats[id].highScore))||n>Number(p.stats[id].highScore)))p.stats[id].highScore=String(n);writeProfile(p);});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

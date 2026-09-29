@@ -80,7 +80,7 @@
   const observer = new MutationObserver(setup);
   const start = () => {
     setup();
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true });
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();

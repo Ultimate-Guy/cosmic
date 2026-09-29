@@ -104,16 +104,17 @@
   function smartPick(){
     if(!allItems.length)return null;
     const p=profile(), recent=new Set(p.recent||[]), fav=new Set(p.favorites||[]);
-    const scored=allItems.map(item=>{
-      const id=itemId(item),s=p.stats[id]||{};
+    let best=allItems[0],bestScore=-Infinity;
+    for(const item of allItems){
+      const id=itemId(item),stats=p.stats[id]||{};
       let score=Math.random()*4;
       if(recent.has(id))score-=7;
       if(fav.has(id))score+=5;
-      score+=Math.min(Number(s.opens||0),5);
+      score+=Math.min(Number(stats.opens||0),5);
       if(item.kind==='game')score+=2;
-      return {item,score};
-    }).sort((a,b)=>b.score-a.score);
-    return scored[0]?.item||allItems[0];
+      if(score>bestScore){bestScore=score;best=item;}
+    }
+    return best;
   }
 
   function launchItem(item){
@@ -243,6 +244,6 @@
       return;
     }
     bootStarted=true;
-    applyTheme();registerPwa();addAccountButton();addTools();filters();installShortcuts();const data=await Promise.all([getJson(base+'pages/lessons/games.json',[]),getJson(base+'apps/apps.json',[]),getJson(base+'collections.json',[])]);games=Array.isArray(data[0])?data[0]:[];apps=Array.isArray(data[1])?data[1]:[];collections=Array.isArray(data[2])?data[2]:[];allItems=buildItemData();allItemsById=new Map(allItems.map(x=>[itemId(x),x]));mission();renderHubSections();const observer=new MutationObserver(records=>{for(const record of records){for(const node of record.addedNodes){if(node.nodeType===1)wireExistingCards(node);}}});observer.observe(document.getElementById(isGames?'gamesgrid':'appsgrid')||document.body,{childList:true,subtree:true});wireExistingCards();window.addEventListener('message',e=>{if(e.data?.type!=='cosmic-score')return;const name=e.data.name||document.title,id=`game:${name}`,p=profile();p.stats[id]=p.stats[id]||{};p.stats[id].lastScore=String(e.data.score??'').slice(0,40);const n=Number(e.data.score);if(Number.isFinite(n)&&(!Number.isFinite(Number(p.stats[id].highScore))||n>Number(p.stats[id].highScore)))p.stats[id].highScore=String(n);writeProfile(p);});}
+    applyTheme();registerPwa();addAccountButton();addTools();filters();installShortcuts();const data=await Promise.all([getJson(base+'pages/lessons/games.json',[]),getJson(base+'apps/apps.json',[]),getJson(base+'collections.json',[])]);games=Array.isArray(data[0])?data[0]:[];apps=Array.isArray(data[1])?data[1]:[];collections=Array.isArray(data[2])?data[2]:[];allItems=buildItemData();allItemsById=new Map(allItems.map(x=>[itemId(x),x]));renderHubSections();const deferMission=()=>mission();if("requestIdleCallback" in window)requestIdleCallback(deferMission,{timeout:1800});else setTimeout(deferMission,1200);const observer=new MutationObserver(records=>{for(const record of records){for(const node of record.addedNodes){if(node.nodeType===1)wireExistingCards(node);}}});observer.observe(document.getElementById(isGames?'gamesgrid':'appsgrid')||document.body,{childList:true,subtree:true});wireExistingCards();window.addEventListener('message',e=>{if(e.data?.type!=='cosmic-score')return;const name=e.data.name||document.title,id=`game:${name}`,p=profile();p.stats[id]=p.stats[id]||{};p.stats[id].lastScore=String(e.data.score??'').slice(0,40);const n=Number(e.data.score);if(Number.isFinite(n)&&(!Number.isFinite(Number(p.stats[id].highScore))||n>Number(p.stats[id].highScore)))p.stats[id].highScore=String(n);writeProfile(p);});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

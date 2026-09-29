@@ -76,7 +76,7 @@
     body.classList.toggle('cosmic-study-cloak-disabled',disabled);
     const hide=()=>{const el=document.getElementById('educational-cloak');if(el)el.style.display=disabled?'none':'';};
     hide();
-    if(!body.dataset.cosmicStudyObserver){const observer=new MutationObserver(hide);observer.observe(body,{childList:true,subtree:true});body.dataset.cosmicStudyObserver='true';}
+    if(!body.dataset.cosmicStudyObserver){const observer=new MutationObserver(hide);observer.observe(body,{childList:true});body.dataset.cosmicStudyObserver='true';}
   }
 
   function applyCrosshair(){

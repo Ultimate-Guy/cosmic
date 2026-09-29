@@ -25,62 +25,92 @@
 	<script>/* COSMIC_BASKET_AD_GUARD */
 (function(){
   "use strict";
-  var BLOCK_RE=/gamemonetize|production-assetsbucket-8ljvyr1xczmb/i;
+  var BAD_RE=/(?:game[-_.]?monetize|gamemonetize|production-assetsbucket-8ljvyr1xczmb|cdn\.jsdelivr\.net\/gh\/st39\/sdk)/i;
   var TEXT_RE=/powered\s+by\s+gamemonetize/i;
-  function blockedUrl(value){
-    return typeof value==="string" && BLOCK_RE.test(value) &&
-      (value.indexOf("gamemonetize")!==-1 || /production-assetsbucket-8ljvyr1xczmb\\/.*scr\.js/i.test(value));
-  }
-  function strip(root){
+
+  function bad(value){ return typeof value==="string" && BAD_RE.test(value); }
+
+  function clean(root){
     if(!root || !root.querySelectorAll) return;
-    var nodes=root.querySelectorAll("*");
-    for(var i=0;i<nodes.length;i++){
-      var el=nodes[i];
-      if(TEXT_RE.test(el.textContent||"") &&
-         ((el.children && el.children.length===0) || /a|span|div|p|footer/i.test(el.tagName||""))){
-        el.remove();
-      } else if(el.tagName==="SCRIPT" && blockedUrl(el.src)){
-        el.remove();
-      } else if((el.tagName==="IFRAME" || el.tagName==="IMG" || el.tagName==="A") && blockedUrl(el.src||el.href||"")){
-        el.remove();
+    var all=root.querySelectorAll("*");
+    for(var i=0;i<all.length;i++){
+      var el=all[i], url=el.src||el.href||"";
+      if((el.tagName==="SCRIPT"||el.tagName==="IFRAME"||el.tagName==="IMG"||el.tagName==="A") && bad(url)){
+        try{el.remove();}catch(_){}
+        continue;
+      }
+      if(TEXT_RE.test(el.textContent||"")){
+        try{el.remove();}catch(_){}
       }
     }
   }
-  var nativeAppend=Node.prototype.appendChild;
-  var nativeInsert=Node.prototype.insertBefore;
-  function reject(node){
-    return node && node.nodeType===1 && (
-      (node.tagName==="SCRIPT" && blockedUrl(node.src)) ||
-      ((node.tagName==="IFRAME"||node.tagName==="IMG"||node.tagName==="A") && blockedUrl(node.src||node.href||""))
-    );
+
+  function blockedNode(node){
+    return !!(node && node.nodeType===1 && bad(node.src||node.href||""));
   }
+
+  var append=Node.prototype.appendChild;
+  var insert=Node.prototype.insertBefore;
   Node.prototype.appendChild=function(node){
-    if(reject(node)) return node;
-    return nativeAppend.call(this,node);
+    if(blockedNode(node)) return node;
+    return append.call(this,node);
   };
   Node.prototype.insertBefore=function(node,ref){
-    if(reject(node)) return node;
-    return nativeInsert.call(this,node,ref);
+    if(blockedNode(node)) return node;
+    return insert.call(this,node,ref);
   };
-  var mo=new MutationObserver(function(mutations){
-    for(var i=0;i<mutations.length;i++){
-      var m=mutations[i];
-      for(var j=0;j<m.addedNodes.length;j++){
-        var n=m.addedNodes[j];
-        if(n.nodeType===1){
-          if(reject(n)){try{n.remove();}catch(e){}}
-          else {
-            if(TEXT_RE.test(n.textContent||"")) try{strip(n.parentNode||n);}catch(e){}
-            else try{strip(n);}catch(e){}
-          }
-        }
+
+  var nativeWrite=Document.prototype.write;
+  Document.prototype.write=function(html){
+    if(typeof html==="string"){
+      html=html
+        .replace(/<script\b[^>]*(?:game[-_.]?monetize|gamemonetize|production-assetsbucket-8ljvyr1xczmb|cdn\.jsdelivr\.net\/gh\/st39\/sdk)[^>]*>[\s\S]*?<\/script\s*>/gi,"")
+        .replace(/<iframe\b[^>]*(?:game[-_.]?monetize|gamemonetize)[^>]*>[\s\S]*?<\/iframe\s*>/gi,"")
+        .replace(/powered\s+by\s+gamemonetize/gi,"");
+    }
+    return nativeWrite.call(this,html);
+  };
+
+  var nativeFetch=window.fetch;
+  if(typeof nativeFetch==="function"){
+    window.fetch=function(input,init){
+      var url=typeof input==="string"?input:(input&&input.url)||"";
+      if(bad(url)) return Promise.reject(new Error("Cosmic blocked Basket Random ad request"));
+      return nativeFetch.call(this,input,init);
+    };
+  }
+
+  var xhrOpen=XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open=function(method,url){
+    if(bad(String(url||""))) throw new Error("Cosmic blocked Basket Random ad request");
+    return xhrOpen.apply(this,arguments);
+  };
+
+  try{
+    if(navigator.serviceWorker){
+      var swRegister=navigator.serviceWorker.register;
+      if(typeof swRegister==="function"){
+        navigator.serviceWorker.register=function(){
+          throw new Error("Cosmic blocked Basket Random service worker registration");
+        };
+      }
+      if(typeof navigator.serviceWorker.getRegistrations==="function"){
+        navigator.serviceWorker.getRegistrations().then(function(regs){
+          regs.forEach(function(reg){
+            try{ reg.unregister(); }catch(_){}
+          });
+        }).catch(function(){});
       }
     }
-  });
+  }catch(_){}
+
+  var mo=new MutationObserver(function(){ try{clean(document);}catch(_){} });
+
   function start(){
-    strip(document);
-    if(document.documentElement) mo.observe(document.documentElement,{childList:true,subtree:true});
+    try{clean(document);}catch(_){}
+    try{mo.observe(document.documentElement,{childList:true,subtree:true});}catch(_){}
   }
+
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",start,{once:true});
   else start();
 })();

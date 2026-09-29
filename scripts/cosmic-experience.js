@@ -412,9 +412,10 @@
   }
 
   function injectCommandCenter(root) {
-    if(!root||root.dataset.cosmicExperienceInjected==='1')return;
+    if(!root)return;
     const shell=root.querySelector('.cc-shell');if(!shell)return;
-    root.dataset.cosmicExperienceInjected='1';adaptiveLayout(root);
+    if(shell.querySelector('#cosmic-experience-system-panel')){adaptiveLayout(root);return;}
+    adaptiveLayout(root);
     const panel=document.createElement('section');panel.className='cosmic-experience-panel';panel.id='cosmic-experience-system-panel';
     panel.innerHTML='<h3>Cosmic Systems</h3><p>Save state, preview launch routes, recover failed launches, and continue your portal across devices.</p><div class="cosmic-experience-grid"><button class="cosmic-experience-button" id="ce-capsules-open">Save Capsules</button><button class="cosmic-experience-button" id="ce-route-all">Route Preview</button><button class="cosmic-experience-button" id="ce-recovery-open">Recovery Queue ('+load(RECOVERY_KEY,[]).length+')</button><button class="cosmic-experience-button" id="ce-missions-open">Mission Chains</button><button class="cosmic-experience-button" id="ce-collections-open">Rule Collections</button><button class="cosmic-experience-button" id="ce-handoff-pick">Send to another device</button>'+(isDev()?'<button class="cosmic-experience-button" id="ce-replay-open">Developer Replay Logs</button>':'')+'</div>';
     shell.appendChild(panel);
@@ -612,10 +613,7 @@
     if(pageKind()==='command'){
       const observer=new MutationObserver(()=>{
         const root=document.getElementById('cc-root');
-        if(root){
-          root.dataset.cosmicExperienceInjected='0';
-          injectCommandCenter(root);
-        }
+        if(root) injectCommandCenter(root);
         const modal=document.getElementById('cc-modal');
         if(modal?.classList.contains('show')){
           const title=modal.querySelector('.cc-dialog h2')?.textContent||'';

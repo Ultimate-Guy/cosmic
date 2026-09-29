@@ -278,9 +278,17 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
   })();
 })();
 </script>
-<script src="../../scripts/cosmic-dev-tools.js?build=dev-commands-v5"></script>
+
 <script src="../../scripts/cosmic-wrapper-controls.js?build=wrapper-v4"></script>
-<script src="../../scripts/cosmic-global-state.js?v=global-state-v4"></script>
+
+<script>
+(()=>{try{
+  const loadGlobal=()=>{const s=document.createElement('script');s.src='../../scripts/cosmic-global-state.js?v=global-state-v4';s.async=true;document.head.appendChild(s);};
+  const loadDev=()=>{if(localStorage.getItem('cosmicCurrentUserV1')!=='TheDevilAngel')return;const s=document.createElement('script');s.src='../../scripts/cosmic-dev-tools.js?build=dev-commands-v5';s.async=true;document.head.appendChild(s);};
+  setTimeout(loadGlobal,1800);
+  if('requestIdleCallback' in window)requestIdleCallback(loadDev,{timeout:3000});else setTimeout(loadDev,3000);
+}catch(_){}})();
+</script>
 <script>
 (function(){
   const frame=document.querySelector('iframe');

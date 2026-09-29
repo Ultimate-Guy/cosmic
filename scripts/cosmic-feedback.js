@@ -52,6 +52,6 @@
   function scan() {
     addReportButton(document.getElementById('cosmic-detail'));
   }
-  new MutationObserver(scan).observe(document.body, {childList:true, subtree:true});
+  new MutationObserver(scan).observe(document.body, {childList:true});
   scan();
 })();

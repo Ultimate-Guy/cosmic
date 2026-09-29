@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='cosmicSiteTourV5';
+  const VERSION='cosmicSiteTourV6';
   const STATE_KEY=VERSION+'State';
   const SESSION_KEY=VERSION+'Session';
   const MAX_OPENS=2;
@@ -19,8 +19,15 @@
   // Game pages are never treated as cloaked tour pages.
   const isCloakShell=isCommandCenter && document.documentElement?.dataset?.cosmicCloakShell === '1';
 
-  const state=loadState()||{version:2,opens:0,active:false,step:0,awaitingEntry:false};
-  if(isNewSession() && state.opens<MAX_OPENS){
+  const state=loadState()||{version:3,opens:0,active:false,step:0,awaitingEntry:false};
+  // Hard stop: once the two allowed runs have been used, the tour can never
+  // resurrect from a stale active/awaiting state on another page or reload.
+  if(state.opens>=MAX_OPENS){
+    state.opens=MAX_OPENS;
+    state.active=false;
+    state.awaitingEntry=false;
+    saveState(state);
+  } else if(isNewSession()){
     state.opens+=1;
     state.active=true;
     state.step=0;
@@ -227,7 +234,7 @@
   }
 
   function start(){
-    if(state.opens>=MAX_OPENS && !state.active)return;
+    if(state.opens>=MAX_OPENS)return;
     if(!state.active && !state.awaitingEntry)return;
     bindSpecialClicks();
 

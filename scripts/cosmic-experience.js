@@ -352,7 +352,7 @@
       const seen=load(UPDATE_SEEN_KEY,{build:'',ids:[]});
       const p=profile();
       const interests=Object.keys(p.stats||{}).slice(0,12).map(k=>k.split(':').slice(1).join(':').toLowerCase()).filter(Boolean);
-      const items=updates.map(u=>{const blob=(u.title+' '+u.body).toLowerCase();let score=0;interests.forEach(n=>{if(n&&blob.includes(n))score+=6;});if(/settings|cloak|panic|performance/.test(blob))score+=2;if(/app|youtube|ai/.test(blob)&&p.recent?.some(k=>k.startsWith('app:')))score+=2;if(/game|fix|launch|registry|catalog/.test(blob)&&p.recent?.some(k=>k.startsWith('game:')))score+=2;return {...u,score,unseen:!seen.ids?.includes(u.id);}}).filter(u=>u.unseen).sort((a,b)=>b.score-a.score||b.index-a.index);
+      const items=updates.map(u=>{const blob=(u.title+' '+u.body).toLowerCase();let score=0;interests.forEach(n=>{if(n&&blob.includes(n))score+=6;});if(/settings|cloak|panic|performance/.test(blob))score+=2;if(/app|youtube|ai/.test(blob)&&p.recent?.some(k=>k.startsWith('app:')))score+=2;if(/game|fix|launch|registry|catalog/.test(blob)&&p.recent?.some(k=>k.startsWith('game:')))score+=2;return {...u,score,unseen:!seen.ids?.includes(u.id)};}).filter(u=>u.unseen).sort((a,b)=>b.score-a.score||b.index-a.index);
       return {items:items.slice(0,4),lastSeenBuild:load(BUILD_KEY,'')||seen.build||''};
     }).catch(()=>({items:[],lastSeenBuild:''}));
   }

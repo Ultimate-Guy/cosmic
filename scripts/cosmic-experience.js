@@ -436,15 +436,6 @@
     showExperienceModal('Developer Replay Logs',html,m=>m.querySelector('#ce-clear-replay').onclick=()=>{save(REPLAY_KEY,[]);developerReplayModal();});
   }
 
-  function injectLessonRoutes() {
-    document.querySelectorAll('.game-card').forEach(card=>{
-      if(card.dataset.cosmicExperienceRoute==='1')return;
-      const actions=card.querySelector('.card-actions');if(!actions)return;
-      card.dataset.cosmicExperienceRoute='1';
-      const btn=document.createElement('button');btn.className='blank-btn cosmic-route-btn';btn.type='button';btn.textContent='Route';btn.dataset.cosmicRoute='1';
-      actions.appendChild(btn);
-    });
-  }
 
   function injectAppRoutes() {
     document.querySelectorAll('.app-card').forEach(card=>{
@@ -457,6 +448,45 @@
         open.after(btn);
       });
     });
+  }
+
+  function firstVisibleGame() {
+    const cards=[...document.querySelectorAll('.game-card')];
+    const card=cards.find(x=>getComputedStyle(x).display!=='none' && x.offsetParent!==null) || cards[0];
+    if(!card)return null;
+    const name=card.dataset.name||card.querySelector('.game-title')?.textContent?.trim()||'';
+    return getRegistry().then(items=>items.find(x=>x.kind==='game'&&x.name.toLowerCase()===name.toLowerCase())||null);
+  }
+
+  function injectPageTools() {
+    const kind=pageKind();
+    if(kind!=='games' && kind!=='apps')return;
+    if(document.getElementById('cosmic-page-tools'))return;
+    const anchor=kind==='games' ? document.getElementById('gamesearchform') : document.getElementById('search');
+    if(!anchor)return;
+    const bar=document.createElement('section');
+    bar.id='cosmic-page-tools';
+    bar.className='cosmic-experience-panel';
+    bar.style.cssText='margin:12px auto;max-width:1240px;padding:10px 12px';
+    bar.innerHTML='<div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center"><strong style="color:#7fe5ff;font-size:.72rem;letter-spacing:.06em">COSMIC TOOLS</strong><button class="cosmic-experience-button" id="ce-page-route">Route Preview</button><button class="cosmic-experience-button" id="ce-page-capsule">Save Capsule</button><button class="cosmic-experience-button" id="ce-page-recovery">Recovery Queue</button><button class="cosmic-experience-button" id="ce-page-missions">Mission Chains</button><button class="cosmic-experience-button" id="ce-page-collections">Rule Collections</button><button class="cosmic-experience-button" id="ce-page-handoff">Send to another device</button></div>';
+    anchor.insertAdjacentElement('afterend',bar);
+    bar.querySelector('#ce-page-route').onclick=()=>{
+      if(kind==='games') firstVisibleGame().then(item=>item?routeModal(item,'play'):showToast('Search for a game first.'));
+      else getRegistry().then(items=>{const item=items.find(x=>x.kind==='app');if(item)routeModal(item,'play');});
+    };
+    bar.querySelector('#ce-page-capsule').onclick=()=>{
+      if(kind==='games') firstVisibleGame().then(item=>item?saveCapsule(item,'play'):showToast('Search for a game first.'));
+      else getRegistry().then(items=>{const item=items.find(x=>x.kind==='app');if(item)saveCapsule(item,'play');});
+    };
+    bar.querySelector('#ce-page-recovery').onclick=renderRecoveryQueue;
+    bar.querySelector('#ce-page-missions').onclick=missionsModal;
+    bar.querySelector('#ce-page-collections').onclick=collectionsModal;
+    bar.querySelector('#ce-page-handoff').onclick=async()=>{
+      const items=await getRegistry();
+      const p=profile();
+      const item=items.find(x=>p.recent?.includes(itemId(x))) || (kind==='games' ? await firstVisibleGame() : items.find(x=>x.kind==='app'));
+      if(item)handoffModal(item); else showToast('Open something first so Cosmic can hand it off.');
+    };
   }
 
   function interceptLaunches() {
@@ -520,9 +550,10 @@
   }
 
   function injectCommandCenter(root) {
-    if(!root||root.dataset.cosmicExperienceInjected==='1')return;
+    if(!root)return;
     const shell=root.querySelector('.cc-shell');if(!shell)return;
-    root.dataset.cosmicExperienceInjected='1';adaptiveLayout(root);
+    if(shell.querySelector('#cosmic-experience-system-panel')){adaptiveLayout(root);return;}
+    adaptiveLayout(root);
     const panel=document.createElement('section');panel.className='cosmic-experience-panel';panel.id='cosmic-experience-system-panel';
     panel.innerHTML='<h3>Cosmic Systems</h3><p>Save state, preview launch routes, recover failed launches, and continue your portal across devices.</p><div class="cosmic-experience-grid"><button class="cosmic-experience-button" id="ce-capsules-open">Save Capsules</button><button class="cosmic-experience-button" id="ce-route-all">Route Preview</button><button class="cosmic-experience-button" id="ce-recovery-open">Recovery Queue ('+load(RECOVERY_KEY,[]).length+')</button><button class="cosmic-experience-button" id="ce-missions-open">Mission Chains</button><button class="cosmic-experience-button" id="ce-collections-open">Rule Collections</button><button class="cosmic-experience-button" id="ce-handoff-pick">Send to another device</button>'+(isDev()?'<button class="cosmic-experience-button" id="ce-replay-open">Developer Replay Logs</button>':'')+'</div>';
     shell.appendChild(panel);
@@ -611,29 +642,32 @@
     handleHandoff();
 
     if(pageKind()==='command'){
-      const observer=new MutationObserver(()=>{
-        const root=document.getElementById('cc-root');
-        if(root) injectCommandCenter(root);
-        const modal=document.getElementById('cc-modal');
-        if(modal?.classList.contains('show')){
-          const title=modal.querySelector('.cc-dialog h2')?.textContent||'';
-          if(/Item Details/i.test(title)){
-            getRegistry().then(items=>{
-              const heading=modal.querySelector('.cc-dialog h2')?.textContent?.trim()||'';
-              const item=items.find(x=>x.name===heading);
-              if(item)enhanceDetail(item);
-            });
+      const ccRoot=document.getElementById('cc-root');
+      if(ccRoot){
+        const observer=new MutationObserver(()=>{
+          injectCommandCenter(ccRoot);
+          const modal=document.getElementById('cc-modal');
+          if(modal?.classList.contains('show')){
+            const title=modal.querySelector('.cc-dialog h2')?.textContent||'';
+            if(/Item Details/i.test(title)){
+              getRegistry().then(items=>{
+                const heading=modal.querySelector('.cc-dialog h2')?.textContent?.trim()||'';
+                const item=items.find(x=>x.name===heading);
+                if(item)enhanceDetail(item);
+              });
+            }
           }
-        }
-      });
-      observer.observe(document.body,{childList:true,subtree:true});
+        });
+        injectCommandCenter(ccRoot);
+        observer.observe(ccRoot,{childList:true});
+      }
     }
     if(pageKind()==='games'){
-      const obs=new MutationObserver(injectLessonRoutes);obs.observe(document.body,{childList:true,subtree:true});injectLessonRoutes();
-      document.addEventListener('click',e=>{const b=e.target?.closest?.('.cosmic-route-btn');if(!b)return;const card=b.closest('.game-card');const name=card?.dataset.name||'';getRegistry().then(items=>{const item=items.find(x=>x.kind==='game'&&x.name.toLowerCase()===name.toLowerCase());if(item){e.preventDefault();e.stopImmediatePropagation();routeModal(item,'play');}});},true);
+      injectPageTools();
     }
     if(pageKind()==='apps'){
-      const obs=new MutationObserver(injectAppRoutes);obs.observe(document.body,{childList:true,subtree:true});injectAppRoutes();
+      injectPageTools();
+      injectAppRoutes();
     }
   }
 

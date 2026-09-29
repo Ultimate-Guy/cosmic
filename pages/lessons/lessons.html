@@ -66,7 +66,7 @@
               .then(res=>{if(!res.ok)throw new Error("Registry request failed: "+res.status);return res.json();})
               .then(games=>{
                 document.getElementById("loading")?.remove();
-                const batchSize=80;
+                const batchSize=24;
                 let index=0;
                 const renderBatch=()=>{
                   const fragment=document.createDocumentFragment();
@@ -83,7 +83,8 @@
                       img.alt="";
                       img.loading="lazy";
                       img.decoding="async";
-                      img.fetchPriority=index<24?"high":"low";
+                      img.loading="lazy";
+                      img.fetchPriority="low";
                       img.src=gameUrl({path:game.image});
                       card.appendChild(img);
                     }else{
@@ -103,12 +104,12 @@
                     play.className="play-btn";
                     play.type="button";
                     play.textContent="Play";
-                    play.addEventListener("click",()=>{window.location.href=launch;});
+                    play.dataset.action="play";
                     const blank=document.createElement("button");
                     blank.className="blank-btn";
                     blank.type="button";
                     blank.textContent="Blank";
-                    blank.addEventListener("click",()=>openBlank(url));
+                    blank.dataset.action="blank";
                     actions.append(play,blank);
                     card.append(title,actions);
                     fragment.appendChild(card);
@@ -116,7 +117,10 @@
                   }
                   grid.appendChild(fragment);
                   if(index<games.length){
-                    (window.requestIdleCallback||function(cb){setTimeout(cb,0);})(renderBatch);
+                    const schedule=window.requestIdleCallback
+                      ? (cb)=>window.requestIdleCallback(cb,{timeout:80})
+                      : (cb)=>setTimeout(cb,16);
+                    schedule(renderBatch);
                   }else{
                     noResults.style.display=games.length?"none":"block";
                   }
@@ -125,6 +129,7 @@
               })
               .catch(error=>{document.getElementById("loading").textContent="Could not load the game registry. Please refresh.";console.error("Cosmic registry error:",error);});
         }
+        grid.addEventListener("click",e=>{const b=e.target.closest?.("button[data-action]");if(!b)return;const card=b.closest(".game-card");if(!card)return;if(b.dataset.action==="play"&&card.dataset.launch)location.href=card.dataset.launch;else if(b.dataset.action==="blank"&&card.dataset.url)openBlank(card.dataset.url);});
         const returningFromGame=(()=>{try{const value=sessionStorage.getItem(RETURN_KEY);sessionStorage.removeItem(RETURN_KEY);return value==='1';}catch(e){return false;}})(); if(isUnlocked()||returningFromGame){showGames();if(!isUnlocked()){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}}loadRegistry();}else{document.getElementById('password-gate').style.display='grid';document.getElementById('site-content').style.display='none';} searchInput.addEventListener('input',e=>{const val=e.target.value.toLowerCase();let matches=0;cards.forEach(c=>{const show=c.name.includes(val);c.element.style.display=show?'flex':'none';if(show)matches++;});noResults.style.display=matches===0&&cards.length?'block':'none';});
     </script>
 <link rel="manifest" href="../../manifest.json">

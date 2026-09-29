@@ -13,7 +13,7 @@
   const HANDOFF_PARAM = 'cosmicHandoff';
   const UPDATE_SEEN_KEY = 'cosmicUpdatesSeenV2';
   const BUILD_KEY = 'cosmicLastSeenBuildV1';
-  const BUILD_ID = 'experience-v1';
+  const BUILD_ID = 'experience-v2';
   const MAX_RECOVERY = 24;
   const MAX_REPLAY = 40;
 
@@ -418,7 +418,18 @@
     adaptiveLayout(root);
     const panel=document.createElement('section');panel.className='cosmic-experience-panel';panel.id='cosmic-experience-system-panel';
     panel.innerHTML='<h3>Cosmic Systems</h3><p>Save state, preview launch routes, recover failed launches, and continue your portal across devices.</p><div class="cosmic-experience-grid"><button class="cosmic-experience-button" id="ce-capsules-open">Save Capsules</button><button class="cosmic-experience-button" id="ce-route-all">Route Preview</button><button class="cosmic-experience-button" id="ce-recovery-open">Recovery Queue ('+load(RECOVERY_KEY,[]).length+')</button><button class="cosmic-experience-button" id="ce-missions-open">Mission Chains</button><button class="cosmic-experience-button" id="ce-collections-open">Rule Collections</button><button class="cosmic-experience-button" id="ce-handoff-pick">Send to another device</button>'+(isDev()?'<button class="cosmic-experience-button" id="ce-replay-open">Developer Replay Logs</button>':'')+'</div>';
-    shell.appendChild(panel);
+    const top=shell.querySelector('.cc-top');
+    if(top) top.insertAdjacentElement('afterend',panel); else shell.appendChild(panel);
+    const actions=shell.querySelector('.cc-actions');
+    if(actions && !actions.querySelector('#cc-experience')){
+      const jump=document.createElement('button');
+      jump.id='cc-experience';
+      jump.className='cc-btn';
+      jump.type='button';
+      jump.textContent='Cosmic Systems';
+      jump.onclick=()=>panel.scrollIntoView({behavior:'smooth',block:'start'});
+      actions.appendChild(jump);
+    }
     panel.querySelector('#ce-capsules-open').onclick=capsuleModal;
     panel.querySelector('#ce-recovery-open').onclick=renderRecoveryQueue;
     panel.querySelector('#ce-missions-open').onclick=missionsModal;
@@ -572,15 +583,6 @@
     const rows=load(REPLAY_KEY,[]);
     const html='<p>Developer-only local replay data. This is never rendered for non-developer users.</p><div class="cosmic-mini-list">'+(rows.length?rows.slice().reverse().map(r=>'<div class="cosmic-recovery-item"><b>'+esc(r.type)+' • '+esc(r.name||'')+'</b><small>'+esc(r.host||'')+' • '+esc(r.mode||'')+' • '+new Date(r.at||0).toLocaleString()+(r.reason?' • '+esc(r.reason):'')+(r.error?' • '+esc(r.error):'')+'</small></div>').join(''):'<div class="cosmic-recovery-item"><b>No replay events yet</b></div>')+'</div><button class="cosmic-experience-button" id="ce-clear-replay">Clear replay logs</button>';
     showExperienceModal('Developer Replay Logs',html,m=>m.querySelector('#ce-clear-replay').onclick=()=>{save(REPLAY_KEY,[]);developerReplayModal();});
-  }
-
-  function injectLessonRoutes() {
-    document.querySelectorAll('.game-card').forEach(card=>{
-      if(card.dataset.cosmicExperienceRoute==='1')return;
-      const actions=card.querySelector('.card-actions');if(!actions)return;
-      card.dataset.cosmicExperienceRoute='1';
-      const btn=document.createElement('button');btn.className='blank-btn cosmic-route-btn';btn.type='button';btn.textContent='Route';btn.dataset.cosmicRoute='1';actions.appendChild(btn);
-    });
   }
 
   function injectAppRoutes() {

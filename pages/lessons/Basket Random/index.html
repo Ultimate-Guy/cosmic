@@ -22,6 +22,69 @@
 </head>
 
 <body>
+	<script>/* COSMIC_BASKET_AD_GUARD */
+(function(){
+  "use strict";
+  var BLOCK_RE=/gamemonetize|production-assetsbucket-8ljvyr1xczmb/i;
+  var TEXT_RE=/powered\s+by\s+gamemonetize/i;
+  function blockedUrl(value){
+    return typeof value==="string" && BLOCK_RE.test(value) &&
+      (value.indexOf("gamemonetize")!==-1 || /production-assetsbucket-8ljvyr1xczmb\\/.*scr\.js/i.test(value));
+  }
+  function strip(root){
+    if(!root || !root.querySelectorAll) return;
+    var nodes=root.querySelectorAll("*");
+    for(var i=0;i<nodes.length;i++){
+      var el=nodes[i];
+      if(TEXT_RE.test(el.textContent||"") &&
+         ((el.children && el.children.length===0) || /a|span|div|p|footer/i.test(el.tagName||""))){
+        el.remove();
+      } else if(el.tagName==="SCRIPT" && blockedUrl(el.src)){
+        el.remove();
+      } else if((el.tagName==="IFRAME" || el.tagName==="IMG" || el.tagName==="A") && blockedUrl(el.src||el.href||"")){
+        el.remove();
+      }
+    }
+  }
+  var nativeAppend=Node.prototype.appendChild;
+  var nativeInsert=Node.prototype.insertBefore;
+  function reject(node){
+    return node && node.nodeType===1 && (
+      (node.tagName==="SCRIPT" && blockedUrl(node.src)) ||
+      ((node.tagName==="IFRAME"||node.tagName==="IMG"||node.tagName==="A") && blockedUrl(node.src||node.href||""))
+    );
+  }
+  Node.prototype.appendChild=function(node){
+    if(reject(node)) return node;
+    return nativeAppend.call(this,node);
+  };
+  Node.prototype.insertBefore=function(node,ref){
+    if(reject(node)) return node;
+    return nativeInsert.call(this,node,ref);
+  };
+  var mo=new MutationObserver(function(mutations){
+    for(var i=0;i<mutations.length;i++){
+      var m=mutations[i];
+      for(var j=0;j<m.addedNodes.length;j++){
+        var n=m.addedNodes[j];
+        if(n.nodeType===1){
+          if(reject(n)){try{n.remove();}catch(e){}}
+          else {
+            if(TEXT_RE.test(n.textContent||"")) try{strip(n.parentNode||n);}catch(e){}
+            else try{strip(n);}catch(e){}
+          }
+        }
+      }
+    }
+  });
+  function start(){
+    strip(document);
+    if(document.documentElement) mo.observe(document.documentElement,{childList:true,subtree:true});
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",start,{once:true});
+  else start();
+})();
+</script>
 	<div id="fb-root"></div>
 	<script
 		src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@1520d90d7b2994737acd8f7a633d018f63c22ca7/box2d.js">

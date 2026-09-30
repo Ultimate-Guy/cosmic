@@ -214,31 +214,26 @@ async function inspectBrowserGame(browser, game) {
       title: await page.title().catch(() => ''),
     };
 
+    // Cosmic's game shell intentionally starts #game at about:blank, then
+    // asynchronously fetches the target and either navigates or document-writes
+    // the real game into the iframe. contentFrame() becomes available before
+    // that work finishes, so do not treat the initial blank document as failure.
     const deadline = Date.now() + FRAME_WAIT;
     let childFrame = null;
-
-    while (Date.now() < deadline) {
-      const iframe = await page.$('#game');
-      childFrame = iframe ? await iframe.contentFrame() : null;
-      if (childFrame) break;
-      await page.waitForTimeout(150);
-    }
-
-    if (!childFrame) {
-      result.reason = 'Cosmic shell created no loaded child game frame within timeout';
-      return result;
-    }
-
-    // The child frame can navigate several times during game startup. Read only
-    // from the current Frame object, and retry after a navigation/context reset.
     let state = null;
     let lastContextError = null;
 
-    for (let attempt = 0; attempt < 4; attempt++) {
-      try {
-        await childFrame.waitForLoadState('domcontentloaded', {timeout: Math.max(500, FRAME_WAIT - (attempt * 500))}).catch(() => {});
-        await page.waitForTimeout(LOAD_WAIT);
+    while (Date.now() < deadline) {
+      const iframe = await page.$('#game');
+      const current = iframe ? await iframe.contentFrame() : null;
+      if (!current) {
+        await page.waitForTimeout(100);
+        continue;
+      }
+      childFrame = current;
 
+      try {
+        await childFrame.waitForLoadState('domcontentloaded', {timeout: 400}).catch(() => {});
         state = await childFrame.evaluate(() => {
           const doc = document;
           const body = doc.body;
@@ -265,23 +260,27 @@ async function inspectBrowserGame(browser, game) {
           };
         });
 
-        break;
+        const ready = Boolean(
+          state.frameUrl &&
+          (state.frameUrl !== 'about:blank' ||
+           state.bodyChildren > 0 ||
+           state.canvasCount > 0 ||
+           state.visibleSurfaceCount > 0 ||
+           state.htmlLength >= 80)
+        );
+        if (ready) break;
       } catch (error) {
         lastContextError = String(error?.message || error);
         if (!/Execution context was destroyed|Cannot find context with specified id|frame was detached|Target page, context or browser has been closed/i.test(lastContextError)) {
           throw error;
         }
-        await page.waitForTimeout(500);
-        const iframe = await page.$('#game');
-        const current = iframe ? await iframe.contentFrame() : null;
-        if (current) childFrame = current;
       }
+
+      await page.waitForTimeout(100);
     }
 
     if (!state) {
-      result.reason = 'game frame kept changing browsing context during startup';
-      result.inconclusive = true;
-      result.ok = true;
+      result.reason = 'game frame did not become readable within timeout';
       return result;
     }
 

@@ -136,3 +136,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--yt-accent);outl
 .ambient-mode #playerWrap::before{content:"";position:absolute;inset:-35px;z-index:-1;background-image:var(--ambient-image);background-size:cover;background-position:center;filter:blur(42px) saturate(1.25);opacity:.28;border-radius:40px}
 #playerWrap{position:relative}
 @media(max-width:760px){.watch-actions-bar{justify-content:flex-start}.watch-action{padding:0 10px}.watch-action span{display:none}.watch-action i{margin:0}.mini-player{right:10px;bottom:10px}}
+
+.channel-result-card{display:grid;grid-template-columns:74px minmax(0,1fr) auto;align-items:center;gap:16px;padding:16px 8px;border-bottom:1px solid var(--yt-border)}
+.channel-result-avatar{width:74px;height:74px;border:0;border-radius:50%;overflow:hidden;background:var(--yt-soft);padding:0}.channel-result-avatar img{width:100%;height:100%;object-fit:cover}
+.channel-result-copy{min-width:0;display:flex;flex-direction:column;gap:4px}.channel-result-name{width:max-content;max-width:100%;border:0;background:none;color:var(--yt-text);font-size:17px;font-weight:800;padding:0;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.channel-result-copy p{margin:0;color:var(--yt-muted);font-size:12px}.channel-result-copy span{color:var(--yt-muted);font-size:11px}.subscribe-button.small{padding:9px 15px;font-size:12px}
+@media(max-width:600px){.channel-result-card{grid-template-columns:56px minmax(0,1fr);gap:12px}.channel-result-avatar{width:56px;height:56px}.channel-result-card .subscribe-button{grid-column:2;width:max-content}.channel-result-name{font-size:15px}}

@@ -2087,15 +2087,15 @@
     "source_path": "UGS-Files/clbasketrandomgood.html"
   },
   {
-    "name": "Basketball Legends",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clbasketballlegends.html",
+    "name": "Basketball Legends (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clbasketballlegends%281%29.html",
     "category": "Arcade",
     "tags": [
       "UGS"
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "UGS-Files/clbasketballlegends.html"
+    "source_path": "UGS-Files/clbasketballlegends(1).html"
   },
   {
     "name": "Basketball Stars",
@@ -2129,17 +2129,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbasketballfrvr.html"
-  },
-  {
-    "name": "Basketball Legends (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clbasketballlegends%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbasketballlegends(1).html"
   },
   {
     "name": "Baskets Lam Dunk 2",
@@ -3235,13 +3224,6 @@
     "source_path": "UGS-Files/clboxheadnightmare.html"
   },
   {
-    "name": "Boxing Random",
-    "path": "pages/lessons/Boxing%20Random/index.html",
-    "category": "Arcade",
-    "tags": [],
-    "featured": false
-  },
-  {
     "name": "Boxing Live 2",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clboxinglive-2.html",
     "category": "Arcade",
@@ -3251,6 +3233,13 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clboxinglive-2.html"
+  },
+  {
+    "name": "Boxing Random",
+    "path": "pages/lessons/Boxing%20Random/index.html",
+    "category": "Arcade",
+    "tags": [],
+    "featured": false
   },
   {
     "name": "Brain Rot",
@@ -3605,26 +3594,15 @@
     "source_path": "UGS-Files/clBusterJam.html"
   },
   {
-    "name": "Cactus Mccoy",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcactusmccoy.html",
+    "name": "Cactus McCoy (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcactusmccoy%281%29.html",
     "category": "Arcade",
     "tags": [
       "UGS"
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "UGS-Files/clcactusmccoy.html"
-  },
-  {
-    "name": "Cactus Mccoy 2",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcactusmccoy2.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcactusmccoy2.html"
+    "source_path": "UGS-Files/clcactusmccoy(1).html"
   },
   {
     "name": "Cactus McCoy 2 (1)",
@@ -3636,28 +3614,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clcactusmccoy2(1).html"
-  },
-  {
-    "name": "Cactus McCoy 2 (2)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcactusmccoy2%282%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcactusmccoy2(2).html"
-  },
-  {
-    "name": "Cactus McCoy (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcactusmccoy%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcactusmccoy(1).html"
   },
   {
     "name": "Call Of Battle",
@@ -4982,17 +4938,6 @@
     "source_path": "UGS-Files/clcoverorangeplayerspack2.html"
   },
   {
-    "name": "Cover Orange Players Pack 3",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcoverorangeplayerspack3.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcoverorangeplayerspack3.html"
-  },
-  {
     "name": "Cover Orange Players Pack 3 (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcoverorangeplayerspack3%281%29.html",
     "category": "Arcade",
@@ -5037,6 +4982,17 @@
     "source_path": "UGS-Files/clcrash3.html"
   },
   {
+    "name": "Crash Bandicoot (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcrashbandicoot%20%281%29.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clcrashbandicoot (1).html"
+  },
+  {
     "name": "Crash Bash",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcrashbash.html",
     "category": "Arcade",
@@ -5057,28 +5013,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clcrashteamracing.html"
-  },
-  {
-    "name": "Crashbandicoot",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcrashbandicoot.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcrashbandicoot.html"
-  },
-  {
-    "name": "Crash Bandicoot (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcrashbandicoot%20%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcrashbandicoot (1).html"
   },
   {
     "name": "Crashbandicoot 2",
@@ -5323,17 +5257,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clctgpnitro.html"
-  },
-  {
-    "name": "Curveball",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clcurveball.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcurveball.html"
   },
   {
     "name": "Curveball (1)",
@@ -6133,17 +6056,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/cldkccompetitioncart.html"
-  },
-  {
-    "name": "Dknes Collection",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clDKNESCollection.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clDKNESCollection.html"
   },
   {
     "name": "DKNES Collection (1)",
@@ -7176,17 +7088,6 @@
     "source_path": "UGS-Files/clEaglercraft-Beta-1.3-Offline.html"
   },
   {
-    "name": "Eaglercraft Indev Offline",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clEaglercraft-Indev-Offline.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clEaglercraft-Indev-Offline.html"
-  },
-  {
     "name": "Eaglercraft Indev Offline (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clEaglercraft-Indev-Offline%20%281%29.html",
     "category": "Arcade",
@@ -7198,17 +7099,6 @@
     "source_path": "UGS-Files/clEaglercraft-Indev-Offline (1).html"
   },
   {
-    "name": "Eaglercraft Indev Offline (2)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clEaglercraft-Indev-Offline%282%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clEaglercraft-Indev-Offline(2).html"
-  },
-  {
     "name": "Eaglercraft Nebula",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/cleaglercraftnebula.html",
     "category": "Arcade",
@@ -7218,17 +7108,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/cleaglercraftnebula.html"
-  },
-  {
-    "name": "EaglercraftL 1.9 v0.7.0 Offline Signed",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clEaglercraftL_19_v0_7_0_Offline_Signed.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clEaglercraftL_19_v0_7_0_Offline_Signed.html"
   },
   {
     "name": "EaglercraftL 1.9 v0.7.0 Offline Signed (1)",
@@ -7330,28 +7209,6 @@
     "source_path": "UGS-Files/clearthboundsnes.html"
   },
   {
-    "name": "Earthwormgg",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clearthwormgg.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clearthwormgg.html"
-  },
-  {
-    "name": "Earthwormjim",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clearthwormjim.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clearthwormjim.html"
-  },
-  {
     "name": "Earthworm Jim (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clearthwormjim%20%281%29.html",
     "category": "Arcade",
@@ -7363,17 +7220,6 @@
     "source_path": "UGS-Files/clearthwormjim (1).html"
   },
   {
-    "name": "Earthwormjim 2",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clearthwormjim2.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clearthwormjim2.html"
-  },
-  {
     "name": "Earthworm Jim 2 (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clearthwormjim2%20%281%29.html",
     "category": "Arcade",
@@ -7383,6 +7229,17 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clearthwormjim2 (1).html"
+  },
+  {
+    "name": "Earthwormgg",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clearthwormgg.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clearthwormgg.html"
   },
   {
     "name": "Eccothedolphin",
@@ -8397,17 +8254,6 @@
     "source_path": "UGS-Files/clFIFA11.html"
   },
   {
-    "name": "FIFA 2000",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clfifa2000.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clfifa2000.html"
-  },
-  {
     "name": "FIFA 2000 (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clFIFA2000%281%29.html",
     "category": "Arcade",
@@ -8417,17 +8263,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clFIFA2000(1).html"
-  },
-  {
-    "name": "FIFA 2000 (2)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clFIFA2000%282%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clFIFA2000(2).html"
   },
   {
     "name": "FIFA 99",
@@ -9024,6 +8859,17 @@
     "source_path": "UGS-Files/clfnaw.html"
   },
   {
+    "name": "FNF Shucks V2",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clfnfshucks-v2.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clfnfshucks-v2.html"
+  },
+  {
     "name": "Fnf Twiddlefinger",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clfnfTWIDDLEFINGER.html",
     "category": "Arcade",
@@ -9033,6 +8879,17 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clfnfTWIDDLEFINGER.html"
+  },
+  {
+    "name": "FNF Wednesday Infidelity",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clfnfwednesday-infedility.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clfnfwednesday-infedility.html"
   },
   {
     "name": "Fnfaethos",
@@ -9860,17 +9717,6 @@
     "source_path": "UGS-Files/clfnfshaggyxmatt.html"
   },
   {
-    "name": "FNF Shucks V2",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clfnfshucks-v2.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clfnfshucks-v2.html"
-  },
-  {
     "name": "Fnfsky",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clfnfsky.html",
     "category": "Arcade",
@@ -10023,17 +9869,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clfnfwaltenfiles.html"
-  },
-  {
-    "name": "FNF Wednesday Infidelity",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clfnfwednesday-infedility.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clfnfwednesday-infedility.html"
   },
   {
     "name": "Fnfwhitty",
@@ -10952,6 +10787,17 @@
     "source_path": "UGS-Files/clgotobed.html"
   },
   {
+    "name": "Grand Action Simulator NY",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clgrandactionsimulator-ny.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clgrandactionsimulator-ny.html"
+  },
+  {
     "name": "Grand Escape Prison",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clgrandescapeprison.html",
     "category": "Arcade",
@@ -10983,17 +10829,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clgrandtheftautoadvance.html"
-  },
-  {
-    "name": "Grand Action Simulator NY",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clgrandactionsimulator-ny.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clgrandactionsimulator-ny.html"
   },
   {
     "name": "Granddad",
@@ -11557,28 +11392,6 @@
     "source_path": "UGS-Files/clhalocombatdevolved.html"
   },
   {
-    "name": "Handshakes",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clhandshakes.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clhandshakes.html"
-  },
-  {
-    "name": "Handsofwar",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clhandsofwar.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clhandsofwar.html"
-  },
-  {
     "name": "Hands of War (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clhandsofwar%20%281%29.html",
     "category": "Arcade",
@@ -11590,15 +11403,15 @@
     "source_path": "UGS-Files/clhandsofwar (1).html"
   },
   {
-    "name": "Hands of War (2)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clhandsofwar%282%29.html",
+    "name": "Handshakes",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clhandshakes.html",
     "category": "Arcade",
     "tags": [
       "UGS"
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "UGS-Files/clhandsofwar(2).html"
+    "source_path": "UGS-Files/clhandshakes.html"
   },
   {
     "name": "Handulum",
@@ -11797,17 +11610,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clhei$t.html"
-  },
-  {
-    "name": "Helios Offline",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clHelios-Offline.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clHelios-Offline.html"
   },
   {
     "name": "Helios Offline (1)",
@@ -12468,17 +12270,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clidleminorzamnshes12.html"
-  },
-  {
-    "name": "Impossiblequiz",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/climpossiblequiz.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/climpossiblequiz.html"
   },
   {
     "name": "Impossible Quiz (1)",
@@ -14571,17 +14362,6 @@
     "source_path": "UGS-Files/clmanagod.html"
   },
   {
-    "name": "Marble Racer",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clmarbleracer.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clmarbleracer.html"
-  },
-  {
     "name": "Marble Racer (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clmarbleracer%281%29.html",
     "category": "Arcade",
@@ -14635,17 +14415,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clmarioandluigisuperstarsaga.html"
-  },
-  {
-    "name": "Mario Builder 64",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clmariobuilder64.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clmariobuilder64.html"
   },
   {
     "name": "Mario Builder 64 (1)",
@@ -15704,17 +15473,6 @@
     "source_path": "UGS-Files/clminhero.html"
   },
   {
-    "name": "Minceraft I NotMine V6",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clMinceraft-I-NotMine_V6.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clMinceraft-I-NotMine_V6.html"
-  },
-  {
     "name": "Minceraft I NotMine V6 (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clMinceraft-I-NotMine_V6%281%29.html",
     "category": "Arcade",
@@ -15781,6 +15539,17 @@
     "source_path": "UGS-Files/clminesweeperplus.html"
   },
   {
+    "name": "Minecraft 1.8.8",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clminecraft1-8-8.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clminecraft1-8-8.html"
+  },
+  {
     "name": "Minecraft Case Sim",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clminecraftcasesim.html",
     "category": "Arcade",
@@ -15812,17 +15581,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clminecraftshooter.html"
-  },
-  {
-    "name": "Minecraft 1.8.8",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clminecraft1-8-8.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clminecraft1-8-8.html"
   },
   {
     "name": "Minecrafttowerdefense",
@@ -16087,17 +15845,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clmmwilywars.html"
-  },
-  {
-    "name": "Mo 64",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clmo64.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clmo64.html"
   },
   {
     "name": "Mo 64 (1)",
@@ -16507,17 +16254,6 @@
     "source_path": "UGS-Files/clmrracer.html"
   },
   {
-    "name": "Mspacman",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clmspacman.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clmspacman.html"
-  },
-  {
     "name": "Ms. Pac-Man (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clmspacman%20%281%29.html",
     "category": "Arcade",
@@ -16527,17 +16263,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clmspacman (1).html"
-  },
-  {
-    "name": "Ms. Pac-Man (2)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clmspacman%282%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clmspacman(2).html"
   },
   {
     "name": "Multi Task",
@@ -16628,6 +16353,17 @@
     "source_path": "UGS-Files/cln.html"
   },
   {
+    "name": "N-Gon (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clngon%281%29.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clngon(1).html"
+  },
+  {
     "name": "Narc",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clnarc.html",
     "category": "Arcade",
@@ -16659,17 +16395,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clnaturalselection.html"
-  },
-  {
-    "name": "Nautilus Os",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clNautilusOS.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clNautilusOS.html"
   },
   {
     "name": "Nautilus OS (1)",
@@ -16945,28 +16670,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clnfsunderground2.html"
-  },
-  {
-    "name": "Ngon",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clngon.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clngon.html"
-  },
-  {
-    "name": "N-Gon (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clngon%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clngon(1).html"
   },
   {
     "name": "Nguidle",
@@ -20519,17 +20222,6 @@
     "source_path": "UGS-Files/clpolishedcrystal.html"
   },
   {
-    "name": "Poly Track But Not Flagged",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clpolytrackbutnotflagged.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clpolytrackbutnotflagged.html"
-  },
-  {
     "name": "Poly Track Work Snow",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clpolytrackworksnow.html",
     "category": "Arcade",
@@ -20704,17 +20396,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clpotatomanseeksthetroof.html"
-  },
-  {
-    "name": "Pou",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clpou.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clpou.html"
   },
   {
     "name": "Pou (1)",
@@ -21222,17 +20903,6 @@
     "featured": false
   },
   {
-    "name": "Ragdoll.io",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clragdoll-io.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clragdoll-io.html"
-  },
-  {
     "name": "Ragdoll Runners",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clragdollrunners.html",
     "category": "Arcade",
@@ -21249,6 +20919,17 @@
     "category": "Arcade",
     "tags": [],
     "featured": false
+  },
+  {
+    "name": "Ragdoll.io",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clragdoll-io.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clragdoll-io.html"
   },
   {
     "name": "Ragdollachivement",
@@ -21504,15 +21185,15 @@
     "source_path": "UGS-Files/clredball3.html"
   },
   {
-    "name": "Red Ball 4",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clredball4.html",
+    "name": "Red Ball 4 (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clredball4%281%29.html",
     "category": "Arcade",
     "tags": [
       "UGS"
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "UGS-Files/clredball4.html"
+    "source_path": "UGS-Files/clredball4(1).html"
   },
   {
     "name": "Red Ball 4 Vol 2",
@@ -21535,17 +21216,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clredball4vol3.html"
-  },
-  {
-    "name": "Red Ball 4 (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clredball4%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clredball4(1).html"
   },
   {
     "name": "Red Handed",
@@ -22043,6 +21713,17 @@
     "source_path": "UGS-Files/clrocketjump.html"
   },
   {
+    "name": "Rocket Knight 2 (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clrocketknight2%20%281%29.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clrocketknight2 (1).html"
+  },
+  {
     "name": "Rocket League",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clrocketleague.html",
     "category": "Arcade",
@@ -22076,28 +21757,6 @@
     "source_path": "UGS-Files/clrocketgoalio.html"
   },
   {
-    "name": "Rocketknight 2",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clrocketknight2.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clrocketknight2.html"
-  },
-  {
-    "name": "Rocket Knight 2 (2)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clrocketknight2%282%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clrocketknight2(2).html"
-  },
-  {
     "name": "Rocketknight Adventures",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clrocketknightadventures.html",
     "category": "Arcade",
@@ -22107,17 +21766,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clrocketknightadventures.html"
-  },
-  {
-    "name": "Rocket Knight 2 (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clrocketknight2%20%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clrocketknight2 (1).html"
   },
   {
     "name": "Rocketpult",
@@ -22448,17 +22096,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clsandsofthecoliseum.html"
-  },
-  {
-    "name": "Sandstone",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsandstone.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clsandstone.html"
   },
   {
     "name": "Sandstone (1)",
@@ -22923,17 +22560,6 @@
     "source_path": "UGS-Files/clshadowdancersecret.html"
   },
   {
-    "name": "Shaggy",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clshaggy.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clshaggy.html"
-  },
-  {
     "name": "Shaggy (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clshaggy%20%281%29.html",
     "category": "Arcade",
@@ -23396,6 +23022,17 @@
     "source_path": "UGS-Files/clskong.html"
   },
   {
+    "name": "Sky Race 3D",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clskyrace-3d.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clskyrace-3d.html"
+  },
+  {
     "name": "Sky Riders",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clSkyRiders.html",
     "category": "Arcade",
@@ -23438,17 +23075,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/skypack.html"
-  },
-  {
-    "name": "Sky Race 3D",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clskyrace-3d.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clskyrace-3d.html"
   },
   {
     "name": "Slalomnes",
@@ -23986,6 +23612,17 @@
     "source_path": "UGS-Files/clSnowBrosGenesis.html"
   },
   {
+    "name": "Snow Bros. (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsnowbros%20%281%29.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clsnowbros (1).html"
+  },
+  {
     "name": "Snow Brothers",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsnowbrothers.html",
     "category": "Arcade",
@@ -24112,39 +23749,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clsnowboardobby.html"
-  },
-  {
-    "name": "Snowbros",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsnowbros.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clsnowbros.html"
-  },
-  {
-    "name": "Snow Bros. (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsnowbros%20%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clsnowbros (1).html"
-  },
-  {
-    "name": "Snow Bros. (2)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsnowbros%282%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clsnowbros(2).html"
   },
   {
     "name": "Soccer Bros",
@@ -24543,15 +24147,15 @@
     "source_path": "UGS-Files/clsonicclassiccollection.html"
   },
   {
-    "name": "Sonic Classic Heroes",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsonicclassicheroes.html",
+    "name": "Sonic Classic Heroes (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsonicclassicheroes%281%29.html",
     "category": "Arcade",
     "tags": [
       "UGS"
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "UGS-Files/clsonicclassicheroes.html"
+    "source_path": "UGS-Files/clsonicclassicheroes(1).html"
   },
   {
     "name": "Sonic Classics",
@@ -24629,6 +24233,17 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clSonicInSM64.html"
+  },
+  {
+    "name": "Sonic In SMW (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clSonicinSMW%281%29.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clSonicinSMW(1).html"
   },
   {
     "name": "Sonic Jam",
@@ -24818,17 +24433,6 @@
     "source_path": "UGS-Files/clsoniccdmobile.html"
   },
   {
-    "name": "Sonic Classic Heroes (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsonicclassicheroes%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clsonicclassicheroes(1).html"
-  },
-  {
     "name": "Soniceexeog",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsoniceexeog.html",
     "category": "Arcade",
@@ -24849,39 +24453,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clsonicgg.html"
-  },
-  {
-    "name": "Sonicin Smw",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clSonicinSMW.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clSonicinSMW.html"
-  },
-  {
-    "name": "Sonic In SMW (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clSonicinSMW%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clSonicinSMW(1).html"
-  },
-  {
-    "name": "Sonic In SMW (2)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsonicinsmw%282%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clsonicinsmw(2).html"
   },
   {
     "name": "Sonicr",
@@ -25896,17 +25467,6 @@
     "source_path": "UGS-Files/clStreetFighter2CEArcade.html"
   },
   {
-    "name": "Street Fighter 2 Hf Arcade",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clStreetFighter2HFArcade.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clStreetFighter2HFArcade.html"
-  },
-  {
     "name": "Street Fighter 2 HF Arcade (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clStreetFighter2HFArcade%281%29.html",
     "category": "Arcade",
@@ -26182,15 +25742,15 @@
     "source_path": "UGS-Files/clsubwaysurfersneworleans.html"
   },
   {
-    "name": "Subway Surfers San Francisco",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsubwaysurferssanfrancisco.html",
+    "name": "Subway Surfers San Francisco (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsubwaysurferssanfrancisco%20%281%29.html",
     "category": "Arcade",
     "tags": [
       "UGS"
     ],
     "featured": false,
     "source": "UGS",
-    "source_path": "UGS-Files/clsubwaysurferssanfrancisco.html"
+    "source_path": "UGS-Files/clsubwaysurferssanfrancisco (1).html"
   },
   {
     "name": "Subway Surfers Winter Holiday",
@@ -26213,17 +25773,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clsubwaysurferszurich.html"
-  },
-  {
-    "name": "Subway Surfers San Francisco (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsubwaysurferssanfrancisco%20%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clsubwaysurferssanfrancisco (1).html"
   },
   {
     "name": "Subwaysurfersstpetersburg",
@@ -26411,6 +25960,17 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clsuperdiagonalmario2.html"
+  },
+  {
+    "name": "Super Drome Bugs (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsuperdromebugs%281%29.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clsuperdromebugs(1).html"
   },
   {
     "name": "Super Falling Fred",
@@ -26728,6 +26288,17 @@
     "source_path": "UGS-Files/clsupermarioworld2.html"
   },
   {
+    "name": "Super Mario World The Secret Of The 7 Golden Statues",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clSuperMarioWorldThe%20SecretOfThe7GoldenStatues.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clSuperMarioWorldThe SecretOfThe7GoldenStatues.html"
+  },
+  {
     "name": "Super Noah Sark 3 D",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsupernoahsark3D.html",
     "category": "Arcade",
@@ -26948,28 +26519,6 @@
     "source_path": "UGS-Files/clsuperchibiknight.html"
   },
   {
-    "name": "Superdromebugs",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsuperdromebugs.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clsuperdromebugs.html"
-  },
-  {
-    "name": "Super Drome Bugs (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsuperdromebugs%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clsuperdromebugs(1).html"
-  },
-  {
     "name": "Supermariolanddx",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clsupermariolanddx.html",
     "category": "Arcade",
@@ -26990,17 +26539,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clsupermariostarroadretooled.html"
-  },
-  {
-    "name": "Super Mario World The Secret Of The 7 Golden Statues",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clSuperMarioWorldThe%20SecretOfThe7GoldenStatues.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clSuperMarioWorldThe SecretOfThe7GoldenStatues.html"
   },
   {
     "name": "Supermetroid",
@@ -27868,6 +27406,17 @@
     "source_path": "UGS-Files/clthelaststand.html"
   },
   {
+    "name": "The Last Stand: Union City (1)",
+    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clthelaststandunioncity%20%281%29.html",
+    "category": "Arcade",
+    "tags": [
+      "UGS"
+    ],
+    "featured": false,
+    "source": "UGS",
+    "source_path": "UGS-Files/clthelaststandunioncity (1).html"
+  },
+  {
     "name": "The Legend Of Zelda: A Link To The Past",
     "path": "pages/lessons/The%20Legend%20of%20Zelda%20a%20Link%20to%20the%20Past/index.html",
     "category": "Arcade",
@@ -27917,28 +27466,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clTheSunForTheVampire.html"
-  },
-  {
-    "name": "Thelaststandunioncity",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clthelaststandunioncity.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clthelaststandunioncity.html"
-  },
-  {
-    "name": "The Last Stand: Union City (1)",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clthelaststandunioncity%20%281%29.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clthelaststandunioncity (1).html"
   },
   {
     "name": "Them An Inthe Window",
@@ -28832,17 +28359,6 @@
     "source_path": "UGS-Files/clturokdinosaurhunter.html"
   },
   {
-    "name": "Twinshot",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/cltwinshot.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cltwinshot.html"
-  },
-  {
     "name": "Twin Shot (1)",
     "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/cltwinshot%20%281%29.html",
     "category": "Arcade",
@@ -29541,17 +29057,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clVSSMB.html"
-  },
-  {
-    "name": "Vvvvvv",
-    "path": "https://cdn.jsdelivr.net/gh/Ultimate-Guy/cosmicgames@main/UGS-Files/clvvvvvv.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clvvvvvv.html"
   },
   {
     "name": "VVVVVV (1)",

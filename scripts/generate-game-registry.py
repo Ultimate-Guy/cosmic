@@ -140,7 +140,8 @@ def main():
             filename=re.sub(r'\.html?$', '', filename, flags=re.I)
             if filename.lower().startswith('cl') and len(filename)>2:
                 filename=filename[2:]
-            name=re.sub(r'[_-]+',' ',filename).strip() or str(item.get('name','')).strip() or 'Untitled UGS Game'
+            fallback_name=re.sub(r'[_-]+',' ',filename).strip() or 'Untitled UGS Game'
+            name=str(item.get('name','')).strip() or fallback_name
             key=dedupe_key(name)
             if key in seen:
                 ugs_skipped+=1

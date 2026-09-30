@@ -111,3 +111,28 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--yt-accent);outl
 @media(max-width:1200px){.search-result-card{grid-template-columns:minmax(250px,320px) minmax(0,1fr)}}
 @media(max-width:900px){.search-result-card{grid-template-columns:250px minmax(0,1fr)}.search-result-card .video-card-title{font-size:15px}}
 @media(max-width:600px){.search-result-card{grid-template-columns:1fr;gap:8px}.search-result-card .search-snippet{display:none}.top-action.create-action{display:none}}
+
+/* Realistic YouTube watch-page polish */
+.watch-actions-bar{display:flex;align-items:center;justify-content:flex-end;margin-top:10px}
+.watch-actions{display:flex;gap:8px;flex-wrap:wrap}
+.watch-action{min-height:38px;padding:0 13px;border-radius:20px;border:1px solid var(--yt-border);background:var(--yt-soft);color:var(--yt-text);font-weight:700}
+.watch-action:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
+.watch-action.active{background:var(--yt-accent);color:#001b18;border-color:var(--yt-accent)}
+.account-action{padding:0 8px}
+.account-avatar{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--yt-accent);color:#001b18;font-weight:900}
+.account-menu{min-width:210px;padding:12px;display:flex;flex-direction:column;gap:7px}
+.account-menu strong{font-size:14px}.account-menu span{font-size:11px;color:var(--yt-muted);padding-bottom:6px}
+.account-menu button{border:0;background:transparent;color:var(--yt-text);text-align:left;padding:9px;border-radius:8px;font-weight:700}
+.account-menu button:hover{background:var(--yt-soft)}
+.action-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:rgba(0,0,0,.68);backdrop-filter:blur(5px)}
+.action-modal.hidden{display:none}
+.action-modal-card{position:relative;width:min(620px,calc(100vw - 30px));max-height:min(78vh,700px);overflow:auto;padding:26px;border:1px solid var(--yt-border);border-radius:18px;background:var(--yt-bg);box-shadow:0 30px 90px rgba(0,0,0,.5)}
+.modal-close{position:absolute;right:14px;top:14px}
+.playlist-picker{display:grid;gap:8px;margin-top:16px}.playlist-choice,.playlist-new{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;padding:13px;border:1px solid var(--yt-border);border-radius:10px;background:var(--yt-soft);color:var(--yt-text);text-align:left}.playlist-choice:hover,.playlist-new:hover{border-color:var(--yt-accent)}.playlist-choice small{color:var(--yt-muted)}.playlist-new{grid-template-columns:28px 1fr;margin-top:4px}
+.playlist-row{display:flex;align-items:center;gap:14px;padding:14px;border-bottom:1px solid var(--yt-border)}.playlist-row>div:nth-child(2){flex:1;display:flex;flex-direction:column;gap:4px}.playlist-row span{font-size:11px;color:var(--yt-muted)}.playlist-icon{width:52px;height:38px;display:grid;place-items:center;border-radius:8px;background:var(--yt-soft);color:var(--yt-accent)}
+.mini-player{position:fixed;right:22px;bottom:22px;z-index:900;width:min(380px,calc(100vw - 30px));padding:10px;border:1px solid var(--yt-border);border-radius:12px;background:#151518;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+.mini-player.hidden{display:none}.mini-player-head{display:flex;align-items:center;gap:8px;padding:2px 3px 8px}.mini-player-head strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.mini-player-video{aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden}.mini-player-video iframe{width:100%;height:100%;border:0}.mini-player-expand{width:100%;margin-top:7px;border:0;border-radius:8px;padding:8px;background:var(--yt-soft);color:var(--yt-text);font-weight:700}
+.ambient-mode #playerWrap{box-shadow:0 0 0 1px var(--yt-border),0 25px 90px rgba(0,0,0,.5),0 0 120px -25px var(--yt-accent)}
+.ambient-mode #playerWrap::before{content:"";position:absolute;inset:-35px;z-index:-1;background-image:var(--ambient-image);background-size:cover;background-position:center;filter:blur(42px) saturate(1.25);opacity:.28;border-radius:40px}
+#playerWrap{position:relative}
+@media(max-width:760px){.watch-actions-bar{justify-content:flex-start}.watch-action{padding:0 10px}.watch-action span{display:none}.watch-action i{margin:0}.mini-player{right:10px;bottom:10px}}

@@ -31,10 +31,11 @@
           <button class="yt-search-button" type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
           <div id="searchSuggestions" class="search-suggestions hidden"></div>
         </form>
-        <button id="voiceSearchBtn" class="round-icon-btn" type="button" aria-label="Voice search"><i class="fas fa-microphone"></i></button>
+        <button id="voiceSearchBtn" class="round-icon-btn voice-search" type="button" aria-label="Voice search" title="Voice search"><i class="fas fa-microphone"></i></button>
       </div>
 
       <div class="yt-top-actions">
+        <button id="topCreateBtn" class="top-action create-action" type="button" title="Add local video to your Cosmic library"><i class="fas fa-plus"></i><span>Create</span></button>
         <button id="topSavedBtn" class="top-action" type="button"><i class="fas fa-bookmark"></i><span>Saved</span></button>
         <button id="topSettingsBtn" class="top-action cosmic-nav cosmic-settings" title="Open Cosmic Settings" type="button"><i class="fas fa-gear"></i><span>Settings</span></button>
         <button id="topGamesBtn" class="top-action cosmic-nav cosmic-games" title="Back to Cosmic Games" type="button"><i class="fas fa-gamepad"></i><span>Games</span></button>
@@ -48,11 +49,19 @@
           <button class="sidebar-item" data-view="shorts" type="button"><i class="fas fa-play"></i><span>Shorts</span></button>
           <button class="sidebar-item" data-view="subscriptions" type="button"><i class="fas fa-clapperboard"></i><span>Subscriptions</span></button>
           <div class="sidebar-divider"></div>
+          <div class="sidebar-label">YOU</div>
           <button class="sidebar-item" data-view="library" type="button"><i class="fas fa-layer-group"></i><span>Library</span></button>
           <button class="sidebar-item" data-view="history" type="button"><i class="fas fa-clock-rotate-left"></i><span>History</span></button>
           <button class="sidebar-item" data-view="saved" type="button"><i class="fas fa-bookmark"></i><span>Watch later</span></button>
+          <button class="sidebar-item" data-view="liked" type="button"><i class="fas fa-thumbs-up"></i><span>Liked videos</span></button>
           <div class="sidebar-divider"></div>
-          <div class="sidebar-label">COSMIC</div>
+          <div class="sidebar-label">EXPLORE</div>
+          <button class="sidebar-item" data-query="trending" type="button"><i class="fas fa-fire"></i><span>Trending</span></button>
+          <button class="sidebar-item" data-query="music" type="button"><i class="fas fa-music"></i><span>Music</span></button>
+          <button class="sidebar-item" data-query="gaming" type="button"><i class="fas fa-gamepad"></i><span>Gaming</span></button>
+          <button class="sidebar-item" data-query="live" type="button"><i class="fas fa-tower-broadcast"></i><span>Live</span></button>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-label cosmic-sidebar-label">COSMIC</div>
           <button id="sideGamesBtn" class="sidebar-item cosmic-side-nav" type="button"><i class="fas fa-gamepad"></i><span>Games</span></button>
           <button id="sideSettingsBtn" class="sidebar-item cosmic-side-nav" type="button"><i class="fas fa-gear"></i><span>Settings</span></button>
         </nav>
@@ -64,8 +73,8 @@
           <div class="hero-strip">
             <div>
               <span class="hero-eyebrow">COSMIC MEDIA</span>
-              <h1>YouTube, rebuilt for Cosmic.</h1>
-              <p>Search, Shorts, channels, subscriptions, history, saved videos and local media in one fast interface.</p>
+              <h1>Cosmic YouTube</h1>
+              <p>Your YouTube-style home for search, Shorts, channels, subscriptions, history and saved videos — with Cosmic controls always one click away.</p>
             </div>
             <div class="hero-actions"><button id="heroExploreBtn" class="hero-button" type="button"><i class="fas fa-compass"></i> Explore</button><button id="heroUrlBtn" class="hero-button secondary" type="button"><i class="fas fa-link"></i> Watch URL</button></div>
           </div>
@@ -84,7 +93,7 @@
           </div>
 
           <div class="section-heading">
-            <div><span class="section-kicker">START HERE</span><h2>Jump back in</h2></div>
+            <div><span class="section-kicker">FOR YOU</span><h2>Recommended videos</h2></div>
             <button id="refreshHomeBtn" class="text-button" type="button"><i class="fas fa-rotate"></i> Refresh</button>
           </div>
           <div id="homeContent" class="video-grid"></div><div id="homeUrlBox" class="home-url-box hidden"><form id="homeUrlForm"><input id="homeUrlInput" type="url" placeholder="Paste a YouTube video or Shorts URL..."><button class="primary-button" type="submit"><i class="fas fa-play"></i> Watch</button></form></div>
@@ -204,6 +213,12 @@
           <div class="section-heading"><div><span class="section-kicker">LIBRARY</span><h1>History</h1><p>Your recently watched Cosmic YouTube videos.</p></div><button id="clearHistoryBtn" class="text-button danger" type="button">Clear history</button></div>
           <div id="historyResults" class="video-grid"></div>
           <div id="historyEmpty" class="view-empty hidden"><i class="fas fa-clock-rotate-left"></i><strong>Nothing here yet</strong><span>Open a video and it will appear in your history.</span></div>
+        </section>
+
+        <section id="likedView" class="yt-view hidden">
+          <div class="section-heading"><div><span class="section-kicker">YOUR LIBRARY</span><h1>Liked videos</h1><p>Videos you marked with Like inside Cosmic.</p></div><button id="clearLikedBtn" class="text-button danger" type="button">Clear liked</button></div>
+          <div id="likedResults" class="video-grid"></div>
+          <div id="likedEmpty" class="view-empty hidden"><i class="fas fa-thumbs-up"></i><strong>No liked videos yet</strong><span>Like a video from its watch page and it will appear here.</span></div>
         </section>
 
         <section id="savedView" class="yt-view hidden">

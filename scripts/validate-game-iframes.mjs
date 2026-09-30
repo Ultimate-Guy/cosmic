@@ -214,23 +214,29 @@ async function inspectBrowserGame(browser, game) {
       title: await page.title().catch(() => ''),
     };
 
-    // Cosmic's game shell intentionally starts #game at about:blank, then
-    // asynchronously fetches the target and either navigates or document-writes
-    // the real game into the iframe. contentFrame() becomes available before
-    // that work finishes, so do not treat the initial blank document as failure.
+    // The shell starts #game at about:blank. For UGS/document-write and generic
+    // external launches it sets data-cosmic-external-url only after the real target
+    // has been fetched and handed to the iframe. Wait for that handoff signal first.
     const deadline = Date.now() + FRAME_WAIT;
     let childFrame = null;
     let state = null;
     let lastContextError = null;
+    let handoffTarget = null;
 
     while (Date.now() < deadline) {
       const iframe = await page.$('#game');
-      const current = iframe ? await iframe.contentFrame() : null;
-      if (!current) {
+      if (!iframe) {
         await page.waitForTimeout(100);
         continue;
       }
-      childFrame = current;
+
+      handoffTarget = await iframe.getAttribute('data-cosmic-external-url');
+      childFrame = await iframe.contentFrame();
+
+      if (!handoffTarget || !childFrame) {
+        await page.waitForTimeout(100);
+        continue;
+      }
 
       try {
         await childFrame.waitForLoadState('domcontentloaded', {timeout: 400}).catch(() => {});
@@ -260,14 +266,12 @@ async function inspectBrowserGame(browser, game) {
           };
         });
 
-        const ready = Boolean(
-          state.frameUrl &&
-          (state.frameUrl !== 'about:blank' ||
-           state.bodyChildren > 0 ||
-           state.canvasCount > 0 ||
-           state.visibleSurfaceCount > 0 ||
-           state.htmlLength >= 80)
-        );
+        // A document-write game can legitimately remain in "loading" while its
+        // scripts/assets initialize. Do not reject a handed-off document merely
+        // because the body has not populated at this exact sampling instant.
+        const hasSubstantialDocument = state.htmlLength >= 300;
+        const hasSurface = state.canvasCount > 0 || state.visibleSurfaceCount > 0 || state.bodyChildren > 0;
+        const ready = hasSubstantialDocument || hasSurface || state.readyState === 'complete';
         if (ready) break;
       } catch (error) {
         lastContextError = String(error?.message || error);
@@ -280,18 +284,20 @@ async function inspectBrowserGame(browser, game) {
     }
 
     if (!state) {
-      result.reason = 'game frame did not become readable within timeout';
+      result.reason = handoffTarget
+        ? 'game frame did not become readable after Cosmic handed off the target'
+        : 'Cosmic game shell never handed the target to the iframe';
       return result;
     }
 
-    result.iframe = state;
+    result.iframe = {...state, handoffTarget};
 
     if (!state.frameUrl) {
       result.reason = 'game frame has no URL';
       return result;
     }
 
-    if (state.bodyChildren === 0 || state.htmlLength < 80) {
+    if (state.bodyChildren === 0 && state.htmlLength < 80 && state.canvasCount === 0 && state.visibleSurfaceCount === 0 && state.readyState === 'complete') {
       result.reason = 'game frame loaded an empty/nearly-empty document';
       return result;
     }

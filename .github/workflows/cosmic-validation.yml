@@ -35,9 +35,87 @@ jobs:
           for f in [Path('pages/lessons/games.json'), Path('apps/apps.json')]:
               data=json.loads(f.read_text())
               assert isinstance(data,list), f'{f} must contain an array'
-              names=[str(x.get('name','')).strip().lower() for x in data]
+              names=[str(x.get('name','')).strip().casefold() for x in data]
               assert all(names), f'{f} contains an item without a name'
-              assert len(names)==len(set(names)), f'{f} contains duplicate names'
+              def duplicate_key(name):
+                  import re
+                  value=re.sub(r'\\(ugs(?:\\s+\\d+)?\\)
+          print('Cosmic registries are valid.')
+          PY
+
+      - name: Check core files
+        run: |
+          test -f index.html
+          test -f cosmic-hub.html
+          test -f cosmic-hub.css
+          test -f pages/lessons/lessons.html
+          test -f pages/lessons/game-shell.html
+          echo "Core Cosmic files are present."
+
+      - name: Validate all original games
+        run: python3 scripts/validate-games.py
+
+      - name: Install browser test dependencies
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
+
+      - name: Verify live deployment and test every game target
+        env:
+          GITHUB_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          COSMIC_DEPLOYMENT_WAIT: "30000"
+          COSMIC_GAME_HTTP_TIMEOUT: "5000"
+          COSMIC_TARGET_CONCURRENCY: "48"
+          COSMIC_BROWSER_CONCURRENCY: "8"
+          COSMIC_GAME_NAV_TIMEOUT: "5000"
+          COSMIC_GAME_FRAME_WAIT: "5000"
+          COSMIC_GAME_LOAD_WAIT: "500"
+          COSMIC_BROWSER_SAMPLE: "12"
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME"
+          CHROME_PATH="$CHROME" node scripts/validate-game-iframes.mjs
+,'',name)
+                  value=re.sub(r'\\(\\d+\\)
+          print('Cosmic registries are valid.')
+          PY
+
+      - name: Check core files
+        run: |
+          test -f index.html
+          test -f cosmic-hub.html
+          test -f cosmic-hub.css
+          test -f pages/lessons/lessons.html
+          test -f pages/lessons/game-shell.html
+          echo "Core Cosmic files are present."
+
+      - name: Validate all original games
+        run: python3 scripts/validate-games.py
+
+      - name: Install browser test dependencies
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright-core@1.55.0 >/dev/null 2>&1
+
+      - name: Verify live deployment and test every game target
+        env:
+          GITHUB_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          COSMIC_DEPLOYMENT_WAIT: "30000"
+          COSMIC_GAME_HTTP_TIMEOUT: "5000"
+          COSMIC_TARGET_CONCURRENCY: "48"
+          COSMIC_BROWSER_CONCURRENCY: "8"
+          COSMIC_GAME_NAV_TIMEOUT: "5000"
+          COSMIC_GAME_FRAME_WAIT: "5000"
+          COSMIC_GAME_LOAD_WAIT: "500"
+          COSMIC_BROWSER_SAMPLE: "12"
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME"
+          CHROME_PATH="$CHROME" node scripts/validate-game-iframes.mjs
+,'',value)
+                  return re.sub(r'[^a-z0-9]+','',value)
+              keys=[duplicate_key(name) for name in names]
+              assert len(keys)==len(set(keys)), f'{f} contains duplicate game names after Cosmic normalization'
           print('Cosmic registries are valid.')
           PY
 

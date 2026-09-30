@@ -392,50 +392,110 @@
   }
 
   function enhanceDetail(item) {
-    const modal=document.getElementById('cc-modal');
-    if(!modal||!modal.classList.contains('show'))return;
-    const dialog=modal.querySelector('.cc-dialog');
-    if(!dialog||dialog.dataset.experienceDetail==='1')return;
+    const modal=document.getElementById('cc-modal');if(!modal||!modal.classList.contains('show'))return;
+    const dialog=modal.querySelector('.cc-dialog');if(!dialog||dialog.dataset.experienceDetail==='1')return;
     dialog.dataset.experienceDetail='1';
     const badge=confidence(item);
     const launch=dialog.querySelector('#cc-detail-launch');
     const bar=document.createElement('div');
     bar.innerHTML='<span class="cosmic-confidence-badge '+badge.className+'">Confidence: '+esc(badge.label)+'</span>';
-    const actions=document.createElement('div');actions.style.cssText='display:flex;gap:7px;flex-wrap:wrap;margin-top:8px';
+    const actions=document.createElement('div');
+    actions.style.cssText='display:flex;gap:7px;flex-wrap:wrap;margin-top:8px';
     actions.innerHTML='<button class="cc-btn cosmic-route-btn" id="ce-route">Route Preview</button><button class="cc-btn cosmic-capsule-btn" id="ce-capsule">Save Capsule</button><button class="cc-btn" id="ce-capsules">Capsules</button><button class="cc-btn" id="ce-handoff">Send to another device</button>';
-    dialog.insertBefore(bar,launch||dialog.firstChild);if(launch)launch.after(actions);else dialog.appendChild(actions);
+    dialog.insertBefore(bar,launch||dialog.firstChild);
+    if(launch)launch.after(actions);else dialog.appendChild(actions);
     actions.querySelector('#ce-route').onclick=()=>routeModal(item,'play');
     actions.querySelector('#ce-capsule').onclick=()=>saveCapsule(item,'play');
     actions.querySelector('#ce-capsules').onclick=capsuleModal;
     actions.querySelector('#ce-handoff').onclick=()=>handoffModal(item);
-    healthCheck(item).then(h=>{if(h.status==='fail'||h.status==='ok'){const next=confidence(item);bar.innerHTML='<span class="cosmic-confidence-badge '+next.className+'">Confidence: '+esc(next.label)+' • '+esc(h.status==='ok'?'HTTP check passed':'HTTP check failed')+'</span>';}}).catch(()=>{});
+    healthCheck(item).then(h=>{
+      if(h.status==='fail'||h.status==='ok'){
+        const next=confidence(item);
+        bar.innerHTML='<span class="cosmic-confidence-badge '+next.className+'">Confidence: '+esc(next.label)+' • '+esc(h.status==='ok'?'HTTP check passed':'HTTP check failed')+'</span>';
+      }
+    }).catch(()=>{});
+  }
+
+  function experienceUpdatesModal(shell) {
+    relevantUpdates().then(result => {
+      const html = result.items.length
+        ? '<p>These are the newest updates Cosmic thinks are relevant to your recent activity.</p><div class="cosmic-mini-list">' +
+          result.items.map(u => '<div class="cosmic-mission-item"><b>'+esc(u.title)+'</b><small>'+esc(u.date)+' • '+esc(u.body)+'</small><button class="cosmic-experience-button" data-mark-update-modal="'+esc(u.id)+'">Mark seen</button></div>').join('') +
+          '</div>'
+        : '<div class="cosmic-mission-item"><b>You are caught up.</b><small>There are no unseen personalized updates right now. New relevant changes will appear here after a future update.</small></div>';
+      showExperienceModal('What Changed for You',html,m=>{
+        m.querySelectorAll('[data-mark-update-modal]').forEach(b=>b.onclick=()=>{
+          markUpdateSeen(b.dataset.markUpdateModal);
+          m.style.display='none';
+          if(shell)updateRelevancePanel(shell);
+        });
+      });
+    });
+  }
+
+  function experienceOverviewModal() {
+    const p=profile();let games=0,apps=0;
+    Object.entries(p.stats||{}).forEach(([key,value])=>{
+      if(Number(value?.opens||0)>0){
+        if(key.startsWith('game:'))games+=Number(value.opens||0);
+        else if(key.startsWith('app:'))apps+=Number(value.opens||0);
+      }
+    });
+    const layout=games>=apps+3?'Game-heavy':(apps>=games+3?'App-heavy':'Balanced');
+    const html='<p>All 10 Cosmic experience updates are active. Some are buttons, while others work automatically in the background or inside item details.</p><div class="cosmic-mini-list">' +
+      '<div class="cosmic-mission-item"><b>1. Cosmic Save Capsules</b><small>Save a game/app target, launch mode, and locally safe Cosmic settings.</small></div>' +
+      '<div class="cosmic-mission-item"><b>2. Launch Route Preview</b><small>Shows local/external route, mirror or shell details, popout support, and compatibility confidence before launch.</small></div>' +
+      '<div class="cosmic-mission-item"><b>3. Cosmic Recovery Queue</b><small>Failed game launches are stored with host/reason and retry, popout, report, and remove actions.</small></div>' +
+      '<div class="cosmic-mission-item"><b>4. Mission Chains</b><small>Weekly themed missions track locally and reset automatically.</small></div>' +
+      '<div class="cosmic-mission-item"><b>5. Adaptive Command Center Layout</b><small>Automatic layout mode: '+esc(layout)+' based on your local game/app activity.</small></div>' +
+      '<div class="cosmic-mission-item"><b>6. Registry Confidence Badges</b><small>Confidence appears in Cosmic item details and updates after a lightweight health check.</small></div>' +
+      '<div class="cosmic-mission-item"><b>7. Portal Handoff Between Devices</b><small>Creates a portable Cosmic link/QR payload containing the selected item and locally safe settings.</small></div>' +
+      '<div class="cosmic-mission-item"><b>8. Developer Replay Logs</b><small>'+(isDev()?'Enabled for TheDevilAngel.':'Developer-only; hidden for normal users.')+'</small></div>' +
+      '<div class="cosmic-mission-item"><b>9. Collection Builder with Rules</b><small>Builds collections from category, tags, kind, confidence, and metadata rules.</small></div>' +
+      '<div class="cosmic-mission-item"><b>10. What Changed for You</b><small>Compares unseen updates against your local activity and highlights relevant changes.</small></div>' +
+      '</div>';
+    showExperienceModal('Cosmic Experience • 10 Updates',html);
   }
 
   function injectCommandCenter(root) {
     if(!root)return;
     const shell=root.querySelector('.cc-shell');if(!shell)return;
-    if(shell.querySelector('#cosmic-experience-system-panel')){adaptiveLayout(root);return;}
+    const existing=shell.querySelector('#cosmic-experience-system-panel');
+    if(existing){adaptiveLayout(root);return;}
     adaptiveLayout(root);
-    const panel=document.createElement('section');panel.className='cosmic-experience-panel';panel.id='cosmic-experience-system-panel';
-    panel.innerHTML='<h3>Cosmic Systems</h3><p>Save state, preview launch routes, recover failed launches, and continue your portal across devices.</p><div class="cosmic-experience-grid"><button class="cosmic-experience-button" id="ce-capsules-open">Save Capsules</button><button class="cosmic-experience-button" id="ce-route-all">Route Preview</button><button class="cosmic-experience-button" id="ce-recovery-open">Recovery Queue ('+load(RECOVERY_KEY,[]).length+')</button><button class="cosmic-experience-button" id="ce-missions-open">Mission Chains</button><button class="cosmic-experience-button" id="ce-collections-open">Rule Collections</button><button class="cosmic-experience-button" id="ce-handoff-pick">Send to another device</button>'+(isDev()?'<button class="cosmic-experience-button" id="ce-replay-open">Developer Replay Logs</button>':'')+'</div>';
+    const panel=document.createElement('section');
+    panel.className='cosmic-experience-panel';
+    panel.id='cosmic-experience-system-panel';
+    panel.innerHTML='<h3>Cosmic Systems</h3><p>These are the 10 new Cosmic experience systems. Several are interactive here; others run automatically or appear inside item details.</p><div class="cosmic-experience-grid">'+
+      '<button class="cosmic-experience-button" id="ce-capsules-open">Save Capsules</button>'+
+      '<button class="cosmic-experience-button" id="ce-route-all">Route Preview</button>'+
+      '<button class="cosmic-experience-button" id="ce-recovery-open">Recovery Queue ('+load(RECOVERY_KEY,[]).length+')</button>'+
+      '<button class="cosmic-experience-button" id="ce-missions-open">Mission Chains</button>'+
+      '<button class="cosmic-experience-button" id="ce-collections-open">Rule Collections</button>'+
+      '<button class="cosmic-experience-button" id="ce-handoff-pick">Send to another device</button>'+
+      '<button class="cosmic-experience-button" id="ce-experience-overview">All 10 Updates</button>'+
+      '<button class="cosmic-experience-button" id="ce-experience-updates">What Changed for You</button>'+
+      (isDev()?'<button class="cosmic-experience-button" id="ce-replay-open">Developer Replay Logs</button>':'')+
+      '</div>';
     const top=shell.querySelector('.cc-top');
-    if(top) top.insertAdjacentElement('afterend',panel); else shell.appendChild(panel);
+    if(top)top.insertAdjacentElement('afterend',panel);else shell.prepend(panel);
+
     const actions=shell.querySelector('.cc-actions');
-    if(actions && !actions.querySelector('#cc-experience')){
+    if(actions&&!actions.querySelector('#cc-experience')){
       const jump=document.createElement('button');
-      jump.id='cc-experience';
-      jump.className='cc-btn';
-      jump.type='button';
-      jump.textContent='Cosmic Systems';
-      jump.onclick=()=>panel.scrollIntoView({behavior:'smooth',block:'start'});
+      jump.id='cc-experience';jump.className='cc-btn';jump.type='button';jump.textContent='Cosmic Systems';
+      jump.onclick=()=>document.getElementById('cosmic-experience-system-panel')?.scrollIntoView({behavior:'smooth',block:'start'});
       actions.appendChild(jump);
     }
+
     panel.querySelector('#ce-capsules-open').onclick=capsuleModal;
     panel.querySelector('#ce-recovery-open').onclick=renderRecoveryQueue;
     panel.querySelector('#ce-missions-open').onclick=missionsModal;
     panel.querySelector('#ce-collections-open').onclick=collectionsModal;
     panel.querySelector('#ce-route-all').onclick=async()=>{const items=await getRegistry();const item=items[Math.floor(Math.random()*Math.max(1,items.length))];if(item)routeModal(item,'play');};
-    panel.querySelector('#ce-handoff-pick').onclick=async()=>{const items=await getRegistry();const p=profile();const item=items.find(x=>p.recent?.includes(itemId(x)))||items[0];if(item)handoffModal(item);};
+    panel.querySelector('#ce-handoff-pick').onclick=async()=>{const items=await getRegistry();const p=profile();const item=items.find(x=>p.recent?.includes(itemId(x)))||items[0];if(item)handoffModal(item);else showToast('Open a game or app first so Cosmic can hand it off.');};
+    panel.querySelector('#ce-experience-overview').onclick=experienceOverviewModal;
+    panel.querySelector('#ce-experience-updates').onclick=()=>experienceUpdatesModal(shell);
     panel.querySelector('#ce-replay-open')?.addEventListener('click',developerReplayModal);
     updateRelevancePanel(shell);
   }
@@ -545,99 +605,6 @@
     }catch(_){}
   }
 
-  function enhanceDetail(item) {
-    const modal=document.getElementById('cc-modal');if(!modal||!modal.classList.contains('show'))return;
-    const dialog=modal.querySelector('.cc-dialog');if(!dialog||dialog.dataset.experienceDetail==='1')return;
-    dialog.dataset.experienceDetail='1';
-    const badge=confidence(item);const launch=dialog.querySelector('#cc-detail-launch');
-    const bar=document.createElement('div');bar.innerHTML='<span class="cosmic-confidence-badge '+badge.className+'">Confidence: '+esc(badge.label)+'</span>';
-    const actions=document.createElement('div');actions.style.cssText='display:flex;gap:7px;flex-wrap:wrap;margin-top:8px';actions.innerHTML='<button class="cc-btn cosmic-route-btn" id="ce-route">Route Preview</button><button class="cc-btn cosmic-capsule-btn" id="ce-capsule">Save Capsule</button><button class="cc-btn" id="ce-capsules">Capsules</button><button class="cc-btn" id="ce-handoff">Send to another device</button>';
-    dialog.insertBefore(bar,launch||dialog.firstChild);if(launch)launch.after(actions);else dialog.appendChild(actions);
-    actions.querySelector('#ce-route').onclick=()=>routeModal(item,'play');
-    actions.querySelector('#ce-capsule').onclick=()=>saveCapsule(item,'play');
-    actions.querySelector('#ce-capsules').onclick=capsuleModal;
-    actions.querySelector('#ce-handoff').onclick=()=>handoffModal(item);
-    healthCheck(item).then(h=>{if(h.status==='fail'||h.status==='ok'){const next=confidence(item);bar.innerHTML='<span class="cosmic-confidence-badge '+next.className+'">Confidence: '+esc(next.label)+' • '+esc(h.status==='ok'?'HTTP check passed':'HTTP check failed')+'</span>';}}).catch(()=>{});
-  }
-
-  function injectCommandCenter(root) {
-    if(!root)return;
-    const shell=root.querySelector('.cc-shell');if(!shell)return;
-    if(shell.querySelector('#cosmic-experience-system-panel')){adaptiveLayout(root);return;}
-    adaptiveLayout(root);
-    const panel=document.createElement('section');panel.className='cosmic-experience-panel';panel.id='cosmic-experience-system-panel';
-    panel.innerHTML='<h3>Cosmic Systems</h3><p>Save state, preview launch routes, recover failed launches, and continue your portal across devices.</p><div class="cosmic-experience-grid"><button class="cosmic-experience-button" id="ce-capsules-open">Save Capsules</button><button class="cosmic-experience-button" id="ce-route-all">Route Preview</button><button class="cosmic-experience-button" id="ce-recovery-open">Recovery Queue ('+load(RECOVERY_KEY,[]).length+')</button><button class="cosmic-experience-button" id="ce-missions-open">Mission Chains</button><button class="cosmic-experience-button" id="ce-collections-open">Rule Collections</button><button class="cosmic-experience-button" id="ce-handoff-pick">Send to another device</button>'+(isDev()?'<button class="cosmic-experience-button" id="ce-replay-open">Developer Replay Logs</button>':'')+'</div>';
-    shell.appendChild(panel);
-    panel.querySelector('#ce-capsules-open').onclick=capsuleModal;
-    panel.querySelector('#ce-recovery-open').onclick=renderRecoveryQueue;
-    panel.querySelector('#ce-missions-open').onclick=missionsModal;
-    panel.querySelector('#ce-collections-open').onclick=collectionsModal;
-    panel.querySelector('#ce-route-all').onclick=async()=>{const items=await getRegistry();const item=items[Math.floor(Math.random()*Math.max(1,items.length))];if(item)routeModal(item,'play');};
-    panel.querySelector('#ce-handoff-pick').onclick=async()=>{const items=await getRegistry();const p=profile();const item=items.find(x=>p.recent?.includes(itemId(x)))||items[0];if(item)handoffModal(item);};
-    panel.querySelector('#ce-replay-open')?.addEventListener('click',developerReplayModal);
-    updateRelevancePanel(shell);
-  }
-
-  function developerReplayModal() {
-    if(!isDev())return;
-    const rows=load(REPLAY_KEY,[]);
-    const html='<p>Developer-only local replay data. This is never rendered for non-developer users.</p><div class="cosmic-mini-list">'+(rows.length?rows.slice().reverse().map(r=>'<div class="cosmic-recovery-item"><b>'+esc(r.type)+' • '+esc(r.name||'')+'</b><small>'+esc(r.host||'')+' • '+esc(r.mode||'')+' • '+new Date(r.at||0).toLocaleString()+(r.reason?' • '+esc(r.reason):'')+(r.error?' • '+esc(r.error):'')+'</small></div>').join(''):'<div class="cosmic-recovery-item"><b>No replay events yet</b></div>')+'</div><button class="cosmic-experience-button" id="ce-clear-replay">Clear replay logs</button>';
-    showExperienceModal('Developer Replay Logs',html,m=>m.querySelector('#ce-clear-replay').onclick=()=>{save(REPLAY_KEY,[]);developerReplayModal();});
-  }
-
-  function injectAppRoutes() {
-    document.querySelectorAll('.app-card').forEach(card=>{
-      if(card.dataset.cosmicExperienceRoute==='1')return;
-      const name=card.querySelector('.app-title')?.textContent?.trim()||'';card.dataset.cosmicExperienceRoute='1';
-      getRegistry().then(items=>{
-        const real=items.find(x=>x.kind==='app'&&x.name===name);const open=card.querySelector('.open-btn');if(!real||!open)return;
-        const btn=document.createElement('button');btn.className='open-btn cosmic-route-btn';btn.type='button';btn.textContent='Route';btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();routeModal(real,'play');});open.after(btn);
-      });
-    });
-  }
-
-  function interceptLaunches() {
-    document.addEventListener('click',e=>{
-      const t=e.target?.closest?.('button');if(!t)return;
-      if(t.matches('.game-card .play-btn')){
-        const name=t.closest('.game-card')?.dataset.name||t.closest('.game-card')?.querySelector('.game-title')?.textContent?.trim();
-        if(name)getRegistry().then(items=>{const item=items.find(x=>x.kind==='game'&&x.name.toLowerCase()===name.toLowerCase());if(item){rememberLaunch(item,'play');recordMissionEvent('game-open',item);replay({type:'launch-intent',name:item.name,kind:item.kind,mode:'play',host:location.host});}});
-      } else if(t.matches('.game-card .blank-btn')&&!t.classList.contains('cosmic-route-btn')){
-        const name=t.closest('.game-card')?.dataset.name||t.closest('.game-card')?.querySelector('.game-title')?.textContent?.trim();
-        if(name)getRegistry().then(items=>{const item=items.find(x=>x.kind==='game'&&x.name.toLowerCase()===name.toLowerCase());if(item){rememberLaunch(item,'blank');recordMissionEvent('popout',item);replay({type:'launch-intent',name:item.name,kind:item.kind,mode:'blank',host:location.host});}});
-      } else if(t.matches('.app-card .open-btn')&&!t.classList.contains('cosmic-route-btn')){
-        const name=t.closest('.app-card')?.querySelector('.app-title')?.textContent?.trim();
-        if(name)getRegistry().then(items=>{const item=items.find(x=>x.kind==='app'&&x.name===name);if(item){rememberLaunch(item,'play');recordMissionEvent('app-open',item);replay({type:'launch-intent',name:item.name,kind:item.kind,mode:'play',host:location.host});}});
-      } else if(t.matches('[data-action="doctor"]')) recordMissionEvent('doctor');
-      else if(t.id==='cc-blank'||t.id==='cc-blob') recordMissionEvent('popout');
-    },true);
-  }
-
-  function shellRecoveryHooks() {
-    if(pageKind()!=='game')return;
-    const frame=document.getElementById('game');
-    const name=(()=>{try{return sessionStorage.getItem('cosmicPendingGameName')||'Cosmic Game';}catch(_){return 'Cosmic Game';}})();
-    const target=new URLSearchParams(location.search).get('game')||'';
-    const host=(()=>{try{return new URL(target,location.href).hostname||location.host;}catch(_){return location.host;}})();
-    let timer=null;
-    replay({type:'game-shell-start',name,host,mode:'play',target});
-    const loaded=()=>{if(timer)clearTimeout(timer);replay({type:'iframe-loaded',name,host,mode:'play',target});const p=profile();p.stats=p.stats||{};const key=itemId({name,kind:'game'});p.stats[key]=p.stats[key]||{opens:0};p.stats[key].lastSuccess=now();save(profileKey(),p);};
-    frame?.addEventListener('load',loaded,{once:false});
-    timer=setTimeout(()=>{addRecovery({name,host,mode:'play',reason:'Game did not report a frame load within 15 seconds.',target});const box=document.getElementById('cosmic-game-recovery');if(box)box.style.display='grid';},15000);
-    window.CosmicExperience=window.CosmicExperience||{};
-    window.CosmicExperience.recordRecovery=(reason,error)=>{if(timer)clearTimeout(timer);addRecovery({name,host,mode:'play',reason:reason||'Game launch failed.',target});replay({type:'launch-failed',name,host,mode:'play',target,error:text(error)});};
-  }
-
-  function handleHandoff() {
-    const encoded=new URLSearchParams(location.search).get(HANDOFF_PARAM);if(!encoded)return;
-    try{
-      const normalized=encoded.replace(/-/g,'+').replace(/_/g,'/');const padded=normalized+'='.repeat((4-normalized.length%4)%4);
-      const payload=JSON.parse(decodeURIComponent(escape(atob(padded))));
-      if(payload?.version!==1||!payload.item?.name)return;
-      setTimeout(()=>showExperienceModal('Incoming Cosmic Handoff','<p><b>'+esc(payload.item.name)+'</b> is ready to open.</p><p>Launch mode: '+esc(payload.launchMode||'play')+'. Accepting also applies locally safe settings from the handoff.</p><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="cosmic-experience-button" id="ce-accept-handoff">Accept & Launch</button><button class="cosmic-experience-button" id="ce-decline-handoff">Not now</button></div>',m=>{m.querySelector('#ce-decline-handoff').onclick=()=>m.style.display='none';m.querySelector('#ce-accept-handoff').onclick=()=>{applySettingsSnapshot(payload.settings);recordMissionEvent('handoff');launchItem(payload.item,payload.launchMode||'play');};}),450);
-    }catch(_){}
-  }
-
   function boot() {
     interceptLaunches();
     if(pageKind()==='game')shellRecoveryHooks();
@@ -661,7 +628,7 @@
           }
         });
         injectCommandCenter(ccRoot);
-        observer.observe(ccRoot,{childList:true});
+        observer.observe(ccRoot,{childList:true,subtree:true});
       }
     }
     if(pageKind()==='games'){

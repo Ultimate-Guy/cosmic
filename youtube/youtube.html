@@ -67,7 +67,7 @@
               <h1>YouTube, rebuilt for Cosmic.</h1>
               <p>Search, Shorts, channels, subscriptions, history, saved videos and local media in one fast interface.</p>
             </div>
-            <button id="heroExploreBtn" class="hero-button" type="button"><i class="fas fa-compass"></i> Explore</button>
+            <div class="hero-actions"><button id="heroExploreBtn" class="hero-button" type="button"><i class="fas fa-compass"></i> Explore</button><button id="heroUrlBtn" class="hero-button secondary" type="button"><i class="fas fa-link"></i> Watch URL</button></div>
           </div>
 
           <div id="topicChips" class="topic-chips" aria-label="Topics">
@@ -87,7 +87,7 @@
             <div><span class="section-kicker">START HERE</span><h2>Jump back in</h2></div>
             <button id="refreshHomeBtn" class="text-button" type="button"><i class="fas fa-rotate"></i> Refresh</button>
           </div>
-          <div id="homeContent" class="video-grid"></div>
+          <div id="homeContent" class="video-grid"></div><div id="homeUrlBox" class="home-url-box hidden"><form id="homeUrlForm"><input id="homeUrlInput" type="url" placeholder="Paste a YouTube video or Shorts URL..."><button class="primary-button" type="submit"><i class="fas fa-play"></i> Watch</button></form></div>
         </section>
 
         <section id="searchView" class="yt-view hidden">

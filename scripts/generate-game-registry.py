@@ -107,7 +107,124 @@ def clean_game_page(folder):
 def registry_path(path):return urllib.parse.quote(path.relative_to(ROOT).as_posix() + '/index.html',safe='/')
 def dedupe_key(name):
     value=str(name or '').strip().casefold()
-    value=re.sub(r'\(ugs(?:\s+\d+)?\)$','',value)
+    value=re.sub(r'\(ugs(?:\s+\d+)?\)
+
+def build_game(folder,metadata):
+    image=choose_image(folder,metadata); entry=choose_entry(folder,metadata); name=str(metadata.get('title',display_name(folder.name))); tags=metadata.get('tags',[])
+    if not isinstance(tags,list):tags=[tags]
+    game={'name':name,'path':registry_path(folder),'category':infer_category(name,metadata),'tags':[str(x) for x in tags],'featured':bool(metadata.get('featured',False))}
+    if entry:game['entry']=entry
+    if image:game['image']=registry_path(image).rstrip('/')
+    return game
+def main():
+    fix_updates_flow(); games=[]; seen=set(); local_added=0
+    if LESSONS_DIR.is_dir():
+        for folder in sorted(p for p in LESSONS_DIR.iterdir() if p.is_dir()):
+            if folder.name.lower() in EXCLUDED_FOLDERS:continue
+            metadata=read_metadata(folder); game=build_game(folder,metadata)
+            key=dedupe_key(game.get('name'))
+            if key in seen:
+                print(f"Skipping duplicate local game: {game.get('name')}")
+                continue
+            games.append(game); seen.add(key); local_added+=1
+
+    ugs_added=0; ugs_skipped=0
+    if UGS_REGISTRY.is_file():
+        data=json.loads(UGS_REGISTRY.read_text(encoding='utf-8'))
+        if not isinstance(data,list): raise ValueError('ugs-games.json must contain an array')
+        for item in data:
+            if not isinstance(item,dict): continue
+            source_path=str(item.get('source_path','')).strip()
+            filename=Path(source_path).name if source_path else ''
+            filename=re.sub(r'\.html?$', '', filename, flags=re.I)
+            if filename.lower().startswith('cl') and len(filename)>2:
+                filename=filename[2:]
+            fallback_name=re.sub(r'[_-]+',' ',filename).strip() or 'Untitled UGS Game'
+            name=str(item.get('name','')).strip() or fallback_name
+            key=dedupe_key(name)
+            if key in seen:
+                ugs_skipped+=1
+                continue
+            raw_path=str(item.get('path','')).strip()
+            if not re.match(r'^https?://',raw_path,re.I):
+                raise ValueError(f'UGS game path is not absolute: {raw_path}')
+            tags=item.get('tags',[])
+            entry={
+                'name':name,
+                'path':raw_path,
+                'category':str(item.get('category','Arcade')).strip() or 'Arcade',
+                'tags':[str(x) for x in tags] if isinstance(tags,list) else ['UGS'],
+                'featured':bool(item.get('featured',False)),
+                'source':'UGS',
+            }
+            if item.get('source_path'): entry['source_path']=str(item['source_path'])
+            games.append(entry); seen.add(key); ugs_added+=1
+
+    games.sort(key=lambda item:(str(item.get('name','')).casefold(),str(item.get('path','')).casefold()))
+    OUTPUT.parent.mkdir(parents=True,exist_ok=True)
+    OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8')
+    print(f'Generated {len(games)} game entries ({local_added} local, {ugs_added} UGS, {ugs_skipped} UGS duplicates skipped) and normalized Cosmic Hub loaders')
+if __name__=='__main__':main()
+,'',value)
+    value=re.sub(r'\(\d+\)
+
+def build_game(folder,metadata):
+    image=choose_image(folder,metadata); entry=choose_entry(folder,metadata); name=str(metadata.get('title',display_name(folder.name))); tags=metadata.get('tags',[])
+    if not isinstance(tags,list):tags=[tags]
+    game={'name':name,'path':registry_path(folder),'category':infer_category(name,metadata),'tags':[str(x) for x in tags],'featured':bool(metadata.get('featured',False))}
+    if entry:game['entry']=entry
+    if image:game['image']=registry_path(image).rstrip('/')
+    return game
+def main():
+    fix_updates_flow(); games=[]; seen=set(); local_added=0
+    if LESSONS_DIR.is_dir():
+        for folder in sorted(p for p in LESSONS_DIR.iterdir() if p.is_dir()):
+            if folder.name.lower() in EXCLUDED_FOLDERS:continue
+            metadata=read_metadata(folder); game=build_game(folder,metadata)
+            key=dedupe_key(game.get('name'))
+            if key in seen:
+                print(f"Skipping duplicate local game: {game.get('name')}")
+                continue
+            games.append(game); seen.add(key); local_added+=1
+
+    ugs_added=0; ugs_skipped=0
+    if UGS_REGISTRY.is_file():
+        data=json.loads(UGS_REGISTRY.read_text(encoding='utf-8'))
+        if not isinstance(data,list): raise ValueError('ugs-games.json must contain an array')
+        for item in data:
+            if not isinstance(item,dict): continue
+            source_path=str(item.get('source_path','')).strip()
+            filename=Path(source_path).name if source_path else ''
+            filename=re.sub(r'\.html?$', '', filename, flags=re.I)
+            if filename.lower().startswith('cl') and len(filename)>2:
+                filename=filename[2:]
+            fallback_name=re.sub(r'[_-]+',' ',filename).strip() or 'Untitled UGS Game'
+            name=str(item.get('name','')).strip() or fallback_name
+            key=dedupe_key(name)
+            if key in seen:
+                ugs_skipped+=1
+                continue
+            raw_path=str(item.get('path','')).strip()
+            if not re.match(r'^https?://',raw_path,re.I):
+                raise ValueError(f'UGS game path is not absolute: {raw_path}')
+            tags=item.get('tags',[])
+            entry={
+                'name':name,
+                'path':raw_path,
+                'category':str(item.get('category','Arcade')).strip() or 'Arcade',
+                'tags':[str(x) for x in tags] if isinstance(tags,list) else ['UGS'],
+                'featured':bool(item.get('featured',False)),
+                'source':'UGS',
+            }
+            if item.get('source_path'): entry['source_path']=str(item['source_path'])
+            games.append(entry); seen.add(key); ugs_added+=1
+
+    games.sort(key=lambda item:(str(item.get('name','')).casefold(),str(item.get('path','')).casefold()))
+    OUTPUT.parent.mkdir(parents=True,exist_ok=True)
+    OUTPUT.write_text(json.dumps(games,indent=2)+'\n',encoding='utf-8')
+    print(f'Generated {len(games)} game entries ({local_added} local, {ugs_added} UGS, {ugs_skipped} UGS duplicates skipped) and normalized Cosmic Hub loaders')
+if __name__=='__main__':main()
+,'',value)
     return re.sub(r'[^a-z0-9]+','',value)
 
 def build_game(folder,metadata):

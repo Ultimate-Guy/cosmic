@@ -107,7 +107,10 @@ def clean_game_page(folder):
 def registry_path(path):return urllib.parse.quote(path.relative_to(ROOT).as_posix() + '/index.html',safe='/')
 def dedupe_key(name):
     value=str(name or '').strip().casefold()
-    value=re.sub(r'\s*\(ugs(?:\s+\d+)?\)\s*(folder,metadata):
+    value=re.sub(r'\(ugs(?:\s+\d+)?\)$','',value)
+    return re.sub(r'[^a-z0-9]+','',value)
+
+def build_game(folder,metadata):
     image=choose_image(folder,metadata); entry=choose_entry(folder,metadata); name=str(metadata.get('title',display_name(folder.name))); tags=metadata.get('tags',[])
     if not isinstance(tags,list):tags=[tags]
     game={'name':name,'path':registry_path(folder),'category':infer_category(name,metadata),'tags':[str(x) for x in tags],'featured':bool(metadata.get('featured',False))}

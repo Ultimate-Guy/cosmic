@@ -37,6 +37,7 @@
       <div class="yt-top-actions">
         <button id="topCreateBtn" class="top-action create-action" type="button" title="Add local video to your Cosmic library"><i class="fas fa-plus"></i><span>Create</span></button>
         <button id="topSavedBtn" class="top-action" type="button"><i class="fas fa-bookmark"></i><span>Saved</span></button>
+        <button id="topAccountBtn" class="top-action account-action" type="button" aria-label="Your Cosmic YouTube account"><span class="account-avatar">C</span></button>
         <button id="topSettingsBtn" class="top-action cosmic-nav cosmic-settings" title="Open Cosmic Settings" type="button"><i class="fas fa-gear"></i><span>Settings</span></button>
         <button id="topGamesBtn" class="top-action cosmic-nav cosmic-games" title="Back to Cosmic Games" type="button"><i class="fas fa-gamepad"></i><span>Games</span></button>
       </div>
@@ -145,11 +146,16 @@
               <div class="watch-channel-row">
                 <button id="watchChannelButton" class="channel-button" type="button"><span id="watchChannelAvatar" class="avatar"></span><span><strong id="watchChannelName">YouTube</strong><small id="watchChannelMeta">Channel</small></span></button>
                 <button id="watchSubscribeBtn" class="subscribe-button" type="button">Subscribe</button>
+              </div>
+              <div class="watch-actions-bar">
                 <div class="watch-actions">
                   <button id="watchLikeBtn" class="watch-action" type="button"><i class="fas fa-thumbs-up"></i><span>Like</span></button>
                   <button id="watchDislikeBtn" class="watch-action" type="button"><i class="fas fa-thumbs-down"></i><span>Dislike</span></button>
                   <button id="watchSaveBtn" class="watch-action" type="button"><i class="fas fa-bookmark"></i><span>Save</span></button>
                   <button id="watchShareBtn" class="watch-action" type="button"><i class="fas fa-share"></i><span>Share</span></button>
+                  <button id="watchPlaylistBtn" class="watch-action" type="button"><i class="fas fa-list"></i><span>Playlist</span></button>
+                  <button id="watchMiniplayerBtn" class="watch-action" type="button"><i class="fas fa-window-restore"></i><span>Miniplayer</span></button>
+                  <button id="watchAmbientBtn" class="watch-action" type="button"><i class="fas fa-wand-magic-sparkles"></i><span>Ambient</span></button>
                   <button id="watchTheaterBtn" class="watch-action" type="button"><i class="fas fa-expand"></i><span>Theater</span></button>
                   <button id="watchOpenYoutubeBtn" class="watch-action" type="button"><i class="fab fa-youtube"></i><span>YouTube</span></button>
                 </div>
@@ -202,10 +208,12 @@
           <div class="library-tabs">
             <button class="library-tab active" data-library-tab="saved" type="button">Saved</button>
             <button class="library-tab" data-library-tab="history" type="button">History</button>
+            <button class="library-tab" data-library-tab="playlists" type="button">Playlists</button>
             <button class="library-tab" data-library-tab="local" type="button">Local files</button>
           </div>
           <div id="savedLibrary" class="library-panel"></div>
           <div id="historyLibrary" class="library-panel hidden"></div>
+          <div id="playlistsLibrary" class="library-panel hidden"></div>
           <div id="localLibrary" class="library-panel hidden"></div>
         </section>
 
@@ -231,6 +239,20 @@
 
     <div id="filterBackdrop" class="modal-backdrop hidden"></div>
     <div id="moreMenu" class="context-menu hidden"></div>
+    <div id="accountMenu" class="context-menu account-menu hidden"></div>
+    <div id="actionModal" class="action-modal hidden" role="dialog" aria-modal="true" aria-labelledby="actionModalTitle">
+      <div class="action-modal-card">
+        <button id="closeActionModal" class="round-icon-btn modal-close" type="button" aria-label="Close"><i class="fas fa-xmark"></i></button>
+        <span class="section-kicker">COSMIC YOUTUBE</span>
+        <h2 id="actionModalTitle">Choose an action</h2>
+        <div id="actionModalBody"></div>
+      </div>
+    </div>
+    <div id="miniPlayer" class="mini-player hidden">
+      <div class="mini-player-head"><strong id="miniPlayerTitle">Now playing</strong><button id="miniPlayerClose" class="round-icon-btn" type="button" aria-label="Close miniplayer"><i class="fas fa-xmark"></i></button></div>
+      <div class="mini-player-video"><iframe id="miniPlayerFrame" title="Cosmic YouTube miniplayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+      <button id="miniPlayerExpand" class="mini-player-expand" type="button"><i class="fas fa-up-right-and-down-left-from-center"></i> Return to video</button>
+    </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
   <script src="youtube.js"></script>

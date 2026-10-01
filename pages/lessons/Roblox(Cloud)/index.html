@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Cloud Stream</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+        /* Fullscreen Game Frame Container */
+        #game-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        /* Fixed ad hiding rule block from your script styles */
+        .sc-f453a444-1, .sc-f453a444-2, .sc-5778dd3f-10, .sc-4e159119-0 {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Embeds the Roblox mobile stream wrapper safely -->
+        <iframe id="game-frame" src="https://now.gg" allow="autoplay; gamepad; fullscreen;"></iframe>
+    </div>
+
+    <script>
+        // Set the fake partner sessions inside the context frame window before load
+        try {
+            sessionStorage.setItem('isEmbeddedFrame', 'skool');
+            sessionStorage.setItem('partnerName', 'skool');
+        } catch (e) {
+            console.error("Session initialization blocked", e);
+        }
+
+        // Clean-up loop to monitor the target game frame once active
+        setInterval(() => {
+            const frame = document.getElementById('game-frame');
+            if (!frame) return;
+
+            try {
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                if (!frameDoc) return;
+
+                // 1. Text re-branding from your script
+                const spanElements = [...frameDoc.querySelectorAll("span")];
+                const pieceOfText = spanElements.find(el => el.textContent?.trim().toUpperCase() === "TEST DRIVE");
+                if (pieceOfText) {
+                    pieceOfText.innerText = "Bypass via Cosmic Hub Integration";
+                }
+
+                // 2. Remove standard platform headers to increase play screen space
+                const header = frameDoc.querySelector('header');
+                if (header) header.remove();
+
+                // 3. Remove targeted ad layers continuously (Fixed class targeting)
+                const adLeaderboard = frameDoc.getElementById('div-ad-app-page-leaderboard-container');
+                if (adLeaderboard) adLeaderboard.remove();
+
+                const removableClasses = ['sc-978a7a9c-0', 'sc-99639c35-0', 'jUWcJN', 'ccRDYZ', 'bhHUDc'];
+                removableClasses.forEach(className => {
+                    const elements = frameDoc.getElementsByClassName(className);
+                    while(elements.length > 0) {
+                        elements[0].parentNode.removeChild(elements[0]);
+                    }
+                });
+
+                // 4. Force check for logout buttons to maintain the clean room session
+                const logoutBtn = frameDoc.getElementById("ng-logout");
+                if (logoutBtn) logoutBtn.remove();
+
+            } catch (err) {
+                // Cross-origin policies might log warnings if now.gg shifts domain routing.
+                // This keeps your developer log clean without crashing the container execution.
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

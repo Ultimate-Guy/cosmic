@@ -212,12 +212,16 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
 
     const doc=frame.contentDocument || frame.contentWindow?.document;
     if(!doc) throw new Error('UGS iframe document is unavailable');
+
+    // Mark the route before executing the fetched game document. Some UGS
+    // pages run synchronous scripts during document.write(); if one blocks or
+    // errors, the parent shell must still know that the target was handed off.
+    frame.dataset.cosmicExternalUrl=url.href;
+    frame.dataset.cosmicLaunchMode='ugs-document-write';
+
     doc.open();
     doc.write(html);
     doc.close();
-
-    frame.dataset.cosmicExternalUrl=url.href;
-    frame.dataset.cosmicLaunchMode='ugs-document-write';
   }
 
   async function loadExternalHtml(url){

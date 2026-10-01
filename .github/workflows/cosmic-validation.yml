@@ -42,7 +42,7 @@ jobs:
                   previous = value
                   value = re.sub(r"\(ugs(?:\s+\d+)?\)$", "", value).strip()
                   value = re.sub(r"\(\d+\)$", "", value).strip()
-              return re.sub(r"[^a-z0-9]+", "", value)
+              return "".join(ch for ch in value if ch.isalnum())
 
           for path in (Path("pages/lessons/games.json"), Path("apps/apps.json")):
               data = json.loads(path.read_text(encoding="utf-8"))

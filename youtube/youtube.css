@@ -111,3 +111,48 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--yt-accent);outl
 @media(max-width:1200px){.search-result-card{grid-template-columns:minmax(250px,320px) minmax(0,1fr)}}
 @media(max-width:900px){.search-result-card{grid-template-columns:250px minmax(0,1fr)}.search-result-card .video-card-title{font-size:15px}}
 @media(max-width:600px){.search-result-card{grid-template-columns:1fr;gap:8px}.search-result-card .search-snippet{display:none}.top-action.create-action{display:none}}
+
+/* 2026 Cosmic YouTube refinement */
+:root{--yt-radius-lg:16px}
+.yt-main{scroll-behavior:smooth}
+.yt-view{animation:ytViewIn .22s ease both}
+@keyframes ytViewIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+.hero-strip{position:relative;overflow:hidden;box-shadow:0 18px 45px rgba(0,0,0,.22)}
+.hero-strip:after{content:"";position:absolute;inset:auto -10% -65% 35%;height:180px;background:radial-gradient(circle,color-mix(in srgb,var(--yt-accent) 17%,transparent),transparent 65%);pointer-events:none}
+.topic-chip{transition:transform .16s,background .16s,border-color .16s,box-shadow .16s}
+.topic-chip:hover{transform:translateY(-1px)}
+.video-card{transition:transform .18s,filter .18s}
+.video-card:hover{transform:translateY(-2px)}
+.video-card .thumb-button{box-shadow:0 7px 20px rgba(0,0,0,.18)}
+.card-actions{opacity:.82;transition:opacity .18s}
+.video-card:hover .card-actions{opacity:1}
+.card-actions button.active,.watch-action.active{box-shadow:0 0 0 1px color-mix(in srgb,var(--yt-accent) 18%,transparent),0 5px 16px color-mix(in srgb,var(--yt-accent) 10%,transparent)}
+.watch-actions-bar{position:sticky;top:0;z-index:20;padding:8px 0;background:linear-gradient(180deg,var(--yt-bg) 65%,transparent);backdrop-filter:blur(7px)}
+.watch-description{box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.watch-side{position:relative}
+.related-list{padding-bottom:10px}
+.channel-button{padding:5px 8px;border-radius:10px;transition:background .15s}
+.channel-button:hover{background:var(--yt-soft)}
+.subscribe-button{box-shadow:0 7px 18px rgba(0,0,0,.2);transition:transform .15s,background .15s}
+.subscribe-button:hover{transform:translateY(-1px)}
+.search-result-card{padding:7px;border-radius:15px;transition:background .18s,transform .18s}
+.search-result-card:hover{background:rgba(255,255,255,.025);transform:translateY(-1px)}
+.filter-panel{box-shadow:0 16px 35px rgba(0,0,0,.18)}
+.playlist-block{padding:14px;border:1px solid var(--yt-border);border-radius:14px;background:rgba(0,0,0,.12);margin-bottom:12px}
+.playlist-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:11px}
+.playlist-heading strong,.playlist-heading span{display:block}
+.playlist-heading strong{font-size:14px}.playlist-heading span{font-size:9px;color:var(--yt-muted);margin-top:3px}
+.playlist-videos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.playlist-empty{padding:25px;text-align:center;color:var(--yt-muted);font-size:10px;border:1px dashed var(--yt-border);border-radius:10px}
+.playlist-picker{display:grid;gap:12px}
+.playlist-create-row{display:flex;gap:8px}
+.playlist-create-row .inline-input{flex:1;width:auto}
+.playlist-list{display:grid;gap:6px;max-height:320px;overflow:auto}
+.playlist-row{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border:1px solid var(--yt-border);border-radius:10px;background:transparent;color:var(--yt-text);cursor:pointer;text-align:left}
+.playlist-row:hover,.playlist-row.active{background:var(--yt-soft);border-color:var(--yt-accent)}
+.playlist-row span{display:block}.playlist-row small{display:block;color:var(--yt-muted);margin-top:2px}
+.ambient-active{--ambient-blur:20px}
+.ambient-active:before{content:"";position:fixed;inset:0;z-index:-1;background-image:var(--ambient-image);background-size:cover;background-position:center;filter:blur(var(--ambient-blur));opacity:.13;transform:scale(1.08);pointer-events:none}
+.mini-player{box-shadow:0 25px 70px rgba(0,0,0,.65);border-color:color-mix(in srgb,var(--yt-accent) 35%,var(--yt-border))}
+@media(max-width:900px){.playlist-videos{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.watch-actions-bar{top:0}.playlist-videos{grid-template-columns:1fr}.playlist-create-row{flex-direction:column}.playlist-create-row .primary-button{width:100%}.search-result-card{padding:4px}}

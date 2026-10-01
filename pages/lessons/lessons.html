@@ -68,6 +68,18 @@
                 document.getElementById("loading")?.remove();
                 const batchSize=24;
                 let index=0;
+                let activeSearch="";
+                let registryFinished=false;
+                const applySearch=()=>{
+                  const query=activeSearch;
+                  let matches=0;
+                  cards.forEach(c=>{
+                    const show=!query||c.name.includes(query);
+                    c.element.style.display=show?"flex":"none";
+                    if(show)matches++;
+                  });
+                  noResults.style.display=registryFinished&&matches===0&&cards.length?"block":"none";
+                };
                 const renderBatch=()=>{
                   const fragment=document.createDocumentFragment();
                   const end=Math.min(index+batchSize,games.length);
@@ -118,13 +130,15 @@
                     cards.push({element:card,name:String(game.name||"").toLowerCase()});
                   }
                   grid.appendChild(fragment);
+                  applySearch();
                   if(index<games.length){
                     const schedule=window.requestIdleCallback
                       ? (cb)=>window.requestIdleCallback(cb,{timeout:80})
                       : (cb)=>setTimeout(cb,16);
                     schedule(renderBatch);
                   }else{
-                    noResults.style.display=games.length?"none":"block";
+                    registryFinished=true;
+                    applySearch();
                   }
                 };
                 renderBatch();
@@ -136,13 +150,9 @@
         document.addEventListener("click",e=>{const b=e.target.closest?.(".game-card .play-btn");if(!b)return;const card=b.closest(".game-card");const launch=card?.dataset.launch;if(!launch)return;e.preventDefault();e.stopImmediatePropagation();try{sessionStorage.setItem("cosmicPendingGameName",card.dataset.name||card.querySelector(".game-title")?.textContent||"");}catch(_){}location.href=launch;},true);
         const returningFromGame=(()=>{try{const value=sessionStorage.getItem(RETURN_KEY);sessionStorage.removeItem(RETURN_KEY);return value==='1';}catch(e){return false;}})(); if(isUnlocked()||returningFromGame){showGames();if(!isUnlocked()){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}}loadRegistry();}else{document.getElementById('password-gate').style.display='grid';document.getElementById('site-content').style.display='none';} let searchFrame=0;
         searchInput.addEventListener('input',e=>{
-          const val=e.target.value.toLowerCase();
+          activeSearch=e.target.value.toLowerCase().trim();
           cancelAnimationFrame(searchFrame);
-          searchFrame=requestAnimationFrame(()=>{
-            let matches=0;
-            cards.forEach(c=>{const show=c.name.includes(val);c.element.style.display=show?'flex':'none';if(show)matches++;});
-            noResults.style.display=matches===0&&cards.length?'block':'none';
-          });
+          searchFrame=requestAnimationFrame(applySearch);
         });
     </script>
 <link rel="manifest" href="../../manifest.json">

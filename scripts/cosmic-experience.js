@@ -38,7 +38,7 @@
 
   const styles = document.createElement('style');
   styles.id = 'cosmic-experience-style';
-  styles.textContent = '.cosmic-experience-panel{margin:14px 0;padding:14px;border:1px solid rgba(45,204,255,.24);border-radius:15px;background:rgba(6,17,24,.94);color:#eaf8ff;box-shadow:0 10px 28px rgba(0,0,0,.16)}.cosmic-experience-panel h3{margin:0 0 7px;color:#7fe5ff;font-size:.82rem;letter-spacing:.05em}.cosmic-experience-panel p{margin:4px 0;color:#8ea8b4;font-size:.68rem;line-height:1.45}.cosmic-experience-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}.cosmic-experience-button{border:1px solid rgba(45,204,255,.3);border-radius:10px;padding:9px 10px;background:#081923;color:#bdefff;font-weight:800;cursor:pointer;text-align:left}.cosmic-experience-button:hover{border-color:#2dccff;background:#0b2533}.cosmic-route-btn,.cosmic-capsule-btn{border:1px solid rgba(45,204,255,.28)!important}.cosmic-confidence-badge{display:inline-flex;align-items:center;gap:5px;margin:6px 5px 2px 0;padding:4px 8px;border-radius:999px;border:1px solid rgba(45,204,255,.3);background:rgba(45,204,255,.06);color:#8fe8ff;font:800 10px system-ui,sans-serif}.cosmic-confidence-badge.review{border-color:rgba(255,117,117,.45);color:#ff9d9d;background:rgba(255,90,90,.07)}.cosmic-recovery-item,.cosmic-capsule-item,.cosmic-mission-item{padding:9px;border:1px solid rgba(45,204,255,.18);border-radius:10px;background:#081923;margin-top:7px}.cosmic-recovery-item b,.cosmic-capsule-item b,.cosmic-mission-item b{display:block;color:#f3fbff;font-size:.73rem}.cosmic-recovery-item small,.cosmic-capsule-item small,.cosmic-mission-item small{display:block;margin-top:4px;color:#77929e;font-size:.6rem;line-height:1.4}.cosmic-progress{height:6px;margin-top:7px;border-radius:999px;overflow:hidden;background:#031019;border:1px solid rgba(45,204,255,.15)}.cosmic-progress span{display:block;height:100%;background:#2dccff}.cosmic-adaptive-games-heavy .cc-layout{grid-template-columns:minmax(0,1.2fr) minmax(240px,290px)}.cosmic-adaptive-games-heavy .cc-layout>div:nth-child(2){order:-1}.cosmic-adaptive-app-heavy .cc-layout{grid-template-columns:minmax(0,1fr) minmax(280px,360px)}.cosmic-route-strip{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.cosmic-route-chip{padding:5px 8px;border-radius:999px;border:1px solid rgba(45,204,255,.22);color:#8adfff;background:rgba(45,204,255,.05);font:700 10px system-ui,sans-serif}.cosmic-route-chip.warn{border-color:rgba(255,170,70,.45);color:#ffc77e;background:rgba(255,170,70,.07)}.cosmic-handoff-qr{width:220px;height:220px;display:block;margin:12px auto;background:white;border-radius:10px;padding:8px}.cosmic-code-box{width:100%;min-height:100px;resize:vertical;box-sizing:border-box;background:#02080d;color:#dff8ff;border:1px solid rgba(45,204,255,.35);border-radius:9px;padding:9px;font:12px ui-monospace,SFMono-Regular,monospace}.cosmic-mini-list{display:grid;gap:7px}.cosmic-update-relevance{border-left:3px solid #2dccff}.cosmic-update-relevance b{display:block;color:#f4fbff;font-size:.74rem}.cosmic-update-relevance small{display:block;margin-top:3px;color:#7c9aa6;font-size:.59rem}.cosmic-route-card{padding:12px;border:1px solid rgba(45,204,255,.2);border-radius:12px;background:#081923}.cosmic-route-card h4{margin:0 0 4px;color:#f4fbff;font-size:.82rem}.cosmic-route-card p{margin:4px 0;color:#92abb7;font-size:.65rem;line-height:1.45}';
+  styles.textContent = '.cosmic-experience-panel{margin:14px 0;padding:14px;border:1px solid rgba(45,204,255,.24);border-radius:15px;background:rgba(6,17,24,.94);color:#eaf8ff;box-shadow:0 10px 28px rgba(0,0,0,.16)}.cosmic-experience-panel h3{margin:0 0 7px;color:#7fe5ff;font-size:.82rem;letter-spacing:.05em}.cosmic-experience-panel p{margin:4px 0;color:#8ea8b4;font-size:.68rem;line-height:1.45}.cosmic-experience-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px}.cosmic-experience-card{min-width:0;padding:12px;border:1px solid rgba(45,204,255,.2);border-radius:12px;background:linear-gradient(145deg,#091c27,#06131c)}.cosmic-experience-card h4{margin:0;color:#f3fbff;font-size:.76rem}.cosmic-experience-card p{margin:5px 0 8px;color:#8faab6;font-size:.62rem;line-height:1.45}.cosmic-experience-card .cosmic-card-status{display:block;margin-bottom:7px;color:#73ddff;font:800 .55rem system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em}.cosmic-experience-card .cosmic-card-action{width:100%;border:1px solid rgba(45,204,255,.3);border-radius:8px;padding:7px 9px;background:#081923;color:#9feaff;font:800 .61rem system-ui,sans-serif;cursor:pointer}.cosmic-experience-card .cosmic-card-action:hover{border-color:#2dccff;background:#0b2533}.cosmic-experience-button{border:1px solid rgba(45,204,255,.3);border-radius:10px;padding:9px 10px;background:#081923;color:#bdefff;font-weight:800;cursor:pointer;text-align:left}.cosmic-experience-button:hover{border-color:#2dccff;background:#0b2533}.cosmic-route-btn,.cosmic-capsule-btn{border:1px solid rgba(45,204,255,.28)!important}.cosmic-confidence-badge{display:inline-flex;align-items:center;gap:5px;margin:6px 5px 2px 0;padding:4px 8px;border-radius:999px;border:1px solid rgba(45,204,255,.3);background:rgba(45,204,255,.06);color:#8fe8ff;font:800 10px system-ui,sans-serif}.cosmic-confidence-badge.review{border-color:rgba(255,117,117,.45);color:#ff9d9d;background:rgba(255,90,90,.07)}.cosmic-recovery-item,.cosmic-capsule-item,.cosmic-mission-item{padding:9px;border:1px solid rgba(45,204,255,.18);border-radius:10px;background:#081923;margin-top:7px}.cosmic-recovery-item b,.cosmic-capsule-item b,.cosmic-mission-item b{display:block;color:#f3fbff;font-size:.73rem}.cosmic-recovery-item small,.cosmic-capsule-item small,.cosmic-mission-item small{display:block;margin-top:4px;color:#77929e;font-size:.6rem;line-height:1.4}.cosmic-progress{height:6px;margin-top:7px;border-radius:999px;overflow:hidden;background:#031019;border:1px solid rgba(45,204,255,.15)}.cosmic-progress span{display:block;height:100%;background:#2dccff}.cosmic-adaptive-games-heavy .cc-layout{grid-template-columns:minmax(0,1.2fr) minmax(240px,290px)}.cosmic-adaptive-games-heavy .cc-layout>div:nth-child(2){order:-1}.cosmic-adaptive-app-heavy .cc-layout{grid-template-columns:minmax(0,1fr) minmax(280px,360px)}.cosmic-route-strip{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.cosmic-route-chip{padding:5px 8px;border-radius:999px;border:1px solid rgba(45,204,255,.22);color:#8adfff;background:rgba(45,204,255,.05);font:700 10px system-ui,sans-serif}.cosmic-route-chip.warn{border-color:rgba(255,170,70,.45);color:#ffc77e;background:rgba(255,170,70,.07)}.cosmic-handoff-qr{width:220px;height:220px;display:block;margin:12px auto;background:white;border-radius:10px;padding:8px}.cosmic-code-box{width:100%;min-height:100px;resize:vertical;box-sizing:border-box;background:#02080d;color:#dff8ff;border:1px solid rgba(45,204,255,.35);border-radius:9px;padding:9px;font:12px ui-monospace,SFMono-Regular,monospace}.cosmic-mini-list{display:grid;gap:7px}.cosmic-update-relevance{border-left:3px solid #2dccff}.cosmic-update-relevance b{display:block;color:#f4fbff;font-size:.74rem}.cosmic-update-relevance small{display:block;margin-top:3px;color:#7c9aa6;font-size:.59rem}.cosmic-route-card{padding:12px;border:1px solid rgba(45,204,255,.2);border-radius:12px;background:#081923}.cosmic-route-card h4{margin:0 0 4px;color:#f4fbff;font-size:.82rem}.cosmic-route-card p{margin:4px 0;color:#92abb7;font-size:.65rem;line-height:1.45}';
   document.head.appendChild(styles);
 
   let registryPromise = null;
@@ -383,6 +383,44 @@
     if(games>=apps+3)shell.classList.add('cosmic-adaptive-games-heavy');else if(apps>=games+3)shell.classList.add('cosmic-adaptive-app-heavy');
   }
 
+  function confidenceModal() {
+    getRegistry().then(items=>{
+      const p=profile();
+      const recent=(Array.isArray(p.recent)?p.recent.map(k=>items.find(x=>itemId(x)===k)).filter(Boolean):[]).slice(0,12);
+      const list=recent.length?recent:items.slice(0,12);
+      const html='<p>Confidence combines recent successful launches, lightweight health checks, external dependency metadata, and recovery history.</p><div class="cosmic-mini-list">'+list.map(item=>{
+        const c=confidence(item);
+        return '<div class="cosmic-recovery-item"><b>'+esc(item.name)+'</b><small>'+esc(item.kind)+' • '+esc(c.label)+'</small><div style="margin-top:7px"><span class="cosmic-confidence-badge '+c.className+'">Confidence: '+esc(c.label)+'</span> <button class="cosmic-experience-button" data-confidence-check="'+esc(itemId(item))+'">Check now</button></div></div>';
+      }).join('')+'</div>';
+      showExperienceModal('Registry Confidence',html,m=>{
+        m.querySelectorAll('[data-confidence-check]').forEach(b=>b.onclick=()=>{
+          const item=items.find(x=>itemId(x)===b.dataset.confidenceCheck);
+          if(item)healthCheck(item).then(result=>showToast(item.name+': '+result.status+(result.http?' ('+result.http+')':'')));
+        });
+      });
+    });
+  }
+
+  function adaptiveModal(root) {
+    const p=profile();
+    let games=0,apps=0;
+    Object.entries(p.stats||{}).forEach(([key,value])=>{
+      if(Number(value?.opens||0)>0){
+        if(key.startsWith('game:'))games+=Number(value.opens||0);
+        else if(key.startsWith('app:'))apps+=Number(value.opens||0);
+      }
+    });
+    const layout=games>=apps+3?'Game-heavy':(apps>=games+3?'App-heavy':'Balanced');
+    const html='<p>Cosmic automatically rearranges the Command Center when one type dominates your local activity.</p><div class="cosmic-mission-item"><b>Current layout: '+esc(layout)+'</b><small>Game launches: '+games+' • App opens: '+apps+'</small></div><button class="cosmic-experience-button" id="ce-rebalance">Recalculate layout</button>';
+    showExperienceModal('Adaptive Command Center Layout',html,m=>{
+      m.querySelector('#ce-rebalance').onclick=()=>{
+        adaptiveLayout(root);
+        showToast('Adaptive layout recalculated.');
+        m.style.display='none';
+      };
+    });
+  }
+
   function saveCapsuleForCurrentPage() {
     getRegistry().then(items=>{
       const name=pageKind()==='game'?(sessionStorage.getItem('cosmicPendingGameName')||'Current Game'):'Current Cosmic Item';
@@ -459,7 +497,8 @@
 
   function injectCommandCenter(root) {
     if(!root)return;
-    const shell=root.querySelector('.cc-shell');if(!shell)return;
+    const shell=root.querySelector('.cc-shell');
+    if(!shell)return;
     const existing=shell.querySelector('#cosmic-experience-system-panel');
     if(existing){adaptiveLayout(root);return;}
     adaptiveLayout(root);
@@ -467,24 +506,46 @@
     panel.className='cosmic-experience-panel';
     panel.id='cosmic-experience-system-panel';
     panel.setAttribute('aria-label','Cosmic Systems');
-    panel.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><h3 style="margin-bottom:4px">Cosmic Systems</h3><p style="margin:0">All 10 Cosmic experience systems are available below. Interactive systems open their working controls; automatic systems are shown in details or run from your activity.</p></div><span style="display:inline-flex;align-items:center;padding:5px 8px;border:1px solid rgba(45,204,255,.35);border-radius:999px;color:#7fe5ff;font-size:10px;font-weight:900;letter-spacing:.05em">10 SYSTEMS</span></div><div class="cosmic-experience-grid">'+
-      '<button class="cosmic-experience-button" id="ce-capsules-open">Save Capsules</button>'+
-      '<button class="cosmic-experience-button" id="ce-route-all">Route Preview</button>'+
-      '<button class="cosmic-experience-button" id="ce-recovery-open">Recovery Queue ('+load(RECOVERY_KEY,[]).length+')</button>'+
-      '<button class="cosmic-experience-button" id="ce-missions-open">Mission Chains</button>'+
-      '<button class="cosmic-experience-button" id="ce-collections-open">Rule Collections</button>'+
-      '<button class="cosmic-experience-button" id="ce-handoff-pick">Send to another device</button>'+
-      '<button class="cosmic-experience-button" id="ce-experience-overview">All 10 Updates</button>'+
-      '<button class="cosmic-experience-button" id="ce-experience-updates">What Changed for You</button>'+
-      (isDev()?'<button class="cosmic-experience-button" id="ce-replay-open">Developer Replay Logs</button>':'')+
-      '</div>';
+
+    const capsuleCount=load(CAPSULES_KEY,[]).length;
+    const recoveryCount=load(RECOVERY_KEY,[]).length;
+    const missionState=load(MISSIONS_KEY,{completed:[]});
+    const p=profile();
+    let games=0,apps=0;
+    Object.entries(p.stats||{}).forEach(([key,value])=>{
+      if(Number(value?.opens||0)>0){
+        if(key.startsWith('game:'))games+=Number(value.opens||0);
+        else if(key.startsWith('app:'))apps+=Number(value.opens||0);
+      }
+    });
+    const adaptiveState=games>=apps+3?'Game-heavy':(apps>=games+3?'App-heavy':'Balanced');
+    const card=(num,title,desc,status,button,id)=>'<article class="cosmic-experience-card"><span class="cosmic-card-status">'+esc(num)+'</span><h4>'+esc(title)+'</h4><p>'+esc(desc)+'</p><small style="display:block;margin-bottom:7px;color:#6f8a96;font-size:.56rem">'+esc(status)+'</small><button class="cosmic-card-action" id="'+esc(id)+'">'+esc(button)+'</button></article>';
+
+    panel.innerHTML=
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><h3 style="margin-bottom:4px">Cosmic Systems</h3><p style="margin:0">All 10 Cosmic experience systems are shown here. Developer Replay is visible only to TheDevilAngel.</p></div><span style="display:inline-flex;align-items:center;padding:5px 8px;border:1px solid rgba(45,204,255,.35);border-radius:999px;color:#7fe5ff;font-size:10px;font-weight:900;letter-spacing:.05em">10 SYSTEMS</span></div>'+
+      '<div class="cosmic-experience-grid">'+
+      card('01','Cosmic Save Capsules','Save a game or app with its launch target, launch mode, and locally safe Cosmic settings.',capsuleCount+' saved','Open Capsules','ce-capsules-open')+
+      card('02','Launch Route Preview','Show the route before launching: local, external iframe, mirror/shell, popout, and compatibility state.','Route-aware launcher','Preview Route','ce-route-all')+
+      card('03','Cosmic Recovery Queue','Failed launches are saved with host and reason plus retry, popout, report, and remove actions.',recoveryCount+' queued','Open Recovery','ce-recovery-open')+
+      card('04','Mission Chains','Weekly themed chains track local progress and can be revisited from the Command Center.','Mission tracker','Open Missions','ce-missions-open')+
+      card('05','Adaptive Command Center Layout','The dashboard rearranges itself from your local game/app usage instead of staying fixed.',adaptiveState+' layout','View Layout','ce-adaptive-open')+
+      card('06','Registry Confidence Badges','Details can show Verified, Usually works, External dependency, Experimental, or Needs review.','Health inspector ready','Inspect Confidence','ce-confidence-open')+
+      card('07','Portal Handoff Between Devices','Create a portable Cosmic link and QR payload containing the selected item and safe settings.','QR + link ready','Send Handoff','ce-handoff-pick')+
+      (isDev()?card('08','Developer Replay Logs','Developer-only replay data records launch host/mode, iframe response events, recovery events, and summaries.','TheDevilAngel only','Open Replay','ce-replay-open'):'')+
+      card('09','Collection Builder with Rules','Generate collections from kind, category, tags, duration, keyboard, multiplayer, and confidence.','Rules loaded','Open Collections','ce-collections-open')+
+      card('10','What Changed for You','Review unseen updates that match your recent Cosmic activity.','Personalized feed','Review Changes','ce-experience-updates')+
+      '</div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px"><button class="cosmic-experience-button" id="ce-experience-overview">All 10 Updates</button></div>';
+
     const top=shell.querySelector('.cc-top');
     if(top)top.insertAdjacentElement('afterend',panel);else shell.prepend(panel);
 
     const actions=shell.querySelector('.cc-actions');
     if(actions&&!actions.querySelector('#cc-experience')){
       const jump=document.createElement('button');
-      jump.id='cc-experience';jump.className='cc-btn';jump.type='button';jump.textContent='Cosmic Systems';
+      jump.id='cc-experience';
+      jump.className='cc-btn';
+      jump.type='button';
+      jump.textContent='Cosmic Systems';
       jump.onclick=()=>document.getElementById('cosmic-experience-system-panel')?.scrollIntoView({behavior:'smooth',block:'start'});
       actions.appendChild(jump);
     }
@@ -493,8 +554,20 @@
     panel.querySelector('#ce-recovery-open').onclick=renderRecoveryQueue;
     panel.querySelector('#ce-missions-open').onclick=missionsModal;
     panel.querySelector('#ce-collections-open').onclick=collectionsModal;
-    panel.querySelector('#ce-route-all').onclick=async()=>{const items=await getRegistry();const item=items[Math.floor(Math.random()*Math.max(1,items.length))];if(item)routeModal(item,'play');};
-    panel.querySelector('#ce-handoff-pick').onclick=async()=>{const items=await getRegistry();const p=profile();const item=items.find(x=>p.recent?.includes(itemId(x)))||items[0];if(item)handoffModal(item);else showToast('Open a game or app first so Cosmic can hand it off.');};
+    panel.querySelector('#ce-route-all').onclick=async()=>{
+      const allItems=await getRegistry();
+      const recent=profile().recent||[];
+      const item=allItems.find(x=>recent.includes(itemId(x)))||allItems[Math.floor(Math.random()*Math.max(1,allItems.length))];
+      if(item)routeModal(item,'play');else showToast('No Cosmic item is available yet.');
+    };
+    panel.querySelector('#ce-adaptive-open').onclick=()=>adaptiveModal(root);
+    panel.querySelector('#ce-confidence-open').onclick=confidenceModal;
+    panel.querySelector('#ce-handoff-pick').onclick=async()=>{
+      const allItems=await getRegistry();
+      const recent=profile().recent||[];
+      const item=allItems.find(x=>recent.includes(itemId(x)))||allItems[0];
+      if(item)handoffModal(item);else showToast('Open a game or app first so Cosmic can hand it off.');
+    };
     panel.querySelector('#ce-experience-overview').onclick=experienceOverviewModal;
     panel.querySelector('#ce-experience-updates').onclick=()=>experienceUpdatesModal(shell);
     panel.querySelector('#ce-replay-open')?.addEventListener('click',developerReplayModal);
@@ -588,12 +661,60 @@
     const target=new URLSearchParams(location.search).get('game')||'';
     const host=(()=>{try{return new URL(target,location.href).hostname||location.host;}catch(_){return location.host;}})();
     let timer=null;
-    replay({type:'game-shell-start',name,host,mode:'play',target});
-    const loaded=()=>{if(timer)clearTimeout(timer);replay({type:'iframe-loaded',name,host,mode:'play',target});const p=profile();p.stats=p.stats||{};const key=itemId({name,kind:'game'});p.stats[key]=p.stats[key]||{opens:0};p.stats[key].lastSuccess=now();save(profileKey(),p);};
+    let iframeResponded=false;
+    let recoveryTriggered=false;
+    const consoleSummary=[];
+    const pushConsole=(level,args)=>{
+      if(!isDev())return;
+      const line=Array.from(args||[]).map(v=>{try{return typeof v==='string'?v:JSON.stringify(v);}catch(_){return text(v);}}).join(' ').slice(0,240);
+      if(line)consoleSummary.push(level+': '+line);
+      while(consoleSummary.length>8)consoleSummary.shift();
+    };
+    if(isDev()){
+      const originalError=console.error.bind(console);
+      const originalWarn=console.warn.bind(console);
+      console.error=function(...args){pushConsole('error',args);originalError(...args);};
+      console.warn=function(...args){pushConsole('warn',args);originalWarn(...args);};
+      window.addEventListener('error',e=>pushConsole('error',[e.message||'Window error']));
+      window.addEventListener('unhandledrejection',e=>pushConsole('error',[e.reason?.message||e.reason||'Unhandled rejection']));
+    }
+    const loaded=()=>{
+      if(timer)clearTimeout(timer);
+      iframeResponded=true;
+      replay({type:'iframe-loaded',name,host,mode:'play',target,iframeResponded:true,recoveryTriggered:false,consoleSummary:consoleSummary.slice(-8)});
+      const p=profile();
+      p.stats=p.stats||{};
+      const key=itemId({name,kind:'game'});
+      p.stats[key]=p.stats[key]||{opens:0};
+      p.stats[key].lastSuccess=now();
+      save(profileKey(),p);
+    };
+    const startWatch=()=>{
+      if(timer)clearTimeout(timer);
+      iframeResponded=false;
+      recoveryTriggered=false;
+      timer=setTimeout(()=>{
+        recoveryTriggered=true;
+        const entry=addRecovery({name,host,mode:'play',reason:'Game did not report a frame load within 15 seconds.',target});
+        replay({type:'launch-failed',name,host,mode:'play',target,error:entry.reason,iframeResponded:false,recoveryTriggered:true,consoleSummary:consoleSummary.slice(-8)});
+        const box=document.getElementById('cosmic-game-recovery');
+        if(box)box.style.display='grid';
+      },15000);
+    };
+    replay({type:'game-shell-start',name,host,mode:'play',target,iframeResponded:false,recoveryTriggered:false});
     frame?.addEventListener('load',loaded,{once:false});
-    timer=setTimeout(()=>{addRecovery({name,host,mode:'play',reason:'Game did not report a frame load within 15 seconds.',target});const box=document.getElementById('cosmic-game-recovery');if(box)box.style.display='grid';},15000);
+    startWatch();
     window.CosmicExperience=window.CosmicExperience||{};
-    window.CosmicExperience.recordRecovery=(reason,error)=>{if(timer)clearTimeout(timer);addRecovery({name,host,mode:'play',reason:reason||'Game launch failed.',target});replay({type:'launch-failed',name,host,mode:'play',target,error:text(error)});};
+    window.CosmicExperience.recordRecovery=(reason,error)=>{
+      if(timer)clearTimeout(timer);
+      recoveryTriggered=true;
+      addRecovery({name,host,mode:'play',reason:reason||'Game launch failed.',target});
+      replay({type:'launch-failed',name,host,mode:'play',target,error:text(error),iframeResponded,recoveryTriggered:true,consoleSummary:consoleSummary.slice(-8)});
+    };
+    window.CosmicExperience.beginRecoveryWatch=()=>{
+      replay({type:'retry',name,host,mode:'play',target,iframeResponded,recoveryTriggered:false});
+      startWatch();
+    };
   }
 
   function handleHandoff() {

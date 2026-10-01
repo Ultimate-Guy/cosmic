@@ -13,7 +13,7 @@
   const HANDOFF_PARAM = 'cosmicHandoff';
   const UPDATE_SEEN_KEY = 'cosmicUpdatesSeenV2';
   const BUILD_KEY = 'cosmicLastSeenBuildV1';
-  const BUILD_ID = 'experience-v2';
+  const BUILD_ID = 'experience-v3';
   const MAX_RECOVERY = 24;
   const MAX_REPLAY = 40;
 
@@ -763,6 +763,10 @@
     }
   }
 
-  window.CosmicExperience={saveCapsule,addRecovery,removeRecovery,renderRecoveryQueue,routeModal,confidence,healthCheck,replay,recordMissionEvent,showToast,settingsSnapshot,saveCapsuleForCurrentPage};
+  window.CosmicExperience={
+    saveCapsule,addRecovery,removeRecovery,renderRecoveryQueue,routeModal,confidence,healthCheck,replay,
+    recordMissionEvent,showToast,settingsSnapshot,saveCapsuleForCurrentPage,
+    openSystems:()=>injectCommandCenter(document.getElementById('cc-root'))
+  };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

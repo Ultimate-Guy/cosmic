@@ -466,7 +466,8 @@
     const panel=document.createElement('section');
     panel.className='cosmic-experience-panel';
     panel.id='cosmic-experience-system-panel';
-    panel.innerHTML='<h3>Cosmic Systems</h3><p>These are the 10 new Cosmic experience systems. Several are interactive here; others run automatically or appear inside item details.</p><div class="cosmic-experience-grid">'+
+    panel.setAttribute('aria-label','Cosmic Systems');
+    panel.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><h3 style="margin-bottom:4px">Cosmic Systems</h3><p style="margin:0">All 10 Cosmic experience systems are available below. Interactive systems open their working controls; automatic systems are shown in details or run from your activity.</p></div><span style="display:inline-flex;align-items:center;padding:5px 8px;border:1px solid rgba(45,204,255,.35);border-radius:999px;color:#7fe5ff;font-size:10px;font-weight:900;letter-spacing:.05em">10 SYSTEMS</span></div><div class="cosmic-experience-grid">'+
       '<button class="cosmic-experience-button" id="ce-capsules-open">Save Capsules</button>'+
       '<button class="cosmic-experience-button" id="ce-route-all">Route Preview</button>'+
       '<button class="cosmic-experience-button" id="ce-recovery-open">Recovery Queue ('+load(RECOVERY_KEY,[]).length+')</button>'+
@@ -629,6 +630,7 @@
         });
         injectCommandCenter(ccRoot);
         observer.observe(ccRoot,{childList:true,subtree:true});
+        [0,250,1000,2500].forEach(delay=>setTimeout(()=>injectCommandCenter(ccRoot),delay));
       }
     }
     if(pageKind()==='games'){

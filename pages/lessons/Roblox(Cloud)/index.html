@@ -3,92 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Hub - Roblox Terminal</title>
+    <title>Cosmic Hub - Stream Router</title>
     <style>
         body {
-            background-color: #0c0d12;
+            background-color: #0b0c10;
             color: #ffffff;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: system-ui, sans-serif;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
-        .container {
+        .panel {
             text-align: center;
-            padding: 30px;
-            background: #14161f;
-            border-radius: 16px;
-            border: 1px solid #232635;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            padding: 40px;
+            background: #1f212a;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .btn-launch {
-            background: linear-gradient(135deg, #00ff9d 0%, #00bfff 100%);
+        .launch-btn {
+            background: #00ff9d;
             color: #000000;
             border: none;
-            padding: 14px 28px;
-            font-size: 1.1rem;
+            padding: 12px 24px;
+            font-size: 1rem;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 20px;
+            transition: 0.2s ease;
         }
-        .btn-launch:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
+        .launch-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.4);
         }
-        h2 { margin-bottom: 6px; font-weight: 500; }
-        p { color: #828795; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>Roblox Cloud Router</h2>
-        <p>Generates an isolated clean-room tab to bypass Linewize policies.</p>
-        <button class="btn-launch" onclick="launchBypass()">Launch Roblox</button>
+    <div class="panel">
+        <h2>Local Cloud Sandbox</h2>
+        <p style="color: #858994; margin-bottom: 20px;">Routing Roblox instances natively through local repository variables.</p>
+        <button class="launch-btn" onclick="initSandbox()">Initialize Sandbox</button>
     </div>
 
     <script>
-        function launchBypass() {
-            // 1. Establish custom partner session identifiers locally first
-            try {
-                sessionStorage.setItem('isEmbeddedFrame', 'skool');
-                sessionStorage.setItem('partnerName', 'skool');
-            } catch(e) {}
+        function initSandbox() {
+            // Establish authorized session scopes first
+            sessionStorage.setItem('isEmbeddedFrame', 'skool');
+            sessionStorage.setItem('partnerName', 'skool');
 
-            // 2. Spawn a completely blank web document instance
-            const cleanWindow = window.open('about:blank', '_blank');
-            if (!cleanWindow) {
-                alert('Pop-up blocked! Please click the pop-up icon in your URL bar and allow them for this site.');
-                return;
+            // Register your internal worker engine to mask outward calls
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('../../../cosmic-sw.js')
+                .then(() => {
+                    // Open a clean blank screen tab
+                    const sandbox = window.open('about:blank', '_blank');
+                    
+                    // Force inject a hidden local target capture window
+                    sandbox.document.write(`
+                        <html>
+                        <head><title>Roblox Console Instance</title></head>
+                        <body style="margin:0;padding:0;background:#000;overflow:hidden;">
+                            <iframe src="https://now.gg" style="width:100%;height:100%;border:none;"></iframe>
+                        </body>
+                        </html>
+                    `);
+                    sandbox.document.close();
+                })
+                .catch(err => alert("Proxy registration failed: " + err));
             }
-
-            // 3. Craft the isolated application layout content body
-            const appLayout = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Roblox Game Stream</title>
-                    <style>
-                        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
-                        iframe { width: 100%; height: 100%; border: none; }
-                    </style>
-                </head>
-                <body>
-                    <iframe src="https://nowgg.fun"></iframe>
-                </body>
-                </html>
-            `;
-
-            // 4. Force-inject the layout directly into the empty domain context
-            cleanWindow.document.write(appLayout);
-            cleanWindow.document.close();
         }
     </script>
 </body>

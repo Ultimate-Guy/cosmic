@@ -206,7 +206,7 @@ def clean_game_page(folder):
         flags=re.DOTALL,
     )
     cleaned = re.sub(
-        r'\s*<script[^>]*src=["'][^"']*cosmic-dev-tools\.js[^"']*["'][^>]*>\s*</script>\s*',
+        r'''\s*<script[^>]*src=["'][^"']*cosmic-dev-tools\.js[^"']*["'][^>]*>\s*</script>\s*''',
         "\n",
         cleaned,
         flags=re.DOTALL,
@@ -218,15 +218,15 @@ def clean_game_page(folder):
         "cosmic-global-state.js",
     ):
         cleaned = re.sub(
-            r'\s*<script[^>]*src=["'][^"']*'
+            r'''\s*<script[^>]*src=["'][^"']*'''
             + re.escape(loader)
-            + r'[^"']*["'][^>]*>\s*</script>\s*',
+            + r'''[^"']*["'][^>]*>\s*</script>\s*''',
             "\n",
             cleaned,
             flags=re.DOTALL,
         )
     cleaned = re.sub(
-        r'\s*<script[^>]*id=["']cosmic-game-runtime-loader["'][^>]*>.*?</script>\s*',
+        r'''\s*<script[^>]*id=["']cosmic-game-runtime-loader["'][^>]*>.*?</script>\s*''',
         "\n",
         cleaned,
         flags=re.DOTALL,

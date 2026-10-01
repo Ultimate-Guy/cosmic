@@ -302,7 +302,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
       box=document.createElement('div');box.id='cosmic-game-recovery';
       box.innerHTML='<div class="cgr-card"><h2>Cosmic couldn’t start this game</h2><p>The game may have failed to load. You can retry it, open it in a blank tab, report the issue, or choose another game.</p><button class="primary" id="cgr-retry">Retry</button><button id="cgr-blank">Open Blank</button><button id="cgr-report">Report</button><button id="cgr-another">Try Another</button></div>';
       document.body.appendChild(box);
-      box.querySelector('#cgr-retry').onclick=()=>{box.style.display='none';if(frame)frame.src=frame.src;};
+      box.querySelector('#cgr-retry').onclick=()=>{box.style.display='none';window.CosmicExperience?.beginRecoveryWatch?.();if(frame)frame.src=frame.src;};
       box.querySelector('#cgr-blank').onclick=()=>{if(frame){const w=window.open('about:blank','_blank');if(w)w.location.href=frame.src;}};
       box.querySelector('#cgr-report').onclick=()=>{window.open('https://docs.google.com/forms/d/e/1FAIpQLSfLFwfXdL_Fk8FGAAXPire3yIPX0qIoj3Ua1dAGQsw4pTb98Q/viewform','_blank');};
       box.querySelector('#cgr-another').onclick=()=>{location.href='../lessons.html';};
@@ -319,5 +319,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
   }
 })();
 </script>
+<script src="../../scripts/cosmic-experience.js?v=experience-v2"></script>
 </body>
 </html>

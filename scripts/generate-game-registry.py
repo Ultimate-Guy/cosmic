@@ -54,7 +54,10 @@ def dedupe_key(name):
         previous = value
         value = re.sub(r"\(ugs(?:\s+\d+)?\)$", "", value).strip()
         value = re.sub(r"\(\d+\)$", "", value).strip()
-    return re.sub(r"[^a-z0-9]+", "", value)
+    # Keep Unicode letters/numbers so symbol or non-ASCII game names
+    # (for example "ʘ") remain valid registry entries rather than collapsing
+    # to an unusable empty key.
+    return "".join(ch for ch in value if ch.isalnum())
 
 
 def read_metadata(folder):

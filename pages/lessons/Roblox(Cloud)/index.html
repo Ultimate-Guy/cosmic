@@ -8,7 +8,7 @@
         body {
             background-color: #0d0e12;
             color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -48,35 +48,16 @@
 
     <div class="loader-container">
         <div class="spinner"></div>
-        <h2>Bypassing Platforms Filters...</h2>
-        <p>Injecting educational partner tokens for Roblox Cloud</p>
+        <h2>Routing to Unblocked Cloud Stream...</h2>
+        <p>Connecting to nowgg.fun instance</p>
     </div>
 
     <script>
-        (function() {
-            try {
-                // 1. Force state variables into parent and local session storage
-                // This tricks the target server into believing it's inside an approved educational portal
-                sessionStorage.setItem('isEmbeddedFrame', 'skool');
-                sessionStorage.setItem('partnerName', 'skool');
-                localStorage.setItem('isEmbeddedFrame', 'skool');
-                localStorage.setItem('partnerName', 'skool');
-                
-                // 2. Clear any active blocked states
-                sessionStorage.removeItem('proxy_detected');
-            } catch (e) {
-                console.error("Storage injection error", e);
-            }
-
-            // 3. Define target Roblox application instance routing
-            const targetUrl = "https://now.gg";
-            const bypassParams = "?utm_source=now.gg-partner&utm_medium=bot&utm_campaign=carl";
-
-            // 4. Force top-level navigation execution to eliminate iframe SAMEORIGIN blocking entirely
-            setTimeout(function() {
-                window.location.href = targetUrl + bypassParams;
-            }, 1200);
-        })();
+        // Directly route the top window to the unblocked platform instance
+        // This avoids iframe SAMEORIGIN blocking completely
+        setTimeout(function() {
+            window.location.href = "https://nowgg.fun";
+        }, 1000);
     </script>
 </body>
 </html>

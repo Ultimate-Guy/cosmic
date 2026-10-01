@@ -3,96 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Cloud Stream</title>
+    <title>Launching Roblox via Cosmic Hub</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        html, body {
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            overflow: hidden;
-            font-family: sans-serif;
-        }
-        /* Fullscreen Game Frame Container */
-        #game-container {
-            width: 100%;
-            height: 100%;
+        body {
+            background-color: #0d0e12;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
         }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .loader-container {
+            text-align: center;
         }
-        /* Fixed ad hiding rule block from your script styles */
-        .sc-f453a444-1, .sc-f453a444-2, .sc-5778dd3f-10, .sc-4e159119-0 {
-            display: none !important;
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border-left-color: #00ff9d;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        p {
+            color: #8a8f98;
+            font-size: 0.9rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <!-- Embeds the Roblox mobile stream wrapper safely -->
-        <iframe id="game-frame" src="https://now.gg" allow="autoplay; gamepad; fullscreen;"></iframe>
+    <div class="loader-container">
+        <div class="spinner"></div>
+        <h2>Bypassing Platforms Filters...</h2>
+        <p>Injecting educational partner tokens for Roblox Cloud</p>
     </div>
 
     <script>
-        // Set the fake partner sessions inside the context frame window before load
-        try {
-            sessionStorage.setItem('isEmbeddedFrame', 'skool');
-            sessionStorage.setItem('partnerName', 'skool');
-        } catch (e) {
-            console.error("Session initialization blocked", e);
-        }
-
-        // Clean-up loop to monitor the target game frame once active
-        setInterval(() => {
-            const frame = document.getElementById('game-frame');
-            if (!frame) return;
-
+        (function() {
             try {
-                const frameDoc = frame.contentDocument || frame.contentWindow.document;
-                if (!frameDoc) return;
-
-                // 1. Text re-branding from your script
-                const spanElements = [...frameDoc.querySelectorAll("span")];
-                const pieceOfText = spanElements.find(el => el.textContent?.trim().toUpperCase() === "TEST DRIVE");
-                if (pieceOfText) {
-                    pieceOfText.innerText = "Bypass via Cosmic Hub Integration";
-                }
-
-                // 2. Remove standard platform headers to increase play screen space
-                const header = frameDoc.querySelector('header');
-                if (header) header.remove();
-
-                // 3. Remove targeted ad layers continuously (Fixed class targeting)
-                const adLeaderboard = frameDoc.getElementById('div-ad-app-page-leaderboard-container');
-                if (adLeaderboard) adLeaderboard.remove();
-
-                const removableClasses = ['sc-978a7a9c-0', 'sc-99639c35-0', 'jUWcJN', 'ccRDYZ', 'bhHUDc'];
-                removableClasses.forEach(className => {
-                    const elements = frameDoc.getElementsByClassName(className);
-                    while(elements.length > 0) {
-                        elements[0].parentNode.removeChild(elements[0]);
-                    }
-                });
-
-                // 4. Force check for logout buttons to maintain the clean room session
-                const logoutBtn = frameDoc.getElementById("ng-logout");
-                if (logoutBtn) logoutBtn.remove();
-
-            } catch (err) {
-                // Cross-origin policies might log warnings if now.gg shifts domain routing.
-                // This keeps your developer log clean without crashing the container execution.
+                // 1. Force state variables into parent and local session storage
+                // This tricks the target server into believing it's inside an approved educational portal
+                sessionStorage.setItem('isEmbeddedFrame', 'skool');
+                sessionStorage.setItem('partnerName', 'skool');
+                localStorage.setItem('isEmbeddedFrame', 'skool');
+                localStorage.setItem('partnerName', 'skool');
+                
+                // 2. Clear any active blocked states
+                sessionStorage.removeItem('proxy_detected');
+            } catch (e) {
+                console.error("Storage injection error", e);
             }
-        }, 1000);
+
+            // 3. Define target Roblox application instance routing
+            const targetUrl = "https://now.gg";
+            const bypassParams = "?utm_source=now.gg-partner&utm_medium=bot&utm_campaign=carl";
+
+            // 4. Force top-level navigation execution to eliminate iframe SAMEORIGIN blocking entirely
+            setTimeout(function() {
+                window.location.href = targetUrl + bypassParams;
+            }, 1200);
+        })();
     </script>
 </body>
 </html>

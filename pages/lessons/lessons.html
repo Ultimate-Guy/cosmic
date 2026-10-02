@@ -52,7 +52,7 @@
     <div id="admin-password-gate"><div class="password-card"><h2 style="color:var(--accent);letter-spacing:2px;">Secret Admin Password</h2><span class="admin-note">(Don't worry users, this is just a precaution so that if a user tells someone else, they wanna-be user still won't be able to access it because they can't do this admin password part. Also this will only appear once.)</span><div class="pass-input-container"><input type="password" id="admin-pass-field" placeholder="Enter Admin Password..." autocomplete="off"/><button class="blank-btn" style="width:45px;flex:none;" onclick="toggleAdminPass()" aria-label="Show admin password"><i id="admin-eye-icon" class="fas fa-eye"></i></button><button class="play-btn" style="width:80px;flex:none;" onclick="checkAdminPass()">Enter</button></div><p id="admin-error-msg" style="color:#ff4d4d;font-size:.8rem;display:none;">Invalid Admin Password.</p></div></div>
     <div id="site-content" style="display:none;"><header id="top-bar"><div class="brand"><img src="../../imgs/cosmic.png" width="45" height="45" alt="Logo"/><h1>Cosmic</h1></div><div class="nav-links"><button class="apps-trigger" onclick="window.location.href='../../apps/apps.html'">Apps</button><button class="youtube-trigger" onclick="window.location.href='../../youtube/youtube.html'">YouTube</button><button class="settings-trigger" onclick="window.location.href='../../settings/settings.html'">Settings</button></div></header><main><form id="gamesearchform" onsubmit="return false;"><input id="gamesearchinput" autocomplete="off" type="text" placeholder="Search Cosmic games..."/></form><div id="gamesgrid"><p id="loading">Connecting to Registry...</p><p id="no-results" style="display:none;grid-column:1/-1;text-align:center;">No results...</p></div></main></div>
     <script>
-        const searchInput=document.getElementById('gamesearchinput'); const grid=document.getElementById('gamesgrid'); const noResults=document.getElementById('no-results'); let cards=[]; const SESSION_KEY='cosmicGamesUnlocked'; const RETURN_KEY='cosmicReturnFromGame'; const ADMIN_SEEN_KEY='cosmicSecretAdminPasswordV1'; const WORKER_ORIGIN='https://cosmicv2.v75ultimate.workers.dev'; const ADMIN_VERIFY_ENDPOINT=WORKER_ORIGIN+'/api/admin-auth';
+        const searchInput=document.getElementById('gamesearchinput'); const grid=document.getElementById('gamesgrid'); const noResults=document.getElementById('no-results'); let cards=[]; let activeSearch=''; let registryFinished=false; let applySearch=()=>{}; let renderScheduled=false; const SESSION_KEY='cosmicGamesUnlocked'; const RETURN_KEY='cosmicReturnFromGame'; const ADMIN_SEEN_KEY='cosmicSecretAdminPasswordV1'; const WORKER_ORIGIN='https://cosmicv2.v75ultimate.workers.dev'; const ADMIN_VERIFY_ENDPOINT=WORKER_ORIGIN+'/api/admin-auth';
         function isUnlocked(){try{return sessionStorage.getItem(SESSION_KEY)==='1';}catch(e){return false;}} function hasCompletedAdminGate(){try{return localStorage.getItem(ADMIN_SEEN_KEY)==='1';}catch(e){return false;}} function markAdminGateComplete(){try{localStorage.setItem(ADMIN_SEEN_KEY,'1');}catch(e){}} function showGames(){document.getElementById('password-gate').style.display='none';document.getElementById('admin-password-gate').style.display='none';document.getElementById('site-content').style.display='block';document.body.style.overflow='auto';try{window.dispatchEvent(new Event('cosmic-entry-ready'));}catch(e){}}
         async function finishEntry(){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}showGames();loadRegistry();}
         async function openAdminGate(){document.getElementById('password-gate').style.display='none';document.getElementById('admin-password-gate').style.display='grid';document.getElementById('site-content').style.display='none';document.body.style.overflow='hidden';setTimeout(()=>document.getElementById('admin-pass-field').focus(),50);}
@@ -68,9 +68,7 @@
                 document.getElementById("loading")?.remove();
                 const batchSize=24;
                 let index=0;
-                let activeSearch="";
-                let registryFinished=false;
-                const applySearch=()=>{
+                applySearch=()=>{
                   const query=activeSearch;
                   let matches=0;
                   cards.forEach(c=>{
@@ -131,10 +129,28 @@
                   grid.appendChild(fragment);
                   applySearch();
                   if(index<games.length){
-                    const schedule=window.requestIdleCallback
-                      ? (cb)=>window.requestIdleCallback(cb,{timeout:80})
-                      : (cb)=>setTimeout(cb,16);
-                    schedule(renderBatch);
+                    const scheduleNext=()=>{
+                      if(document.hidden){
+                        renderScheduled=false;
+                        const resume=()=>{
+                          if(!document.hidden){
+                            document.removeEventListener('visibilitychange',resume);
+                            scheduleNext();
+                          }
+                        };
+                        document.addEventListener('visibilitychange',resume,{once:true});
+                        return;
+                      }
+                      if(renderScheduled)return;
+                      renderScheduled=true;
+                      const run=()=>{
+                        renderScheduled=false;
+                        renderBatch();
+                      };
+                      if(window.requestIdleCallback) window.requestIdleCallback(run,{timeout:120});
+                      else setTimeout(run,16);
+                    };
+                    scheduleNext();
                   }else{
                     registryFinished=true;
                     applySearch();
@@ -148,14 +164,18 @@
         // Critical interaction path: launch immediately. Optional analytics/enhancements must not run before Play navigates.
         document.addEventListener("click",e=>{const b=e.target.closest?.(".game-card .play-btn");if(!b)return;const card=b.closest(".game-card");const launch=card?.dataset.launch;if(!launch)return;e.preventDefault();e.stopImmediatePropagation();try{sessionStorage.setItem("cosmicPendingGameName",card.dataset.name||card.querySelector(".game-title")?.textContent||"");}catch(_){}location.href=launch;},true);
         const returningFromGame=(()=>{try{const value=sessionStorage.getItem(RETURN_KEY);sessionStorage.removeItem(RETURN_KEY);return value==='1';}catch(e){return false;}})(); if(isUnlocked()||returningFromGame){showGames();if(!isUnlocked()){try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}}loadRegistry();}else{document.getElementById('password-gate').style.display='grid';document.getElementById('site-content').style.display='none';} let searchFrame=0;
-        let searchTimer=0;
         searchInput.addEventListener('input',e=>{
           activeSearch=e.target.value.toLowerCase().trim();
-          clearTimeout(searchTimer);
-          searchTimer=setTimeout(()=>{
+          cancelAnimationFrame(searchFrame);
+          searchFrame=requestAnimationFrame(applySearch);
+        });
+        searchInput.addEventListener('keydown',e=>{
+          if(e.key==='Escape' && searchInput.value){
+            searchInput.value='';
+            activeSearch='';
             cancelAnimationFrame(searchFrame);
             searchFrame=requestAnimationFrame(applySearch);
-          },45);
+          }
         });
     </script>
 <link rel="manifest" href="../../manifest.json">

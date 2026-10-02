@@ -68,16 +68,11 @@
     const frame = findFrame();
     if (!document.body) return false;
 
-    if (!document.getElementById('cosmic-game-home')) {
-      const home = document.createElement('button');
-      home.id = 'cosmic-game-home';
-      home.type = 'button';
-      home.textContent = '← Home';
-      home.title = 'Return to Cosmic games';
-      home.setAttribute('aria-label', 'Return to Cosmic games');
-      home.style.cssText = 'position:fixed;top:12px;left:12px;z-index:2147483647;padding:9px 15px;border:2px solid #2dccff;border-radius:10px;background:#0d1a21;color:#2dccff;font:700 14px system-ui,sans-serif;cursor:pointer;user-select:none;touch-action:none;box-shadow:0 4px 16px rgba(0,0,0,.55)';
-      home.addEventListener('click', () => { location.href = cosmicRoot() + 'pages/lessons/lessons.html'; });
-      document.body.appendChild(home);
+    // game-shell.html owns the single draggable Home button.
+    const home = document.getElementById('home');
+    if (home) {
+      home.style.cursor = 'grab';
+      home.style.touchAction = 'none';
     }
 
     if (!frame) return false;
@@ -207,18 +202,9 @@
   tryInstall();
   let attempts = 0;
   const timer = setInterval(() => {
-    tryInstall();
-    attempts++;
-    if (attempts >= 80 || document.getElementById('cosmic-wrapper-controls')) clearInterval(timer);
+    if (install() || ++attempts >= 12) clearInterval(timer);
   }, 250);
 
-  if (!window.__COSMIC_WRAPPER_OBSERVER__) {
-    window.__COSMIC_WRAPPER_OBSERVER__ = true;
-    const observer = new MutationObserver(() => {
-      if (!document.getElementById('cosmic-wrapper-controls')) install();
-    });
-    const observe = () => document.documentElement && observer.observe(document.documentElement, { childList: true, subtree: true });
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observe, { once: true });
-    else observe();
-  }
+  // Controls initialize during the short startup retry window; avoid a
+  // document-wide observer while the game itself is running.
 })();

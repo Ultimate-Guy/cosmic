@@ -99,7 +99,7 @@ function showPopupBlockedNotice(type){
 function testPopupAccess(){
   try{
     const test=window.open('about:blank','_blank');
-    if(!test) return false;
+    if(!test)return false;
     try{test.close();}catch(_){}
     return true;
   }catch(_){return false}
@@ -109,14 +109,15 @@ function cloakShellHtml(commandCenterUrl,entryUrl){return '<!doctype html><html>
 function dashboardFromShell(){if(window.parent&&window.parent!==window){window.parent.postMessage({type:'cosmic-dashboard'},'*')}else{location.href=dashboardTarget()}}
 function launchCloakShell(type,redirectCurrent,fromUserGesture){
   const commandCenterUrl=commandCenterShellUrl(type),entryUrl=dashboardTarget(),html=cloakShellHtml(commandCenterUrl,entryUrl);
-  if(!fromUserGesture && !testPopupAccess()){
-    showPopupBlockedNotice(type);
-    return false;
-  }
+  // Automatic Auto Cloak must fail silently when the browser blocks popups.
+  // The permission notice is only appropriate after the user explicitly clicks
+  // an Auto Cloak launch button.
+  if(!fromUserGesture && !testPopupAccess()) return false;
   if(type==='blank'){
     const win=window.open('about:blank','_blank');
     if(!win){
-      if(!fromUserGesture)showPopupBlockedNotice(type);
+      if(!fromUserGesture)return false;
+      showPopupBlockedNotice(type);
       return false;
     }
     try{
@@ -133,7 +134,8 @@ function launchCloakShell(type,redirectCurrent,fromUserGesture){
   const win=window.open(blobUrl,'_blank');
   if(!win){
     URL.revokeObjectURL(blobUrl);
-    if(!fromUserGesture)showPopupBlockedNotice(type);
+    if(!fromUserGesture)return false;
+    showPopupBlockedNotice(type);
     return false;
   }
   if(redirectCurrent)window.location.replace('https://www.google.com');

@@ -60,7 +60,7 @@
   function registerPwa() {
     if ('serviceWorker' in navigator) {
       const sw=base+'sw.js?v=9';
-      navigator.serviceWorker.register(sw,{updateViaCache:'none'}).then(reg=>{reg.update().catch(()=>{});updateOffline();}).catch(()=>updateOffline());
+      navigator.serviceWorker.register(sw,{updateViaCache:'none'}).then(()=>updateOffline()).catch(()=>updateOffline());
     } else updateOffline();
     window.addEventListener('online',updateOffline); window.addEventListener('offline',updateOffline);
   }

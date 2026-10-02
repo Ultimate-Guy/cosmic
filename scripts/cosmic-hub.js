@@ -232,7 +232,37 @@
   function feedbackBroken(){window.open(GAME_REPORT_FORM,'_blank','noopener,noreferrer');}
   function feedbackForm(title,placeholder,type){const m=openModal('cosmic-feedback',title,`<textarea id="cf-text" rows="6" placeholder="${placeholder}"></textarea><button class="cosmic-primary" id="cf-open">Open GitHub form</button>`);m.querySelector('#cf-open').onclick=()=>{const body=encodeURIComponent(`${m.querySelector('#cf-text').value}\n\nCosmic ${type} report from ${currentUser()}`),url=`https://github.com/Ultimate-Guy/cosmic/issues/new?title=${encodeURIComponent(type==='broken'?'Broken app/game report':'App/game suggestion')}&body=${body}`;window.open(url,'_blank','noopener');};}
   function addTools(){const main=document.querySelector('main');if(!main||document.getElementById('cosmic-hub-tools'))return;const host=document.createElement('div');host.id='cosmic-hub-tools';const tools=document.createElement('div');tools.className='cosmic-filters';tools.innerHTML='<button class="cosmic-tool" id="cosmic-cmd">⌘ Command</button><button class="cosmic-tool" id="cosmic-theme-btn">Themes</button><button class="cosmic-tool" id="cosmic-help-btn">?</button><button class="cosmic-tool" id="cosmic-collections-btn">Collections</button><button class="cosmic-tool" id="cosmic-suggest">💡 Suggest a Game</button><button class="cosmic-tool" id="cosmic-report">⚠️ Report broken</button>';host.appendChild(tools);main.insertBefore(host,main.firstChild);document.getElementById('cosmic-cmd').onclick=commandPalette;document.getElementById('cosmic-theme-btn').onclick=themeModal;document.getElementById('cosmic-help-btn').onclick=helpModal;document.getElementById('cosmic-collections-btn').onclick=collectionsModal;document.getElementById('cosmic-suggest').onclick=suggestGame;document.getElementById('cosmic-report').onclick=feedbackBroken;}
-  function wireExistingCards(root=document){const selector=isGames?'.game-card':'.app-card';const cards=[];if(root?.matches?.(selector))cards.push(root);root?.querySelectorAll?.(selector).forEach(card=>cards.push(card));for(const card of cards){if(card.dataset.cosmicEnhanced)continue;const name=card.querySelector('.game-title,.app-title')?.textContent?.trim()||'';const item=allItemsById.get(itemId({kind:isGames?'game':'app',name}));if(item)decorateCard(card,item,launchTarget(item));}}
+  let cardEnhancementObserver=null;
+  function wireExistingCards(root=document){
+    const selector=isGames?'.game-card':'.app-card';
+    if(!cardEnhancementObserver && 'IntersectionObserver' in window){
+      cardEnhancementObserver=new IntersectionObserver(entries=>{
+        for(const entry of entries){
+          if(!entry.isIntersecting)continue;
+          const card=entry.target;
+          if(card.dataset.cosmicEnhanced){cardEnhancementObserver.unobserve(card);continue;}
+          const name=card.querySelector('.game-title,.app-title')?.textContent?.trim()||'';
+          const item=allItemsById.get(itemId({kind:isGames?'game':'app',name}));
+          if(item)decorateCard(card,item,launchTarget(item));
+          cardEnhancementObserver.unobserve(card);
+        }
+      },{rootMargin:'600px 0px'});
+    }
+    const cards=[];
+    if(root?.matches?.(selector))cards.push(root);
+    root?.querySelectorAll?.(selector).forEach(card=>cards.push(card));
+    for(const card of cards){
+      if(card.dataset.cosmicEnhanced||card.dataset.cosmicObserved)continue;
+      if(cardEnhancementObserver){
+        card.dataset.cosmicObserved='1';
+        cardEnhancementObserver.observe(card);
+      }else{
+        const name=card.querySelector('.game-title,.app-title')?.textContent?.trim()||'';
+        const item=allItemsById.get(itemId({kind:isGames?'game':'app',name}));
+        if(item)decorateCard(card,item,launchTarget(item));
+      }
+    }
+  }
   function installShortcuts(){document.addEventListener('keydown',e=>{const tag=(e.target?.tagName||'').toLowerCase();if(e.key==='Escape'){document.querySelectorAll('.cosmic-modal').forEach(x=>x.style.display='none');return;}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();commandPalette();return;}if(e.key==='/'&&!['input','textarea'].includes(tag)){e.preventDefault();const s=document.querySelector('#gamesearchinput,#search');if(s){s.focus();s.select();}else commandPalette();}if(e.key==='?'&&!['input','textarea'].includes(tag)){e.preventDefault();helpModal();}});}
   async function boot(){
     if (bootStarted) return;

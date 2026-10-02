@@ -727,6 +727,20 @@
     }catch(_){}
   }
 
+  function enhanceOpenedDetail(ccRoot){
+    setTimeout(()=>{
+      const modal=document.getElementById('cc-modal');
+      if(!modal?.classList.contains('show'))return;
+      const title=modal.querySelector('.cc-dialog h2')?.textContent||'';
+      if(!/Item Details/i.test(title))return;
+      const heading=modal.querySelector('.cc-dialog h2')?.textContent?.trim()||'';
+      getRegistry().then(items=>{
+        const item=items.find(x=>x.name===heading);
+        if(item)enhanceDetail(item);
+      });
+    },0);
+  }
+
   function boot() {
     interceptLaunches();
     if(pageKind()==='game')shellRecoveryHooks();
@@ -735,28 +749,16 @@
     if(pageKind()==='command'){
       const ccRoot=document.getElementById('cc-root');
       if(ccRoot){
-        const observer=new MutationObserver(()=>{
-          injectCommandCenter(ccRoot);
-          const modal=document.getElementById('cc-modal');
-          if(modal?.classList.contains('show')){
-            const title=modal.querySelector('.cc-dialog h2')?.textContent||'';
-            if(/Item Details/i.test(title)){
-              getRegistry().then(items=>{
-                const heading=modal.querySelector('.cc-dialog h2')?.textContent?.trim()||'';
-                const item=items.find(x=>x.name===heading);
-                if(item)enhanceDetail(item);
-              });
-            }
-          }
+        const tryInject=()=>injectCommandCenter(ccRoot);
+        tryInject();
+        window.addEventListener('cosmic-command-center-rendered',tryInject);
+        [0,250,1000,2500].forEach(delay=>setTimeout(tryInject,delay));
+        ccRoot.addEventListener('click',event=>{
+          if(event.target?.closest?.('[data-detail]')) enhanceOpenedDetail(ccRoot);
         });
-        injectCommandCenter(ccRoot);
-        observer.observe(ccRoot,{childList:true,subtree:true});
-        [0,250,1000,2500].forEach(delay=>setTimeout(()=>injectCommandCenter(ccRoot),delay));
       }
     }
-    if(pageKind()==='games'){
-      injectPageTools();
-    }
+    if(pageKind()==='games') injectPageTools();
     if(pageKind()==='apps'){
       injectPageTools();
       injectAppRoutes();
@@ -766,7 +768,12 @@
   window.CosmicExperience={
     saveCapsule,addRecovery,removeRecovery,renderRecoveryQueue,routeModal,confidence,healthCheck,replay,
     recordMissionEvent,showToast,settingsSnapshot,saveCapsuleForCurrentPage,
-    openSystems:()=>injectCommandCenter(document.getElementById('cc-root'))
+    openSystems:()=>{
+      const root=document.getElementById('cc-root');
+      if(!root)return;
+      injectCommandCenter(root);
+      document.getElementById('cosmic-experience-system-panel')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

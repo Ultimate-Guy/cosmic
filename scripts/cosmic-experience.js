@@ -639,13 +639,13 @@
       const t=e.target?.closest?.('button');if(!t)return;
       if(t.matches('.game-card .play-btn')){
         const name=t.closest('.game-card')?.dataset.name||t.closest('.game-card')?.querySelector('.game-title')?.textContent?.trim();
-        if(name)getRegistry().then(items=>{const item=items.find(x=>x.kind==='game'&&x.name.toLowerCase()===name.toLowerCase());if(item){rememberLaunch(item,'play');recordMissionEvent('game-open',item);replay({type:'launch-intent',name:item.name,kind:item.kind,mode:'play',host:location.host});}});
+        if(name){const item={name,kind:'game',path:t.closest('.game-card')?.dataset.url||''};rememberLaunch(item,'play');recordMissionEvent('game-open',item);replay({type:'launch-intent',name,kind:'game',mode:'play',host:location.host});}
       } else if(t.matches('.game-card .blank-btn') && !t.classList.contains('cosmic-route-btn')){
         const name=t.closest('.game-card')?.dataset.name||t.closest('.game-card')?.querySelector('.game-title')?.textContent?.trim();
-        if(name)getRegistry().then(items=>{const item=items.find(x=>x.kind==='game'&&x.name.toLowerCase()===name.toLowerCase());if(item){rememberLaunch(item,'blank');recordMissionEvent('popout',item);replay({type:'launch-intent',name:item.name,kind:item.kind,mode:'blank',host:location.host});}});
+        if(name){const item={name,kind:'game',path:t.closest('.game-card')?.dataset.url||''};rememberLaunch(item,'blank');recordMissionEvent('popout',item);replay({type:'launch-intent',name,kind:'game',mode:'blank',host:location.host});}
       } else if(t.matches('.app-card .open-btn') && !t.classList.contains('cosmic-route-btn')){
         const name=t.closest('.app-card')?.querySelector('.app-title')?.textContent?.trim();
-        if(name)getRegistry().then(items=>{const item=items.find(x=>x.kind==='app'&&x.name===name);if(item){rememberLaunch(item,'play');recordMissionEvent('app-open',item);replay({type:'launch-intent',name:item.name,kind:item.kind,mode:'play',host:location.host});}});
+        if(name){const item={name,kind:'app'};rememberLaunch(item,'play');recordMissionEvent('app-open',item);replay({type:'launch-intent',name,kind:'app',mode:'play',host:location.host});}
       } else if(t.matches('[data-action="doctor"]')) {
         recordMissionEvent('doctor');
       } else if(t.id==='cc-blank'||t.id==='cc-blob') {

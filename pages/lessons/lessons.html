@@ -62,7 +62,7 @@
         document.getElementById('pass-field').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkPass();}}); document.getElementById('admin-pass-field').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkAdminPass();}});
         function normalizeUrl(url){return new URL(url,window.location.href).href;} function gameUrl(game){const rawPath=String(game?.path||'');if(/^https?:\/\//i.test(rawPath)){return rawPath+(game.entry||'');} const localUrl=normalizeUrl('../../'+rawPath+(game.entry||''));if(window.location.hostname.endsWith('.github.io')){const url=new URL(localUrl);const marker='/pages/lessons/';const index=url.pathname.indexOf(marker);if(index>=0){url.pathname=url.pathname.slice(index);url.hostname=new URL(WORKER_ORIGIN).hostname;url.protocol='https:';url.port='';return url.href;}}return localUrl;} function shellUrl(game){const target=gameUrl(game);return normalizeUrl('game-shell.html?game='+encodeURIComponent(target));} function openBlank(url){const win=window.open('about:blank','_blank');if(win){win.location.href=url;}}
         function loadRegistry(){
-            fetch("games.json?nocache="+Date.now(),{cache:"no-store"})
+            fetch("games.json",{cache:"default"})
               .then(res=>{if(!res.ok)throw new Error("Registry request failed: "+res.status);return res.json();})
               .then(games=>{
                 document.getElementById("loading")?.remove();
@@ -96,7 +96,6 @@
                       img.alt="";
                       img.loading="lazy";
                       img.decoding="async";
-                      img.loading="lazy";
                       img.fetchPriority="low";
                       img.src=gameUrl({path:game.image});
                       card.appendChild(img);
@@ -170,6 +169,6 @@
 </script>
 <script src="../../scripts/cosmic-global-state.js?v=global-state"></script>
 <script src="../../scripts/cosmic-site-tour.js?v=2"></script>
-<script src="../../scripts/cosmic-experience.js?v=experience-v2"></script></body>
+<script src="../../scripts/cosmic-experience.js?v=experience-v3"></script></body>
 <script src="../../scripts/cosmic-platform-enhancements.js?build=cc-v1"></script>
 </html>

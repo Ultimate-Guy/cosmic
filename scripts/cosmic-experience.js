@@ -752,7 +752,7 @@
         const tryInject=()=>injectCommandCenter(ccRoot);
         tryInject();
         window.addEventListener('cosmic-command-center-rendered',tryInject);
-        [0,250,1000,2500].forEach(delay=>setTimeout(tryInject,delay));
+        [0,150,400,900,1800,3500].forEach(delay=>setTimeout(tryInject,delay));
         ccRoot.addEventListener('click',event=>{
           if(event.target?.closest?.('[data-detail]')) enhanceOpenedDetail(ccRoot);
         });

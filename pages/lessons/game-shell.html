@@ -164,16 +164,43 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
 
   async function loadCosmicGamesHtml(url){
     const frame=document.getElementById('game');
-    const response=await fetch(url.href,{credentials:'omit',cache:'no-store',redirect:'follow'});
-    if(!response.ok) throw new Error('UGS game returned HTTP '+response.status);
-    let html=await response.text();
-    if(!html.trim()) throw new Error('UGS game returned an empty document');
+    const candidates=[url.href];
+    if(url.hostname==='cdn.jsdelivr.net' && /^\/gh\/Ultimate-Guy\/cosmicgames@main\//i.test(url.pathname)){
+      const relative=url.pathname.replace(/^\/gh\/Ultimate-Guy\/cosmicgames@main\//i,'');
+      candidates.push('https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/'+relative);
+    }
+
+    let html='';
+    let lastError=null;
+    let usedUrl=url.href;
+    for(const candidate of candidates){
+      try{
+        const response=await fetch(candidate,{credentials:'omit',cache:'no-store',redirect:'follow'});
+        if(!response.ok){
+          lastError=new Error('UGS game returned HTTP '+response.status);
+          continue;
+        }
+        html=await response.text();
+        if(!html.trim()){
+          lastError=new Error('UGS game returned an empty document');
+          continue;
+        }
+        usedUrl=response.url||candidate;
+        break;
+      }catch(error){
+        lastError=error;
+      }
+    }
+
+    if(!html){
+      throw lastError||new Error('UGS game could not be fetched');
+    }
 
     // UGS's own launcher fetches the single-file HTML and writes it into a
     // fresh blank document. Match that behavior instead of navigating the
     // iframe directly to the CDN URL.
     if(!/<base\b[^>]*\bhref\s*=|<base\s/i.test(html)){
-      const baseTag='<base href="'+new URL('./',url.href).href.replace(/"/g,'&quot;')+'">\n';
+      const baseTag='<base href="'+new URL('./',usedUrl).href.replace(/"/g,'&quot;')+'">\n';
       if(/<head\b[^>]*>/i.test(html)){
         html=html.replace(/<head\b[^>]*>/i,'$&\n'+baseTag);
       }else{
@@ -217,6 +244,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
     // pages run synchronous scripts during document.write(); if one blocks or
     // errors, the parent shell must still know that the target was handed off.
     frame.dataset.cosmicExternalUrl=url.href;
+    frame.dataset.cosmicResolvedUrl=usedUrl;
     frame.dataset.cosmicLaunchMode='ugs-document-write';
 
     doc.open();

@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Generate game registry and clean legacy injections
+      - name: Generate local game registry
         run: python3 scripts/generate-game-registry.py
       - name: Commit generated registry and game cleanup
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -44,18 +44,6 @@ jobs:
           file_pattern: 'pages/lessons/**'
           skip_dirty_check: false
           skip_fetch: true
-      - name: Sync private gfiles catalog
-        env:
-          GFILES_READ_TOKEN: ${{ secrets.GFILES_READ_TOKEN }}
-        run: python3 scripts/import-gfiles-registry.py
-      - name: Sync gfiles runtime secret to Cloudflare
-        env:
-          GFILES_READ_TOKEN: ${{ secrets.GFILES_READ_TOKEN }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          printf '%s' "$GFILES_READ_TOKEN" | npx wrangler secret put GFILES_READ_TOKEN --config wrangler.jsonc
       - name: Prepare identical deployment files
         env:
           PASSWORD_FOR_GAMES_UNLOCK: ${{ secrets.PASSWORD_FOR_GAMES_UNLOCK }}

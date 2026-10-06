@@ -11,6 +11,7 @@ class UsernameRegistry {
       await this.state.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS activity (username TEXT NOT NULL, game_key TEXT NOT NULL, game_name TEXT NOT NULL, opens INTEGER NOT NULL DEFAULT 0, last_opened INTEGER NOT NULL, PRIMARY KEY (username, game_key))'
       );
+      await this.state.storage.sql.exec('CREATE TABLE IF NOT EXISTS profiles (username TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL)');
       await this.state.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS site_state (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
       );
@@ -40,6 +41,39 @@ class UsernameRegistry {
       'INSERT INTO accounts (username, created_at, account_token) VALUES (?, ?, ?)', key, now, token
     );
     return this.json({ ok: true, username, account_token: token });
+  }
+
+  async cloudProfile(request) {
+    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const username=typeof body?.username==='string'?body.username.trim():''; const token=typeof body?.account_token==='string'?body.account_token:'';
+    if(!username||!token)return this.json({ok:false,error:'missing-fields'},400);
+    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).one();
+    if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
+    const profile=await this.state.storage.sql.exec('SELECT value FROM profiles WHERE username = ?',key).one();
+    return this.json({ok:true,profile:profile?.value?JSON.parse(profile.value):{}});
+  }
+  async cloudProfileWrite(request) {
+    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const username=typeof body?.username==='string'?body.username.trim():''; const token=typeof body?.account_token==='string'?body.account_token:'';
+    if(!username||!token)return this.json({ok:false,error:'missing-fields'},400);
+    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).one();
+    if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
+    const value=body?.profile&&typeof body.profile==='object'?JSON.stringify(body.profile):'{}';
+    await this.state.storage.sql.exec('INSERT INTO profiles (username,value,updated_at) VALUES (?,?,?) ON CONFLICT(username) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at',key,value,Date.now());
+    return this.json({ok:true,profile:JSON.parse(value)});
+  }
+  async eventState(request) {
+    const row=await this.state.storage.sql.exec('SELECT value FROM site_state WHERE key = ?', 'cosmic_events').one();
+    return this.json({ok:true,event:row?.value?JSON.parse(row.value):null});
+  }
+  async room(request) {
+    const url=new URL(request.url); const code=url.pathname.split('/').filter(Boolean).pop().toUpperCase();
+    if(!/^[A-Z0-9]{4,8}$/.test(code))return this.json({ok:false,error:'invalid-code'},400);
+    if(request.method==='GET'){const row=await this.state.storage.sql.exec('SELECT value FROM site_state WHERE key = ?', 'room:'+code).one();return this.json({ok:true,room:row?.value?JSON.parse(row.value):null});}
+    let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400);}
+    const room=body?.room&&typeof body.room==='object'?body.room:null;if(!room)return this.json({ok:false,error:'missing-room'},400);
+    await this.state.storage.sql.exec('INSERT INTO site_state (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value','room:'+code,JSON.stringify({...room,code,updated_at:Date.now()}));
+    return this.json({ok:true,room:{...room,code}});
   }
 
   async activity(request) {
@@ -609,6 +643,10 @@ class UsernameRegistry {
       if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) return this.json({ ok: false, error: 'invalid-username' }, 400);
       return this.reserve(username);
     }
+    if (url.pathname === '/profile' && request.method === 'GET') return this.cloudProfile(request);
+    if (url.pathname === '/profile' && request.method === 'POST') return this.cloudProfileWrite(request);
+    if (url.pathname === '/events' && request.method === 'GET') return this.eventState(request);
+    if (url.pathname.startsWith('/rooms/') && (request.method === 'GET' || request.method === 'POST')) return this.room(request);
     if (url.pathname === '/activity' && request.method === 'POST') return this.activity(request);
     if (url.pathname === '/list' && request.method === 'GET') return this.adminList();
     if (url.pathname === '/detail' && request.method === 'GET') return this.adminDetail(url.searchParams.get('username') || '');
@@ -1088,6 +1126,17 @@ export default {
     if (url.pathname === '/api/hub-diagnostics') return handleHubDiagnostics(request, env);
     if (url.pathname === '/api/ai') return handleAI(request, env);
     if (url.pathname === '/api/admin/auth' || url.pathname === '/api/admin-auth') return handleAdminAuth(request, env);
+    if ((url.pathname === '/api/cosmic-profile' || url.pathname === '/api/cosmic-events') && request.method === 'GET') {
+      const id=env.USERNAME_REGISTRY.idFromName('global'); const target=url.pathname==='/api/cosmic-profile'?'/profile':'/events';
+      return env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL(target,request.url),request));
+    }
+    if (url.pathname === '/api/cosmic-profile' && request.method === 'POST') {
+      const id=env.USERNAME_REGISTRY.idFromName('global'); return env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL('/profile',request.url),request));
+    }
+    if (url.pathname.startsWith('/api/rooms/') && (request.method === 'GET' || request.method === 'POST')) {
+      const id=env.USERNAME_REGISTRY.idFromName('global'); const code=url.pathname.split('/').pop();
+      return env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL('/rooms/'+code,request.url),request));
+    }
     if ((url.pathname === '/api/usernames/reserve' || url.pathname === '/api/accounts/activity') && request.method === 'POST') {
       const id = env.USERNAME_REGISTRY.idFromName('global');
       const target = url.pathname === '/api/usernames/reserve' ? '/reserve' : '/activity';

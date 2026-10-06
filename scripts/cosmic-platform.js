@@ -1,0 +1,6 @@
+(()=>{'use strict';if(window.__COSMIC_PLATFORM__)return;window.__COSMIC_PLATFORM__=true;
+const API=location.hostname.endsWith('.github.io')?'https://cosmicv2.v75ultimate.workers.dev':location.origin;
+const btn=()=>{if(document.getElementById('cosmic-platform-launch'))return;const b=document.createElement('button');b.id='cosmic-platform-launch';b.textContent='☄ Cosmic Spaces';b.style.cssText='position:fixed;right:14px;bottom:14px;z-index:2147483001;border:1px solid #2dccff;border-radius:999px;background:#06131c;color:#9feaff;padding:9px 13px;font:800 12px system-ui;cursor:pointer;box-shadow:0 8px 30px #0008';b.onclick=()=>window.CosmicSpaces?.show();document.body.appendChild(b)};
+function profile(){return window.CosmicCloudProfile?.local?.()||{}}
+window.CosmicPlatform={api:API,profile,openSpaces:(x)=>window.CosmicSpaces?.open(x),cloudProfile:window.CosmicCloudProfile,foundry:window.CosmicFoundry,compatibility:window.CosmicCompatibility,events:window.CosmicEvents,rooms:window.CosmicRooms,deploymentShield:window.CosmicDeploymentShield};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',btn,{once:true});else btn();})();

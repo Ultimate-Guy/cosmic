@@ -104,17 +104,27 @@ jobs:
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
 
           platform_scripts=['cosmic-runtime.js','cosmic-spaces.js','cosmic-runtime-manifest.js','cosmic-cloud-profile.js','cosmic-foundry.js','cosmic-compatibility.js','cosmic-deployment-shield.js','cosmic-events.js','cosmic-rooms.js','cosmic-platform.js']
-          for p in site.rglob('*'):
-              if not p.is_file() or p.suffix.lower() not in {'.html','.htm'}: continue
-              try: value=p.read_text(encoding='utf-8')
-              except UnicodeDecodeError: continue
+          platform_targets={
+              'index.html':'',
+              'cosmic-hub.html':'',
+              'cosmic-doctor.html':'',
+              'apps/apps.html':'../',
+              'apps/app.html':'../',
+              'youtube/youtube.html':'../',
+              'settings/settings.html':'../',
+              'pages/lessons/lessons.html':'../../',
+          }
+          for relative_path,prefix in platform_targets.items():
+              p=site/relative_path
+              if not p.is_file(): raise SystemExit(f'Cannot install Cosmic platform scripts: missing owned surface {relative_path}')
+              value=p.read_text(encoding='utf-8')
               tags=[]
               for name in platform_scripts:
-                  tag=f'<script src="../../scripts/{name}?build={build_tag}"></script>'
+                  tag=f'<script src="{prefix}scripts/{name}?build={build_tag}"></script>'
                   if tag not in value: tags.append(tag)
               if tags:
                   pos=value.lower().rfind('</body>')
-                  if pos<0: raise SystemExit(f'Cannot install Cosmic platform scripts in {p.relative_to(site)}')
+                  if pos<0: raise SystemExit(f'Cannot install Cosmic platform scripts in owned surface {relative_path}: missing </body>')
                   value=value[:pos]+'\n'.join(tags)+'\n'+value[pos:]
                   p.write_text(value,encoding='utf-8')
 

@@ -69,7 +69,7 @@ jobs:
           absent=[path for path in required_assets if not (site/path).is_file()]
           if absent: raise SystemExit('Cloudflare staging is missing hub assets: '+', '.join(absent))
 
-          local_assets={'cosmic-dev-tools.js':build_tag,'cosmic-hub.js':build_tag,'cosmic-hub-preflight.js':build_tag,'cosmic-hub-repair.js':build_tag,'cosmic-admin-guard.js':build_tag,'cosmic-launch-fix.js':build_tag,'cosmic-feedback.js':build_tag,'cosmic-profile-widget.js':build_tag,'cosmic-pwa.js':build_tag,'settings-engine.js':build_tag}
+          local_assets={'cosmic-runtime.js':build_tag,'cosmic-spaces.js':build_tag,'cosmic-cloud-profile.js':build_tag,'cosmic-foundry.js':build_tag,'cosmic-compatibility.js':build_tag,'cosmic-deployment-shield.js':build_tag,'cosmic-events.js':build_tag,'cosmic-rooms.js':build_tag,'cosmic-runtime-manifest.js':build_tag,'cosmic-platform.js':build_tag,'cosmic-dev-tools.js':build_tag,'cosmic-hub.js':build_tag,'cosmic-hub-preflight.js':build_tag,'cosmic-hub-repair.js':build_tag,'cosmic-admin-guard.js':build_tag,'cosmic-launch-fix.js':build_tag,'cosmic-feedback.js':build_tag,'cosmic-profile-widget.js':build_tag,'cosmic-pwa.js':build_tag,'settings-engine.js':build_tag}
           script_pat=re.compile(r'(?P<prefix>(?:\.\./)+scripts/(?P<name>[^"\']+?\.js))(?:\?[^"\']*)?(?P<suffix>["\'])',re.I)
           settings_pat=re.compile(r'(?P<prefix>(?:\.\./)+settings/(?P<name>settings-engine\.js))(?:\?[^"\']*)?(?P<suffix>["\'])',re.I)
           for p in site.rglob('*'):
@@ -102,6 +102,21 @@ jobs:
           required=[preflight_tag,hub_tag,repair_tag]
           missing=[x for x in required if x not in text]
           if missing: raise SystemExit('Generated lessons.html is missing: '+', '.join(missing))
+
+          platform_scripts=['cosmic-runtime.js','cosmic-spaces.js','cosmic-runtime-manifest.js','cosmic-cloud-profile.js','cosmic-foundry.js','cosmic-compatibility.js','cosmic-deployment-shield.js','cosmic-events.js','cosmic-rooms.js','cosmic-platform.js']
+          for p in site.rglob('*'):
+              if not p.is_file() or p.suffix.lower() not in {'.html','.htm'}: continue
+              try: value=p.read_text(encoding='utf-8')
+              except UnicodeDecodeError: continue
+              tags=[]
+              for name in platform_scripts:
+                  tag=f'<script src="../../scripts/{name}?build={build_tag}"></script>'
+                  if tag not in value: tags.append(tag)
+              if tags:
+                  pos=value.lower().rfind('</body>')
+                  if pos<0: raise SystemExit(f'Cannot install Cosmic platform scripts in {p.relative_to(site)}')
+                  value=value[:pos]+'\n'.join(tags)+'\n'+value[pos:]
+                  p.write_text(value,encoding='utf-8')
 
           lessons.write_text(text,encoding='utf-8')
           required=[preflight_tag,hub_tag,repair_tag]

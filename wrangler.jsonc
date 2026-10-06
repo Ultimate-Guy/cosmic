@@ -8,6 +8,7 @@
     "binding": "ASSETS",
     "run_worker_first": [
       "/",
+      "/api/*",
       "/pages/lessons/lessons.html",
       "/apps/apps.html",
       "/cosmic-hub.html"

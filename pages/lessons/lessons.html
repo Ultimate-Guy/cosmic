@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="../../css/otherpages.css"/>
     <script src="../../settings/settings-engine.js"></script>
     <style>
+        html, body { overflow-x: hidden; max-width: 100%; }
+        #site-content, main, #gamesgrid { max-width: 100%; min-width: 0; }
         :root { --card-bg: rgba(6, 20, 16, 0.76); --accent: #2dccff; --card-border: rgba(45, 204, 255, 0.42); --card-hover: rgba(127, 255, 212, 0.16); }
         #gamesgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:14px; align-items:stretch; }
         .game-card { display:flex; flex-direction:column; gap:8px; padding:10px; border-radius:16px; background:var(--card-bg); border:1px solid var(--card-border); backdrop-filter:blur(6px); box-shadow:0 8px 24px rgba(0,0,0,.35); }

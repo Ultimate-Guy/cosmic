@@ -164,6 +164,8 @@ jobs:
           (site/'deployment.json').write_text(json.dumps(marker,indent=2)+'\n',encoding='utf-8')
           print(json.dumps(marker))
           PY
+      - name: Deployment Shield
+        run: python3 scripts/deployment-shield.py _site
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload exact build for GitHub Pages

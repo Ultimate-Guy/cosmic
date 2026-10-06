@@ -1144,8 +1144,11 @@ export default {
     if (url.pathname === '/api/ai') return handleAI(request, env);
     if (url.pathname === '/api/admin/auth' || url.pathname === '/api/admin-auth') return handleAdminAuth(request, env);
     if ((url.pathname === '/api/cosmic-profile' || url.pathname === '/api/cosmic-events') && request.method === 'GET') {
-      const id=env.USERNAME_REGISTRY.idFromName('global'); const target=url.pathname==='/api/cosmic-profile'?'/profile':'/events';
-      return env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL(target,request.url),request));
+      const id=env.USERNAME_REGISTRY.idFromName('global');
+      const target=url.pathname==='/api/cosmic-profile'?'/profile':'/events';
+      const internalUrl=new URL(target,request.url);
+      internalUrl.search=url.search;
+      return env.USERNAME_REGISTRY.get(id).fetch(new Request(internalUrl,request));
     }
     if (url.pathname === '/api/admin/cosmic-event' && request.method === 'POST') {
       if (!(await verifyAdminSession(request,env))) return jsonResponse(request,{ok:false,error:'unauthorized'},401);

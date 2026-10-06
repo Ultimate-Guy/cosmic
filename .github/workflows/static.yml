@@ -112,7 +112,6 @@ jobs:
               'apps/app.html':'../',
               'youtube/youtube.html':'../',
               'settings/settings.html':'../',
-              'pages/lessons/lessons.html':'../../',
           }
           for relative_path,prefix in platform_targets.items():
               p=site/relative_path
@@ -128,6 +127,16 @@ jobs:
                   value=value[:pos]+'\n'.join(tags)+'\n'+value[pos:]
                   p.write_text(value,encoding='utf-8')
 
+          platform_lessons_tags=[]
+          for name in platform_scripts:
+              tag=f'<script src="../../scripts/{name}?build={build_tag}"></script>'
+              if tag not in text:
+                  platform_lessons_tags.append(tag)
+          if platform_lessons_tags:
+              matches=list(re.finditer(r'</body>',text,re.I))
+              if not matches: raise SystemExit('Cannot install Cosmic platform scripts in lessons.html: missing </body>')
+              pos=matches[-1].start()
+              text=text[:pos]+'\n'.join(platform_lessons_tags)+'\n'+text[pos:]
           lessons.write_text(text,encoding='utf-8')
           required=[preflight_tag,hub_tag,repair_tag]
           missing=[x for x in required if x not in text]

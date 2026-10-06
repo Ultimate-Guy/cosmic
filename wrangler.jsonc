@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cosmicv2",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-09",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/",
+      "/pages/lessons/lessons.html",
+      "/apps/apps.html",
+      "/cosmic-hub.html"
+    ]
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "USERNAME_REGISTRY",
+        "class_name": "UsernameRegistry"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "UsernameRegistry"
+      ]
+    }
+  ]
+}

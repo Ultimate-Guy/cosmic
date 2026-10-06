@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Cosmic YouTube</title>
+  <link rel="stylesheet" href="../css/fontawesome.css">
+  <link rel="stylesheet" href="../css/otherpages.css">
+  <script src="../settings/settings-engine.js"></script>
+  <link rel="stylesheet" href="youtube.css">
+  <script src="../scripts/cosmic-panic.js?v=panic-v1"></script>
+</head>
+<body>
+  <div id="youtubeApp">
+    <header id="ytTopBar">
+      <div class="yt-brand-area">
+        <button id="mobileSidebarBtn" class="icon-btn" type="button" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+        <button class="yt-brand" type="button" aria-label="Cosmic YouTube home">
+          <span class="yt-brand-mark"><i class="fab fa-youtube"></i></span>
+          <span><strong>Cosmic</strong><small>YouTube</small></span>
+        </button>
+      </div>
+
+      <div class="yt-search-area">
+        <form id="ytSearchForm" class="yt-search-form" autocomplete="off">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input id="searchInput" type="search" autocomplete="off" placeholder="Search YouTube" aria-label="Search YouTube">
+            <button id="clearSearchBtn" class="search-clear hidden" type="button" aria-label="Clear search"><i class="fas fa-xmark"></i></button>
+          </div>
+          <button class="yt-search-button" type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
+          <div id="searchSuggestions" class="search-suggestions hidden"></div>
+        </form>
+        <button id="voiceSearchBtn" class="round-icon-btn voice-search" type="button" aria-label="Voice search" title="Voice search"><i class="fas fa-microphone"></i></button>
+      </div>
+
+      <div class="yt-top-actions">
+        <button id="topCreateBtn" class="top-action create-action" type="button" title="Add local video to your Cosmic library"><i class="fas fa-plus"></i><span>Create</span></button>
+        <button id="topSavedBtn" class="top-action" type="button"><i class="fas fa-bookmark"></i><span>Saved</span></button>
+        <button id="topAccountBtn" class="top-action account-action" type="button" aria-label="Your Cosmic YouTube account"><span class="account-avatar">C</span></button>
+        <button id="topSettingsBtn" class="top-action cosmic-nav cosmic-settings" title="Open Cosmic Settings" type="button"><i class="fas fa-gear"></i><span>Settings</span></button>
+        <button id="topGamesBtn" class="top-action cosmic-nav cosmic-games" title="Back to Cosmic Games" type="button"><i class="fas fa-gamepad"></i><span>Games</span></button>
+      </div>
+    </header>
+
+    <div class="yt-layout">
+      <aside id="ytSidebar" class="yt-sidebar">
+        <nav class="sidebar-nav" aria-label="YouTube navigation">
+          <button class="sidebar-item active" data-view="home" type="button"><i class="fas fa-house"></i><span>Home</span></button>
+          <button class="sidebar-item" data-view="shorts" type="button"><i class="fas fa-play"></i><span>Shorts</span></button>
+          <button class="sidebar-item" data-view="subscriptions" type="button"><i class="fas fa-clapperboard"></i><span>Subscriptions</span></button>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-label">YOU</div>
+          <button class="sidebar-item" data-view="library" type="button"><i class="fas fa-layer-group"></i><span>Library</span></button>
+          <button class="sidebar-item" data-view="history" type="button"><i class="fas fa-clock-rotate-left"></i><span>History</span></button>
+          <button class="sidebar-item" data-view="saved" type="button"><i class="fas fa-bookmark"></i><span>Watch later</span></button>
+          <button class="sidebar-item" data-view="liked" type="button"><i class="fas fa-thumbs-up"></i><span>Liked videos</span></button>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-label">EXPLORE</div>
+          <button class="sidebar-item" data-query="trending" type="button"><i class="fas fa-fire"></i><span>Trending</span></button>
+          <button class="sidebar-item" data-query="music" type="button"><i class="fas fa-music"></i><span>Music</span></button>
+          <button class="sidebar-item" data-query="gaming" type="button"><i class="fas fa-gamepad"></i><span>Gaming</span></button>
+          <button class="sidebar-item" data-query="live" type="button"><i class="fas fa-tower-broadcast"></i><span>Live</span></button>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-label cosmic-sidebar-label">COSMIC</div>
+          <button id="sideGamesBtn" class="sidebar-item cosmic-side-nav" type="button"><i class="fas fa-gamepad"></i><span>Games</span></button>
+          <button id="sideSettingsBtn" class="sidebar-item cosmic-side-nav" type="button"><i class="fas fa-gear"></i><span>Settings</span></button>
+        </nav>
+        <div class="sidebar-footer">Cosmic YouTube<br><span>Your local library &amp; preferences stay in this browser.</span></div>
+      </aside>
+
+      <main id="ytMain" class="yt-main">
+        <section id="homeView" class="yt-view">
+          <div class="hero-strip">
+            <div>
+              <span class="hero-eyebrow">COSMIC MEDIA</span>
+              <h1>Cosmic YouTube</h1>
+              <p>Your YouTube-style home for search, Shorts, channels, subscriptions, history and saved videos — with Cosmic controls always one click away.</p>
+            </div>
+            <div class="hero-actions"><button id="heroExploreBtn" class="hero-button" type="button"><i class="fas fa-compass"></i> Explore</button><button id="heroUrlBtn" class="hero-button secondary" type="button"><i class="fas fa-link"></i> Watch URL</button></div>
+          </div>
+
+          <div id="topicChips" class="topic-chips" aria-label="Topics">
+            <button class="topic-chip active" data-query="" type="button">All</button>
+            <button class="topic-chip" data-query="gaming" type="button">Gaming</button>
+            <button class="topic-chip" data-query="music" type="button">Music</button>
+            <button class="topic-chip" data-query="coding" type="button">Coding</button>
+            <button class="topic-chip" data-query="science" type="button">Science</button>
+            <button class="topic-chip" data-query="movies" type="button">Movies</button>
+            <button class="topic-chip" data-query="sports" type="button">Sports</button>
+            <button class="topic-chip" data-query="news" type="button">News</button>
+            <button class="topic-chip" data-query="memes" type="button">Memes</button>
+            <button class="topic-chip" data-query="how to" type="button">How-to</button>
+          </div>
+
+          <div class="section-heading">
+            <div><span class="section-kicker">FOR YOU</span><h2>Recommended videos</h2></div>
+            <button id="refreshHomeBtn" class="text-button" type="button"><i class="fas fa-rotate"></i> Refresh</button>
+          </div>
+          <div id="homeContent" class="video-grid"></div><div id="homeUrlBox" class="home-url-box hidden"><form id="homeUrlForm"><input id="homeUrlInput" type="url" placeholder="Paste a YouTube video or Shorts URL..."><button class="primary-button" type="submit"><i class="fas fa-play"></i> Watch</button></form></div>
+        </section>
+
+        <section id="searchView" class="yt-view hidden">
+          <div class="search-toolbar">
+            <div><span class="section-kicker">SEARCH</span><h1 id="searchHeading">Search results</h1><p id="searchMeta"></p></div>
+            <button id="filterButton" class="filter-button" type="button"><i class="fas fa-sliders"></i> Filters</button>
+          </div>
+          <div id="searchTabs" class="search-tabs">
+            <button class="search-tab active" data-result-type="all" type="button">All</button>
+            <button class="search-tab" data-result-type="video" type="button">Videos</button>
+            <button class="search-tab" data-result-type="short" type="button">Shorts</button>
+            <button class="search-tab" data-result-type="channel" type="button">Channels</button>
+            <button class="search-tab" data-result-type="live" type="button">Live</button>
+            <button class="search-tab" data-result-type="playlist" type="button">Playlists</button>
+          </div>
+          <div id="filterPanel" class="filter-panel hidden">
+            <div class="filter-group"><strong>Type</strong><div class="filter-options" data-filter-group="type">
+              <button data-value="all" class="filter-option active" type="button">All</button><button data-value="video" class="filter-option" type="button">Video</button><button data-value="short" class="filter-option" type="button">Shorts</button><button data-value="channel" class="filter-option" type="button">Channel</button><button data-value="live" class="filter-option" type="button">Live</button>
+            </div></div>
+            <div class="filter-group"><strong>Upload date</strong><div class="filter-options" data-filter-group="date">
+              <button data-value="any" class="filter-option active" type="button">Any time</button><button data-value="today" class="filter-option" type="button">Today</button><button data-value="week" class="filter-option" type="button">This week</button><button data-value="month" class="filter-option" type="button">This month</button><button data-value="year" class="filter-option" type="button">This year</button>
+            </div></div>
+            <div class="filter-group"><strong>Duration</strong><div class="filter-options" data-filter-group="duration">
+              <button data-value="any" class="filter-option active" type="button">Any</button><button data-value="short" class="filter-option" type="button">Under 4 minutes</button><button data-value="medium" class="filter-option" type="button">4–20 minutes</button><button data-value="long" class="filter-option" type="button">Over 20 minutes</button>
+            </div></div>
+            <div class="filter-group"><strong>Prioritize</strong><div class="filter-options" data-filter-group="sort">
+              <button data-value="relevance" class="filter-option active" type="button">Relevance</button><button data-value="newest" class="filter-option" type="button">Newest</button><button data-value="views" class="filter-option" type="button">Most viewed</button>
+            </div></div>
+            <div class="filter-group"><strong>Features</strong><div class="filter-options" data-filter-group="features">
+              <button data-value="all" class="filter-option active" type="button">All</button><button data-value="live" class="filter-option" type="button">Live</button><button data-value="cc" class="filter-option" type="button">Subtitles/CC</button><button data-value="hd" class="filter-option" type="button">HD</button>
+            </div></div>
+            <div class="filter-note"><i class="fas fa-circle-info"></i><span>Filters use the metadata supplied by Cosmic's search service. Missing metadata is left untouched instead of guessing.</span></div>
+          </div>
+          <div id="searchResults" class="video-results"></div>
+          <div id="searchEmpty" class="view-empty hidden"><i class="fas fa-magnifying-glass"></i><strong>No matching results</strong><span>Try a different search or loosen one of the filters.</span></div>
+        </section>
+
+        <section id="watchView" class="yt-view hidden">
+          <div class="watch-layout">
+            <div class="watch-primary">
+              <div id="playerWrap" class="player-wrap">
+                <div class="player-loading"><i class="fas fa-circle-notch fa-spin"></i></div>
+                <iframe id="youtubePlayer" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+              </div>
+              <div class="watch-title-row"><h1 id="watchTitle">YouTube video</h1><button id="watchMoreBtn" class="round-icon-btn" type="button" aria-label="More"><i class="fas fa-ellipsis"></i></button></div>
+              <div class="watch-channel-row">
+                <button id="watchChannelButton" class="channel-button" type="button"><span id="watchChannelAvatar" class="avatar"></span><span><strong id="watchChannelName">YouTube</strong><small id="watchChannelMeta">Channel</small></span></button>
+                <button id="watchSubscribeBtn" class="subscribe-button" type="button">Subscribe</button>
+              </div>
+              <div class="watch-actions-bar">
+                <div class="watch-actions">
+                  <button id="watchLikeBtn" class="watch-action" type="button"><i class="fas fa-thumbs-up"></i><span>Like</span></button>
+                  <button id="watchDislikeBtn" class="watch-action" type="button"><i class="fas fa-thumbs-down"></i><span>Dislike</span></button>
+                  <button id="watchSaveBtn" class="watch-action" type="button"><i class="fas fa-bookmark"></i><span>Save</span></button>
+                  <button id="watchShareBtn" class="watch-action" type="button"><i class="fas fa-share"></i><span>Share</span></button>
+                  <button id="watchPlaylistBtn" class="watch-action" type="button"><i class="fas fa-list"></i><span>Playlist</span></button>
+                  <button id="watchMiniplayerBtn" class="watch-action" type="button"><i class="fas fa-window-restore"></i><span>Miniplayer</span></button>
+                  <button id="watchAmbientBtn" class="watch-action" type="button"><i class="fas fa-wand-magic-sparkles"></i><span>Ambient</span></button>
+                  <button id="watchTheaterBtn" class="watch-action" type="button"><i class="fas fa-expand"></i><span>Theater</span></button>
+                  <button id="watchOpenYoutubeBtn" class="watch-action" type="button"><i class="fab fa-youtube"></i><span>YouTube</span></button>
+                </div>
+              </div>
+              <div id="watchDescription" class="watch-description">
+                <div class="description-line"><strong id="watchMetaLine">Video</strong></div>
+                <p id="watchDescriptionText">Open a video to see its details.</p>
+              </div>
+              <div class="comment-placeholder"><i class="fas fa-comments"></i><div><strong>Comments</strong><span>Comments are handled by YouTube itself. Open the video on YouTube to view or post them.</span></div><button id="commentsYoutubeBtn" class="text-button" type="button">Open comments</button></div>
+            </div>
+            <aside class="watch-side">
+              <div class="side-heading"><span>UP NEXT</span><button id="refreshRelatedBtn" class="icon-text-button" type="button"><i class="fas fa-rotate"></i></button></div>
+              <div id="relatedResults" class="related-list"></div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="channelView" class="yt-view hidden">
+          <div id="channelHero" class="channel-hero"></div>
+          <div class="channel-tabs">
+            <button class="channel-tab active" data-channel-tab="home" type="button">Home</button>
+            <button class="channel-tab" data-channel-tab="videos" type="button">Videos</button>
+            <button class="channel-tab" data-channel-tab="shorts" type="button">Shorts</button>
+            <button class="channel-tab" data-channel-tab="live" type="button">Live</button>
+          </div>
+          <div class="section-heading"><div><span class="section-kicker">CHANNEL</span><h2 id="channelSectionTitle">Latest videos</h2></div><button id="channelSearchBtn" class="text-button" type="button"><i class="fas fa-magnifying-glass"></i> Search channel</button></div>
+          <div id="channelResults" class="video-grid"></div>
+          <div id="channelEmpty" class="view-empty hidden"><i class="fas fa-tv"></i><strong>No channel results yet</strong><span>Search for the channel or open it directly on YouTube.</span></div>
+        </section>
+
+        <section id="shortsView" class="yt-view hidden">
+          <div class="shorts-heading">
+            <div><span class="section-kicker">VERTICAL VIDEO</span><h1>Shorts</h1><p>Cosmic's vertical Shorts viewer. Start from a Short URL or open a Short from search.</p></div>
+            <div class="shorts-start"><input id="shortUrlInput" class="inline-input" type="url" placeholder="Paste a Shorts URL..."><button id="startShortBtn" class="primary-button" type="button"><i class="fas fa-play"></i> Start</button></div>
+          </div>
+          <p id="shortMessage" class="inline-message" aria-live="polite"></p>
+          <div id="shortFeed" class="short-feed"><div class="short-feed-empty"><i class="fas fa-mobile-screen-button"></i><strong>No Shorts feed yet</strong><span>Start a feed with one YouTube Short.</span></div></div>
+          <div id="shortCounter" class="short-counter">0 Shorts</div>
+        </section>
+
+        <section id="subscriptionsView" class="yt-view hidden">
+          <div class="section-heading"><div><span class="section-kicker">YOUR COSMIC YOUTUBE</span><h1>Subscriptions</h1><p>Channels you subscribe to inside Cosmic.</p></div><button id="refreshSubscriptionsBtn" class="text-button" type="button"><i class="fas fa-rotate"></i> Refresh</button></div>
+          <div id="subscriptionChips" class="subscription-chips"></div>
+          <div id="subscriptionResults" class="video-grid"></div>
+          <div id="subscriptionEmpty" class="view-empty hidden"><i class="fas fa-clapperboard"></i><strong>No subscriptions yet</strong><span>Subscribe to a channel from its Cosmic channel page.</span></div>
+        </section>
+
+        <section id="libraryView" class="yt-view hidden">
+          <div class="section-heading"><div><span class="section-kicker">LIBRARY</span><h1>Your library</h1><p>Saved videos, watch history, and local video files.</p></div></div>
+          <div class="library-tabs">
+            <button class="library-tab active" data-library-tab="saved" type="button">Saved</button>
+            <button class="library-tab" data-library-tab="history" type="button">History</button>
+            <button class="library-tab" data-library-tab="playlists" type="button">Playlists</button>
+            <button class="library-tab" data-library-tab="local" type="button">Local files</button>
+          </div>
+          <div id="savedLibrary" class="library-panel"></div>
+          <div id="historyLibrary" class="library-panel hidden"></div>
+          <div id="playlistsLibrary" class="library-panel hidden"></div>
+          <div id="localLibrary" class="library-panel hidden"></div>
+        </section>
+
+        <section id="historyView" class="yt-view hidden">
+          <div class="section-heading"><div><span class="section-kicker">LIBRARY</span><h1>History</h1><p>Your recently watched Cosmic YouTube videos.</p></div><button id="clearHistoryBtn" class="text-button danger" type="button">Clear history</button></div>
+          <div id="historyResults" class="video-grid"></div>
+          <div id="historyEmpty" class="view-empty hidden"><i class="fas fa-clock-rotate-left"></i><strong>Nothing here yet</strong><span>Open a video and it will appear in your history.</span></div>
+        </section>
+
+        <section id="likedView" class="yt-view hidden">
+          <div class="section-heading"><div><span class="section-kicker">YOUR LIBRARY</span><h1>Liked videos</h1><p>Videos you marked with Like inside Cosmic.</p></div><button id="clearLikedBtn" class="text-button danger" type="button">Clear liked</button></div>
+          <div id="likedResults" class="video-grid"></div>
+          <div id="likedEmpty" class="view-empty hidden"><i class="fas fa-thumbs-up"></i><strong>No liked videos yet</strong><span>Like a video from its watch page and it will appear here.</span></div>
+        </section>
+
+        <section id="savedView" class="yt-view hidden">
+          <div class="section-heading"><div><span class="section-kicker">YOUR LIBRARY</span><h1>Watch later</h1><p>Saved YouTube links that remain available in this browser.</p></div><button id="clearSavedBtn" class="text-button danger" type="button">Clear saved</button></div>
+          <div id="savedResults" class="video-grid"></div>
+          <div id="savedEmpty" class="view-empty hidden"><i class="fas fa-bookmark"></i><strong>No saved videos</strong><span>Use Save on any Cosmic YouTube video.</span></div>
+        </section>
+      </main>
+    </div>
+
+    <div id="filterBackdrop" class="modal-backdrop hidden"></div>
+    <div id="moreMenu" class="context-menu hidden"></div>
+    <div id="accountMenu" class="context-menu account-menu hidden"></div>
+    <div id="actionModal" class="action-modal hidden" role="dialog" aria-modal="true" aria-labelledby="actionModalTitle">
+      <div class="action-modal-card">
+        <button id="closeActionModal" class="round-icon-btn modal-close" type="button" aria-label="Close"><i class="fas fa-xmark"></i></button>
+        <span class="section-kicker">COSMIC YOUTUBE</span>
+        <h2 id="actionModalTitle">Choose an action</h2>
+        <div id="actionModalBody"></div>
+      </div>
+    </div>
+    <div id="miniPlayer" class="mini-player hidden">
+      <div class="mini-player-head"><strong id="miniPlayerTitle">Now playing</strong><button id="miniPlayerClose" class="round-icon-btn" type="button" aria-label="Close miniplayer"><i class="fas fa-xmark"></i></button></div>
+      <div class="mini-player-video"><iframe id="miniPlayerFrame" title="Cosmic YouTube miniplayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+      <button id="miniPlayerExpand" class="mini-player-expand" type="button"><i class="fas fa-up-right-and-down-left-from-center"></i> Return to video</button>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+  <script src="youtube.js"></script>
+  <script src="../scripts/cosmic-global-state.js?v=global-state"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+[
+  {"name":"5-minute games","category":"Arcade","max":24},
+  {"name":"Best keyboard games","tags":["keyboard"],"max":24},
+  {"name":"Chill apps","kind":"app","max":24},
+  {"name":"Multiplayer night","category":"Multiplayer","max":24}
+]

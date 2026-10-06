@@ -1,0 +1,13 @@
+{
+  "name": "Cosmic Hub",
+  "short_name": "Cosmic",
+  "description": "The Cosmic games and apps hub.",
+  "start_url": "./pages/lessons/lessons.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050b12",
+  "theme_color": "#2dccff",
+  "icons": [
+    { "src": "./imgs/cosmic.png", "sizes": "862x830", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

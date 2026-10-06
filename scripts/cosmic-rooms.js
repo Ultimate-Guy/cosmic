@@ -1,8 +1,1 @@
-(() => {
-'use strict';
-if(window.CosmicRooms)return;
-const API=location.hostname.endsWith('.github.io')?'https://cosmicv2.v75ultimate.workers.dev':location.origin;
-async function create(name){const r=await fetch(API+'/api/rooms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});return r.json()}
-async function join(code){const r=await fetch(API+'/api/rooms/'+encodeURIComponent(code),{cache:'no-store'});return r.json()}
-window.CosmicRooms={create,join};
-})();
+(()=>{'use strict';if(window.CosmicRooms)return;const API=location.hostname.endsWith('.github.io')?'https://cosmicv2.v75ultimate.workers.dev':location.origin;async function request(code,method='GET',room){const r=await fetch(API+'/api/rooms/'+encodeURIComponent(code),{method,headers:{'Content-Type':'application/json'},body:method==='POST'?JSON.stringify({room}):undefined});return r.json()}async function create(name,code){return request(code,'POST',{name,host:'local',queue:[],watch_queue:[],status:'open',players:[]})}async function join(code){return request(code)}window.CosmicRooms={create,join};})();

@@ -62,6 +62,12 @@ class UsernameRegistry {
     await this.state.storage.sql.exec('INSERT INTO profiles (username,value,updated_at) VALUES (?,?,?) ON CONFLICT(username) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at',key,value,Date.now());
     return this.json({ok:true,profile:JSON.parse(value)});
   }
+  async eventWrite(request) {
+    let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
+    const event=body?.event&&typeof body.event==='object'?body.event:null;if(!event)return this.json({ok:false,error:'missing-event'},400);
+    await this.state.storage.sql.exec('INSERT INTO site_state (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value','cosmic_events',JSON.stringify({...event,updated_at:Date.now()}));
+    return this.json({ok:true,event});
+  }
   async eventState(request) {
     const row=await this.state.storage.sql.exec('SELECT value FROM site_state WHERE key = ?', 'cosmic_events').one();
     return this.json({ok:true,event:row?.value?JSON.parse(row.value):null});
@@ -646,6 +652,7 @@ class UsernameRegistry {
     if (url.pathname === '/profile' && request.method === 'GET') return this.cloudProfile(request);
     if (url.pathname === '/profile' && request.method === 'POST') return this.cloudProfileWrite(request);
     if (url.pathname === '/events' && request.method === 'GET') return this.eventState(request);
+    if (url.pathname === '/events' && request.method === 'POST') return this.eventWrite(request);
     if (url.pathname.startsWith('/rooms/') && (request.method === 'GET' || request.method === 'POST')) return this.room(request);
     if (url.pathname === '/activity' && request.method === 'POST') return this.activity(request);
     if (url.pathname === '/list' && request.method === 'GET') return this.adminList();
@@ -1129,6 +1136,10 @@ export default {
     if ((url.pathname === '/api/cosmic-profile' || url.pathname === '/api/cosmic-events') && request.method === 'GET') {
       const id=env.USERNAME_REGISTRY.idFromName('global'); const target=url.pathname==='/api/cosmic-profile'?'/profile':'/events';
       return env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL(target,request.url),request));
+    }
+    if (url.pathname === '/api/admin/cosmic-event' && request.method === 'POST') {
+      if (!(await verifyAdminSession(request,env))) return jsonResponse(request,{ok:false,error:'unauthorized'},401);
+      const id=env.USERNAME_REGISTRY.idFromName('global'); return env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL('/events',request.url),request));
     }
     if (url.pathname === '/api/cosmic-profile' && request.method === 'POST') {
       const id=env.USERNAME_REGISTRY.idFromName('global'); return env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL('/profile',request.url),request));

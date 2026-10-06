@@ -117,6 +117,29 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Verify Cosmic Cloud API
+        env:
+          COSMIC_API_ORIGIN: https://cosmicv2.v75ultimate.workers.dev
+        run: |
+          set -euo pipefail
+          body="$(mktemp)"
+          url="$COSMIC_API_ORIGIN/api/cosmic-profile?username=__cosmic_validation__&account_token=__cosmic_validation__"
+          status="$(curl -sS -o "$body" -w "%{http_code}" "$url")"
+          type="$(curl -sSI "$url" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print tolower($2); exit}')"
+          echo "Cosmic Cloud API status: $status"
+          echo "Cosmic Cloud API content-type: $type"
+          cat "$body"
+          test "$status" = "401"
+          echo "$type" | grep -q "application/json"
+          python3 - "$body" <<'PY'
+          import json, sys
+          with open(sys.argv[1], encoding='utf-8') as fh:
+              data=json.load(fh)
+          assert data.get('ok') is False, data
+          assert data.get('error') == 'unauthorized', data
+          print('Cosmic Cloud API smoke test passed.')
+          PY
+
       - name: Install browser test dependencies
         run: |
           npm init -y >/dev/null 2>&1

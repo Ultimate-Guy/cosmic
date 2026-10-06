@@ -44,13 +44,23 @@ class UsernameRegistry {
   }
 
   async cloudProfile(request) {
-    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
-    const username=typeof body?.username==='string'?body.username.trim():''; const token=typeof body?.account_token==='string'?body.account_token:'';
+    let username='', token='';
+    if (request.method === 'GET') {
+      const url=new URL(request.url);
+      username=(url.searchParams.get('username')||'').trim();
+      token=url.searchParams.get('account_token')||'';
+    } else {
+      let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+      username=typeof body?.username==='string'?body.username.trim():'';
+      token=typeof body?.account_token==='string'?body.account_token:'';
+    }
     if(!username||!token)return this.json({ok:false,error:'missing-fields'},400);
     const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).one();
     if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
     const profile=await this.state.storage.sql.exec('SELECT value FROM profiles WHERE username = ?',key).one();
-    return this.json({ok:true,profile:profile?.value?JSON.parse(profile.value):{}});
+    let value={};
+    if(profile?.value){try{value=JSON.parse(profile.value)||{}}catch(_){value={};}}
+    return this.json({ok:true,profile:value});
   }
   async cloudProfileWrite(request) {
     let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }

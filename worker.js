@@ -29,7 +29,7 @@ class UsernameRegistry {
     const key = username.toLowerCase();
     const existing = await this.state.storage.sql.exec(
       'SELECT username, account_token FROM accounts WHERE username = ?', key
-    ).one();
+    ).toArray()[0];
     if (existing) return this.json({ ok: false, error: 'taken' }, 409);
 
     const token = crypto.randomUUID();
@@ -55,9 +55,9 @@ class UsernameRegistry {
       token=typeof body?.account_token==='string'?body.account_token:'';
     }
     if(!username||!token)return this.json({ok:false,error:'missing-fields'},400);
-    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).one();
+    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).toArray()[0];
     if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
-    const profile=await this.state.storage.sql.exec('SELECT value FROM profiles WHERE username = ?',key).one();
+    const profile=await this.state.storage.sql.exec('SELECT value FROM profiles WHERE username = ?',key).toArray()[0];
     let value={};
     if(profile?.value){try{value=JSON.parse(profile.value)||{}}catch(_){value={};}}
     return this.json({ok:true,profile:value});
@@ -66,7 +66,7 @@ class UsernameRegistry {
     let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
     const username=typeof body?.username==='string'?body.username.trim():''; const token=typeof body?.account_token==='string'?body.account_token:'';
     if(!username||!token)return this.json({ok:false,error:'missing-fields'},400);
-    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).one();
+    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).toArray()[0];
     if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
     const value=body?.profile&&typeof body.profile==='object'?JSON.stringify(body.profile):'{}';
     await this.state.storage.sql.exec('INSERT INTO profiles (username,value,updated_at) VALUES (?,?,?) ON CONFLICT(username) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at',key,value,Date.now());
@@ -79,13 +79,13 @@ class UsernameRegistry {
     return this.json({ok:true,event});
   }
   async eventState(request) {
-    const row=await this.state.storage.sql.exec('SELECT value FROM site_state WHERE key = ?', 'cosmic_events').one();
+    const row=await this.state.storage.sql.exec('SELECT value FROM site_state WHERE key = ?', 'cosmic_events').toArray()[0];
     return this.json({ok:true,event:row?.value?JSON.parse(row.value):null});
   }
   async room(request) {
     const url=new URL(request.url); const code=url.pathname.split('/').filter(Boolean).pop().toUpperCase();
     if(!/^[A-Z0-9]{4,8}$/.test(code))return this.json({ok:false,error:'invalid-code'},400);
-    if(request.method==='GET'){const row=await this.state.storage.sql.exec('SELECT value FROM site_state WHERE key = ?', 'room:'+code).one();return this.json({ok:true,room:row?.value?JSON.parse(row.value):null});}
+    if(request.method==='GET'){const row=await this.state.storage.sql.exec('SELECT value FROM site_state WHERE key = ?', 'room:'+code).toArray()[0];return this.json({ok:true,room:row?.value?JSON.parse(row.value):null});}
     let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400);}
     const room=body?.room&&typeof body.room==='object'?body.room:null;if(!room)return this.json({ok:false,error:'missing-room'},400);
     await this.state.storage.sql.exec('INSERT INTO site_state (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value','room:'+code,JSON.stringify({...room,code,updated_at:Date.now()}));
@@ -103,7 +103,7 @@ class UsernameRegistry {
     const key = username.toLowerCase();
     const account = await this.state.storage.sql.exec(
       'SELECT username, account_token FROM accounts WHERE username = ?', key
-    ).one();
+    ).toArray()[0];
     if (!account || account.account_token !== token) return this.json({ ok: false, error: 'unauthorized' }, 401);
 
     const gameKey = gameName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 120) || 'game';
@@ -169,7 +169,7 @@ class UsernameRegistry {
     const key = username.toLowerCase();
     const account = await this.state.storage.sql.exec(
       'SELECT username, created_at FROM accounts WHERE username = ?', key
-    ).one();
+    ).toArray()[0];
     if (!account) return this.json({ ok: false, error: 'not-found' }, 404);
     const games = await this.state.storage.sql.exec(
       'SELECT game_name, opens, last_opened FROM activity WHERE username = ? ORDER BY last_opened DESC',
@@ -423,7 +423,7 @@ class UsernameRegistry {
     const read = async (key, fallback) => {
       const row = await this.state.storage.sql.exec(
         'SELECT value FROM site_state WHERE key = ?', key
-      ).one();
+      ).toArray()[0];
       if (!row) return fallback;
       try { return JSON.parse(row.value); } catch (_) { return fallback; }
     };

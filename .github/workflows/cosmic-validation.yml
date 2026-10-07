@@ -54,9 +54,10 @@ jobs:
         run: |
           set -euo pipefail
           body="$(mktemp)"
+          headers="$(mktemp)"
           url="$COSMIC_API_ORIGIN/api/cosmic-profile?username=__cosmic_validation__&account_token=__cosmic_validation__"
-          status="$(curl -sS -o "$body" -w "%{http_code}" "$url")"
-          type="$(curl -sSI "$url" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print tolower($2); exit}')"
+          status="$(curl -sS -D "$headers" -o "$body" -w "%{http_code}" "$url")"
+          type="$(tr -d '\r' < "$headers" | awk -F': ' 'tolower($1)=="content-type"{print tolower($2); exit}')"
           echo "Cosmic Cloud API status: $status"
           echo "Cosmic Cloud API content-type: $type"
           cat "$body"

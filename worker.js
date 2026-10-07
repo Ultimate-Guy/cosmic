@@ -12,6 +12,8 @@ class UsernameRegistry {
         'CREATE TABLE IF NOT EXISTS activity (username TEXT NOT NULL, game_key TEXT NOT NULL, game_name TEXT NOT NULL, opens INTEGER NOT NULL DEFAULT 0, last_opened INTEGER NOT NULL, PRIMARY KEY (username, game_key))'
       );
       await this.state.storage.sql.exec('CREATE TABLE IF NOT EXISTS profiles (username TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL)');
+      try { await this.state.storage.sql.exec('ALTER TABLE accounts ADD COLUMN password_salt TEXT'); } catch (_) {}
+      try { await this.state.storage.sql.exec('ALTER TABLE accounts ADD COLUMN password_hash TEXT'); } catch (_) {}
       await this.state.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS site_state (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
       );
@@ -25,7 +27,12 @@ class UsernameRegistry {
     });
   }
 
-  async reserve(username) {
+  async passwordHash(password, salt) {
+    const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
+    const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode(salt),iterations:120000,hash:'SHA-256'},key,256);
+    return Array.from(new Uint8Array(bits)).map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+  async reserve(username, password='') {
     const key = username.toLowerCase();
     const existing = await this.state.storage.sql.exec(
       'SELECT username, account_token FROM accounts WHERE username = ?', key
@@ -37,12 +44,34 @@ class UsernameRegistry {
     await this.state.storage.sql.exec(
       'INSERT INTO usernames (username, created_at) VALUES (?, ?)', key, now
     );
+    const salt=crypto.randomUUID();
+    const passwordHash=password?await this.passwordHash(password,salt):'';
     await this.state.storage.sql.exec(
-      'INSERT INTO accounts (username, created_at, account_token) VALUES (?, ?, ?)', key, now, token
+      'INSERT INTO accounts (username, created_at, account_token, password_salt, password_hash) VALUES (?, ?, ?, ?, ?)', key, now, token, salt, passwordHash
     );
     return this.json({ ok: true, username, account_token: token });
   }
 
+  async accountLogin(request) {
+    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const username=typeof body?.username==='string'?body.username.trim():''; const password=typeof body?.password==='string'?body.password:'';
+    if(!username||!password)return this.json({ok:false,error:'missing-fields'},400);
+    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT username,account_token,password_salt,password_hash FROM accounts WHERE username = ?',key).toArray()[0];
+    if(!account)return this.json({ok:false,error:'invalid-credentials'},401);
+    if(!account.password_hash||!account.password_salt)return this.json({ok:false,error:'cloud-login-not-enabled'},409);
+    if(await this.passwordHash(password,account.password_salt)!==account.password_hash)return this.json({ok:false,error:'invalid-credentials'},401);
+    return this.json({ok:true,username:account.username,account_token:account.account_token});
+  }
+  async accountPassword(request) {
+    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const username=typeof body?.username==='string'?body.username.trim():''; const token=typeof body?.account_token==='string'?body.account_token:''; const password=typeof body?.password==='string'?body.password:'';
+    if(!username||!token||password.length<6)return this.json({ok:false,error:'missing-fields'},400);
+    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).toArray()[0];
+    if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
+    const salt=crypto.randomUUID(); const hash=await this.passwordHash(password,salt);
+    await this.state.storage.sql.exec('UPDATE accounts SET password_salt=?, password_hash=? WHERE username=?',salt,hash,key);
+    return this.json({ok:true});
+  }
   async cloudProfile(request) {
     let username='', token='';
     if (request.method === 'GET') {
@@ -659,6 +688,8 @@ class UsernameRegistry {
       if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) return this.json({ ok: false, error: 'invalid-username' }, 400);
       return this.reserve(username);
     }
+    if (url.pathname === '/login' && request.method === 'POST') return this.accountLogin(request);
+    if (url.pathname === '/password' && request.method === 'POST') return this.accountPassword(request);
     if (url.pathname === '/profile' && request.method === 'GET') return this.cloudProfile(request);
     if (url.pathname === '/profile' && request.method === 'POST') return this.cloudProfileWrite(request);
     if (url.pathname === '/events' && request.method === 'GET') return this.eventState(request);
@@ -1143,6 +1174,12 @@ export default {
     if (url.pathname === '/api/hub-diagnostics') return handleHubDiagnostics(request, env);
     if (url.pathname === '/api/ai') return handleAI(request, env);
     if (url.pathname === '/api/admin/auth' || url.pathname === '/api/admin-auth') return handleAdminAuth(request, env);
+    if (url.pathname === '/api/accounts/login' && request.method === 'POST') {
+      const id=env.USERNAME_REGISTRY.idFromName('global'); return env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL('/login',request.url),request));
+    }
+    if (url.pathname === '/api/accounts/password' && request.method === 'POST') {
+      const id=env.USERNAME_REGISTRY.idFromName('global'); return env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL('/password',request.url),request));
+    }
     if (url.pathname === '/api/cosmic-profile' && request.method === 'GET') {
       const username=(url.searchParams.get('username')||'').trim();
       const token=url.searchParams.get('account_token')||'';

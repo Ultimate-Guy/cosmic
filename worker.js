@@ -1146,12 +1146,16 @@ export default {
     if (url.pathname === '/api/cosmic-profile' && request.method === 'GET') {
       const username=(url.searchParams.get('username')||'').trim();
       const token=url.searchParams.get('account_token')||'';
-      const id=env.USERNAME_REGISTRY.idFromName('global');
-      return env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL('/profile',request.url),{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({username,account_token:token})
-      }));
+      try {
+        const id=env.USERNAME_REGISTRY.idFromName('global');
+        return await env.USERNAME_REGISTRY.get(id).fetch(new Request(new URL('/profile',request.url),{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({username,account_token:token})
+        }));
+      } catch (error) {
+        return jsonResponse(request,{ok:false,error:'cosmic-profile-worker-error',detail:String(error?.message||error)},500);
+      }
     }
     if (url.pathname === '/api/cosmic-events' && request.method === 'GET') {
       const id=env.USERNAME_REGISTRY.idFromName('global');

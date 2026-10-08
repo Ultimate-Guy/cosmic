@@ -35,15 +35,15 @@
   }
 
   const weeklySteps=[
-    {page:'command',selector:'.cc-news',title:'Weekly Cosmic Update',text:'This week’s Cosmic Tour highlights the newest features added to Cosmic. The current tour focuses on the eight major upgrades: Spaces, Cloud Profiles, Game Foundry, Compatibility Engine, Deployment Shield, Arcade Network, Game Rooms, and the Universal Runtime.'},
-    {page:'command',selector:'.cc-actions [data-action="settings"]',title:'Cosmic Spaces',text:'Cosmic Spaces turns Cosmic into a workspace where Games, Apps, YouTube, and other surfaces can coexist as movable, resizable windows that can be minimized and restored.'},
-    {page:'games',selector:'#cosmic-account',title:'Cosmic Cloud Profiles',text:'Cloud Profiles let your Cosmic account sync favorites, recent games, missions, settings, playlists, statistics, capsules, dashboard customization, and update state across devices.'},
-    {page:'games',selector:'.play-btn',title:'Cosmic Foundry',text:'The Game Foundry is the developer import pipeline: scan a source, detect its entry and assets, normalize it, wrap it, validate it, preview it, and only then create a registry entry.'},
-    {page:'game',selector:'#cosmic-wrapper-controls',title:'Compatibility Engine',text:'The Compatibility Engine gives games runtime-specific adapters for paths, document.write, external scripts, resizing, focus, service workers, asset rewrites, and launch fallbacks.'},
-    {page:'command',selector:'.cc-news',title:'Deployment Shield',text:'Deployment Shield is the pre-publish safety gate. It verifies the registry, critical assets, core Cosmic surfaces, deployment consistency, and representative game launches before a build can publish.'},
-    {page:'command',selector:'.cc-news',title:'Cosmic Arcade Network',text:'Arcade Network adds server-backed events with event windows, progress, leaderboards, featured games, badges, announcements, countdowns, and admin controls.'},
-    {page:'command',selector:'.cc-news',title:'Cosmic Game Rooms',text:'Game Rooms provide shared spaces with join codes, shared game and YouTube queues, room status, synchronized announcements, and host controls.'},
-    {page:'command',selector:'.cc-actions [data-action="quick"]',title:'Cosmic Universal Runtime',text:'The Universal Runtime gives games, apps, YouTube, external pages, media, and future services one common launch model for controls, permissions, history, fullscreen, recovery, and analytics.'}
+    {page:'command',selector:'#cc-root',title:'What’s New This Week',text:'This is Cosmic’s weekly update tour. It keeps existing users up to date with the newest features without replacing the normal first-time tour.'},
+    {page:'command',selector:'#cc-root',title:'Cosmic Spaces',text:'Spaces lets Cosmic treat Games, Apps, YouTube, and other surfaces as a workspace instead of making every surface replace the previous one.'},
+    {page:'command',selector:'#cc-root',title:'Cosmic Cloud Profiles',text:'Cloud Profiles make your account useful across devices: favorites, recent games, missions, settings, playlists, statistics, capsules, dashboard customization, and update state can sync.'},
+    {page:'command',selector:'#cc-root',title:'Cosmic Foundry',text:'Foundry is the safer developer import pipeline: scan a source, detect its entry and assets, normalize it, wrap it, validate it, preview it, and only then create a registry entry.'},
+    {page:'command',selector:'#cc-root',title:'Compatibility Engine',text:'The Compatibility Engine gives individual games runtime adapters for legacy paths, scripts, resizing, focus, service workers, asset rewriting, and launch fallbacks.'},
+    {page:'command',selector:'#cc-root',title:'Deployment Shield',text:'Deployment Shield is a hard pre-publish gate that checks the registry, assets, core pages, mirrors, shell, and representative game launches before a build can publish.'},
+    {page:'command',selector:'#cc-root',title:'Cosmic Arcade Network',text:'Arcade Network adds real server-backed events with schedules, progress, leaderboards, featured games, badges, announcements, countdowns, and admin controls.'},
+    {page:'command',selector:'#cc-root',title:'Cosmic Game Rooms',text:'Game Rooms let people share a room with a join code, shared queues, room status, announcements, and host controls. You can always leave a room from its room panel.'},
+    {page:'command',selector:'#cc-root',title:'Cosmic Universal Runtime',text:'The Universal Runtime gives games, apps, YouTube, external pages, media, and future Cosmic services one common launch model for controls, permissions, history, fullscreen, recovery, and analytics.'}
   ];
 
   const steps=[
@@ -69,6 +69,8 @@
     {page:'games',selector:'#cosmic-portals',title:'Explore Cosmic',text:'Cosmic also has local discovery tools, category sections, achievements, backups, diagnostics, and more. This tour has shown the main new areas; the rest is there to explore.'}
   ];
 
+  // New users always learn the latest feature set first; returning users use the separate weekly tour.
+  const onboardingSteps=[...weeklySteps,...steps];
   const findStepForPage=step=>{
     if(step.page==='command' && isCommandCenter && !isCloakShell)return true;
     if(step.page==='cloak' && isCloakShell)return true;
@@ -80,9 +82,10 @@
 
   function stepIndex(title){return steps.findIndex(s=>s.title===title);}
   function getCurrentStep(){
-    let i=Math.max(0,Math.min(steps.length-1,Number(state.step)||0));
+    const tourSteps=state.mode==='weekly'?weeklySteps:onboardingSteps;
+    let i=Math.max(0,Math.min(tourSteps.length-1,Number(state.step)||0));
     for(let n=0;n<steps.length;n++){
-      if(findStepForPage(steps[i]))return i;
+      if(findStepForPage(tourSteps[i]))return i;
       i=(i+1)%steps.length;
     }
     return -1;
@@ -127,7 +130,8 @@
   function position(){
     const i=getCurrentStep();
     if(i<0){removeTour();return;}
-    const step=steps[i];
+    const tourSteps=state.mode==='weekly'?weeklySteps:onboardingSteps;
+    const step=tourSteps[i];
     const target=resolveTarget(step);
     if(!target){
       setTimeout(position,350);
@@ -243,13 +247,22 @@
     });
   }
 
-  function startWeeklyTour(){
-    if(weeklyAlreadyShown)return;
+  function addWeeklyLauncher(){
+    if(!isCommandCenter||isCloakShell||document.getElementById('cosmic-weekly-tour-launcher'))return;
+    const host=document.createElement('div');host.id='cosmic-weekly-tour-launcher';
+    host.style.cssText='position:fixed;right:18px;bottom:18px;z-index:2147483000;display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid #2dccff;border-radius:12px;background:rgba(4,15,23,.96);box-shadow:0 12px 40px #0008;font:12px system-ui;color:#dff8ff;';
+    host.innerHTML='<span><b>✦ What’s New</b><br><small>This week in Cosmic</small></span><button id="cosmic-weekly-tour-open" style="border:1px solid #2dccff;border-radius:8px;padding:7px 10px;background:#2dccff;color:#031721;font-weight:800;cursor:pointer">Tour</button>';
+    document.body.appendChild(host);
+    host.querySelector('#cosmic-weekly-tour-open').onclick=()=>startWeeklyTour(true);
+  }
+
+  function startWeeklyTour(manual=false){
+    if(weeklyAlreadyShown&&!manual)return;
     const weekly={active:true,step:0,version:WEEKLY_VERSION,week:weekKey};
     try{localStorage.setItem(WEEKLY_STATE_KEY,JSON.stringify(weekly))}catch(_){}
     const originalSteps=steps;
     steps.length=0; weeklySteps.forEach(s=>steps.push(s));
-    state.active=true;state.step=0;state.opens=MAX_OPENS;
+    state.active=true;state.mode='weekly';state.step=0;state.opens=Math.max(state.opens,MAX_OPENS);
     setTimeout(position,250);
     window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(position,80)});
     window.addEventListener('scroll',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(position,80)},{passive:true});
@@ -276,6 +289,7 @@
     saveState(state);
   }
 
+  addWeeklyLauncher();
   if(!weeklyAlreadyShown && !state.active && state.opens>=MAX_OPENS){
     startWeeklyTour();
   }else{

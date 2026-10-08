@@ -3,8 +3,7 @@
  * Managed automatically by GitHub Actions Automation.
  */
 const ContentModerator = (() => {
-    // The GitHub Action will automatically overwrite the array below.
-    // DYNAMIC_ARRAY_PLACEHOLDER
+    // Generated from scripts/moderator-blocklist.json by update-moderator.yml.
     const DEFAULT_BLOCKLIST = ["proxy", "vpn", "killing", "games"]; 
 
     const CHARACTER_MAP = {
@@ -24,11 +23,21 @@ const ContentModerator = (() => {
         return translated.replace(/[^a-z0-9]/g, '');
     }
 
-    function structuralSanitize(text, word) {
+    function escapeRegExp(value) {
+        return value.replace(/[.*+?^${}()|[\]\\]/g, '\\    function structuralSanitize(text, word) {
         if (word.length <= 2) return text;
         const midpoint = Math.floor(word.length / 2);
         const structureSafeWord = word.substring(0, midpoint) + '-' + word.substring(midpoint + 1);
         const safeRegex = new RegExp(word.split('').join('[-_\\s]*'), 'gi');
+        return text.replace(safeRegex, structureSafeWord);
+    }');
+    }
+
+    function structuralSanitize(text, word) {
+        if (word.length <= 2) return text;
+        const midpoint = Math.floor(word.length / 2);
+        const structureSafeWord = word.substring(0, midpoint) + '-' + word.substring(midpoint + 1);
+        const safeRegex = new RegExp(escapeRegExp(word).split('').join('[-_\\s]*'), 'gi');
         return text.replace(safeRegex, structureSafeWord);
     }
 

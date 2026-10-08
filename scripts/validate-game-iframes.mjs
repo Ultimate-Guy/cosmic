@@ -6,7 +6,8 @@ import fs from 'node:fs';
 const REGISTRIES = ['pages/lessons/games.json', 'pages/lessons/ugs-games.json'];
 const GAME_ORIGIN = process.env.COSMIC_GAME_ORIGIN || 'https://cosmicv2.v75ultimate.workers.dev';
 const TARGET_CONCURRENCY = Number(process.env.COSMIC_TARGET_CONCURRENCY || 48);
-const HTTP_TIMEOUT = Number(process.env.COSMIC_GAME_HTTP_TIMEOUT || 6000);
+const HTTP_TIMEOUT = Number(process.env.COSMIC_GAME_HTTP_TIMEOUT || 10000);
+const TARGET_RETRIES = Number(process.env.COSMIC_TARGET_RETRIES || 2);
 const BROWSER_CONCURRENCY = Number(process.env.COSMIC_BROWSER_CONCURRENCY || 8);
 const NAV_TIMEOUT = Number(process.env.COSMIC_GAME_NAV_TIMEOUT || 5000);
 const FRAME_WAIT = Number(process.env.COSMIC_GAME_FRAME_WAIT || 2500);
@@ -96,42 +97,50 @@ function sampleGames(games) {
 async function checkTarget(game) {
   const name = String(game.name || '').trim() || '<unnamed>';
   const url = targetUrl(game);
-  const result = {name, url, ok:false, status:null, contentType:null, reason:null};
+  const result = {name, url, ok:false, status:null, contentType:null, reason:null, attempts:0};
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), HTTP_TIMEOUT);
+  for (let attempt = 0; attempt <= TARGET_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), HTTP_TIMEOUT);
+    let retryable = false;
 
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      redirect: 'follow',
-      signal: controller.signal,
-      headers: {'User-Agent':'Cosmic-Game-Validator/1.0','Cache-Control':'no-cache'},
-    });
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: {'User-Agent':'Cosmic-Game-Validator/1.0','Cache-Control':'no-cache'},
+      });
 
-    result.status = response.status;
-    result.contentType = response.headers.get('content-type') || '';
+      result.attempts = attempt + 1;
+      result.status = response.status;
+      result.contentType = response.headers.get('content-type') || '';
+      try { await response.body?.cancel(); } catch (_) {}
 
-    try { await response.body?.cancel(); } catch (_) {}
-
-    if (!response.ok) {
-      result.reason = 'target returned HTTP ' + response.status;
-      return result;
+      if (!response.ok) {
+        result.reason = 'target returned HTTP ' + response.status;
+        retryable = response.status === 408 || response.status === 425 ||
+          response.status === 429 || response.status >= 500;
+      } else if (result.contentType && !/text\/html|application\/xhtml\+xml/i.test(result.contentType)) {
+        result.reason = 'target did not return HTML content (' + result.contentType + ')';
+      } else {
+        result.ok = true;
+        result.reason = null;
+        return result;
+      }
+    } catch (e) {
+      result.attempts = attempt + 1;
+      result.reason = e.name === 'AbortError' ? 'target request timed out' : e.message;
+      retryable = true;
+    } finally {
+      clearTimeout(timer);
     }
 
-    if (result.contentType && !/text\/html|application\/xhtml\+xml/i.test(result.contentType)) {
-      result.reason = 'target did not return HTML content (' + result.contentType + ')';
-      return result;
-    }
-
-    result.ok = true;
-    return result;
-  } catch (e) {
-    result.reason = e.name === 'AbortError' ? 'target request timed out' : e.message;
-    return result;
-  } finally {
-    clearTimeout(timer);
+    if (!retryable || attempt === TARGET_RETRIES) return result;
+    await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)));
   }
+
+  return result;
 }
 
 async function runTargetChecks(games) {

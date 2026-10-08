@@ -112,15 +112,44 @@ class UsernameRegistry {
     return this.json({ok:true,event:row?.value?JSON.parse(row.value):null});
   }
   async room(request) {
-    const url=new URL(request.url); const code=url.pathname.split('/').filter(Boolean).pop().toUpperCase();
+    const url=new URL(request.url);
+    const code=url.pathname.split('/').filter(Boolean).pop().toUpperCase();
     if(!/^[A-Z0-9]{4,8}$/.test(code))return this.json({ok:false,error:'invalid-code'},400);
-    if(request.method==='GET'){const row=await this.state.storage.sql.exec('SELECT value FROM site_state WHERE key = ?', 'room:'+code).toArray()[0];return this.json({ok:true,room:row?.value?JSON.parse(row.value):null});}
-    let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400);}
-    const room=body?.room&&typeof body.room==='object'?body.room:null;if(!room)return this.json({ok:false,error:'missing-room'},400);
-    await this.state.storage.sql.exec('INSERT INTO site_state (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value','room:'+code,JSON.stringify({...room,code,updated_at:Date.now()}));
-    return this.json({ok:true,room:{...room,code}});
+    const key='room:'+code;
+    const readRoom=async()=>{const row=await this.state.storage.sql.exec('SELECT value FROM site_state WHERE key = ?',key).toArray()[0];if(!row?.value)return null;try{return JSON.parse(row.value)||null}catch(_){return null}};
+    const writeRoom=async(room)=>{await this.state.storage.sql.exec('INSERT INTO site_state (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',key,JSON.stringify(room));return room};
+    if(request.method==='GET'){const room=await readRoom();return this.json({ok:true,room})}
+    let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
+    const action=body?.action||'get';
+    const incoming=body?.player&&typeof body.player==='object'?body.player:null;
+    if(action==='create'){
+      if(await readRoom())return this.json({ok:false,error:'room-exists'},409);
+      if(!incoming?.id)return this.json({ok:false,error:'missing-player'},400);
+      const now=Date.now();
+      const room={code,name:String(body?.name||'Cosmic Room').trim().slice(0,80)||'Cosmic Room',host:String(incoming.id),queue:[],watch_queue:[],status:'open',players:[{id:String(incoming.id),name:String(incoming.name||'Guest').trim().slice(0,32)||'Guest',joined_at:now}],created_at:now,updated_at:now};
+      await writeRoom(room);return this.json({ok:true,room});
+    }
+    const room=await readRoom();if(!room)return this.json({ok:false,error:'room-not-found'},404);
+    if(action==='join'){
+      if(!incoming?.id)return this.json({ok:false,error:'missing-player'},400);
+      const players=Array.isArray(room.players)?room.players:[];if(!players.some(p=>String(p.id)===String(incoming.id)))players.push({id:String(incoming.id),name:String(incoming.name||'Guest').trim().slice(0,32)||'Guest',joined_at:Date.now()});
+      room.players=players;room.updated_at=Date.now();await writeRoom(room);return this.json({ok:true,room});
+    }
+    if(action==='leave'){
+      if(!incoming?.id)return this.json({ok:false,error:'missing-player'},400);
+      room.players=(Array.isArray(room.players)?room.players:[]).filter(p=>String(p.id)!==String(incoming.id));
+      if(String(room.host)===String(incoming.id))room.host=room.players[0]?.id||null;
+      room.updated_at=Date.now();
+      if(!room.players.length){await this.state.storage.sql.exec('DELETE FROM site_state WHERE key = ?',key);return this.json({ok:true,left:true,room:null})}
+      await writeRoom(room);return this.json({ok:true,left:true,room});
+    }
+    if(action==='update'){
+      if(!incoming?.id||String(room.host)!==String(incoming.id))return this.json({ok:false,error:'host-required'},403);
+      if(body?.room&&typeof body.room==='object'){room.queue=Array.isArray(body.room.queue)?body.room.queue:room.queue;room.watch_queue=Array.isArray(body.room.watch_queue)?body.room.watch_queue:room.watch_queue;room.status=String(body.room.status||room.status);room.updated_at=Date.now();await writeRoom(room)}
+      return this.json({ok:true,room});
+    }
+    return this.json({ok:false,error:'unknown-action'},400);
   }
-
   async activity(request) {
     let body;
     try { body = await request.json(); } catch { return this.json({ ok: false, error: 'invalid-json' }, 400); }

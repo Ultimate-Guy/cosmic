@@ -1086,10 +1086,30 @@ function rewriteGfilesHtml(html, source, folder) {
 
 async function serveUgs(request) {
   const url = new URL(request.url);
-  const match = url.pathname.match(/^\/ugs\/([A-Za-z0-9._-]+)$/);
+  const match = url.pathname.match(/^\/ugs\/(.+)$/);
   if (!match) return null;
 
-  const upstreamUrl = 'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/' + match[1];
+  let filename = '';
+  try {
+    filename = decodeURIComponent(match[1]);
+  } catch (_) {
+    return new Response('Invalid UGS path.', {
+      status: 400,
+      headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' }
+    });
+  }
+
+  if (!filename || filename.includes('/') || filename.includes('\\') || filename === '.' || filename === '..') {
+    return new Response('Invalid UGS path.', {
+      status: 400,
+      headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' }
+    });
+  }
+
+  const upstreamUrl =
+    'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/' +
+    encodeURIComponent(filename);
+
   const upstream = await fetch(upstreamUrl, {
     headers: {
       'User-Agent': 'Cosmic-UGS-Runtime',
@@ -1109,7 +1129,17 @@ async function serveUgs(request) {
   headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
   headers.set('Content-Type', 'text/html; charset=UTF-8');
   headers.delete('Set-Cookie');
-  return new Response(await upstream.text(), { status: upstream.status, headers });
+  headers.delete('X-Frame-Options');
+  headers.delete('Content-Security-Policy');
+  headers.delete('Content-Security-Policy-Report-Only');
+
+  let html = await upstream.text();
+  if (!/<base\b/i.test(html) && /<head\b/i.test(html)) {
+    const base = '<base href="https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/">';
+    html = html.replace(/<head\b[^>]*>/i, match => match + base);
+  }
+
+  return new Response(html, { status: upstream.status, headers });
 }
 
 async function serveGfiles(request, env) {

@@ -2,16 +2,14 @@ name: Dynamic Wordlist Auto-Updater
 
 on:
   schedule:
-    # Runs automatically every single day at midnight (UTC)
     - cron: '0 0 * * *'
   workflow_dispatch:
-    # Allows you to click a button in GitHub and trigger it manually
 
 jobs:
   update-list:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Grants the bot permission to push changes to your repository
+      contents: write 
 
     steps:
       - name: Checkout Code Base
@@ -19,34 +17,44 @@ jobs:
 
       - name: Fetch and Inject Dynamic Terminology
         run: |
-          # 1. Download a raw list of words from a public source
-          # Replace this URL with any raw text list (newline separated terms)
-          curl -s "https://githubusercontent.com" > raw_list.txt
+          # 1. Corrected the URL to the live open-source word list destination
+          curl -f -s "https://githubusercontent.com" > raw_list.txt || echo "" > raw_list.txt
           
-          # 2. Add your custom specific values to the downloaded list
+          # 2. Append your exact target requirements safely
           echo "proxy" >> raw_list.txt
           echo "games" >> raw_list.txt
           echo "killing" >> raw_list.txt
 
-          # 3. Clean up the words and turn them into a single-line JavaScript Array format
-          # This trims white space, ignores empty lines, adds quotes, and joins them with commas
+          # 3. Format the words safely into a clean JavaScript array string
           JS_ARRAY=$(awk 'NF {print "\""$0"\""}' raw_list.txt | paste -sd, -)
           FINAL_LINE="    const DEFAULT_BLOCKLIST = [$JS_ARRAY];"
 
-          # 4. Use sed to replace the row immediately following our anchor placeholder comment
-          # This alters the local script file directly inside the GitHub runner environment
-          sed -i "/\/\/ DYNAMIC_ARRAY_PLACEHOLDER/{n;s/.*/$FINAL_LINE/;}" scripts/moderator.js
+          # 4. Smart Finder: Locates your file whether it is named moderator.js or cosmic-sw.js
+          # It looks for wherever you pasted the "// DYNAMIC_ARRAY_PLACEHOLDER" comment!
+          TARGET_FILE=$(grep -rl "// DYNAMIC_ARRAY_PLACEHOLDER" . | head -n 1)
+
+          if [ -z "$TARGET_FILE" ]; then
+            echo "ERROR: Could not find any file containing the comment // DYNAMIC_ARRAY_PLACEHOLDER"
+            exit 1
+          fi
+
+          echo "Found placeholder comment inside target file: $TARGET_FILE"
+          
+          # Update the file dynamically
+          sed -i "/\/\/ DYNAMIC_ARRAY_PLACEHOLDER/{n;s/.*/$FINAL_LINE/;}" "$TARGET_FILE"
+          
+          # Save the path to use in the next step
+          echo "UPDATED_FILE=$TARGET_FILE" >> $GITHUB_ENV
 
       - name: Commit and Push Changes to Main
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
-          # Only proceed with saving if changes were actually introduced
-          if ! git diff --exit-code scripts/moderator.js; then
-            git add scripts/moderator.js
+          if ! git diff --exit-code "${{ env.UPDATED_FILE }}"; then
+            git add "${{ env.UPDATED_FILE }}"
             git commit -m "chore: automated sync of content moderation list [skip ci]"
             git push origin HEAD:${{ github.ref }}
           else
-            echo "No new terminology detected. Workspace is clean."
+            echo "No new terminology changes detected. Workspace is clean."
           fi

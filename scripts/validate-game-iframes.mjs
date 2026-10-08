@@ -76,21 +76,27 @@ function sampleGames(games) {
   if (games.length <= BROWSER_SAMPLE) return games;
   const chosen = [];
   const seen = new Set();
-
   const add = (game) => {
     if (!game || seen.has(game.name)) return;
     seen.add(game.name);
     chosen.push(game);
   };
 
+  // Keep known UGS iframe failures in every smoke run; uniform sampling alone
+  // repeatedly missed them, allowing a broken UGS launch path to pass.
+  const regressions = [
+    '2048', 'ballistic', 'unpkg', 'golfsunday',
+    'goodbigtowertinysquare', 'googledino', 'pvz',
+    'soccerbros', 'tailsskypatrol', 'codeorg (UGS)'
+  ];
+  for (const name of regressions) add(games.find(game => game.name === name));
+
   add(games[0]);
   add(games[games.length - 1]);
 
-  const step = Math.max(1, Math.floor(games.length / (BROWSER_SAMPLE - 2)));
-  for (let i = step; i < games.length - 1 && chosen.length < BROWSER_SAMPLE; i += step) {
-    add(games[i]);
-  }
-
+  const remaining = Math.max(0, BROWSER_SAMPLE - chosen.length);
+  const step = Math.max(1, Math.floor(games.length / Math.max(1, remaining)));
+  for (let i = 0; i < games.length && chosen.length < BROWSER_SAMPLE; i += step) add(games[i]);
   return chosen.slice(0, BROWSER_SAMPLE);
 }
 

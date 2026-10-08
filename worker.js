@@ -1086,10 +1086,10 @@ function rewriteGfilesHtml(html, source, folder) {
 
 async function serveUgs(request) {
   const url = new URL(request.url);
-  const match = url.pathname.match(/^\/ugs\/(UGS-Files\/[A-Za-z0-9._-]+)$/);
+  const match = url.pathname.match(/^\/ugs\/([A-Za-z0-9._-]+)$/);
   if (!match) return null;
 
-  const upstreamUrl = 'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/' + match[1];
+  const upstreamUrl = 'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/' + match[1];
   const upstream = await fetch(upstreamUrl, {
     headers: {
       'User-Agent': 'Cosmic-UGS-Runtime',

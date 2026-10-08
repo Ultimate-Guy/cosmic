@@ -1097,6 +1097,12 @@ function decodeSafeUgsPath(encodedPath, allowedRoot) {
   return parts;
 }
 
+function rewriteUgsTextAsset(text, origin) {
+  return text
+    .replace(/(?:https?:)?\/\/(?:cdn|fastly|gcore)\.jsdelivr\.net\//gi, origin + '/ugs-cdn/')
+    .replace(/https?:\/\/raw\.githubusercontent\.com\/Ultimate-Guy\/cosmicgames\/main\//gi, origin + '/ugs-repo/');
+}
+
 async function proxyUgsAsset(request, prefix, upstreamBase, allowedRoot) {
   const url = new URL(request.url);
   if (!url.pathname.startsWith(prefix)) return null;
@@ -1114,6 +1120,16 @@ async function proxyUgsAsset(request, prefix, upstreamBase, allowedRoot) {
   headers.delete('X-Frame-Options');
   headers.delete('Content-Security-Policy');
   headers.delete('Content-Security-Policy-Report-Only');
+
+  const contentType = headers.get('Content-Type') || '';
+  if (upstream.ok && /(?:text\/|javascript|ecmascript|json|xml)/i.test(contentType)) {
+    const body = rewriteUgsTextAsset(await upstream.text(), url.origin);
+    headers.delete('Content-Length');
+    headers.delete('Content-Encoding');
+    headers.delete('ETag');
+    headers.delete('Content-MD5');
+    return new Response(body, {status:upstream.status,statusText:upstream.statusText,headers});
+  }
   return new Response(upstream.body, {status:upstream.status,statusText:upstream.statusText,headers});
 }
 

@@ -58,6 +58,10 @@ function readGames() {
 
 function targetUrl(game) {
   const rawPath = String(game.path || '');
+  const ugsMatch = rawPath.match(/^https:\/\/cdn\.jsdelivr\.net\/gh\/Ultimate-Guy\/cosmicgames@main\/UGS-Files\/([^/]+)$/i);
+  if (ugsMatch) {
+    return GAME_ORIGIN.replace(/\/+$/, '') + '/ugs/' + ugsMatch[1];
+  }
   if (/^https?:\/\//i.test(rawPath)) return rawPath;
   return GAME_ORIGIN.replace(/\/+$/, '') + '/' + rawPath.replace(/^\/+/, '');
 }

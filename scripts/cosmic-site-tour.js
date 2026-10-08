@@ -159,7 +159,8 @@
   }
 
   function setStep(next){
-    state.step=Math.max(0,Math.min(steps.length-1,next));
+    const tourSteps=state.mode==='weekly'?weeklySteps:onboardingSteps;
+    state.step=Math.max(0,Math.min(tourSteps.length-1,next));
     state.active=true;
     state.awaitingEntry=false;
     saveState(state);
@@ -169,13 +170,14 @@
 
   function move(delta){
     const current=getCurrentStep();
+    const tourSteps=state.mode==='weekly'?weeklySteps:onboardingSteps;
     if(current<0)return;
     let next=current+delta;
     if(next<0){next=0;}
-    if(next>=steps.length){
-      state.active=false;state.awaitingEntry=false;saveState(state);removeTour();return;
+    if(next>=tourSteps.length){
+      state.active=false;state.awaitingEntry=false;state.mode=null;saveState(state);removeTour();return;
     }
-    const targetPage=steps[next].page;
+    const targetPage=tourSteps[next].page;
     if((targetPage==='command'&&(!isCommandCenter||isCloakShell))||(targetPage==='cloak'&&!isCloakShell)||(targetPage==='settings'&&!isSettings)||(targetPage==='games'&&!isGames)||(targetPage==='game'&&!isGameShell)){
       state.step=next;state.active=true;saveState(state);
       if(targetPage==='cloak'){
@@ -269,6 +271,7 @@
   }
 
   function start(){
+    if(state.mode==='weekly')return;
     if(state.opens>=MAX_OPENS && !state.active)return;
     if(!state.active && !state.awaitingEntry)return;
     bindSpecialClicks();

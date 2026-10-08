@@ -4,7 +4,6 @@
  */
 const ContentModerator = (() => {
     const DEFAULT_BLOCKLIST = ["proxy", "vpn", "killing", "games"];
-
     const CHARACTER_MAP = {
         '4': 'a', '@': 'a', '0': 'o', '1': 'i', '!': 'i', '3': 'e',
         '5': 's', '$': 's', '7': 't', 'x': 'x', '9': 'g', '8': 'b'

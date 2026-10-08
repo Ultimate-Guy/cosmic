@@ -27,7 +27,7 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
-          for f in [Path('pages/lessons/games.json'), Path('apps/apps.json')]:
+          for f in [Path('pages/lessons/games.json'), Path('pages/lessons/ugs-games.json'), Path('apps/apps.json')]:
               data=json.loads(f.read_text())
               assert isinstance(data,list), f'{f} must contain an array'
               names=[str(x.get('name','')).strip().lower() for x in data]
@@ -44,6 +44,28 @@ jobs:
           test -f pages/lessons/lessons.html
           test -f pages/lessons/game-shell.html
           echo "Core Cosmic files are present."
+
+      - name: Check account gate and moderation scripts
+        run: |
+          set -euo pipefail
+          node --check scripts/cosmic-required-account.js
+          node --check scripts/moderator.js
+          node --check worker.js
+          node - <<'JS'
+          const moderator = require('./scripts/moderator.js');
+          const flagged = moderator.clean('proxy');
+          const normal = moderator.clean('hello cosmic');
+          if (!flagged.isFlagged) throw new Error('Moderator failed to flag a configured term.');
+          if (normal.isFlagged) throw new Error('Moderator flagged normal text.');
+          console.log('Account gate, Worker, and moderator syntax checks passed.');
+          JS
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          words=json.loads(Path('scripts/moderator-blocklist.json').read_text(encoding='utf-8'))
+          assert isinstance(words,list) and words and all(isinstance(w,str) and w.strip() for w in words)
+          print(f'Moderator source list valid: {len(words)} terms.')
+          PY
 
       - name: Validate all original games
         run: python3 scripts/validate-games.py

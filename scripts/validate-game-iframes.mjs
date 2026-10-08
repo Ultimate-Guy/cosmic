@@ -3,7 +3,7 @@
 import { chromium } from 'playwright-core';
 import fs from 'node:fs';
 
-const REGISTRY = 'pages/lessons/games.json';
+const REGISTRIES = ['pages/lessons/games.json', 'pages/lessons/ugs-games.json'];
 const GAME_ORIGIN = process.env.COSMIC_GAME_ORIGIN || 'https://cosmicv2.v75ultimate.workers.dev';
 const TARGET_CONCURRENCY = Number(process.env.COSMIC_TARGET_CONCURRENCY || 48);
 const HTTP_TIMEOUT = Number(process.env.COSMIC_GAME_HTTP_TIMEOUT || 6000);
@@ -47,14 +47,19 @@ async function waitForDeployment() {
 
 
 function readGames() {
-  const data = JSON.parse(fs.readFileSync(REGISTRY, 'utf8'));
-  if (!Array.isArray(data)) throw new Error('games.json must contain an array');
-  return data;
+  const games = [];
+  for (const registry of REGISTRIES) {
+    const data = JSON.parse(fs.readFileSync(registry, 'utf8'));
+    if (!Array.isArray(data)) throw new Error(registry + ' must contain an array');
+    games.push(...data.map(game => ({...game, __registry: registry})));
+  }
+  return games;
 }
 
 function targetUrl(game) {
-  const rawPath = String(game.path || '').replace(/^\/+/, '');
-  return GAME_ORIGIN.replace(/\/+$/, '') + '/' + rawPath;
+  const rawPath = String(game.path || '');
+  if (/^https?:\/\//i.test(rawPath)) return rawPath;
+  return GAME_ORIGIN.replace(/\/+$/, '') + '/' + rawPath.replace(/^\/+/, '');
 }
 
 function shellUrl(game) {
@@ -357,7 +362,7 @@ async function main() {
   const games = readGames();
   console.log('WAITING FOR LIVE DEPLOYMENT');
   await waitForDeployment();
-  console.log('FAST TARGET TEST: ' + games.length + ' games, concurrency ' + TARGET_CONCURRENCY);
+  console.log('FAST TARGET TEST: ' + games.length + ' games across ' + REGISTRIES.length + ' registries, concurrency ' + TARGET_CONCURRENCY);
 
   const targetResults = await runTargetChecks(games);
   const targetFailures = targetResults.filter(r => !r.ok);

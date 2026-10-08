@@ -1084,6 +1084,34 @@ function rewriteGfilesHtml(html, source, folder) {
   return html.replace(/(["'(])\/(?!\/)/g, '$1' + rootPrefix);
 }
 
+async function serveUgs(request) {
+  const url = new URL(request.url);
+  const match = url.pathname.match(/^\/ugs\/(UGS-Files\/[A-Za-z0-9._-]+)$/);
+  if (!match) return null;
+
+  const upstreamUrl = 'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/' + match[1];
+  const upstream = await fetch(upstreamUrl, {
+    headers: {
+      'User-Agent': 'Cosmic-UGS-Runtime',
+      'Accept': 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'
+    },
+    cf: { cacheTtl: 3600, cacheEverything: true }
+  });
+
+  if (!upstream.ok) {
+    return new Response('UGS game source not found.', {
+      status: upstream.status,
+      headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' }
+    });
+  }
+
+  const headers = new Headers(upstream.headers);
+  headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+  headers.set('Content-Type', 'text/html; charset=UTF-8');
+  headers.delete('Set-Cookie');
+  return new Response(await upstream.text(), { status: upstream.status, headers });
+}
+
 async function serveGfiles(request, env) {
   const url = new URL(request.url);
   const match = url.pathname.match(/^\/gfiles\/(gfiles|gfiles2|gfiles3|gfiles4|gfiles5)\/(.+)$/);
@@ -1255,6 +1283,10 @@ export default {
       if (url.pathname.startsWith('/gfiles/')) {
         const gfiles = await serveGfiles(request, env);
         if (gfiles) return gfiles;
+      }
+      if (url.pathname.startsWith('/ugs/')) {
+        const ugs = await serveUgs(request);
+        if (ugs) return ugs;
       }
       const hub = await serveHub(request, env);
       if (hub) return hub;

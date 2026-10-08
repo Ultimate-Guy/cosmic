@@ -152,12 +152,21 @@ html,body{margin:0;width:100%;height:100%;max-width:100%;overflow:hidden;backgro
   if(!game){location.replace(home);return;}
 
   try{
-    const url=new URL(game,location.href);
+    let url=new URL(game,location.href);
+
+    // UGS entries are authored in Ultimate-Guy/cosmicgames but were previously
+    // loaded directly from jsDelivr. Route first-party cosmicgames paths through
+    // Cosmic's own Worker so the shell does not depend on the external CDN.
+    const ugsPrefix='/gh/Ultimate-Guy/cosmicgames@main/';
+    if(url.hostname.toLowerCase()==='cdn.jsdelivr.net' && url.pathname.startsWith(ugsPrefix)){
+      const proxied=new URL(workerHost+'/ugs/'+url.pathname.slice(ugsPrefix.length),location.protocol);
+      proxied.search=url.search;
+      proxied.hash=url.hash;
+      url=proxied;
+    }
 
     // Cosmic-local game targets can use the Worker as their canonical host.
-    // External UGS/CDN targets must remain external; rewriting an external
-    // hostname (for example cdn.jsdelivr.net) to the Cosmic Worker produces
-    // a nonexistent Worker path and leaves the iframe black.
+    // External targets remain external unless they are first-party UGS content.
     const isLocalCosmicTarget = (() => {
       const host = String(url.hostname || '').toLowerCase();
       if (host === workerHost) return true;

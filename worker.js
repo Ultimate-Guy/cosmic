@@ -1084,63 +1084,80 @@ function rewriteGfilesHtml(html, source, folder) {
   return html.replace(/(["'(])\/(?!\/)/g, '$1' + rootPrefix);
 }
 
+function ugsError(message, status = 400) {
+  return new Response(message, {status, headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'no-store'}});
+}
+
+function decodeSafeUgsPath(encodedPath, allowedRoot) {
+  let parts;
+  try { parts = encodedPath.split('/').map(part => decodeURIComponent(part)); }
+  catch (_) { return null; }
+  if (!parts.length || parts.some(part => !part || part === '.' || part === '..' || part.includes('/') || part.includes('\\'))) return null;
+  if (allowedRoot && parts[0] !== allowedRoot) return null;
+  return parts;
+}
+
+async function proxyUgsAsset(request, prefix, upstreamBase, allowedRoot) {
+  const url = new URL(request.url);
+  if (!url.pathname.startsWith(prefix)) return null;
+  const parts = decodeSafeUgsPath(url.pathname.slice(prefix.length), allowedRoot);
+  if (!parts) return ugsError('Invalid UGS asset path.');
+  const upstreamUrl = new URL(upstreamBase + parts.map(encodeURIComponent).join('/'));
+  upstreamUrl.search = url.search;
+  const upstream = await fetch(upstreamUrl.href, {
+    headers: {'User-Agent':'Cosmic-UGS-Asset-Proxy/1.0','Accept':'*/*'},
+    cf: {cacheTtl:3600, cacheEverything:true}
+  });
+  const headers = new Headers(upstream.headers);
+  headers.set('Cache-Control', upstream.ok ? 'public, max-age=3600, s-maxage=86400' : 'no-store');
+  headers.delete('Set-Cookie');
+  headers.delete('X-Frame-Options');
+  headers.delete('Content-Security-Policy');
+  headers.delete('Content-Security-Policy-Report-Only');
+  return new Response(upstream.body, {status:upstream.status,statusText:upstream.statusText,headers});
+}
+
+async function serveUgsCdn(request) {
+  return proxyUgsAsset(request, '/ugs-cdn/', 'https://cdn.jsdelivr.net/', null);
+}
+
+async function serveUgsRepoAsset(request) {
+  return proxyUgsAsset(request, '/ugs-repo/', 'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/', 'UGS-Files');
+}
+
 async function serveUgs(request) {
   const url = new URL(request.url);
   const match = url.pathname.match(/^\/ugs\/(.+)$/);
   if (!match) return null;
-
-  let filename = '';
-  try {
-    filename = decodeURIComponent(match[1]);
-  } catch (_) {
-    return new Response('Invalid UGS path.', {
-      status: 400,
-      headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' }
-    });
-  }
-
-  if (!filename || filename.includes('/') || filename.includes('\\') || filename === '.' || filename === '..') {
-    return new Response('Invalid UGS path.', {
-      status: 400,
-      headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' }
-    });
-  }
-
-  const upstreamUrl =
-    'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/' +
-    encodeURIComponent(filename);
-
-  const upstream = await fetch(upstreamUrl, {
-    headers: {
-      'User-Agent': 'Cosmic-UGS-Runtime',
-      'Accept': 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'
-    },
-    cf: { cacheTtl: 3600, cacheEverything: true }
+  const parts = decodeSafeUgsPath(match[1]);
+  if (!parts || parts.length !== 1) return ugsError('Invalid UGS path.');
+  const upstreamUrl = new URL('https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/' + encodeURIComponent(parts[0]));
+  upstreamUrl.search = url.search;
+  const upstream = await fetch(upstreamUrl.href, {
+    headers: {'User-Agent':'Cosmic-UGS-Runtime','Accept':'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'},
+    cf: {cacheTtl:3600,cacheEverything:true}
   });
-
-  if (!upstream.ok) {
-    return new Response('UGS game source not found.', {
-      status: upstream.status,
-      headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' }
-    });
-  }
+  if (!upstream.ok) return ugsError('UGS game source not found.', upstream.status);
 
   const headers = new Headers(upstream.headers);
-  headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
-  headers.set('Content-Type', 'text/html; charset=UTF-8');
+  headers.set('Cache-Control','public, max-age=3600, s-maxage=86400');
+  headers.set('Content-Type','text/html; charset=UTF-8');
   headers.delete('Set-Cookie');
   headers.delete('X-Frame-Options');
   headers.delete('Content-Security-Policy');
   headers.delete('Content-Security-Policy-Report-Only');
 
   let html = await upstream.text();
+  const origin = url.origin;
+  html = html.replace(/(?:https?:)?\/\/(?:cdn|fastly|gcore)\.jsdelivr\.net\//gi, origin + '/ugs-cdn/');
+  html = html.replace(/https?:\/\/raw\.githubusercontent\.com\/Ultimate-Guy\/cosmicgames\/main\//gi, origin + '/ugs-repo/');
+  html = html.replace(/(href|src|poster|data-src)=("|')\/UGS-Files\//gi, '$1=$2' + origin + '/ugs-repo/UGS-Files/');
   if (!/<base\b/i.test(html) && /<head\b/i.test(html)) {
-    const base = '<base href="https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/">';
-    html = html.replace(/<head\b[^>]*>/i, match => match + base);
+    html = html.replace(/<head\b[^>]*>/i, head => head + '<base href="' + origin + '/ugs-repo/UGS-Files/">');
   }
-
-  return new Response(html, { status: upstream.status, headers });
+  return new Response(html, {status:upstream.status,headers});
 }
+
 
 async function serveGfiles(request, env) {
   const url = new URL(request.url);
@@ -1313,6 +1330,14 @@ export default {
       if (url.pathname.startsWith('/gfiles/')) {
         const gfiles = await serveGfiles(request, env);
         if (gfiles) return gfiles;
+      }
+      if (url.pathname.startsWith('/ugs-cdn/')) {
+        const asset = await serveUgsCdn(request);
+        if (asset) return asset;
+      }
+      if (url.pathname.startsWith('/ugs-repo/')) {
+        const asset = await serveUgsRepoAsset(request);
+        if (asset) return asset;
       }
       if (url.pathname.startsWith('/ugs/')) {
         const ugs = await serveUgs(request);

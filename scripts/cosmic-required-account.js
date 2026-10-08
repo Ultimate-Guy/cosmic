@@ -140,8 +140,16 @@
           accounts[username.toLowerCase()] = {username, salt, hash, accountToken:account.account_token, account_token:account.account_token, createdAt:Date.now()};
           write(LOCAL_ACCOUNTS_KEY, accounts);
         } else {
-          const data = await request('/api/accounts/login', {username, password:pass});
-          account = {username:data.username || username, account_token:data.account_token};
+          try {
+            const data = await request('/api/accounts/login', {username, password:pass});
+            account = {username:data.username || username, account_token:data.account_token};
+          } catch (cloudError) {
+            // Keep same-device legacy accounts usable if they already have a cloud token.
+            const legacy = read(LOCAL_ACCOUNTS_KEY, {})[username.toLowerCase()];
+            if (!legacy?.salt || !legacy?.hash || !legacy?.accountToken) throw cloudError;
+            if (await passwordHash(pass, legacy.salt) !== legacy.hash) throw cloudError;
+            account = {username:legacy.username || username, account_token:legacy.accountToken};
+          }
         }
         if (!account.account_token || !(await verify(account))) throw new Error('account-verification-failed');
         setActive(account);

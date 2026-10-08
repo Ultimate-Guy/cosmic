@@ -1103,12 +1103,17 @@ function rewriteUgsTextAsset(text, origin) {
     .replace(/https?:\/\/raw\.githubusercontent\.com\/Ultimate-Guy\/cosmicgames\/main\//gi, origin + '/ugs-repo/');
 }
 
+function encodeUgsPathPart(value) {
+  // jsDelivr needs literal @ in GitHub branch and npm scope/version paths.
+  return encodeURIComponent(value).replace(/%40/gi, '@');
+}
+
 async function proxyUgsAsset(request, prefix, upstreamBase, allowedRoot) {
   const url = new URL(request.url);
   if (!url.pathname.startsWith(prefix)) return null;
   const parts = decodeSafeUgsPath(url.pathname.slice(prefix.length), allowedRoot);
   if (!parts) return ugsError('Invalid UGS asset path.');
-  const upstreamUrl = new URL(upstreamBase + parts.map(encodeURIComponent).join('/'));
+  const upstreamUrl = new URL(upstreamBase + parts.map(encodeUgsPathPart).join('/'));
   upstreamUrl.search = url.search;
   const upstream = await fetch(upstreamUrl.href, {
     headers: {'User-Agent':'Cosmic-UGS-Asset-Proxy/1.0','Accept':'*/*'},

@@ -81,7 +81,8 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
           COSMIC_DEPLOYMENT_WAIT: "30000"
-          COSMIC_GAME_HTTP_TIMEOUT: "5000"
+          COSMIC_GAME_HTTP_TIMEOUT: "10000"
+          COSMIC_TARGET_RETRIES: "2"
           COSMIC_TARGET_CONCURRENCY: "48"
           COSMIC_BROWSER_CONCURRENCY: "8"
           COSMIC_GAME_NAV_TIMEOUT: "5000"

@@ -13,6 +13,7 @@ const NAV_TIMEOUT = Number(process.env.COSMIC_GAME_NAV_TIMEOUT || 5000);
 const FRAME_WAIT = Number(process.env.COSMIC_GAME_FRAME_WAIT || 2500);
 const LOAD_WAIT = Number(process.env.COSMIC_GAME_LOAD_WAIT || 500);
 const BROWSER_SAMPLE = Number(process.env.COSMIC_BROWSER_SAMPLE || 12);
+const UGS_ASSET_TIMEOUT = Number(process.env.COSMIC_UGS_ASSET_TIMEOUT || 15000);
 const EXPECTED_COMMIT = process.env.GITHUB_SHA || '';
 const DEPLOYMENT_URL = process.env.COSMIC_DEPLOYMENT_URL || GAME_ORIGIN.replace(/\/+$/, '') + '/deployment.json';
 
@@ -177,6 +178,15 @@ async function inspectBrowserGame(browser, game) {
   const page = await browser.newPage({viewport:{width:1365,height:768}});
   const errors = [];
   const failed = [];
+  const ugsAssetResponses = [];
+  const isUgs = /cosmicgames@main\/UGS-Files\//i.test(String(game.path || ''));
+
+  page.on('response', response => {
+    const responseUrl = response.url();
+    if (/\/ugs-cdn\/|\/ugs-repo\//i.test(responseUrl)) {
+      ugsAssetResponses.push({url:responseUrl,status:response.status()});
+    }
+  });
 
   page.on('pageerror', e => {
     if (errors.length < 5) errors.push('pageerror: ' + e.message);
@@ -202,6 +212,7 @@ async function inspectBrowserGame(browser, game) {
     iframe:null,
     errors,
     failed,
+    ugsAssetResponses,
     reason:null
   };
 
@@ -253,22 +264,27 @@ async function inspectBrowserGame(browser, game) {
     for (let attempt = 0; attempt < 4; attempt++) {
       try {
         await childFrame.waitForLoadState('domcontentloaded', {timeout: Math.max(500, FRAME_WAIT - (attempt * 500))}).catch(() => {});
-        await page.waitForTimeout(LOAD_WAIT);
+        await page.waitForTimeout(isUgs ? Math.max(LOAD_WAIT, 1800) : LOAD_WAIT);
 
         state = await childFrame.evaluate(() => {
           const doc = document;
           const body = doc.body;
           const html = doc.documentElement;
           const canvasCount = doc.querySelectorAll('canvas').length;
-          const visibleSurfaces = Array.from(
-            doc.querySelectorAll('canvas, #game, #gameContainer, #unity-container, iframe, video')
-          ).filter(el => {
+          const selector = 'canvas, video, iframe, svg, img, button, input, select, textarea, [role="button"], .tile, .game-container, #gamePlace, #board-container, .grid-container, [class*="game"], [id*="game"]';
+          const visibleSurfaces = Array.from(doc.querySelectorAll(selector)).filter(el => {
             const style = getComputedStyle(el);
             const rect = el.getBoundingClientRect();
-            return style.display !== 'none' &&
-              style.visibility !== 'hidden' &&
-              rect.width > 0 &&
-              rect.height > 0;
+            return style.display !== 'none' && style.visibility !== 'hidden' &&
+              Number(style.opacity || 1) > 0.05 && rect.width >= 8 && rect.height >= 8;
+          }).length;
+          const visibleText = (body?.innerText || '').trim().slice(0, 1200);
+          const visibleLargeElements = Array.from(doc.body?.querySelectorAll('*') || []).filter(el => {
+            const style = getComputedStyle(el);
+            const rect = el.getBoundingClientRect();
+            return style.display !== 'none' && style.visibility !== 'hidden' &&
+              Number(style.opacity || 1) > 0.05 && rect.width >= innerWidth * 0.18 &&
+              rect.height >= innerHeight * 0.12;
           }).length;
 
           return {
@@ -277,7 +293,10 @@ async function inspectBrowserGame(browser, game) {
             bodyChildren: body?.children.length || 0,
             htmlLength: html?.outerHTML?.length || 0,
             canvasCount,
-            visibleSurfaceCount: visibleSurfaces
+            visibleSurfaceCount: visibleSurfaces,
+            visibleLargeElementCount: visibleLargeElements,
+            visibleTextLength: visibleText.length,
+            visibleText: visibleText.slice(0, 220)
           };
         });
 
@@ -321,7 +340,28 @@ async function inspectBrowserGame(browser, game) {
       /ReferenceError|SyntaxError|TypeError|URIError|RangeError|Failed to load module script|uncaught/i.test(e)
     );
 
-    if (fatal && state.canvasCount === 0 && state.visibleSurfaceCount === 0) {
+    const failedUgsAssets = ugsAssetResponses.filter(asset => asset.status >= 400);
+    if (isUgs && failedUgsAssets.length) {
+      result.reason = 'UGS runtime assets failed: ' + failedUgsAssets.slice(0, 4).map(x => x.status + ' ' + x.url).join(' | ');
+      return result;
+    }
+
+    const knownAssetApps = new Set(['2048','ballistic','pvz','soccerbros','100in1nes']);
+    if (isUgs && knownAssetApps.has(name.toLowerCase()) && ugsAssetResponses.filter(asset => asset.status < 400).length === 0) {
+      result.reason = 'UGS HTML loaded but no proxied game assets loaded';
+      return result;
+    }
+
+    const hasGameContent = state.canvasCount > 0 ||
+      state.visibleSurfaceCount > 0 ||
+      state.visibleLargeElementCount > 0 ||
+      state.visibleTextLength >= 12;
+    if (!hasGameContent) {
+      result.reason = 'game iframe is non-empty but has no visible game surface or content';
+      return result;
+    }
+
+    if (fatal && !hasGameContent) {
       result.reason = fatal;
       return result;
     }

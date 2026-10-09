@@ -78,7 +78,7 @@ function browserTargetUrl(game) {
 
 function shellUrl(game) {
   const target = browserTargetUrl(game);
-  return GAME_ORIGIN.replace(/\/+$/, '') + '/pages/lessons/game-shell.html?game=' + encodeURIComponent(target);
+  return GAME_ORIGIN.replace(/\/+$/, '') + '/pages/lessons/game-shell.html?game=' + encodeURIComponent(target) + '&shell=ugs-direct-v3';
 }
 
 function sampleGames(games) {
@@ -94,7 +94,7 @@ function sampleGames(games) {
   // Keep known UGS iframe failures in every smoke run; uniform sampling alone
   // repeatedly missed them, allowing a broken UGS launch path to pass.
   const regressions = [
-    '2048', 'ballistic', 'unpkg', 'golfsunday',
+    '2048', 'ballistic', 'blockysnakes', 'unpkg', 'golfsunday',
     'goodbigtowertinysquare', 'googledino', 'pvz',
     'soccerbros', 'tailsskypatrol', '100in1nes'
   ];

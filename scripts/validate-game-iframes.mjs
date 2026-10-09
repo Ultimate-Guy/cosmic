@@ -13,7 +13,6 @@ const NAV_TIMEOUT = Number(process.env.COSMIC_GAME_NAV_TIMEOUT || 5000);
 const FRAME_WAIT = Number(process.env.COSMIC_GAME_FRAME_WAIT || 2500);
 const LOAD_WAIT = Number(process.env.COSMIC_GAME_LOAD_WAIT || 500);
 const BROWSER_SAMPLE = Number(process.env.COSMIC_BROWSER_SAMPLE || 12);
-const UGS_ASSET_TIMEOUT = Number(process.env.COSMIC_UGS_ASSET_TIMEOUT || 15000);
 const EXPECTED_COMMIT = process.env.GITHUB_SHA || '';
 const DEPLOYMENT_URL = process.env.COSMIC_DEPLOYMENT_URL || GAME_ORIGIN.replace(/\/+$/, '') + '/deployment.json';
 
@@ -68,8 +67,17 @@ function targetUrl(game) {
   return GAME_ORIGIN.replace(/\/+$/, '') + '/' + rawPath.replace(/^\/+/, '');
 }
 
+function browserTargetUrl(game) {
+  const rawPath = String(game.path || '');
+  // The public UGS catalog intentionally loads from the original jsDelivr
+  // URLs. Only the fast HTTP target probe uses /ugs/; browser smoke tests must
+  // exercise the same direct-URL path used by lessons.html.
+  if (/^https?:\/\//i.test(rawPath)) return rawPath + (game.entry || '');
+  return targetUrl(game);
+}
+
 function shellUrl(game) {
-  const target = targetUrl(game);
+  const target = browserTargetUrl(game);
   return GAME_ORIGIN.replace(/\/+$/, '') + '/pages/lessons/game-shell.html?game=' + encodeURIComponent(target);
 }
 
@@ -88,7 +96,7 @@ function sampleGames(games) {
   const regressions = [
     '2048', 'ballistic', 'unpkg', 'golfsunday',
     'goodbigtowertinysquare', 'googledino', 'pvz',
-    'soccerbros', 'tailsskypatrol', 'codeorg (UGS)'
+    'soccerbros', 'tailsskypatrol', '100in1nes'
   ];
   for (const name of regressions) add(games.find(game => game.name === name));
 
@@ -174,19 +182,11 @@ async function runTargetChecks(games) {
 async function inspectBrowserGame(browser, game) {
   const name = String(game.name || '').trim() || '<unnamed>';
   const url = shellUrl(game);
-  const target = targetUrl(game);
+  const target = browserTargetUrl(game);
   const page = await browser.newPage({viewport:{width:1365,height:768}});
   const errors = [];
   const failed = [];
-  const ugsAssetResponses = [];
   const isUgs = /cosmicgames@main\/UGS-Files\//i.test(String(game.path || ''));
-
-  page.on('response', response => {
-    const responseUrl = response.url();
-    if (/\/ugs-cdn\/|\/ugs-repo\//i.test(responseUrl)) {
-      ugsAssetResponses.push({url:responseUrl,status:response.status()});
-    }
-  });
 
   page.on('pageerror', e => {
     if (errors.length < 5) errors.push('pageerror: ' + e.message);
@@ -212,7 +212,6 @@ async function inspectBrowserGame(browser, game) {
     iframe:null,
     errors,
     failed,
-    ugsAssetResponses,
     reason:null
   };
 
@@ -339,18 +338,6 @@ async function inspectBrowserGame(browser, game) {
     const fatal = errors.find(e =>
       /ReferenceError|SyntaxError|TypeError|URIError|RangeError|Failed to load module script|uncaught/i.test(e)
     );
-
-    const failedUgsAssets = ugsAssetResponses.filter(asset => asset.status >= 400);
-    if (isUgs && failedUgsAssets.length) {
-      result.reason = 'UGS runtime assets failed: ' + failedUgsAssets.slice(0, 4).map(x => x.status + ' ' + x.url).join(' | ');
-      return result;
-    }
-
-    const knownAssetApps = new Set(['2048','ballistic','pvz','soccerbros','100in1nes']);
-    if (isUgs && knownAssetApps.has(name.toLowerCase()) && ugsAssetResponses.filter(asset => asset.status < 400).length === 0) {
-      result.reason = 'UGS HTML loaded but no proxied game assets loaded';
-      return result;
-    }
 
     const hasGameContent = state.canvasCount > 0 ||
       state.visibleSurfaceCount > 0 ||

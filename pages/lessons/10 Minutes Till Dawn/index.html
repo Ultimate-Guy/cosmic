@@ -201,7 +201,7 @@
   ];
   for (const file of files) {
     const script = document.createElement('script');
-    script.src = root + file;
+    script.src = new URL(root + file, location.origin).href;
     script.async = false;
     (document.body || document.documentElement).appendChild(script);
   }

@@ -1186,12 +1186,12 @@ async function serveUgs(request) {
     }
   }
 
-  const origin = url.origin;
-  html = html.replace(/(?:https?:)?\/\/(?:cdn|fastly|gcore)\.jsdelivr\.net\//gi, origin + '/ugs-cdn/');
-  html = html.replace(/https?:\/\/raw\.githubusercontent\.com\/Ultimate-Guy\/cosmicgames\/main\//gi, origin + '/ugs-repo/');
-  html = html.replace(/(href|src|poster|data-src)=("|')\/UGS-Files\//gi, '$1=$2' + origin + '/ugs-repo/UGS-Files/');
+  // Keep the original upstream base URL. Rewriting all nested CDN assets
+  // through the Worker changed package paths and broke games that worked
+  // when loaded directly from jsDelivr.
   if (!/<base\b/i.test(html) && /<head\b/i.test(html)) {
-    html = html.replace(/<head\b[^>]*>/i, head => head + '<base href="' + origin + '/ugs-repo/UGS-Files/">');
+    const base = '<base href="https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/">';
+    html = html.replace(/<head\b[^>]*>/i, match => match + base);
   }
   return new Response(html, {status:upstream.status,headers});
 }

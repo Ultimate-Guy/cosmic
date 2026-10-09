@@ -1169,6 +1169,23 @@ async function serveUgs(request) {
   headers.delete('Content-Security-Policy-Report-Only');
 
   let html = await upstream.text();
+
+  // Some UGS catalog entries are Google Gadget XML modules containing the
+  // actual HTML inside CDATA (or nested inside a <Module> wrapper). Serving
+  // the wrapper as text/html produces a blank iframe instead of the game.
+  if (/^\\s*<Module\\b/i.test(html)) {
+    const cdata = html.match(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/i);
+    if (cdata) {
+      html = cdata[1];
+    } else {
+      const htmlStart = html.search(/<!doctype\\s+html|<html\\b/i);
+      const htmlEnd = html.toLowerCase().lastIndexOf('</html>');
+      if (htmlStart >= 0 && htmlEnd > htmlStart) {
+        html = html.slice(htmlStart, htmlEnd + 7);
+      }
+    }
+  }
+
   const origin = url.origin;
   html = html.replace(/(?:https?:)?\/\/(?:cdn|fastly|gcore)\.jsdelivr\.net\//gi, origin + '/ugs-cdn/');
   html = html.replace(/https?:\/\/raw\.githubusercontent\.com\/Ultimate-Guy\/cosmicgames\/main\//gi, origin + '/ugs-repo/');

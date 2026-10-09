@@ -1193,6 +1193,11 @@ async function serveUgs(request) {
     const base = '<base href="https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/">';
     html = html.replace(/<head\b[^>]*>/i, match => match + base);
   }
+
+  // Route UGS HTML dependencies through the same Worker so CDN fetch failures
+  // do not leave the iframe blank. This rewrites only upstream asset URLs;
+  // each asset proxy still fetches the original upstream resource.
+  html = rewriteUgsTextAsset(html, url.origin);
   return new Response(html, {status:upstream.status,headers});
 }
 

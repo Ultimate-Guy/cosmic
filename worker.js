@@ -1173,12 +1173,12 @@ async function serveUgs(request) {
   // Some UGS catalog entries are Google Gadget XML modules containing the
   // actual HTML inside CDATA (or nested inside a <Module> wrapper). Serving
   // the wrapper as text/html produces a blank iframe instead of the game.
-  if (/^\\s*<Module\\b/i.test(html)) {
-    const cdata = html.match(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/i);
+  if (/^\s*<Module\b/i.test(html)) {
+    const cdata = html.match(/<!\[CDATA\[([\s\S]*?)\]\]>/i);
     if (cdata) {
       html = cdata[1];
     } else {
-      const htmlStart = html.search(/<!doctype\\s+html|<html\\b/i);
+      const htmlStart = html.search(/<!doctype\s+html|<html\b/i);
       const htmlEnd = html.toLowerCase().lastIndexOf('</html>');
       if (htmlStart >= 0 && htmlEnd > htmlStart) {
         html = html.slice(htmlStart, htmlEnd + 7);

@@ -88,17 +88,6 @@
     "source_path": "UGS-Files/cl10yardfight.html"
   },
   {
-    "name": "12minibattles",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl12minibattles.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cl12minibattles.html"
-  },
-  {
     "name": "13bones",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl13bones.html",
     "category": "Arcade",
@@ -132,17 +121,6 @@
     "source_path": "UGS-Files/cl1on1soccer.html"
   },
   {
-    "name": "1v1lol",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl1v1lol.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cl1v1lol.html"
-  },
-  {
     "name": "1v1tennis",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl1v1tennis.html",
     "category": "Arcade",
@@ -152,17 +130,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/cl1v1tennis.html"
-  },
-  {
-    "name": "2048",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl2048.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cl2048.html"
   },
   {
     "name": "2048cupcakes",
@@ -198,39 +165,6 @@
     "source_path": "UGS-Files/cl234playergame.html"
   },
   {
-    "name": "2doom",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl2doom.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cl2doom.html"
-  },
-  {
-    "name": "2Dshooting",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl2Dshooting.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cl2Dshooting.html"
-  },
-  {
-    "name": "3dash",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl3dash.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cl3dash.html"
-  },
-  {
     "name": "3dasheditor",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl3dasheditor.html",
     "category": "Arcade",
@@ -240,17 +174,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/cl3dasheditor.html"
-  },
-  {
-    "name": "3dpinballspacecadet",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl3dpinballspacecadet.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cl3dpinballspacecadet.html"
   },
   {
     "name": "3pandas",
@@ -330,17 +253,6 @@
     "source_path": "UGS-Files/cl40xescape.html"
   },
   {
-    "name": "4thandgoal",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl4thandgoal.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cl4thandgoal.html"
-  },
-  {
     "name": "500calibercontractz",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl500calibercontractz.html",
     "category": "Arcade",
@@ -385,17 +297,6 @@
     "source_path": "UGS-Files/cl64in1nes.html"
   },
   {
-    "name": "8ballclassic",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl8ballclassic.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cl8ballclassic.html"
-  },
-  {
     "name": "8ballpool",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl8ballpool.html",
     "category": "Arcade",
@@ -427,17 +328,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/cl90in1nes.html"
-  },
-  {
-    "name": "99balls",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cl99balls.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cl99balls.html"
   },
   {
     "name": "99nightsitf",
@@ -605,39 +495,6 @@
     "source_path": "UGS-Files/clAcko_s Mach Bike Challenge (v10).html"
   },
   {
-    "name": "ADarkRoom",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clADarkRoom.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clADarkRoom.html"
-  },
-  {
-    "name": "adatewithdeath",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cladatewithdeath.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cladatewithdeath.html"
-  },
-  {
-    "name": "adayintheoffice",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cladayintheoffice.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cladayintheoffice.html"
-  },
-  {
     "name": "ADOFAI",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clADOFAI.html",
     "category": "Arcade",
@@ -682,17 +539,6 @@
     "source_path": "UGS-Files/cladvancewarsdualstrike.html"
   },
   {
-    "name": "adventneon",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cladventneon.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cladventneon.html"
-  },
-  {
     "name": "AdventureCapatalist",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clAdventureCapatalist.html",
     "category": "Arcade",
@@ -702,17 +548,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clAdventureCapatalist.html"
-  },
-  {
-    "name": "adventurecapitalist",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cladventurecapitalist.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cladventurecapitalist.html"
   },
   {
     "name": "aflac",
@@ -737,17 +572,6 @@
     "source_path": "UGS-Files/claftertheweek.html"
   },
   {
-    "name": "agariolite",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clagariolite.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clagariolite.html"
-  },
-  {
     "name": "ageofwar",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clageofwar.html",
     "category": "Arcade",
@@ -770,17 +594,6 @@
     "source_path": "UGS-Files/clageofwar2.html"
   },
   {
-    "name": "agesofconflict",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clagesofconflict.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clagesofconflict.html"
-  },
-  {
     "name": "agesofempire",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clagesofempire.html",
     "category": "Arcade",
@@ -790,39 +603,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clagesofempire.html"
-  },
-  {
-    "name": "ahoysurvival",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clahoysurvival.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clahoysurvival.html"
-  },
-  {
-    "name": "ai",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clai.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clai.html"
-  },
-  {
-    "name": "airlinetycoonidle",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clairlinetycoonidle.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clairlinetycoonidle.html"
   },
   {
     "name": "akoopasrevenge",
@@ -902,17 +682,6 @@
     "source_path": "UGS-Files/clalienhominidgba.html"
   },
   {
-    "name": "alienskyinvasion",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clalienskyinvasion.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clalienskyinvasion.html"
-  },
-  {
     "name": "alientransporter",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clalientransporter.html",
     "category": "Arcade",
@@ -946,17 +715,6 @@
     "source_path": "UGS-Files/clallbossesin1.html"
   },
   {
-    "name": "allocation",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clallocation.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clallocation.html"
-  },
-  {
     "name": "Altered Beast",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clAltered%20Beast.html",
     "category": "Arcade",
@@ -988,17 +746,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clambulencearush.html"
-  },
-  {
-    "name": "amidstthesky",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clamidstthesky.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clamidstthesky.html"
   },
   {
     "name": "amigopancho",
@@ -1078,39 +825,6 @@
     "source_path": "UGS-Files/clamigopancho7.html"
   },
   {
-    "name": "amongus",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clamongus.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clamongus.html"
-  },
-  {
-    "name": "amorphous",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clamorphous.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clamorphous.html"
-  },
-  {
-    "name": "ancientsins",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clancientsins.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clancientsins.html"
-  },
-  {
     "name": "anemonesfall",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clanemonesfall.html",
     "category": "Arcade",
@@ -1144,50 +858,6 @@
     "source_path": "UGS-Files/clangrybirds-space.html"
   },
   {
-    "name": "angrybirds",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clangrybirds.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clangrybirds.html"
-  },
-  {
-    "name": "angrybirds2",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clangrybirds2.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clangrybirds2.html"
-  },
-  {
-    "name": "angrybirdsshowdown",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clangrybirdsshowdown.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clangrybirdsshowdown.html"
-  },
-  {
-    "name": "angrybirdsslingshotfrenzy",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clangrybirdsslingshotfrenzy.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clangrybirdsslingshotfrenzy.html"
-  },
-  {
     "name": "angrybirdsspace",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clangrybirdsspace.html",
     "category": "Arcade",
@@ -1197,17 +867,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clangrybirdsspace.html"
-  },
-  {
-    "name": "animalcrossing",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clanimalcrossing.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clanimalcrossing.html"
   },
   {
     "name": "animalcrossingwildworld",
@@ -1254,28 +913,6 @@
     "source_path": "UGS-Files/clanotherworld.html"
   },
   {
-    "name": "antarttycoon",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clantarttycoon.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clantarttycoon.html"
-  },
-  {
-    "name": "antimatterdimensions",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clantimatterdimensions.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clantimatterdimensions.html"
-  },
-  {
     "name": "antipathy",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clantipathy.html",
     "category": "Arcade",
@@ -1285,17 +922,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clantipathy.html"
-  },
-  {
-    "name": "apesvshelium",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clapesvshelium.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clapesvshelium.html"
   },
   {
     "name": "apotris",
@@ -1331,28 +957,6 @@
     "source_path": "UGS-Files/clappleworm.html"
   },
   {
-    "name": "aquaparkio",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/claquaparkio.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/claquaparkio.html"
-  },
-  {
-    "name": "arcadevolley",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clarcadevolley.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clarcadevolley.html"
-  },
-  {
     "name": "arceuslegend",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clarceuslegend.html",
     "category": "Arcade",
@@ -1362,28 +966,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clarceuslegend.html"
-  },
-  {
-    "name": "archeryworldtour",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clarcheryworldtour.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clarcheryworldtour.html"
-  },
-  {
-    "name": "archesspelago",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clarchesspelago.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clarchesspelago.html"
   },
   {
     "name": "arena",
@@ -1408,61 +990,6 @@
     "source_path": "UGS-Files/clarmormayhem2.html"
   },
   {
-    "name": "arsonate",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clarsonate.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clarsonate.html"
-  },
-  {
-    "name": "arthursnightmare",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clarthursnightmare.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clarthursnightmare.html"
-  },
-  {
-    "name": "ascent",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clascent.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clascent.html"
-  },
-  {
-    "name": "asdutydemands",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clasdutydemands.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clasdutydemands.html"
-  },
-  {
-    "name": "asmallworldcup",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clasmallworldcup.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clasmallworldcup.html"
-  },
-  {
     "name": "assesmentexaminationque",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/classesmentexaminationque.html",
     "category": "Arcade",
@@ -1472,28 +999,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/classesmentexaminationque.html"
-  },
-  {
-    "name": "assessmentexamination",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/classessmentexamination.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/classessmentexamination.html"
-  },
-  {
-    "name": "asteroids",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clasteroids.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clasteroids.html"
   },
   {
     "name": "asteroidsALT",
@@ -1571,17 +1076,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clavalanche.html"
-  },
-  {
-    "name": "aviamasters",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/claviamasters.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/claviamasters.html"
   },
   {
     "name": "aviamastersbuggy",
@@ -1694,17 +1188,6 @@
     "source_path": "UGS-Files/clb3313v102.html"
   },
   {
-    "name": "babeltower",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbabeltower.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbabeltower.html"
-  },
-  {
     "name": "babychiccoadventure",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbabychiccoadventure.html",
     "category": "Arcade",
@@ -1736,28 +1219,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbabysniperinvietnam.html"
-  },
-  {
-    "name": "backrooms",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbackrooms.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbackrooms.html"
-  },
-  {
-    "name": "backrooms2D",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbackrooms2D.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbackrooms2D.html"
   },
   {
     "name": "backyardbaseball",
@@ -1813,17 +1274,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbackyardsoccer.html"
-  },
-  {
-    "name": "baconmaydie",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbaconmaydie.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbaconmaydie.html"
   },
   {
     "name": "badbodyguards",
@@ -1892,17 +1342,6 @@
     "source_path": "UGS-Files/clbadparenting.html"
   },
   {
-    "name": "badpiggies",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbadpiggies.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbadpiggies.html"
-  },
-  {
     "name": "badpiggieslatest",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbadpiggieslatest.html",
     "category": "Arcade",
@@ -1923,17 +1362,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbadtimesim.html"
-  },
-  {
-    "name": "badtimesimulator",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbadtimesimulator.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbadtimesimulator.html"
   },
   {
     "name": "balatrogba",
@@ -2000,17 +1428,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbaldiepstein.html"
-  },
-  {
-    "name": "baldisbasics",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbaldisbasics.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbaldisbasics.html"
   },
   {
     "name": "baldisbasicsremaster",
@@ -2178,17 +1595,6 @@
     "source_path": "UGS-Files/clbankbreakout2.html"
   },
   {
-    "name": "bankrobbery2",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbankrobbery2.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbankrobbery2.html"
-  },
-  {
     "name": "barryhasasecret",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbarryhasasecret.html",
     "category": "Arcade",
@@ -2220,17 +1626,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbas.html"
-  },
-  {
-    "name": "baseballbros",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbaseballbros.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbaseballbros.html"
   },
   {
     "name": "baseballnes",
@@ -2299,17 +1694,6 @@
     "source_path": "UGS-Files/clbasketballsuperstars.html"
   },
   {
-    "name": "basketbattle",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbasketbattle.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbasketbattle.html"
-  },
-  {
     "name": "basketbros",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbasketbros.html",
     "category": "Arcade",
@@ -2319,17 +1703,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbasketbros.html"
-  },
-  {
-    "name": "basketrandom",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbasketrandom.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbasketrandom.html"
   },
   {
     "name": "basketrandomgood",
@@ -2363,17 +1736,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbatterup.html"
-  },
-  {
-    "name": "battlekarts",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbattlekarts.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbattlekarts.html"
   },
   {
     "name": "battles",
@@ -2739,17 +2101,6 @@
     "source_path": "UGS-Files/clbitlifeencrypted.html"
   },
   {
-    "name": "bitplanes",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbitplanes.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbitplanes.html"
-  },
-  {
     "name": "blackjack",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clblackjack.html",
     "category": "Arcade",
@@ -2827,17 +2178,6 @@
     "source_path": "UGS-Files/clblastronaut.html"
   },
   {
-    "name": "blazedrifter",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clblazedrifter.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clblazedrifter.html"
-  },
-  {
     "name": "bleachvsnaruto",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbleachvsnaruto.html",
     "category": "Arcade",
@@ -2869,17 +2209,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clblobsstory2.html"
-  },
-  {
-    "name": "blockblast",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clblockblast.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clblockblast.html"
   },
   {
     "name": "blockblastv2",
@@ -2935,17 +2264,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clblockthepig.html"
-  },
-  {
-    "name": "blockydemolitionderby",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clblockydemolitionderby.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clblockydemolitionderby.html"
   },
   {
     "name": "blockysnakes",
@@ -3146,28 +2464,6 @@
     "source_path": "UGS-Files/clbloxorz.html"
   },
   {
-    "name": "blumgiracers",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clblumgiracers.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clblumgiracers.html"
-  },
-  {
-    "name": "blumgirocket",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clblumgirocket.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clblumgirocket.html"
-  },
-  {
     "name": "BMX2",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clBMX2.html",
     "category": "Arcade",
@@ -3210,17 +2506,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbobtherobber.html"
-  },
-  {
-    "name": "bobtherobber2",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbobtherobber2.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbobtherobber2.html"
   },
   {
     "name": "bobtherobber5",
@@ -3476,17 +2761,6 @@
     "source_path": "UGS-Files/clboxinglive2.html"
   },
   {
-    "name": "boxingrandom",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clboxingrandom.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clboxingrandom.html"
-  },
-  {
     "name": "brainrot",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbrainrot.html",
     "category": "Arcade",
@@ -3496,17 +2770,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbrainrot.html"
-  },
-  {
-    "name": "brawlsimulator3d",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbrawlsimulator3d.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbrawlsimulator3d.html"
   },
   {
     "name": "Brawlstars",
@@ -3540,17 +2803,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clbridgerace.html"
-  },
-  {
-    "name": "brotato",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clbrotato.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clbrotato.html"
   },
   {
     "name": "BTD1",
@@ -3982,17 +3234,6 @@
     "source_path": "UGS-Files/clcapybaraclicker.html"
   },
   {
-    "name": "carcrash3",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcarcrash3.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcarcrash3.html"
-  },
-  {
     "name": "cardrawing",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcardrawing.html",
     "category": "Arcade",
@@ -4015,17 +3256,6 @@
     "source_path": "UGS-Files/clcareatscar2deluxe.html"
   },
   {
-    "name": "carkingarena",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcarkingarena.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcarkingarena.html"
-  },
-  {
     "name": "carmods",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcarmods.html",
     "category": "Arcade",
@@ -4046,17 +3276,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clcarnivalgamesds.html"
-  },
-  {
-    "name": "carrampvspolicechase",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcarrampvspolicechase.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcarrampvspolicechase.html"
   },
   {
     "name": "carstuntsdriving",
@@ -4563,17 +3782,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clclashnslash.html"
-  },
-  {
-    "name": "clashofvikings",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clclashofvikings.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clclashofvikings.html"
   },
   {
     "name": "classof09",
@@ -5148,17 +4356,6 @@
     "source_path": "UGS-Files/clcotlk.html"
   },
   {
-    "name": "countmastersstickmangames",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcountmastersstickmangames.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcountmastersstickmangames.html"
-  },
-  {
     "name": "coverorange",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcoverorange.html",
     "category": "Arcade",
@@ -5368,39 +4565,6 @@
     "source_path": "UGS-Files/clcrashteamracing.html"
   },
   {
-    "name": "crazycars",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcrazycars.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcrazycars.html"
-  },
-  {
-    "name": "crazycattle3d",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcrazycattle3d.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcrazycattle3d.html"
-  },
-  {
-    "name": "crazychicken3D",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcrazychicken3D.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcrazychicken3D.html"
-  },
-  {
     "name": "crazyclimber",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcrazyclimber.html",
     "category": "Arcade",
@@ -5421,17 +4585,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clcrazyfrogracer.html"
-  },
-  {
-    "name": "crazymotorcycle",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clcrazymotorcycle.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clcrazymotorcycle.html"
   },
   {
     "name": "crazypenguincatapult",
@@ -6191,17 +5344,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/cldementium.html"
-  },
-  {
-    "name": "demolitionderbycrashracing",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cldemolitionderbycrashracing.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cldemolitionderbycrashracing.html"
   },
   {
     "name": "demonblade",
@@ -7038,17 +6180,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/cldriftsimulator.html"
-  },
-  {
-    "name": "drivemad",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/cldrivemad.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/cldrivemad.html"
   },
   {
     "name": "drivemady",
@@ -10844,17 +9975,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clgeorgeandtheprinter.html"
-  },
-  {
-    "name": "getawayshootout",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clgetawayshootout.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clgetawayshootout.html"
   },
   {
     "name": "getontop",
@@ -21571,39 +20691,6 @@
     "source_path": "UGS-Files/clragdollachivement.html"
   },
   {
-    "name": "ragdollarchers",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clragdollarchers.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clragdollarchers.html"
-  },
-  {
-    "name": "ragdolldrop",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clragdolldrop.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clragdolldrop.html"
-  },
-  {
-    "name": "ragdollhit",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clragdollhit.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clragdollhit.html"
-  },
-  {
     "name": "ragdollrunners",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clragdollrunners.html",
     "category": "Arcade",
@@ -21613,17 +20700,6 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/clragdollrunners.html"
-  },
-  {
-    "name": "ragdollsoccer",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clragdollsoccer.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clragdollsoccer.html"
   },
   {
     "name": "ragollhit",
@@ -26917,17 +25993,6 @@
     "source_path": "UGS-Files/clsuperislandadventure.html"
   },
   {
-    "name": "superliquidsoccer",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clsuperliquidsoccer.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clsuperliquidsoccer.html"
-  },
-  {
     "name": "supermario",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clsupermario.html",
     "category": "Arcade",
@@ -29359,17 +28424,6 @@
     "source_path": "UGS-Files/clultimatemortalkombat3.html"
   },
   {
-    "name": "ultrakill",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clultrakill.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/clultrakill.html"
-  },
-  {
     "name": "umjammerlammy",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/clumjammerlammy.html",
     "category": "Arcade",
@@ -30954,39 +30008,6 @@
     "source_path": "UGS-Files/clʘ.html"
   },
   {
-    "name": "codeorg (UGS)",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/codeorg.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/codeorg.html"
-  },
-  {
-    "name": "esm",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/esm.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/esm.html"
-  },
-  {
-    "name": "npm",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/npm.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/npm.html"
-  },
-  {
     "name": "skypack",
     "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/skypack.html",
     "category": "Arcade",
@@ -31018,16 +30039,5 @@
     "featured": false,
     "source": "UGS",
     "source_path": "UGS-Files/thiefpuzzle.html"
-  },
-  {
-    "name": "unpkg",
-    "path": "https://cosmicv2.v75ultimate.workers.dev/ugs/unpkg.html",
-    "category": "Arcade",
-    "tags": [
-      "UGS"
-    ],
-    "featured": false,
-    "source": "UGS",
-    "source_path": "UGS-Files/unpkg.html"
   }
 ]

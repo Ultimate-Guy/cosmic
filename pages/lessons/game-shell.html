@@ -303,7 +303,7 @@ html,body{margin:0;width:100%;height:100%;max-width:100%;overflow:hidden;backgro
  };
  function keyFor(action){return directionalKeys[layout.value]?.[action]||fixedKeys[action]||null}
  function releaseAll(){
-  for(const [action,button] of pressed){sendKey(keyFor(action),'keyup');button.classList.remove('is-pressed')}
+  for(const held of pressed.values()){sendKey(held.info,'keyup');held.button.classList.remove('is-pressed')}
   pressed.clear();
  }
  function sendKey(info,type){
@@ -357,16 +357,17 @@ html,body{margin:0;width:100%;height:100%;max-width:100%;overflow:hidden;backgro
   const action=button.dataset.touchAction;
   button.addEventListener('pointerdown',event=>{
    if(!compatible||pressed.has(action))return;
+   const info=keyFor(action);if(!info)return;
    event.preventDefault();
    try{button.setPointerCapture(event.pointerId)}catch(_){}
-   pressed.set(action,button);button.classList.add('is-pressed');
-   sendKey(keyFor(action),'keydown');
+   pressed.set(action,{button,info});button.classList.add('is-pressed');
+   sendKey(info,'keydown');
   });
   const release=event=>{
-   if(!pressed.has(action))return;
+   const held=pressed.get(action);if(!held)return;
    if(event)event.preventDefault();
-   sendKey(keyFor(action),'keyup');pressed.delete(action);button.classList.remove('is-pressed');
-   if(event&&button.hasPointerCapture?.(event.pointerId)){try{button.releasePointerCapture(event.pointerId)}catch(_){}}
+   sendKey(held.info,'keyup');pressed.delete(action);held.button.classList.remove('is-pressed');
+   if(event&&held.button.hasPointerCapture?.(event.pointerId)){try{held.button.releasePointerCapture(event.pointerId)}catch(_){}}
   };
   button.addEventListener('pointerup',release);
   button.addEventListener('pointercancel',release);

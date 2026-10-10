@@ -230,9 +230,9 @@ class UsernameRegistry {
       return this.json({ok:true,submissions:rows});
     }
     if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
-    const parsed = await this.readLimitedJson(request, 16 * 1024);
-    if (!parsed.ok) return this.json({ok:false,error:parsed.error},parsed.status);
-    const body = parsed.value;
+    const requestData = await this.readLimitedJson(request, 16 * 1024);
+    if (!requestData.ok) return this.json({ok:false,error:requestData.error},requestData.status);
+    const body = requestData.value;
     const auth = await this.authenticatedAccount(request, body);
     if (!auth) return this.json({ok:false,error:'unauthorized'},401);
     const kind = body.kind === 'app' ? 'app' : body.kind === 'game' ? 'game' : '';

@@ -84,9 +84,9 @@
   function getCurrentStep(){
     const tourSteps=state.mode==='weekly'?weeklySteps:onboardingSteps;
     let i=Math.max(0,Math.min(tourSteps.length-1,Number(state.step)||0));
-    for(let n=0;n<steps.length;n++){
+    for(let n=0;n<tourSteps.length;n++){
       if(findStepForPage(tourSteps[i]))return i;
-      i=(i+1)%steps.length;
+      i=(i+1)%tourSteps.length;
     }
     return -1;
   }
@@ -175,7 +175,11 @@
     let next=current+delta;
     if(next<0){next=0;}
     if(next>=tourSteps.length){
-      state.active=false;state.awaitingEntry=false;state.mode=null;saveState(state);removeTour();return;
+      state.active=false;state.awaitingEntry=false;state.mode=null;saveState(state);removeTour();
+      if(tourSteps===weeklySteps){
+        try{const stored=JSON.parse(localStorage.getItem(WEEKLY_STATE_KEY)||'{}');stored.active=false;stored.completedAt=Date.now();stored.version=WEEKLY_VERSION;stored.week=weekKey;stored.history=weeklyHistory();localStorage.setItem(WEEKLY_STATE_KEY,JSON.stringify(stored));}catch(_){}
+      }
+      return;
     }
     const targetPage=tourSteps[next].page;
     if((targetPage==='command'&&(!isCommandCenter||isCloakShell))||(targetPage==='cloak'&&!isCloakShell)||(targetPage==='settings'&&!isSettings)||(targetPage==='games'&&!isGames)||(targetPage==='game'&&!isGameShell)){
@@ -317,7 +321,7 @@
     if(weeklyAlreadyShown&&!manual)return;
     const history=weeklyHistory();
     const stored=(()=>{try{return JSON.parse(localStorage.getItem(WEEKLY_STATE_KEY)||'null')||{}}catch(_){return {}}})();
-    stored.active=true;stored.step=0;stored.currentVersion=WEEKLY_VERSION;stored.week=weekKey;stored.startedAt=Date.now();stored.history=history;
+    stored.active=true;stored.step=0;stored.version=WEEKLY_VERSION;stored.currentVersion=WEEKLY_VERSION;stored.week=weekKey;stored.startedAt=Date.now();stored.history=history;
     try{localStorage.setItem(WEEKLY_STATE_KEY,JSON.stringify(stored))}catch(_){}
     state.active=true;state.mode='weekly';state.step=0;state.opens=Math.max(state.opens,MAX_OPENS);
     saveState(state);

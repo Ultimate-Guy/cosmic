@@ -240,14 +240,17 @@ class UsernameRegistry {
     if(!commitResponse.ok) return {ok:false,error:'source-commit-not-found'};
     let commitData;try{commitData=await commitResponse.json()}catch(_){return {ok:false,error:'invalid-github-commit-response'};}
     if(String(commitData.sha||'').toLowerCase()!==sha) return {ok:false,error:'source-commit-mismatch'};
+    const treeSha=String(commitData.commit?.tree?.sha||'').toLowerCase();
+    if(!/^[a-f0-9]{40}$/.test(treeSha)) return {ok:false,error:'invalid-github-tree-sha'};
     try {
-      treeResponse=await fetch('https://api.github.com/repos/'+owner+'/'+name+'/git/trees/'+sha+'?recursive=1',{headers,cf:{cacheTtl:300}});
+      treeResponse=await fetch('https://api.github.com/repos/'+owner+'/'+name+'/git/trees/'+treeSha+'?recursive=1',{headers,cf:{cacheTtl:300}});
     } catch (_) { return {ok:false,error:'github-source-tree-unavailable'}; }
     if(!treeResponse.ok) return {ok:false,error:'source-tree-not-found'};
     let treeData;try{treeData=await treeResponse.json()}catch(_){return {ok:false,error:'invalid-github-tree-response'};}
+    if(treeData.truncated) return {ok:false,error:'source-tree-truncated'};
     if(!Array.isArray(treeData.tree)||treeData.tree.length>10000) return {ok:false,error:'source-tree-too-large'};
     const eligible=treeData.tree.filter(file=>file.type==='blob'&&typeof file.path==='string'&&
-      /\.(?:js|mjs|cjs|ts|tsx|jsx|html|htm|json|css|wasm)$/i.test(file.path)&&
+      /\.(?:js|mjs|cjs|ts|tsx|jsx|html|htm|json|css)$/i.test(file.path)&&
       !/(?:^|\/)(?:node_modules|vendor|dist|build|\.git)(?:\/|$)/i.test(file.path)&&
       !/(?:\.min\.[^.]+|\.map)$/i.test(file.path))
       .sort((a,b)=>{

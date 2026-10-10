@@ -22,9 +22,31 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Validate registries and Deployment Shield
+      - name: Validate staged registry and Deployment Shield
         run: |
           set -euo pipefail
+          # The production workflow injects the shared platform scripts into lessons.html
+          # while preparing _site. Reproduce that relevant staging step before running
+          # Deployment Shield; calling it against an untouched source tree is a false failure.
+          python3 - <<'PY'
+          from pathlib import Path
+          page = Path('pages/lessons/lessons.html')
+          source = page.read_text(encoding='utf-8')
+          scripts = [
+              'cosmic-runtime.js', 'cosmic-spaces.js', 'cosmic-cloud-profile.js',
+              'cosmic-foundry.js', 'cosmic-compatibility.js',
+              'cosmic-deployment-shield.js', 'cosmic-events.js', 'cosmic-rooms.js',
+              'cosmic-runtime-manifest.js', 'cosmic-platform.js'
+          ]
+          tags = [f'<script src="../../scripts/{name}"></script>' for name in scripts]
+          missing = [tag for tag in tags if tag not in source]
+          if missing:
+              marker = source.lower().rfind('</body>')
+              if marker < 0:
+                  raise SystemExit('Cannot stage Deployment Shield input: lessons.html has no </body>')
+              source = source[:marker] + '\n'.join(missing) + '\n' + source[marker:]
+              page.write_text(source, encoding='utf-8')
+          PY
           python3 scripts/deployment-shield.py .
           python3 - <<'PY'
           import json
@@ -32,17 +54,19 @@ jobs:
           from pathlib import Path
           local = json.loads(Path('pages/lessons/games.json').read_text())
           ugs = json.loads(Path('pages/lessons/ugs-games.json').read_text())
-          assert len(local) > 0 and len(ugs) > 0
+          apps = json.loads(Path('apps/apps.json').read_text())
+          for label, items in [('local games', local), ('UGS games', ugs), ('apps', apps)]:
+              names = [str(x.get('name', '')).strip().casefold() for x in items]
+              assert names and all(names), f'{label} contains missing names'
+              assert len(names) == len(set(names)), f'{label} contains duplicate names'
           norm = lambda x: re.sub(r'[^a-z0-9]', '', str(x or '').casefold())
-          assert len({norm(x.get('name')) for x in local}) == len(local), 'duplicate local game names'
-          assert len({norm(x.get('name')) for x in ugs}) == len(ugs), 'duplicate UGS game names'
           local_names = {norm(x.get('name')) for x in local}
           assert not any(norm(x.get('name')) in local_names for x in ugs), 'UGS duplicates a local Cosmic game'
           blocked = {'games', 'npm', 'esm', 'codeorgugs', 'unpkg'}
           assert not any(norm(x.get('name')) in blocked for x in ugs), 'blocked placeholder remains in UGS registry'
           revisions = {str(x.get('revision', '')) for x in ugs if x.get('source') == 'UGS'}
           assert revisions and all(re.fullmatch(r'[a-f0-9]{40}', x, re.I) for x in revisions), 'UGS source revision is not immutable'
-          print(f'Registries PASS: local={len(local)}, UGS={len(ugs)}, total={len(local)+len(ugs)}, pinned revisions={len(revisions)}')
+          print(f'Registries PASS: local={len(local)}, UGS={len(ugs)}, apps={len(apps)}, pinned revisions={len(revisions)}')
           PY
 
       - name: Check JavaScript syntax

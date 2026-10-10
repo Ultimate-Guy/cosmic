@@ -1,3 +1,28 @@
+function validatePinnedExtensionEntry(entryUrl, owner, repository, commitSha) {
+  let entry;
+  try { entry=new URL(String(entryUrl||'')); }
+  catch (_) { return {ok:false,error:'pinned-jsdelivr-entry-required'}; }
+  if(entry.protocol!=='https:'||entry.hostname!=='cdn.jsdelivr.net'||entry.username||entry.password||entry.search||entry.hash) {
+    return {ok:false,error:'pinned-jsdelivr-entry-required'};
+  }
+  const match=entry.pathname.match(/^\/gh\/([^/]+)\/([^/]+)@([a-f0-9]{40})\/(.+)$/i);
+  if(!match) return {ok:false,error:'pinned-jsdelivr-entry-required'};
+  let entryOwner,entryRepository,entryPath;
+  try {
+    entryOwner=decodeURIComponent(match[1]);
+    entryRepository=decodeURIComponent(match[2]);
+    entryPath=decodeURIComponent(match[4]);
+  } catch (_) { return {ok:false,error:'invalid-pinned-entry-path'}; }
+  if(entryOwner.toLowerCase()!==String(owner).toLowerCase()||
+     entryRepository.replace(/\.git$/i,'').toLowerCase()!==String(repository).toLowerCase()||
+     match[3].toLowerCase()!==String(commitSha).toLowerCase()||
+     !/\.html?$/i.test(entryPath)||
+     entryPath.split('/').some(part=>!part||part==='.'||part==='..')) {
+    return {ok:false,error:'extension-entry-not-pinned-to-audited-source'};
+  }
+  return {ok:true,entry,entryPath};
+}
+
 class UsernameRegistry {
   constructor(state) {
     this.state = state;
@@ -232,21 +257,9 @@ class UsernameRegistry {
       return {ok:false,error:'invalid-source-repository'};
     }
     const owner=parts[0],name=parts[1].replace(/\.git$/i,'');
-    let entry,entryPath,entryMatch;
-    try { entry=new URL(String(entryUrl||'')); } catch (_) { return {ok:false,error:'pinned-jsdelivr-entry-required'}; }
-    if(entry.protocol!=='https:'||entry.hostname!=='cdn.jsdelivr.net'||entry.username||entry.password||entry.search||entry.hash) {
-      return {ok:false,error:'pinned-jsdelivr-entry-required',message:'Catalog entries must use a query-free jsDelivr URL pinned to the audited GitHub commit.'};
-    }
-    entryMatch=entry.pathname.match(/^\/gh\/([^/]+)\/([^/]+)@([a-f0-9]{40})\/(.+)$/i);
-    if(!entryMatch) return {ok:false,error:'pinned-jsdelivr-entry-required'};
-    let entryOwner,entryRepo;
-    try { entryOwner=decodeURIComponent(entryMatch[1]);entryRepo=decodeURIComponent(entryMatch[2]);entryPath=decodeURIComponent(entryMatch[4]); }
-    catch (_) { return {ok:false,error:'invalid-pinned-entry-path'}; }
-    if(entryOwner.toLowerCase()!==owner.toLowerCase()||entryRepo.replace(/\.git$/i,'').toLowerCase()!==name.toLowerCase()||
-       entryMatch[3].toLowerCase()!==sha||! /\.html?$/i.test(entryPath)||
-       entryPath.split('/').some(part=>!part||part==='.'||part==='..')) {
-      return {ok:false,error:'extension-entry-not-pinned-to-audited-source'};
-    }
+    const pinnedEntry=validatePinnedExtensionEntry(entryUrl,owner,name,sha);
+    if(!pinnedEntry.ok)return pinnedEntry;
+    const entry=pinnedEntry.entry,entryPath=pinnedEntry.entryPath;
     const headers={'Accept':'application/vnd.github+json','User-Agent':'Cosmic-Extension-Static-Audit/1.0'};
     let commitResponse,treeResponse;
     try {

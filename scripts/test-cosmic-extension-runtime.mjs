@@ -5,6 +5,28 @@ const studio = await readFile(new URL('../cosmic-studio.html', import.meta.url),
 const worker = await readFile(new URL('../worker.js', import.meta.url), 'utf8');
 const shell = await readFile(new URL('../pages/lessons/game-shell.html', import.meta.url), 'utf8');
 
+const pinStart = worker.indexOf('function validatePinnedExtensionEntry(');
+const pinEnd = worker.indexOf('\nclass UsernameRegistry', pinStart);
+if (pinStart < 0 || pinEnd < 0) throw new Error('Could not locate pinned extension entry validator.');
+const pinnedValidator = worker.slice(pinStart, pinEnd);
+const pinContext = { URL, decodeURIComponent, String, Error };
+pinContext.globalThis = pinContext;
+vm.runInNewContext(pinnedValidator + '\nglobalThis.validatePinnedExtensionEntry = validatePinnedExtensionEntry;', pinContext, {filename:'cosmic-pinned-entry-validator.js'});
+const pinValidate = pinContext.validatePinnedExtensionEntry;
+const fixedSha = 'a'.repeat(40);
+const validPinned = pinValidate('https://cdn.jsdelivr.net/gh/octocat/hello-world@'+fixedSha+'/extension/index.html','octocat','hello-world',fixedSha);
+if (!validPinned.ok || validPinned.entryPath !== 'extension/index.html') throw new Error('Valid pinned jsDelivr entry was rejected.');
+function mustRejectPinned(label, url, owner='octocat', repository='hello-world', sha=fixedSha) {
+  const result = pinValidate(url, owner, repository, sha);
+  if (result.ok) throw new Error('Unsafe pinned extension entry accepted: ' + label);
+}
+mustRejectPinned('wrong commit', 'https://cdn.jsdelivr.net/gh/octocat/hello-world@'+'b'.repeat(40)+'/extension/index.html');
+mustRejectPinned('wrong repository', 'https://cdn.jsdelivr.net/gh/attacker/hello-world@'+fixedSha+'/extension/index.html');
+mustRejectPinned('non-jsDelivr host', 'https://example.com/extension.html');
+mustRejectPinned('mutable non-pinned path', 'https://cdn.jsdelivr.net/gh/octocat/hello-world@main/extension/index.html');
+mustRejectPinned('query override', 'https://cdn.jsdelivr.net/gh/octocat/hello-world@'+fixedSha+'/extension/index.html?x=1');
+mustRejectPinned('path traversal', 'https://cdn.jsdelivr.net/gh/octocat/hello-world@'+fixedSha+'/../extension.html');
+
 const start = studio.indexOf('function validateExtensionManifest(input){');
 const end = studio.indexOf('\nfunction buildExtensionManifest', start);
 if (start < 0 || end < 0) throw new Error('Could not locate the Studio manifest validator.');
@@ -20,6 +42,7 @@ const invariants = [
   [studio, "apiRequest('/api/community/submissions?catalog=extensions'", 'public catalog client'],
   [studio, "apiRequest('/api/extensions/source-audit'+query", 'source-audit client'],
   [worker, 'async auditGithubExtensionSource(repositoryUrl, commitSha, entryUrl)', 'pinned source scanner'],
+  [worker, 'function validatePinnedExtensionEntry(', 'pinned entry URL validator'],
   [worker, "url.searchParams.get('catalog') === 'extensions'", 'moderated public catalog route'],
   [worker, "url.pathname === '/api/extensions/source-audit'", 'source-audit Worker route'],
   [worker, 'source-commit-not-found', 'immutable commit verification'],
@@ -86,4 +109,4 @@ mustReject('same-origin sandbox grant', {
   isolation: { mode: 'iframe', sandbox: 'allow-scripts allow-same-origin', sameOrigin: false }
 });
 mustReject('automatic extension enablement', { enabledByDefault: true });
-console.log('Cosmic extension manifest tests passed (9 acceptance/rejection cases and 17 runtime/marketplace/touch invariants).');
+console.log('Cosmic tests passed: 9 manifest rejection cases, 6 pinned-entry cases, and runtime/marketplace/touch invariants.');

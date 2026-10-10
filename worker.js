@@ -1170,10 +1170,9 @@ async function serveUgs(request) {
 
   let html = await upstream.text();
 
-  // Thief Puzzle's UGS source has an incomplete document wrapper: its
-  // GameSnacks interface script runs before the trailing <body> tag, and a
-  // blocking alert prevents automated browser validation from proceeding.
-  // Normalize only this known source without modifying the upstream file.
+  // Thief Puzzle's upstream file is malformed: it starts with head content,
+  // loads its interface before a real body exists, and ends with an empty
+  // <body>. Normalize only this known file on the Worker response.
   if (parts[0].toLowerCase() === 'thiefpuzzle.html') {
     html = '<!doctype html><html lang="en"><head>' + html;
     html = html.replace(
@@ -1185,17 +1184,6 @@ async function serveUgs(request) {
       () => "console.info('Thief Puzzle upstream note: menu/back and save may be unavailable.');"
     );
     html = html.replace(/<body>\s*$/i, '');
-    html += '</body></html>';
-  }
-
-  // Some UGS catalog entries are Google Gadget XML modules containing the'
-    );
-    html = html.replace(
-      /alert\\(["']The Menu\\/Back Buttons Do Not Work and The Game Does Not Save as of now - Greeni["']\\);/i,
-      "console.info('Thief Puzzle upstream note: menu/back and save may be unavailable.');"
-    );
-    html = html.replace(/<body>\\s*$/i, '');
-    html = html.replace(/\\s*<\\/body>\\s*<\\/html>\\s*$/i, '');
     html += '</body></html>';
   }
 

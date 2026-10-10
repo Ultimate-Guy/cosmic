@@ -9,6 +9,12 @@ class UsernameRegistry {
         'CREATE TABLE IF NOT EXISTS accounts (username TEXT PRIMARY KEY, created_at INTEGER NOT NULL, account_token TEXT NOT NULL)'
       );
       await this.state.storage.sql.exec(
+        "CREATE TABLE IF NOT EXISTS account_sessions (id TEXT PRIMARY KEY, username TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, device_label TEXT NOT NULL DEFAULT 'Web browser', user_agent TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL, last_seen_at INTEGER NOT NULL, revoked_at INTEGER)"
+      );
+      await this.state.storage.sql.exec(
+        'CREATE INDEX IF NOT EXISTS account_sessions_owner_created ON account_sessions(username, created_at)'
+      );
+      await this.state.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS activity (username TEXT NOT NULL, game_key TEXT NOT NULL, game_name TEXT NOT NULL, opens INTEGER NOT NULL DEFAULT 0, last_opened INTEGER NOT NULL, PRIMARY KEY (username, game_key))'
       );
       await this.state.storage.sql.exec('CREATE TABLE IF NOT EXISTS profiles (username TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL)');
@@ -53,6 +59,49 @@ class UsernameRegistry {
     const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode(salt),iterations:120000,hash:'SHA-256'},key,256);
     return Array.from(new Uint8Array(bits)).map(x=>x.toString(16).padStart(2,'0')).join('');
   }
+
+  async hashSessionToken(token) {
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token)));
+    return Array.from(digest).map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+
+  async createAccountSession(usernameKey, token, request, label='Web browser') {
+    const id = crypto.randomUUID();
+    const now = Date.now();
+    const userAgent = String(request?.headers?.get('User-Agent') || '').slice(0,240);
+    await this.state.storage.sql.exec(
+      'INSERT INTO account_sessions (id, username, token_hash, device_label, user_agent, created_at, last_seen_at, revoked_at) VALUES (?, ?, ?, ?, ?, ?, ?, NULL)',
+      id, usernameKey, await this.hashSessionToken(token), String(label).slice(0,80), userAgent, now, now
+    );
+    return {id, device_label:String(label).slice(0,80), user_agent:userAgent, created_at:now, last_seen_at:now, revoked_at:null};
+  }
+
+  async accountForToken(username, token, request=null) {
+    const key = String(username || '').trim().toLowerCase();
+    if (!key || !token) return null;
+    const account = await this.state.storage.sql.exec(
+      'SELECT username, account_token, password_salt, password_hash, created_at FROM accounts WHERE username = ?', key
+    ).toArray()[0];
+    if (!account) return null;
+    const hash = await this.hashSessionToken(token);
+    let session = await this.state.storage.sql.exec(
+      'SELECT id, username, device_label, user_agent, created_at, last_seen_at, revoked_at FROM account_sessions WHERE username = ? AND token_hash = ?',
+      key, hash
+    ).toArray()[0];
+    if (session?.revoked_at) return null;
+    if (!session) {
+      // Migrate existing pre-session accounts on first authenticated use.
+      // A previously revoked token has a persistent row and therefore cannot
+      // be re-created through this legacy migration path.
+      if (account.account_token !== token) return null;
+      session = await this.createAccountSession(key, token, request, 'Migrated Cosmic session');
+    } else {
+      const now = Date.now();
+      await this.state.storage.sql.exec('UPDATE account_sessions SET last_seen_at = ? WHERE id = ?', now, session.id);
+      session.last_seen_at = now;
+    }
+    return {key, account, session};
+  }
   async reserve(username, password='') {
     const key = username.toLowerCase();
     const existing = await this.state.storage.sql.exec(
@@ -70,6 +119,7 @@ class UsernameRegistry {
     await this.state.storage.sql.exec(
       'INSERT INTO accounts (username, created_at, account_token, password_salt, password_hash) VALUES (?, ?, ?, ?, ?)', key, now, token, salt, passwordHash
     );
+    await this.createAccountSession(key, token, null, 'Account created');
     return this.json({ ok: true, username, account_token: token });
   }
 
@@ -81,17 +131,20 @@ class UsernameRegistry {
     if(!account)return this.json({ok:false,error:'invalid-credentials'},401);
     if(!account.password_hash||!account.password_salt)return this.json({ok:false,error:'cloud-login-not-enabled'},409);
     if(await this.passwordHash(password,account.password_salt)!==account.password_hash)return this.json({ok:false,error:'invalid-credentials'},401);
-    return this.json({ok:true,username:account.username,account_token:account.account_token});
+    const sessionToken=crypto.randomUUID();
+    const session=await this.createAccountSession(key,sessionToken,request,'Login session');
+    return this.json({ok:true,username:account.username,account_token:sessionToken,session:{id:session.id,device_label:session.device_label,created_at:session.created_at,last_seen_at:session.last_seen_at}});
   }
   async accountPassword(request) {
     let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
     const username=typeof body?.username==='string'?body.username.trim():''; const token=typeof body?.account_token==='string'?body.account_token:''; const password=typeof body?.password==='string'?body.password:'';
     if(!username||!token||password.length<6)return this.json({ok:false,error:'missing-fields'},400);
-    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).toArray()[0];
-    if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
+    const auth=await this.accountForToken(username,token,request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
     const salt=crypto.randomUUID(); const hash=await this.passwordHash(password,salt);
-    await this.state.storage.sql.exec('UPDATE accounts SET password_salt=?, password_hash=? WHERE username=?',salt,hash,key);
-    return this.json({ok:true});
+    await this.state.storage.sql.exec('UPDATE accounts SET password_salt=?, password_hash=? WHERE username=?',salt,hash,auth.key);
+    await this.state.storage.sql.exec('UPDATE account_sessions SET revoked_at = ? WHERE username = ? AND id <> ? AND revoked_at IS NULL',Date.now(),auth.key,auth.session.id);
+    return this.json({ok:true,sessions_revoked:true});
   }
   async cloudProfile(request) {
     let username='', token='';
@@ -128,13 +181,7 @@ class UsernameRegistry {
     const authorization = request.headers.get('Authorization') || '';
     const bearer = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
     const token = String(body.account_token || bearer || '').trim();
-    if (!username || !token) return null;
-    const key = username.toLowerCase();
-    const account = await this.state.storage.sql.exec(
-      'SELECT username, account_token, password_salt, password_hash, created_at FROM accounts WHERE username = ?', key
-    ).toArray()[0];
-    if (!account || account.account_token !== token) return null;
-    return { key, account };
+    return this.accountForToken(username,token,request);
   }
 
   async communitySubmissions(request) {

@@ -19,7 +19,7 @@
 <section class="card" id="capture"><div class="row"><span class="num">3</span><span class="badge">CREATOR TOOLS</span></div><h3>Capture Studio</h3><p>Capture this Cosmic tab after you choose the browser's screen-sharing source. A visible indicator remains while recording.</p><div class="row"><button class="primary" id="start-record">Start tab recording</button><button id="stop-record" disabled>Stop & save clip</button><button id="screenshot">Screenshot help</button></div><p class="muted" id="capture-indicator">Not recording.</p><video id="preview" controls playsinline style="display:none;width:100%;max-height:230px;border-radius:10px;background:#000"></video><div class="status" id="capture-status" role="status"></div></section>
 <section class="card" id="submissions"><div class="row"><span class="num">4</span><span class="badge">COMMUNITY</span></div><h3>Submission Inbox</h3><p>Submit a suggestion to Cosmic’s server-backed moderation queue. Submitted source code is stored as a URL only—it is never executed automatically.</p><label for="submit-kind">Submission type</label><select id="submit-kind"><option value="game">Game</option><option value="app">App</option></select><label for="submit-name">Game or app name</label><input id="submit-name" maxlength="80" placeholder="Name"><label for="submit-url">Source URL</label><input id="submit-url" type="url" maxlength="500" placeholder="https://…"><label for="submit-notes">Why should Cosmic add it?</label><textarea id="submit-notes" maxlength="1200" placeholder="Description, controls, and source ownership/permission"></textarea><div class="row"><button class="primary" id="save-submission">Submit for review</button><button id="save-submission-local">Save local draft</button><button id="export-submissions">Export drafts</button><button id="load-submissions">Refresh server queue</button><button id="load-admin-queue" hidden>Admin moderation queue</button></div><div class="list" id="submission-list"></div><div class="list" id="server-submission-list"></div><div class="list" id="admin-queue-list"></div><div class="status" id="submission-status" role="status"></div></section>
 <section class="card" id="reviews"><div class="row"><span class="num">5</span><span class="badge">PLAYER FEEDBACK</span></div><h3>Reviews & Play Reports</h3><p>Submit account-backed ratings and structured play reports. All new or edited reports remain pending until reviewed by a Cosmic moderator.</p><label for="review-game">Game name</label><input id="review-game" maxlength="100" placeholder="Game name"><div class="split"><div><label for="review-rating">Rating</label><select id="review-rating"><option value="5">5 — Great</option><option value="4">4 — Good</option><option value="3">3 — Okay</option><option value="2">2 — Poor</option><option value="1">1 — Broken</option></select></div><div><label for="review-result">Play result</label><select id="review-result"><option value="worked">Worked</option><option value="partial">Partly worked</option><option value="broken">Did not work</option></select></div></div><label for="review-text">Brief review</label><textarea id="review-text" maxlength="1000" placeholder="What worked well? Any loading or control issues?"></textarea><div class="row"><button class="primary" id="save-review">Submit report for review</button><button id="save-review-local">Save local draft</button><button id="load-public-reviews">Load approved reviews</button><button id="export-reviews">Export reports</button></div><div class="list" id="review-list"></div><div class="list" id="public-review-list"></div><div class="status" id="review-status" role="status"></div></section>
-<section class="card" id="extensions"><div class="row"><span class="num">6</span><span class="badge">DEVELOPER SDK</span></div><h3>Cosmic Extension SDK</h3><p>Create and save an extension manifest in this browser, then launch the entry page inside a sandboxed iframe. Extensions are optional and require your confirmation to run. They receive no direct access to Cosmic's page, password, or account token; manifest capabilities are narrowly mediated by the host.</p><label for="ext-name">Extension name</label><input id="ext-name" maxlength="80" value="Example Cosmic Extension"><label for="ext-url">Extension entry URL (HTTPS)</label><input id="ext-url" type="url" maxlength="2048" placeholder="https://example.com/extension.html"><div class="split"><label><input id="ext-perm-profile" type="checkbox" checked style="width:auto"> Allow minimal profile read</label><label><input id="ext-perm-navigation" type="checkbox" checked style="width:auto"> Allow user-confirmed navigation requests</label></div><div class="row"><button class="primary" id="make-manifest">Generate manifest</button><button id="save-extension">Save extension locally</button><button id="download-manifest">Download manifest</button><button id="run-extension">Run in sandbox</button></div><pre id="manifest-preview">Generate a manifest to review the exact entry URL and permissions.</pre><div class="status" id="ext-status" role="status"></div>
+<section class="card" id="extensions"><div class="row"><span class="num">6</span><span class="badge">DEVELOPER SDK</span></div><h3>Cosmic Extension SDK</h3><p>Create and save an extension manifest in this browser, then launch the entry page inside a sandboxed iframe. Extensions are optional and require your confirmation to run. They receive no direct access to Cosmic's page, password, or account token; manifest capabilities are narrowly mediated by the host.</p><label for="ext-name">Extension name</label><input id="ext-name" maxlength="80" value="Example Cosmic Extension"><label for="ext-url">Extension entry URL (HTTPS)</label><input id="ext-url" type="url" maxlength="2048" placeholder="https://example.com/extension.html"><label for="ext-version">Extension version</label><input id="ext-version" maxlength="64" value="0.1.0" placeholder="1.0.0"><label for="ext-source-repo">Public GitHub source repository</label><input id="ext-source-repo" type="url" maxlength="300" placeholder="https://github.com/owner/extension"><label for="ext-source-commit">Immutable source commit SHA (40 characters)</label><input id="ext-source-commit" maxlength="40" spellcheck="false" placeholder="Full 40-character Git commit"><div class="row"><button id="audit-extension-source" type="button">Scan pinned source</button></div><pre id="extension-source-audit-result">Source scanning is advisory. A GitHub commit is verified and bounded source files are scanned without executing them.</pre><div class="split"><label><input id="ext-perm-profile" type="checkbox" checked style="width:auto"> Allow minimal profile read</label><label><input id="ext-perm-navigation" type="checkbox" checked style="width:auto"> Allow user-confirmed navigation requests</label></div><div class="row"><button class="primary" id="make-manifest">Generate manifest</button><button id="save-extension">Save extension locally</button><button id="download-manifest">Download manifest</button><button id="run-extension">Run in sandbox</button></div><pre id="manifest-preview">Generate a manifest to review the exact entry URL and permissions.</pre><div class="status" id="ext-status" role="status"></div>
 <h4>Community Extension Catalog</h4><p>Browse extensions whose metadata was approved by a Cosmic moderator. Approval does not mean the third-party code was audited. Catalog entries are not run automatically.</p>
 <div class="row"><input id="extension-catalog-search" maxlength="100" placeholder="Search approved extensions" aria-label="Search approved extensions"><button id="load-extension-catalog" type="button">Refresh catalog</button><button id="submit-extension-catalog" class="primary" type="button">Submit current manifest for review</button></div>
 <div class="notice">Submitting requires a Cosmic Cloud account. New listings remain pending until moderation. Cosmic stores only a validated manifest and entry URL; it does not fetch, host, or execute submitted source code. Avoid submitting extensions that contain private information.</div>
@@ -214,7 +214,7 @@ function buildExtensionManifest(){
  const permissions=[];
  if($('ext-perm-profile').checked)permissions.push('cosmic.profile.read');
  if($('ext-perm-navigation').checked)permissions.push('cosmic.navigation.request');
- try{manifest=validateExtensionManifest({manifestVersion:1,name,version:'0.1.0',entry:url.href,permissions,isolation:{mode:'iframe',sandbox:'allow-scripts',sameOrigin:false}})}
+ try{manifest=validateExtensionManifest({manifestVersion:1,name,version:$('ext-version').value.trim()||'0.1.0',entry:url.href,permissions,isolation:{mode:'iframe',sandbox:'allow-scripts',sameOrigin:false}})}
  catch(e){status('ext-status',e.message,true);return null}
  $('manifest-preview').textContent=JSON.stringify(manifest,null,2);
  status('ext-status','Manifest validated. Review the URL and permissions before saving or running.');
@@ -257,14 +257,17 @@ async function loadExtensionCatalog(){
   for(const item of filtered){
    const card=document.createElement('div');card.className='item';
    const title=document.createElement('strong');title.textContent=item.name+' · '+item.version;
-   const audit=document.createElement('small');audit.textContent='Moderator-approved metadata · third-party code NOT independently audited';
-   const detail=document.createElement('p');detail.style.overflowWrap='anywhere';detail.textContent='Entry: '+item.entry+'\nRequested capabilities: '+(item.permissions||[]).join(', ')+(item.reviewed_at?'\nReviewed: '+new Date(Number(item.reviewed_at)).toLocaleDateString():'');
+   const audit=document.createElement('small');audit.textContent='Moderator-approved metadata · heuristic scan only · not a human security audit';
+   const sourceAudit=item.source_audit||{};
+   const counts=sourceAudit.findingsBySeverity||{};
+   const detail=document.createElement('p');detail.style.overflowWrap='anywhere';detail.textContent='Entry: '+item.entry+'\nRequested capabilities: '+(item.permissions||[]).join(', ')+'\nSource: '+(item.source_repository||'source unavailable')+' @ '+String(item.source_commit||'').slice(0,12)+'\nStatic scan: '+(sourceAudit.scannedFiles||0)+' files; high '+(counts.high||0)+', medium '+(counts.medium||0)+', low '+(counts.low||0)+', info '+(counts.info||0)+' finding(s).\n'+(sourceAudit.disclaimer||'Source has not been independently audited.')+(item.reviewed_at?'\nMetadata reviewed: '+new Date(Number(item.reviewed_at)).toLocaleDateString():'');
    const actions=document.createElement('div');actions.className='row';
    const link=document.createElement('a');link.href=item.entry;link.target='_blank';link.rel='noopener noreferrer';link.textContent='View source';link.addEventListener('click',e=>{if(!confirm('Open the extension publisher’s external URL? Cosmic has not independently audited its code.'))e.preventDefault()});
    const use=document.createElement('button');use.type='button';use.textContent='Review manifest';use.addEventListener('click',()=>{
     try{
      const m=validateExtensionManifest(item.manifest);
-     $('ext-name').value=m.name;$('ext-url').value=m.entry;
+     $('ext-name').value=m.name;$('ext-url').value=m.entry;$('ext-version').value=m.version;
+     $('ext-source-repo').value=item.source_repository||'';$('ext-source-commit').value=item.source_commit||'';
      $('ext-perm-profile').checked=m.permissions.includes('cosmic.profile.read');
      $('ext-perm-navigation').checked=m.permissions.includes('cosmic.navigation.request');
      buildExtensionManifest();
@@ -279,15 +282,36 @@ async function loadExtensionCatalog(){
   host.replaceChildren();const err=document.createElement('div');err.className='item danger';err.textContent='Catalog could not be loaded: '+e.message;host.appendChild(err);status('extension-catalog-status','Check the connection and try refreshing.',true);
  }
 }
+$('audit-extension-source').onclick=async()=>{
+ const repository=$('ext-source-repo').value.trim(),commit=$('ext-source-commit').value.trim();
+ if(!repository||! /^[a-f0-9]{40}$/i.test(commit)){status('extension-catalog-status','Enter a public GitHub repository and its full 40-character commit SHA first.',true);return}
+ const button=$('audit-extension-source'),output=$('extension-source-audit-result');
+ button.disabled=true;output.textContent='Verifying pinned commit and scanning bounded text source files…';
+ try{
+  const query='?repository='+encodeURIComponent(repository)+'&commit='+encodeURIComponent(commit);
+  const result=await apiRequest('/api/extensions/source-audit'+query,{auth:'account'});
+  const report=result.report||{},counts=report.findingsBySeverity||{};
+  output.textContent=JSON.stringify({
+   repository:report.repository,commit:report.commit,commitVerified:report.commitVerified,
+   scannedFiles:report.scannedFiles,filesSkipped:report.filesSkipped,bytesScanned:report.bytesScanned,
+   result:report.result,findingsBySeverity:counts,findings:(report.findings||[]).slice(0,40),disclaimer:report.disclaimer
+  },null,2);
+  status('extension-catalog-status','Pinned source verified. '+(report.scannedFiles||0)+' file(s) scanned. Static scanning is advisory and cannot prove code is safe.');
+ }catch(e){output.textContent='Source scan failed: '+e.message;status('extension-catalog-status',e.message,true)}
+ finally{button.disabled=false}
+};
 $('load-extension-catalog').onclick=()=>loadExtensionCatalog();
 $('extension-catalog-search').addEventListener('input',()=>loadExtensionCatalog());
 $('submit-extension-catalog').onclick=async()=>{
  const ext=buildExtensionManifest();if(!ext)return;
  const button=$('submit-extension-catalog');button.disabled=true;
  try{
-  const result=await apiRequest('/api/community/submissions',{method:'POST',body:{kind:'extension',name:ext.name,source_url:ext.entry,notes:JSON.stringify(ext)}});
-  status('extension-catalog-status','Extension metadata submitted for moderation. Status: '+result.submission.status+'. Nothing has been run or published yet.');
-  status('ext-status','Submission recorded. A moderator must approve the metadata before it appears in the public catalog.');
+  const source_repository=$('ext-source-repo').value.trim(),source_commit=$('ext-source-commit').value.trim();
+  if(!source_repository||! /^[a-f0-9]{40}$/i.test(source_commit))throw Error('Enter a public GitHub repository and its full 40-character commit SHA, then scan it before submitting.');
+  const result=await apiRequest('/api/community/submissions',{method:'POST',body:{kind:'extension',name:ext.name,source_url:ext.entry,notes:JSON.stringify(ext),source_repository,source_commit}});
+  const audit=result.source_audit||{},counts=audit.findingsBySeverity||{};
+  status('extension-catalog-status','Extension metadata and pinned source submitted for moderation. Status: '+result.submission.status+'. Static scan: '+(audit.scannedFiles||0)+' files; '+(audit.findings?.length||0)+' signal(s). This is not a security guarantee; the listing will not be published until approved.');
+  status('ext-status','Submission recorded. Moderator approval is required before the listing appears in the catalog.');
  }catch(e){status('extension-catalog-status',e.message,true)}
  finally{button.disabled=false}
 };

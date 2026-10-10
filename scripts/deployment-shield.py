@@ -17,6 +17,20 @@ for i,x in enumerate(games):
     if not isinstance(x,dict) or not x.get("name") or not x.get("path"): raise SystemExit(f"Deployment Shield FAIL: invalid local game entry {i}")
 for i,x in enumerate(ugs):
     if not isinstance(x,dict) or not x.get("name") or not x.get("path"): raise SystemExit(f"Deployment Shield FAIL: invalid UGS game entry {i}")
+
+def name_key(value):
+    value = str(value or "").casefold()
+    value = "".join(ch for ch in value if ch.isalnum())
+    return value
+
+local_names = {name_key(x.get("name")) for x in games}
+overlaps = sorted({str(x.get("name", "")) for x in ugs if name_key(x.get("name")) in local_names})
+if overlaps:
+    raise SystemExit("Deployment Shield FAIL: UGS duplicates original Cosmic games: " + ", ".join(overlaps[:20]))
+blocked_names = {"games", "npm", "esm", "codeorgugs", "unpkg"}
+blocked = sorted({str(x.get("name", "")) for x in ugs if name_key(x.get("name")) in blocked_names})
+if blocked:
+    raise SystemExit("Deployment Shield FAIL: unwanted UGS catalog entries present: " + ", ".join(blocked))
 lessons=(root/"pages/lessons/lessons.html").read_text(encoding="utf-8")
 for name in ["cosmic-runtime.js","cosmic-spaces.js","cosmic-cloud-profile.js","cosmic-foundry.js","cosmic-compatibility.js","cosmic-deployment-shield.js","cosmic-events.js","cosmic-rooms.js","cosmic-platform.js"]:
     if name not in lessons: raise SystemExit("Deployment Shield FAIL: lessons missing "+name)

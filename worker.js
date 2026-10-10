@@ -512,11 +512,37 @@ class UsernameRegistry {
       result=await this.state.storage.sql.exec(
         'UPDATE community_reviews SET status=?, updated_at=?, reviewed_at=?, reviewer=?, review_note=? WHERE game_key=? AND username=?',status,now,now,reviewer,note,gameKey,username
       );
-    } else if(type==='source_lockfile') result=await this.state.storage.sql.exec(
-      'UPDATE source_lockfiles SET status=?, reviewed_at=?, reviewer=?, review_note=? WHERE id=?',status,now,reviewer,note,id
-    );
-    else return this.json({ok:false,error:'invalid-type'},400);
-    return this.json({ok:true,status,reviewed:result?.rowsWritten??null});
+    } else if(type==='source_lockfile') {
+      let revisionToActivate='';
+      if(status==='approved') {
+        const row=await this.state.storage.sql.exec(
+          'SELECT value FROM source_lockfiles WHERE id = ?',id
+        ).toArray()[0];
+        if(!row) return this.json({ok:false,error:'source-snapshot-not-found'},404);
+        let snapshot={};try{snapshot=JSON.parse(row.value)||{}}catch(_){}
+        const revisions=[...new Set((Array.isArray(snapshot.games)?snapshot.games:[])
+          .filter(game=>game.source==='UGS'||String(game.source_path||'').startsWith('UGS-Files/'))
+          .map(game=>String(game.revision||''))
+          .filter(value=>/^[a-f0-9]{40}$/i.test(value)))];
+        if(revisions.length!==1) return this.json({ok:false,error:'source-revision-ambiguous',message:'An approved UGS source snapshot must contain exactly one valid pinned cosmicgames commit.'},400);
+        const verify=await fetch('https://api.github.com/repos/Ultimate-Guy/cosmicgames/commits/'+revisions[0],{
+          headers:{'Accept':'application/vnd.github+json','User-Agent':'Cosmic-Source-Lockfile-Approval/1.0'},
+          cf:{cacheTtl:300,cacheEverything:true}
+        });
+        if(!verify.ok) return this.json({ok:false,error:'source-revision-not-found',message:'The pinned revision could not be verified in Ultimate-Guy/cosmicgames.'},400);
+        revisionToActivate=revisions[0];
+      }
+      result=await this.state.storage.sql.exec(
+        'UPDATE source_lockfiles SET status=?, reviewed_at=?, reviewer=?, review_note=? WHERE id=?',status,now,reviewer,note,id
+      );
+      if(status==='approved'&&revisionToActivate) {
+        await this.state.storage.sql.exec(
+          'INSERT INTO site_state (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',
+          'cosmic_ugs_active_revision',revisionToActivate
+        );
+      }
+    } else return this.json({ok:false,error:'invalid-type'},400);
+    return this.json({ok:true,status,reviewed:result?.rowsWritten??null,active_ugs_revision:type==='source_lockfile'&&status==='approved'?revisionToActivate||null:undefined});
   }
 
   async eventWrite(request) {

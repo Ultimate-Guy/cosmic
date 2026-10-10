@@ -126,13 +126,19 @@ jobs:
           sw = Path('sw.js').read_text()
           studio = Path('cosmic-studio.html').read_text()
           worker = Path('worker.js').read_text()
+          shell = Path('pages/lessons/game-shell.html').read_text()
           assert "key.startsWith('cosmic-shell-') && key !== CACHE" in sw, 'activation must prune only Cosmic shell caches'
           assert 'cosmic-offline-packs-v1' in studio, 'offline pack cache missing'
-          for route in ['/api/community/submissions','/api/community/reviews','/api/source-lockfiles','/api/admin/community/queue','/api/accounts/data','/api/accounts/revoke-sessions','/api/accounts/delete']:
+          for route in ['/api/community/submissions','/api/community/reviews','/api/source-lockfiles','/api/admin/community/queue','/api/accounts/data','/api/accounts/revoke-sessions','/api/accounts/delete','/api/extensions/source-audit']:
               assert route in studio, f'Studio route missing: {route}'
               assert route in worker, f'Worker route missing: {route}'
           assert 'readLimitedJson' in worker and 'consumeRateLimit' in worker, 'server request caps or rate limits missing'
-          print('Offline cache policy and Studio/Worker endpoint wiring passed.')
+          assert 'auditGithubExtensionSource' in worker and 'source-commit-not-found' in worker, 'pinned extension source audit missing'
+          assert 'catalog' in worker and 'moderator-approved-metadata-static-scan-advisory-not-code-audited' in worker, 'moderated extension catalog missing'
+          assert 'iframe' in shell and 'id="touch-controls"' in shell, 'touch overlay missing'
+          assert 'frame.contentWindow.location.origin===location.origin' in shell, 'touch key injection must stay same-origin only'
+          assert "pressed.set(action,{button,info})" in shell, 'touch press/release mapping must be stable'
+          print('Offline cache, extension catalog/source scan, touch overlay, and API wiring checks passed.')
           PY
 
       - name: Wrangler bundle dry run

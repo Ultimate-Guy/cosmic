@@ -19,7 +19,7 @@ const invariants = [
   [studio, 'id="extension-catalog-list"', 'catalog UI'],
   [studio, "apiRequest('/api/community/submissions?catalog=extensions'", 'public catalog client'],
   [studio, "apiRequest('/api/extensions/source-audit'+query", 'source-audit client'],
-  [worker, 'async auditGithubExtensionSource(repositoryUrl, commitSha)', 'pinned source scanner'],
+  [worker, 'async auditGithubExtensionSource(repositoryUrl, commitSha, entryUrl)', 'pinned source scanner'],
   [worker, "url.searchParams.get('catalog') === 'extensions'", 'moderated public catalog route'],
   [worker, "url.pathname === '/api/extensions/source-audit'", 'source-audit Worker route'],
   [worker, 'source-commit-not-found', 'immutable commit verification'],

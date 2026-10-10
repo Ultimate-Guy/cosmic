@@ -158,8 +158,9 @@ class UsernameRegistry {
       token=typeof body?.account_token==='string'?body.account_token:'';
     }
     if(!username||!token)return this.json({ok:false,error:'missing-fields'},400);
-    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).toArray()[0];
-    if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
+    const auth=await this.accountForToken(username,token,request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    const key=auth.key;
     const profile=await this.state.storage.sql.exec('SELECT value FROM profiles WHERE username = ?',key).toArray()[0];
     let value={};
     if(profile?.value){try{value=JSON.parse(profile.value)||{}}catch(_){value={};}}
@@ -169,8 +170,9 @@ class UsernameRegistry {
     let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
     const username=typeof body?.username==='string'?body.username.trim():''; const token=typeof body?.account_token==='string'?body.account_token:'';
     if(!username||!token)return this.json({ok:false,error:'missing-fields'},400);
-    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).toArray()[0];
-    if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
+    const auth=await this.accountForToken(username,token,request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    const key=auth.key;
     const value=body?.profile&&typeof body.profile==='object'?JSON.stringify(body.profile):'{}';
     await this.state.storage.sql.exec('INSERT INTO profiles (username,value,updated_at) VALUES (?,?,?) ON CONFLICT(username) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at',key,value,Date.now());
     return this.json({ok:true,profile:JSON.parse(value)});
@@ -372,13 +374,39 @@ class UsernameRegistry {
     return this.json({ok:true,exported_at:new Date().toISOString(),account:{username:auth.account.username,created_at:auth.account.created_at},profile:scrub(profile),profile_updated_at:profileRow?.updated_at||null,activity,submissions,reviews,source_lockfiles:locks.map(row=>({...row,lockfile:(()=>{try{return JSON.parse(row.value)}catch(_){return {}}})(),value:undefined}))});
   }
 
+  async accountSessions(request) {
+    const auth=await this.authenticatedAccount(request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    const rows=await this.state.storage.sql.exec(
+      'SELECT id, device_label, user_agent, created_at, last_seen_at, revoked_at FROM account_sessions WHERE username = ? ORDER BY created_at DESC LIMIT 30',
+      auth.key
+    ).toArray();
+    return this.json({ok:true,current_session_id:auth.session.id,sessions:rows.map(row=>({...row,current:row.id===auth.session.id}))});
+  }
+
   async revokeAccountSessions(request) {
     let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
     const auth=await this.authenticatedAccount(request,body);
     if(!auth)return this.json({ok:false,error:'unauthorized'},401);
-    const token=crypto.randomUUID();
-    await this.state.storage.sql.exec('UPDATE accounts SET account_token = ? WHERE username = ?',token,auth.key);
-    return this.json({ok:true,username:auth.account.username,account_token:token,message:'All other devices were signed out. Update this device with the new token.'});
+    const now=Date.now();
+    const sessionId=String(body.session_id||'').trim();
+    if(sessionId){
+      if(sessionId===auth.session.id)return this.json({ok:false,error:'cannot-revoke-current-session'},400);
+      const result=await this.state.storage.sql.exec(
+        'UPDATE account_sessions SET revoked_at = ? WHERE id = ? AND username = ? AND revoked_at IS NULL',
+        now,sessionId,auth.key
+      );
+      return this.json({ok:true,revoked:Number(result?.rowsWritten||0)>0,message:'Session revoked.'});
+    }
+    await this.state.storage.sql.exec(
+      'UPDATE account_sessions SET revoked_at = ? WHERE username = ? AND id <> ? AND revoked_at IS NULL',
+      now,auth.key,auth.session.id
+    );
+    const sessions=await this.state.storage.sql.exec(
+      'SELECT id, device_label, created_at, last_seen_at, revoked_at FROM account_sessions WHERE username = ? ORDER BY created_at DESC LIMIT 30',
+      auth.key
+    ).toArray();
+    return this.json({ok:true,username:auth.account.username,current_session_id:auth.session.id,sessions,message:'All other active sessions were revoked.'});
   }
 
   async deleteAccount(request) {
@@ -392,7 +420,7 @@ class UsernameRegistry {
         return this.json({ok:false,error:'invalid-credentials'},401);
       }
     }
-    for(const table of ['activity','profiles','community_submissions','community_reviews','source_lockfiles']) {
+    for(const table of ['activity','profiles','community_submissions','community_reviews','source_lockfiles','account_sessions']) {
       await this.state.storage.sql.exec('DELETE FROM '+table+' WHERE username = ?',auth.key);
     }
     await this.state.storage.sql.exec('DELETE FROM accounts WHERE username = ?',auth.key);
@@ -496,11 +524,9 @@ class UsernameRegistry {
     const gameName = typeof body?.game_name === 'string' ? body.game_name.trim().slice(0, 120) : '';
     if (!username || !token || !gameName) return this.json({ ok: false, error: 'missing-fields' }, 400);
 
-    const key = username.toLowerCase();
-    const account = await this.state.storage.sql.exec(
-      'SELECT username, account_token FROM accounts WHERE username = ?', key
-    ).toArray()[0];
-    if (!account || account.account_token !== token) return this.json({ ok: false, error: 'unauthorized' }, 401);
+    const auth = await this.accountForToken(username, token, request);
+    if (!auth) return this.json({ ok: false, error: 'unauthorized' }, 401);
+    const key = auth.key;
 
     const gameKey = gameName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 120) || 'game';
     const now = Date.now();
@@ -1059,6 +1085,7 @@ class UsernameRegistry {
     }
     if (url.pathname === '/login' && request.method === 'POST') return this.accountLogin(request);
     if (url.pathname === '/password' && request.method === 'POST') return this.accountPassword(request);
+    if (url.pathname === '/sessions' && request.method === 'GET') return this.accountSessions(request);
     if (url.pathname === '/community/submissions' && ['GET','POST'].includes(request.method)) return this.communitySubmissions(request);
     if (url.pathname === '/community/reviews' && ['GET','POST'].includes(request.method)) return this.communityReviews(request);
     if (url.pathname === '/source-lockfiles' && ['GET','POST'].includes(request.method)) return this.sourceLockfiles(request);

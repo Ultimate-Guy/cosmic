@@ -1534,7 +1534,10 @@ async function serveUgsRepoAsset(request) {
   if (!parts || parts.length < 2) return ugsError('Invalid UGS repository asset path.');
   const revision = parts[0] === 'main' || /^[a-f0-9]{40}$/i.test(parts[0]) ? parts.shift() : 'main';
   if (parts[0] !== 'UGS-Files') return ugsError('UGS repository paths must stay inside UGS-Files.');
-  return proxyUgsAsset(request, prefix, 'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/' + revision + '/', null);
+  const normalizedUrl = new URL(url.href);
+  normalizedUrl.pathname = prefix + parts.map(encodeUgsPathPart).join('/');
+  return proxyUgsAsset(new Request(normalizedUrl.href, request), prefix,
+    'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/' + revision + '/', null);
 }
 
 async function serveUgs(request) {

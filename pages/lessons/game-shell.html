@@ -15,10 +15,42 @@ html,body{margin:0;width:100%;height:100%;max-width:100%;overflow:hidden;backgro
 #cosmic-game-recovery{position:fixed;inset:0;z-index:2147483645;display:none;place-items:center;padding:24px;background:radial-gradient(circle at 50% 20%,rgba(45,204,255,.12),transparent 45%),#050c12;color:#f2f7fa;font-family:system-ui,sans-serif;text-align:center}
 #cosmic-game-recovery .cgr-card{width:min(560px,94vw);padding:28px;border:1px solid #2dccff;border-radius:22px;background:rgba(7,19,26,.96);box-shadow:0 25px 80px rgba(0,0,0,.6)}
 #cosmic-game-recovery h2{color:#2dccff;margin:0 0 10px}#cosmic-game-recovery p{opacity:.8;line-height:1.5}#cosmic-game-recovery button{border:1px solid #2dccff;border-radius:10px;padding:10px 14px;margin:4px;background:rgba(45,204,255,.1);color:#2dccff;cursor:pointer}#cosmic-game-recovery .primary{background:#2dccff;color:#031721;font-weight:800}
+#touch-toggle{position:fixed;top:12px;right:12px;z-index:2147483646;border:1px solid #2dccff;border-radius:10px;background:#0d1a21;color:#2dccff;font:800 13px system-ui,sans-serif;padding:9px 12px;cursor:pointer;box-shadow:0 4px 16px #0008;touch-action:manipulation}
+#touch-toggle:disabled{opacity:.55;cursor:not-allowed}
+#touch-controls[hidden],#touch-support[hidden]{display:none!important}
+#touch-controls{position:fixed;inset:0;z-index:2147483644;display:flex;align-items:flex-end;justify-content:space-between;padding:12px;pointer-events:none;box-sizing:border-box}
+#touch-support{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);max-width:min(84vw,440px);padding:8px 12px;border:1px solid #2dccff;border-radius:10px;background:#07151feF;color:#dff8ff;font:600 12px/1.4 system-ui,sans-serif;text-align:center;pointer-events:none}
+.touch-cluster{display:grid;gap:6px;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.touch-dpad{grid-template-columns:repeat(3,clamp(38px,8vw,58px));grid-template-rows:repeat(3,clamp(38px,8vw,58px));align-items:center;justify-items:center}
+.touch-actions{grid-template-columns:repeat(2,clamp(44px,9vw,64px));grid-template-rows:repeat(2,clamp(44px,9vw,64px));align-items:center;justify-items:center;margin-bottom:4px}
+.touch-key{width:100%;height:100%;padding:0;display:grid;place-items:center;border:1px solid #70ddff;border-radius:14px;background:rgba(6,24,35,.78);color:#effaff;font:900 20px/1 system-ui,sans-serif;box-shadow:0 4px 14px #0008;touch-action:none;user-select:none;-webkit-user-select:none}
+.touch-actions .touch-key{border-radius:50%;background:rgba(7,37,52,.82);font-size:22px}
+.touch-key:active,.touch-key.is-pressed{background:rgba(45,204,255,.88);color:#03131b;transform:scale(.96)}
+.touch-key:focus-visible,#touch-toggle:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.touch-center{width:100%;height:100%;border-radius:14px;background:rgba(15,32,42,.45);display:grid;place-items:center;color:#6d9bac;font:700 10px system-ui,sans-serif}
+#touch-toolbar{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:5px 7px;border:1px solid #335e70;border-radius:10px;background:rgba(4,13,20,.9);pointer-events:auto}
+#touch-toolbar label{font:700 11px system-ui,sans-serif;color:#ccecf7}
+#touch-movement{width:auto;max-width:110px;margin:0;padding:5px;border-radius:7px;font-size:11px;background:#0b202c;color:#eafaff;border:1px solid #416a7a}
+@media(max-width:560px){#touch-controls{padding:8px}.touch-dpad{grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px)}.touch-actions{grid-template-columns:repeat(2,52px);grid-template-rows:repeat(2,52px)}.touch-key{border-radius:12px}#touch-toolbar{bottom:10px;max-width:42vw}#touch-toolbar label{display:none}#touch-movement{max-width:90px}}
+@media(orientation:landscape) and (max-height:500px){#touch-controls{padding:6px}.touch-dpad{grid-template-columns:repeat(3,42px);grid-template-rows:repeat(3,42px)}.touch-actions{grid-template-columns:repeat(2,48px);grid-template-rows:repeat(2,48px)}#touch-toolbar{bottom:6px}}
 </style></head>
 <body>
 <button id="home" type="button">← Home</button>
 <iframe id="game" allow="fullscreen; gamepad" allowfullscreen></iframe>
+<button id="touch-toggle" type="button" aria-expanded="false" aria-controls="touch-controls" disabled title="Touch controls work only for same-origin Cosmic game targets">☷ Touch controls</button>
+<div id="touch-controls" hidden aria-label="On-screen game controls">
+  <div class="touch-cluster touch-dpad" aria-label="Movement controls">
+    <span></span><button class="touch-key" type="button" data-touch-action="up" aria-label="Move up">↑</button><span></span>
+    <button class="touch-key" type="button" data-touch-action="left" aria-label="Move left">←</button><span class="touch-center">MOVE</span><button class="touch-key" type="button" data-touch-action="right" aria-label="Move right">→</button>
+    <span></span><button class="touch-key" type="button" data-touch-action="down" aria-label="Move down">↓</button><span></span>
+  </div>
+  <div class="touch-cluster touch-actions" aria-label="Action controls">
+    <button class="touch-key" type="button" data-touch-action="a" aria-label="Action A">A</button><button class="touch-key" type="button" data-touch-action="b" aria-label="Action B">B</button>
+    <button class="touch-key" type="button" data-touch-action="c" aria-label="Jump or action C">⤒</button><button class="touch-key" type="button" data-touch-action="d" aria-label="Action D">↵</button>
+  </div>
+  <div id="touch-toolbar"><label for="touch-movement">Move</label><select id="touch-movement" aria-label="Movement key layout"><option value="arrows">Arrows</option><option value="wasd">WASD</option></select><button id="touch-hide" type="button" aria-label="Hide touch controls">Hide</button></div>
+  <div id="touch-support" role="status" aria-live="polite" hidden></div>
+</div>
 <script>
 (function(){
   const marker='/pages/lessons/';
@@ -246,6 +278,113 @@ html,body{margin:0;width:100%;height:100%;max-width:100%;overflow:hidden;backgro
     document.body.appendChild(loading);
     frame.addEventListener('load',()=>{loading.style.opacity='0';setTimeout(()=>loading.remove(),220);},{once:true});
   }
+})();
+</script>
+
+<script>
+(function(){
+ 'use strict';
+ const frame=document.getElementById('game');
+ const toggle=document.getElementById('touch-toggle');
+ const panel=document.getElementById('touch-controls');
+ const support=document.getElementById('touch-support');
+ const layout=document.getElementById('touch-movement');
+ const pressed=new Map();
+ let compatible=false;
+ const fixedKeys={
+  a:{key:'z',code:'KeyZ',legacy:90,label:'A'},
+  b:{key:'x',code:'KeyX',legacy:88,label:'B'},
+  c:{key:' ',code:'Space',legacy:32,label:'⤒'},
+  d:{key:'Enter',code:'Enter',legacy:13,label:'↵'}
+ };
+ const directionalKeys={
+  arrows:{up:{key:'ArrowUp',code:'ArrowUp',legacy:38,label:'↑'},down:{key:'ArrowDown',code:'ArrowDown',legacy:40,label:'↓'},left:{key:'ArrowLeft',code:'ArrowLeft',legacy:37,label:'←'},right:{key:'ArrowRight',code:'ArrowRight',legacy:39,label:'→'}},
+  wasd:{up:{key:'w',code:'KeyW',legacy:87,label:'W'},down:{key:'s',code:'KeyS',legacy:83,label:'S'},left:{key:'a',code:'KeyA',legacy:65,label:'A'},right:{key:'d',code:'KeyD',legacy:68,label:'D'}}
+ };
+ function keyFor(action){return directionalKeys[layout.value]?.[action]||fixedKeys[action]||null}
+ function releaseAll(){
+  for(const [action,button] of pressed){sendKey(keyFor(action),'keyup');button.classList.remove('is-pressed')}
+  pressed.clear();
+ }
+ function sendKey(info,type){
+  if(!compatible||!info)return;
+  try{
+   const doc=frame.contentDocument,win=frame.contentWindow;
+   if(!doc||!win)return;
+   const target=doc.activeElement&&doc.activeElement!==doc.body?doc.activeElement:doc.body||doc;
+   const event=new win.KeyboardEvent(type,{key:info.key,code:info.code,bubbles:true,cancelable:true,composed:true,view:win});
+   try{Object.defineProperty(event,'keyCode',{get:()=>info.legacy});Object.defineProperty(event,'which',{get:()=>info.legacy})}catch(_){}
+   target.dispatchEvent(event);
+  }catch(_){compatible=false;updateSupport()}
+ }
+ function updateLabels(){
+  panel.querySelectorAll('[data-touch-action]').forEach(button=>{
+   const action=button.dataset.touchAction,info=keyFor(action);
+   if(!info)return;
+   if(action==='up'||action==='down'||action==='left'||action==='right')button.textContent=info.label;
+  });
+ }
+ function updateSupport(){
+  compatible=false;
+  try{
+   compatible=!!(frame.contentWindow&&frame.contentDocument&&frame.contentWindow.location.origin===location.origin&&frame.contentDocument.documentElement);
+  }catch(_){compatible=false}
+  toggle.disabled=!compatible;
+  toggle.title=compatible?'Show or hide the on-screen controls':'Touch key injection is disabled for this cross-origin game frame.';
+  toggle.textContent=compatible?'☷ Touch controls':'☷ Touch controls unavailable';
+  if(!compatible){
+   releaseAll();
+   panel.hidden=true;
+   toggle.setAttribute('aria-expanded','false');
+   support.hidden=false;
+   support.textContent='This game runs on a different origin. Cosmic cannot safely inject touch keys into it. Try the game’s native touch controls or use a keyboard/controller.';
+  }else{
+   support.hidden=true;
+   if(!panel.hidden)toggle.setAttribute('aria-expanded','true');
+  }
+ }
+ toggle.addEventListener('click',()=>{
+  if(!compatible)return;
+  panel.hidden=!panel.hidden;
+  toggle.setAttribute('aria-expanded',String(!panel.hidden));
+  if(panel.hidden)releaseAll();
+ });
+ document.getElementById('touch-hide').addEventListener('click',()=>{
+  panel.hidden=true;toggle.setAttribute('aria-expanded','false');releaseAll();toggle.focus({preventScroll:true});
+ });
+ layout.addEventListener('change',updateLabels);
+ panel.querySelectorAll('[data-touch-action]').forEach(button=>{
+  const action=button.dataset.touchAction;
+  button.addEventListener('pointerdown',event=>{
+   if(!compatible||pressed.has(action))return;
+   event.preventDefault();
+   try{button.setPointerCapture(event.pointerId)}catch(_){}
+   pressed.set(action,button);button.classList.add('is-pressed');
+   sendKey(keyFor(action),'keydown');
+  });
+  const release=event=>{
+   if(!pressed.has(action))return;
+   if(event)event.preventDefault();
+   sendKey(keyFor(action),'keyup');pressed.delete(action);button.classList.remove('is-pressed');
+   if(event&&button.hasPointerCapture?.(event.pointerId)){try{button.releasePointerCapture(event.pointerId)}catch(_){}}
+  };
+  button.addEventListener('pointerup',release);
+  button.addEventListener('pointercancel',release);
+  button.addEventListener('lostpointercapture',()=>release());
+  button.addEventListener('contextmenu',event=>event.preventDefault());
+ });
+ frame.addEventListener('load',()=>{releaseAll();updateSupport()});
+ window.addEventListener('blur',releaseAll);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll()});
+ window.addEventListener('pagehide',releaseAll);
+ window.addEventListener('resize',()=>{
+  const rect=toggle.getBoundingClientRect();
+  if(rect.right>innerWidth)toggle.style.right='8px';
+ });
+ updateLabels();
+ // The frame may complete before this script runs. Re-check after a short load
+ // event as well as from the load handler above.
+ updateSupport();
 })();
 </script>
 </body>

@@ -290,9 +290,9 @@ class UsernameRegistry {
         bytesScanned+=file.bytes;scannedFiles.push(file.path);
         if(bytesScanned>1500000) return {ok:false,error:'source-audit-size-limit'};
         for(const rule of rules) {
-          if(rule.pattern.test(file.text)) findings.push({file:file.path,code:rule.code,severity:rule.severity,summary:rule.summary});
+          if(findings.length>=32) break;
+          if(rule.pattern.test(file.text)) findings.push({file:file.path.slice(0,160),code:rule.code,severity:rule.severity,summary:rule.summary});
           rule.pattern.lastIndex=0;
-          if(findings.length>=80) break;
         }
       }
     }
@@ -414,6 +414,9 @@ class UsernameRegistry {
       const sourceCommit=typeof body.source_commit==='string'?body.source_commit.trim().toLowerCase():'';
       if (!sourceRepository || !/^[a-f0-9]{40}$/.test(sourceCommit)) {
         return this.json({ok:false,error:'pinned-github-source-required',message:'An extension catalog submission must include a public GitHub repository and a full 40-character commit SHA.'},400);
+      }
+      if(!(await this.consumeRateLimit('extension-source-audit:'+auth.key,5,60*60*1000))) {
+        return this.json({ok:false,error:'rate-limited',message:'Extension source scan limit reached. Try again in about an hour.'},429);
       }
       const audit=await this.auditGithubExtensionSource(sourceRepository,sourceCommit);
       if(!audit.ok)return this.json({ok:false,error:audit.error,message:'The pinned source could not be verified and scanned.'},400);
@@ -730,9 +733,23 @@ class UsernameRegistry {
     if(!status||!id)return this.json({ok:false,error:'missing-fields'},400);
     const now=Date.now(),reviewer='TheDevilAngel';
     let result;
-    if(type==='submission') result=await this.state.storage.sql.exec(
-      'UPDATE community_submissions SET status=?, updated_at=?, reviewed_at=?, reviewer=?, review_note=? WHERE id=?',status,now,now,reviewer,note,id
-    );
+    if(type==='submission') {
+      const target=await this.state.storage.sql.exec(
+        'SELECT kind, notes FROM community_submissions WHERE id = ?',id
+      ).toArray()[0];
+      if(!target)return this.json({ok:false,error:'submission-not-found'},404);
+      if(target.kind==='extension'&&status==='approved') {
+        let envelope={};try{envelope=JSON.parse(target.notes||'{}')}catch(_){}
+        const pinned=String(envelope.source?.commit||'').toLowerCase();
+        if(body.source_reviewed!==true||!pinned||String(body.source_commit_confirmation||'').trim().toLowerCase()!==pinned) {
+          return this.json({ok:false,error:'extension-source-review-required',message:'Extension listings require an explicit manual source-review acknowledgement and the exact pinned commit SHA before approval.'},400);
+        }
+        if(note.length<20) return this.json({ok:false,error:'extension-review-note-required',message:'Write a moderator note of at least 20 characters describing the source review.'},400);
+      }
+      result=await this.state.storage.sql.exec(
+        'UPDATE community_submissions SET status=?, updated_at=?, reviewed_at=?, reviewer=?, review_note=? WHERE id=?',status,now,now,reviewer,note,id
+      );
+    }
     else if(type==='review') {
       const gameKey=String(body.game_key||'').trim().slice(0,100);
       const username=String(body.username||'').trim().toLowerCase();

@@ -1483,7 +1483,8 @@ function decodeSafeUgsPath(encodedPath, allowedRoot) {
 function rewriteUgsTextAsset(text, origin) {
   return text
     .replace(/(?:https?:)?\/\/(?:cdn|fastly|gcore)\.jsdelivr\.net\//gi, origin + '/ugs-cdn/')
-    .replace(/https?:\/\/raw\.githubusercontent\.com\/Ultimate-Guy\/cosmicgames\/main\//gi, origin + '/ugs-repo/');
+    .replace(/https:\/\/raw\.githubusercontent\.com\/Ultimate-Guy\/cosmicgames\/(main|[a-f0-9]{40})\//gi,
+      (_, revision) => origin + '/ugs-repo/' + revision + '/');
 }
 
 function encodeUgsPathPart(value) {
@@ -1526,7 +1527,14 @@ async function serveUgsCdn(request) {
 }
 
 async function serveUgsRepoAsset(request) {
-  return proxyUgsAsset(request, '/ugs-repo/', 'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/', 'UGS-Files');
+  const url = new URL(request.url);
+  const prefix = '/ugs-repo/';
+  if (!url.pathname.startsWith(prefix)) return null;
+  const parts = decodeSafeUgsPath(url.pathname.slice(prefix.length));
+  if (!parts || parts.length < 2) return ugsError('Invalid UGS repository asset path.');
+  const revision = parts[0] === 'main' || /^[a-f0-9]{40}$/i.test(parts[0]) ? parts.shift() : 'main';
+  if (parts[0] !== 'UGS-Files') return ugsError('UGS repository paths must stay inside UGS-Files.');
+  return proxyUgsAsset(request, prefix, 'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/' + revision + '/', null);
 }
 
 async function serveUgs(request) {
@@ -1535,8 +1543,10 @@ async function serveUgs(request) {
   if (!match) return null;
   const parts = decodeSafeUgsPath(match[1]);
   if (!parts || parts.length !== 1) return ugsError('Invalid UGS path.');
-  const upstreamUrl = new URL('https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/' + encodeURIComponent(parts[0]));
-  upstreamUrl.search = url.search;
+  const requestedRef = url.searchParams.get('ref') || 'main';
+  const revision = requestedRef === 'main' ? 'main' : /^[a-f0-9]{40}$/i.test(requestedRef) ? requestedRef : '';
+  if (!revision) return ugsError('Invalid UGS revision. Use main or a full 40-character commit SHA.');
+  const upstreamUrl = new URL('https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/' + revision + '/UGS-Files/' + encodeURIComponent(parts[0]));
   const upstream = await fetch(upstreamUrl.href, {
     headers: {'User-Agent':'Cosmic-UGS-Runtime','Accept':'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'},
     cf: {cacheTtl:3600,cacheEverything:true}
@@ -1589,8 +1599,11 @@ async function serveUgs(request) {
   // Keep the original upstream base URL. Rewriting all nested CDN assets
   // through the Worker changed package paths and broke games that worked
   // when loaded directly from jsDelivr.
+  if (revision !== 'main') {
+    html = html.replace(/(cdn\.jsdelivr\.net\/gh\/Ultimate-Guy\/cosmicgames)@main\//gi, '$1@' + revision + '/');
+  }
   if (!/<base\b/i.test(html) && /<head\b/i.test(html)) {
-    const base = '<base href="https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/">';
+    const base = '<base href="https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/' + revision + '/UGS-Files/">';
     html = html.replace(/<head\b[^>]*>/i, match => match + base);
   }
 

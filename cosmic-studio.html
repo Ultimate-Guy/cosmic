@@ -170,9 +170,61 @@ $('save-permissions').onclick=()=>{const name=$('permission-game').value.trim();
 $('show-permissions').onclick=()=>$('permission-preview').textContent=JSON.stringify(read(PERM,{}),null,2);
 function scanPads(){if(!navigator.getGamepads){$('gamepad-list').innerHTML='<div class="item danger">Gamepad API is not supported by this browser.</div>';return}const pads=[...navigator.getGamepads()].filter(Boolean);$('gamepad-list').innerHTML=pads.map(p=>'<div class="item"><strong>'+esc(p.id||'Controller')+'</strong><small>'+p.buttons.length+' buttons · '+p.axes.length+' axes · index '+p.index+'</small><div class="muted">Buttons: '+p.buttons.map((b,i)=>b.pressed?i:null).filter(x=>x!==null).join(', ')+'</div><div class="muted">Axes: '+[...p.axes].map((a,i)=>i+': '+a.toFixed(2)).join(' · ')+'</div></div>').join('')||'<div class="item">No controller detected. Connect one and press a button.</div>';const first=pads[0];if(first){const moved=first.axes.some((a,i)=>Math.abs(a-(gamepadNeutral[i]||0))>.2);$('gamepad-meter').style.width=(first.buttons.filter(b=>b.pressed).length/Math.max(1,first.buttons.length)*100)+'%';$('gamepad-status').textContent='Connected: '+first.id+(moved?' · axis movement detected':' · waiting for input')}}
 $('scan-gamepad').onclick=scanPads;$('calibrate-gamepad').onclick=()=>{const p=[...navigator.getGamepads?.()||[]].find(Boolean);if(!p)return status('gamepad-status','No controller detected.',true);gamepadNeutral=[p.axes[0]||0,p.axes[1]||0];status('gamepad-status','Neutral baseline recorded for first two axes.')};window.addEventListener('gamepadconnected',scanPads);window.addEventListener('gamepaddisconnected',scanPads);
-function accountData(){const keys=['cosmicCloudAccountV1','cosmicCurrentUserV1','cosmicProfile:'+ (localStorage.getItem('cosmicCurrentUserV1')||'Guest'),'cosmicOfflinePackManifestV1','cosmicGamePermissionsV1','cosmicSubmissionDraftsV1','cosmicPlayReportDraftsV1'];const out={exportedAt:new Date().toISOString(),source:'this browser only',items:{}};for(const k of keys){try{const v=localStorage.getItem(k);if(v!==null){if(k==='cosmicCloudAccountV1'){const p=JSON.parse(v)||{};out.items[k]={username:p.username||null,hasAccountToken:!!p.account_token,syncStatus:'not independently verified'};}else out.items[k]=JSON.parse(v)}}catch(_){}}return out}
-$('refresh-account').onclick=()=>{$('account-preview').textContent=JSON.stringify(accountData(),null,2);status('account-status','Inspected browser-local data only. Server-side data and active sessions are not included.')};
-$('export-account').onclick=()=>download('cosmic-account-data-export.json',accountData());
+function localAccountData(){
+ const keys=['cosmicCloudAccountV1','cosmicCurrentUserV1','cosmicProfile:'+(localStorage.getItem('cosmicCurrentUserV1')||'Guest'),'cosmicOfflinePackManifestV1','cosmicGamePermissionsV1','cosmicSubmissionDraftsV1','cosmicPlayReportDraftsV1'];
+ const out={exportedAt:new Date().toISOString(),source:'this browser only',items:{}};
+ for(const k of keys){try{const v=localStorage.getItem(k);if(v!==null){if(k==='cosmicCloudAccountV1'){const p=JSON.parse(v)||{};out.items[k]={username:p.username||null,hasAccountToken:!!p.account_token,syncStatus:'not independently verified'};}else out.items[k]=JSON.parse(v)}}catch(_){}}
+ return out;
+}
+async function fetchFullAccountData(){const cloud=await apiRequest('/api/accounts/data');return {exportedAt:new Date().toISOString(),cloud,local:localAccountData()};}
+$('refresh-account').onclick=async()=>{
+ $('refresh-account').disabled=true;
+ try{const data=await fetchFullAccountData();$('account-preview').textContent=JSON.stringify(data,null,2);status('account-status','Loaded server-side profile, activity, submissions, reports, and source history, plus browser-local data. Secrets and account tokens are omitted.');}
+ catch(e){$('account-preview').textContent=JSON.stringify(localAccountData(),null,2);status('account-status',e.message+' Showing browser-local data only.',true);}
+ finally{$('refresh-account').disabled=false}
+};
+$('export-account').onclick=async()=>{
+ $('export-account').disabled=true;
+ try{const data=await fetchFullAccountData();download('cosmic-account-data-export.json',data);status('account-status','Cloud and local account data exported. Account tokens and password material were omitted.');}
+ catch(e){download('cosmic-account-data-export.json',localAccountData());status('account-status',e.message+' Only browser-local data was exported.',true);}
+ finally{$('export-account').disabled=false}
+};
+$('revoke-sessions').onclick=async()=>{
+ const account=cloudAccount();
+ if(!account.username||!account.account_token)return status('account-status','Log in to a Cosmic Cloud account first.',true);
+ if(!confirm('Revoke other devices by rotating your Cosmic account token? Other devices will need to log in again.'))return;
+ $('revoke-sessions').disabled=true;
+ try{
+   const data=await apiRequest('/api/accounts/revoke-sessions',{method:'POST',body:{}});
+   write('cosmicCloudAccountV1',{...account,account_token:data.account_token});
+   try{const legacy=read('cosmicAccountsV1',{}),k=account.username.toLowerCase();if(legacy[k]){legacy[k].accountToken=data.account_token;legacy[k].account_token=data.account_token;write('cosmicAccountsV1',legacy)}}catch(_){}
+   status('account-status','Session token rotated. Other devices using the previous token are now signed out.');
+ }catch(e){status('account-status',e.message,true)}
+ finally{$('revoke-sessions').disabled=false}
+};
+$('delete-account').onclick=async()=>{
+ const account=cloudAccount();
+ if(!account.username||!account.account_token)return status('account-status','Log in to a Cosmic Cloud account first.',true);
+ const typed=prompt('This permanently deletes the server-side account data. Type your exact username ('+account.username+') to continue.');
+ if(typed===null)return;
+ if(typed.trim().toLowerCase()!==String(account.username).toLowerCase())return status('account-status','Username confirmation did not match. Nothing was deleted.',true);
+ if(!confirm('Permanently delete the Cosmic Cloud account, profile, activity, reports, submissions, and source snapshots? This cannot be undone.'))return;
+ const password=prompt('Enter your Cosmic Cloud password if this account has one. Leave blank only if it has no Cloud password.');
+ if(password===null)return;
+ $('delete-account').disabled=true;
+ try{
+   await apiRequest('/api/accounts/delete',{method:'POST',body:{confirm_username:typed.trim(),password}});
+   try{
+     localStorage.removeItem('cosmicCloudAccountV1');
+     localStorage.removeItem('cosmicCurrentUserV1');
+     localStorage.removeItem('cosmicAccountsV1');
+     localStorage.removeItem('cosmicProfile:'+account.username);
+   }catch(_){}
+   status('account-status','Cosmic Cloud account and server-side records were deleted. Returning to Cosmic.');
+   setTimeout(()=>location.assign(BASE+'index.html'),800);
+ }catch(e){status('account-status',e.message,true)}
+ finally{$('delete-account').disabled=false}
+};
 $('refresh').onclick=async()=>{await initGames();scanPads();$('refresh-account').click();status('account-status','Status refreshed.')};
 $('refresh').click();initGames();renderDrafts();if(navigator.getGamepads){$('gamepad-status').textContent='Gamepad API supported. Connect a controller and press Scan.'}else $('gamepad-status').textContent='Gamepad API unavailable in this browser.';
 })();

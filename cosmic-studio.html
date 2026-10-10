@@ -19,7 +19,12 @@
 <section class="card" id="capture"><div class="row"><span class="num">3</span><span class="badge">CREATOR TOOLS</span></div><h3>Capture Studio</h3><p>Capture this Cosmic tab after you choose the browser's screen-sharing source. A visible indicator remains while recording.</p><div class="row"><button class="primary" id="start-record">Start tab recording</button><button id="stop-record" disabled>Stop & save clip</button><button id="screenshot">Screenshot help</button></div><p class="muted" id="capture-indicator">Not recording.</p><video id="preview" controls playsinline style="display:none;width:100%;max-height:230px;border-radius:10px;background:#000"></video><div class="status" id="capture-status" role="status"></div></section>
 <section class="card" id="submissions"><div class="row"><span class="num">4</span><span class="badge">COMMUNITY</span></div><h3>Submission Inbox</h3><p>Submit a suggestion to Cosmic’s server-backed moderation queue. Submitted source code is stored as a URL only—it is never executed automatically.</p><label for="submit-kind">Submission type</label><select id="submit-kind"><option value="game">Game</option><option value="app">App</option></select><label for="submit-name">Game or app name</label><input id="submit-name" maxlength="80" placeholder="Name"><label for="submit-url">Source URL</label><input id="submit-url" type="url" maxlength="500" placeholder="https://…"><label for="submit-notes">Why should Cosmic add it?</label><textarea id="submit-notes" maxlength="1200" placeholder="Description, controls, and source ownership/permission"></textarea><div class="row"><button class="primary" id="save-submission">Submit for review</button><button id="save-submission-local">Save local draft</button><button id="export-submissions">Export drafts</button><button id="load-submissions">Refresh server queue</button><button id="load-admin-queue" hidden>Admin moderation queue</button></div><div class="list" id="submission-list"></div><div class="list" id="server-submission-list"></div><div class="list" id="admin-queue-list"></div><div class="status" id="submission-status" role="status"></div></section>
 <section class="card" id="reviews"><div class="row"><span class="num">5</span><span class="badge">PLAYER FEEDBACK</span></div><h3>Reviews & Play Reports</h3><p>Submit account-backed ratings and structured play reports. All new or edited reports remain pending until reviewed by a Cosmic moderator.</p><label for="review-game">Game name</label><input id="review-game" maxlength="100" placeholder="Game name"><div class="split"><div><label for="review-rating">Rating</label><select id="review-rating"><option value="5">5 — Great</option><option value="4">4 — Good</option><option value="3">3 — Okay</option><option value="2">2 — Poor</option><option value="1">1 — Broken</option></select></div><div><label for="review-result">Play result</label><select id="review-result"><option value="worked">Worked</option><option value="partial">Partly worked</option><option value="broken">Did not work</option></select></div></div><label for="review-text">Brief review</label><textarea id="review-text" maxlength="1000" placeholder="What worked well? Any loading or control issues?"></textarea><div class="row"><button class="primary" id="save-review">Submit report for review</button><button id="save-review-local">Save local draft</button><button id="load-public-reviews">Load approved reviews</button><button id="export-reviews">Export reports</button></div><div class="list" id="review-list"></div><div class="list" id="public-review-list"></div><div class="status" id="review-status" role="status"></div></section>
-<section class="card" id="extensions"><div class="row"><span class="num">6</span><span class="badge">DEVELOPER SDK</span></div><h3>Cosmic Extension SDK</h3><p>Create and save an extension manifest in this browser, then launch the entry page inside a sandboxed iframe. Extensions are optional and require your confirmation to run. They receive no direct access to Cosmic's page, password, or account token; manifest capabilities are narrowly mediated by the host.</p><label for="ext-name">Extension name</label><input id="ext-name" maxlength="80" value="Example Cosmic Extension"><label for="ext-url">Extension entry URL (HTTPS)</label><input id="ext-url" type="url" maxlength="2048" placeholder="https://example.com/extension.html"><div class="split"><label><input id="ext-perm-profile" type="checkbox" checked style="width:auto"> Allow minimal profile read</label><label><input id="ext-perm-navigation" type="checkbox" checked style="width:auto"> Allow user-confirmed navigation requests</label></div><div class="row"><button class="primary" id="make-manifest">Generate manifest</button><button id="save-extension">Save extension locally</button><button id="download-manifest">Download manifest</button><button id="run-extension">Run in sandbox</button></div><pre id="manifest-preview">Generate a manifest to review the exact entry URL and permissions.</pre><div class="status" id="ext-status" role="status"></div><div class="notice">Security boundary: extensions must use a different HTTPS origin from Cosmic. The iframe keeps that external origin so Cosmic can verify message senders, but remains sandboxed without top-navigation, pop-up, form, download, or clipboard permissions. Cross-origin isolation keeps the extension away from Cosmic's page and storage. Every capability request is checked against the saved manifest.</div><h4>Saved extensions on this device</h4><div id="installed-extensions" class="list"><div class="item muted">No saved extensions yet.</div></div><div class="status" id="extension-list-status" role="status"></div><div id="extension-runtime-panel" hidden style="margin-top:14px"><div class="row"><strong id="extension-runtime-title">Extension runtime</strong><button id="stop-extension" type="button">Stop extension</button></div><p id="extension-runtime-status" class="muted" role="status">No extension is running.</p><div id="extension-navigation-prompt" class="item" hidden><strong>Extension requests navigation</strong><p id="extension-navigation-url" style="overflow-wrap:anywhere"></p><p class="muted">This link will open only after you press Open link. Cosmic does not navigate automatically.</p><div class="row"><button id="extension-navigation-open" class="primary" type="button">Open link</button><button id="extension-navigation-reject" type="button">Reject</button></div></div><div id="extension-frame-host" style="margin-top:10px"></div></div></section>
+<section class="card" id="extensions"><div class="row"><span class="num">6</span><span class="badge">DEVELOPER SDK</span></div><h3>Cosmic Extension SDK</h3><p>Create and save an extension manifest in this browser, then launch the entry page inside a sandboxed iframe. Extensions are optional and require your confirmation to run. They receive no direct access to Cosmic's page, password, or account token; manifest capabilities are narrowly mediated by the host.</p><label for="ext-name">Extension name</label><input id="ext-name" maxlength="80" value="Example Cosmic Extension"><label for="ext-url">Extension entry URL (HTTPS)</label><input id="ext-url" type="url" maxlength="2048" placeholder="https://example.com/extension.html"><div class="split"><label><input id="ext-perm-profile" type="checkbox" checked style="width:auto"> Allow minimal profile read</label><label><input id="ext-perm-navigation" type="checkbox" checked style="width:auto"> Allow user-confirmed navigation requests</label></div><div class="row"><button class="primary" id="make-manifest">Generate manifest</button><button id="save-extension">Save extension locally</button><button id="download-manifest">Download manifest</button><button id="run-extension">Run in sandbox</button></div><pre id="manifest-preview">Generate a manifest to review the exact entry URL and permissions.</pre><div class="status" id="ext-status" role="status"></div>
+<h4>Community Extension Catalog</h4><p>Browse extensions whose metadata was approved by a Cosmic moderator. Approval does not mean the third-party code was audited. Catalog entries are not run automatically.</p>
+<div class="row"><input id="extension-catalog-search" maxlength="100" placeholder="Search approved extensions" aria-label="Search approved extensions"><button id="load-extension-catalog" type="button">Refresh catalog</button><button id="submit-extension-catalog" class="primary" type="button">Submit current manifest for review</button></div>
+<div class="notice">Submitting requires a Cosmic Cloud account. New listings remain pending until moderation. Cosmic stores only a validated manifest and entry URL; it does not fetch, host, or execute submitted source code. Avoid submitting extensions that contain private information.</div>
+<div id="extension-catalog-status" class="status" role="status" aria-live="polite"></div><div id="extension-catalog-list" class="list"><div class="item muted">Loading approved extension metadata…</div></div>
+<div class="notice">Runtime security boundary: extensions use <code>sandbox="allow-scripts"</code> only. This creates an opaque iframe origin, so the host uses a per-load random channel token plus the iframe's exact Window reference; it never grants same-origin access, top navigation, pop-ups, forms, downloads, or clipboard permissions. Each request is checked against the manifest and high-risk actions require user approval.</div><h4>Saved extensions on this device</h4><div id="installed-extensions" class="list"><div class="item muted">No saved extensions yet.</div></div><div class="status" id="extension-list-status" role="status"></div><div id="extension-runtime-panel" hidden style="margin-top:14px"><div class="row"><strong id="extension-runtime-title">Extension runtime</strong><button id="stop-extension" type="button">Stop extension</button></div><p id="extension-runtime-status" class="muted" role="status">No extension is running.</p><div id="extension-navigation-prompt" class="item" hidden><strong>Extension requests navigation</strong><p id="extension-navigation-url" style="overflow-wrap:anywhere"></p><p class="muted">This link will open only after you press Open link. Cosmic does not navigate automatically.</p><div class="row"><button id="extension-navigation-open" class="primary" type="button">Open link</button><button id="extension-navigation-reject" type="button">Reject</button></div></div><div id="extension-frame-host" style="margin-top:10px"></div></div></section>
 <section class="card" id="permissions"><div class="row"><span class="num">7</span><span class="badge">ISOLATION</span></div><h3>Per-Game Permissions</h3><p>Choose the iframe permissions Cosmic should grant when this game next launches. Profiles apply to fullscreen, autoplay, clipboard, and gamepad capabilities; browser and site restrictions still take precedence.</p><label for="permission-game">Game name or ID</label><input id="permission-game" maxlength="100" placeholder="Game name"><div class="split"><label><input id="perm-fullscreen" type="checkbox" checked style="width:auto"> Allow fullscreen</label><label><input id="perm-autoplay" type="checkbox" style="width:auto"> Allow autoplay</label><label><input id="perm-clipboard" type="checkbox" style="width:auto"> Allow clipboard</label><label><input id="perm-gamepad" type="checkbox" checked style="width:auto"> Allow gamepad</label></div><div class="row"><button class="primary" id="save-permissions">Save profile</button><button id="show-permissions">Show saved profiles</button></div><pre id="permission-preview"></pre><div class="status" id="permission-status" role="status"></div></section>
 <section class="card" id="controller"><div class="row"><span class="num">8</span><span class="badge">INPUT LAB</span></div><h3>Controller & Touch Hub</h3><p>Connect a controller, press buttons, and inspect axes. Press any controller button if it is not detected automatically.</p><div class="row"><button class="primary" id="scan-gamepad">Scan controllers</button><button id="calibrate-gamepad">Calibrate neutral</button></div><div id="gamepad-list" class="list"><div class="item">No controller scan yet.</div></div><div class="meter"><span id="gamepad-meter"></span></div><p class="muted" id="gamepad-status">Gamepad API support: checking…</p><div class="notice">Touch overlay adapters will be enabled only for games with a tested compatibility profile; this tester does not inject controls into arbitrary third-party frames.</div></section>
 <section class="card" id="account"><div class="row"><span class="num">9</span><span class="badge">ACCOUNT CENTER</span></div><h3>Account Security & Data</h3><p>Inspect the account data Cosmic has stored in this browser, export a copy, and review synchronization status before moving devices.</p><div class="row"><button class="primary" id="refresh-account">Inspect account</button><button id="export-account">Export cloud + local data</button><button id="revoke-sessions">Revoke other sessions</button><button id="delete-account" class="danger">Delete account data</button></div><pre id="account-preview">Account data has not been inspected yet.</pre><div class="status" id="account-status" role="status"></div><div class="notice">Exports omit account tokens and password material. Session revocation rotates the account token, invalidating copies on other devices. Deletion removes the Cloud account and its stored server-side records and cannot be undone.</div></section>
@@ -181,7 +186,7 @@ $('load-admin-queue').onclick=()=>loadAdminQueue().catch(e=>status('submission-s
 renderDrafts();
 const EXT_KEY='cosmicExtensionsV1';
 const EXT_CAPABILITIES=new Set(['cosmic.profile.read','cosmic.navigation.request']);
-let manifest=null, activeExtension=null, activeExtensionFrame=null, pendingExtensionNavigation=null;
+let manifest=null, activeExtension=null, activeExtensionFrame=null, pendingExtensionNavigation=null, activeExtensionNonce='';
 let extensionMessageWindow=0, extensionMessageCount=0;
 function validateExtensionManifest(input){
  if(!input||typeof input!=='object'||Array.isArray(input)||input.manifestVersion!==1)throw Error('Unsupported extension manifest version.');
@@ -197,8 +202,8 @@ function validateExtensionManifest(input){
  if(!Array.isArray(input.permissions)||input.permissions.length>EXT_CAPABILITIES.size)throw Error('Extension permissions must be an explicit list.');
  const permissions=[...new Set(input.permissions)];
  if(permissions.length!==input.permissions.length||permissions.some(x=>!EXT_CAPABILITIES.has(x)))throw Error('The manifest requests an unsupported or duplicate capability.');
- if(input.isolation?.mode!=='iframe'||input.isolation?.sandbox!=='allow-scripts allow-same-origin'||input.isolation?.sameOrigin!==false)throw Error('The manifest must use the restricted, origin-verifiable sandbox settings.');
- return {manifestVersion:1,name,version,entry:entry.href,permissions,isolation:{mode:'iframe',sandbox:'allow-scripts allow-same-origin',sameOrigin:false},enabledByDefault:false,reviewRequired:true};
+ if(input.isolation?.mode!=='iframe'||input.isolation?.sandbox!=='allow-scripts'||input.isolation?.sameOrigin!==false)throw Error('The manifest must use the strict opaque-origin sandbox settings.');
+ return {manifestVersion:1,name,version,entry:entry.href,permissions,isolation:{mode:'iframe',sandbox:'allow-scripts',sameOrigin:false},enabledByDefault:false,reviewRequired:true};
 }
 function buildExtensionManifest(){
  const entry=$('ext-url').value.trim();
@@ -209,7 +214,7 @@ function buildExtensionManifest(){
  const permissions=[];
  if($('ext-perm-profile').checked)permissions.push('cosmic.profile.read');
  if($('ext-perm-navigation').checked)permissions.push('cosmic.navigation.request');
- try{manifest=validateExtensionManifest({manifestVersion:1,name,version:'0.1.0',entry:url.href,permissions,isolation:{mode:'iframe',sandbox:'allow-scripts allow-same-origin',sameOrigin:false}})}
+ try{manifest=validateExtensionManifest({manifestVersion:1,name,version:'0.1.0',entry:url.href,permissions,isolation:{mode:'iframe',sandbox:'allow-scripts',sameOrigin:false}})}
  catch(e){status('ext-status',e.message,true);return null}
  $('manifest-preview').textContent=JSON.stringify(manifest,null,2);
  status('ext-status','Manifest validated. Review the URL and permissions before saving or running.');
@@ -237,6 +242,55 @@ function renderInstalledExtensions(){
   buttons.append(run,remove);card.append(title,detail,buttons);host.appendChild(card);
  });
 }
+async function loadExtensionCatalog(){
+ const host=$('extension-catalog-list'),query=$('extension-catalog-search').value.trim().toLowerCase();
+ host.replaceChildren();
+ const loading=document.createElement('div');loading.className='item muted';loading.textContent='Loading approved extension metadata…';host.appendChild(loading);
+ try{
+  const data=await apiRequest('/api/community/submissions?catalog=extensions',{auth:'none'});
+  const rows=Array.isArray(data.extensions)?data.extensions:[];
+  const filtered=rows.filter(x=>String(x.name||'').toLowerCase().includes(query)||String(x.entry||'').toLowerCase().includes(query)||String(x.version||'').toLowerCase().includes(query));
+  host.replaceChildren();
+  if(!filtered.length){
+   const empty=document.createElement('div');empty.className='item muted';empty.textContent=rows.length?'No approved extensions match this search.':'The approved extension catalog is empty. Submit a manifest for moderator review; new entries will appear only after approval.';host.appendChild(empty);
+  }
+  for(const item of filtered){
+   const card=document.createElement('div');card.className='item';
+   const title=document.createElement('strong');title.textContent=item.name+' · '+item.version;
+   const audit=document.createElement('small');audit.textContent='Moderator-approved metadata · third-party code NOT independently audited';
+   const detail=document.createElement('p');detail.style.overflowWrap='anywhere';detail.textContent='Entry: '+item.entry+'\nRequested capabilities: '+(item.permissions||[]).join(', ')+(item.reviewed_at?'\nReviewed: '+new Date(Number(item.reviewed_at)).toLocaleDateString():'');
+   const actions=document.createElement('div');actions.className='row';
+   const link=document.createElement('a');link.href=item.entry;link.target='_blank';link.rel='noopener noreferrer';link.textContent='View source';link.addEventListener('click',e=>{if(!confirm('Open the extension publisher’s external URL? Cosmic has not independently audited its code.'))e.preventDefault()});
+   const use=document.createElement('button');use.type='button';use.textContent='Review manifest';use.addEventListener('click',()=>{
+    try{
+     const m=validateExtensionManifest(item.manifest);
+     $('ext-name').value=m.name;$('ext-url').value=m.entry;
+     $('ext-perm-profile').checked=m.permissions.includes('cosmic.profile.read');
+     $('ext-perm-navigation').checked=m.permissions.includes('cosmic.navigation.request');
+     buildExtensionManifest();
+     status('ext-status','Catalog metadata loaded into the manifest editor. Review the entry and permissions. Nothing has been saved or executed.');
+     $('ext-name').focus({preventScroll:false});
+    }catch(e){status('extension-catalog-status','Catalog manifest rejected: '+e.message,true)}
+   });
+   actions.append(link,use);card.append(title,audit,detail,actions);host.appendChild(card);
+  }
+  status('extension-catalog-status',rows.length+' moderator-approved metadata listing(s). No extension code was downloaded or executed.');
+ }catch(e){
+  host.replaceChildren();const err=document.createElement('div');err.className='item danger';err.textContent='Catalog could not be loaded: '+e.message;host.appendChild(err);status('extension-catalog-status','Check the connection and try refreshing.',true);
+ }
+}
+$('load-extension-catalog').onclick=()=>loadExtensionCatalog();
+$('extension-catalog-search').addEventListener('input',()=>loadExtensionCatalog());
+$('submit-extension-catalog').onclick=async()=>{
+ const ext=buildExtensionManifest();if(!ext)return;
+ const button=$('submit-extension-catalog');button.disabled=true;
+ try{
+  const result=await apiRequest('/api/community/submissions',{method:'POST',body:{kind:'extension',name:ext.name,source_url:ext.entry,notes:JSON.stringify(ext)}});
+  status('extension-catalog-status','Extension metadata submitted for moderation. Status: '+result.submission.status+'. Nothing has been run or published yet.');
+  status('ext-status','Submission recorded. A moderator must approve the metadata before it appears in the public catalog.');
+ }catch(e){status('extension-catalog-status',e.message,true)}
+ finally{button.disabled=false}
+};
 function safeProfileSnapshot(){
  const account=cloudAccount();
  let username=String(account.username||read('cosmicCurrentUserV1','')||'').trim().slice(0,24);
@@ -249,8 +303,8 @@ function safeProfileSnapshot(){
 }
 function postExtensionResponse(id,ok,data){
  const frame=activeExtensionFrame;
- if(!frame?.contentWindow||!activeExtension)return;
- try{frame.contentWindow.postMessage({type:'cosmic:host:response',version:1,id,ok,...(ok?{data}:{error:String(data||'request-denied').slice(0,160)})},new URL(activeExtension.entry).origin)}catch(_){}
+ if(!frame?.contentWindow||!activeExtension||!activeExtensionNonce)return;
+ try{frame.contentWindow.postMessage({type:'cosmic:host:response',version:1,nonce:activeExtensionNonce,id,ok,...(ok?{data}:{error:String(data||'request-denied').slice(0,160)})},'*')}catch(_){}
 }
 function resolveNavigationRequest(accept){
  const pending=pendingExtensionNavigation;if(!pending)return;
@@ -273,7 +327,7 @@ function stopExtension(message='Extension stopped.'){
  pendingExtensionNavigation=null;
  $('extension-navigation-prompt').hidden=true;
  if(activeExtensionFrame){activeExtensionFrame.src='about:blank';activeExtensionFrame.remove();activeExtensionFrame=null}
- activeExtension=null;$('extension-runtime-panel').hidden=true;
+ activeExtension=null;activeExtensionNonce='';$('extension-runtime-panel').hidden=true;
  $('extension-frame-host').replaceChildren();
  $('extension-runtime-status').textContent=message;
 }
@@ -286,20 +340,20 @@ window.addEventListener('message',event=>{
  if(!frame||!ext||event.source!==frame.contentWindow)return;
  let expectedOrigin;
  try{expectedOrigin=new URL(ext.entry).origin}catch(_){return}
- if(event.origin!==expectedOrigin)return;
+ if(event.origin!=='null'||typeof activeExtensionNonce!=='string'||!activeExtensionNonce)return;
  let bytes;
  try{bytes=new TextEncoder().encode(JSON.stringify(event.data)).byteLength}catch(_){return}
- if(bytes>16*1024||!event.data||typeof event.data!=='object'||Array.isArray(event.data))return;
+ if(bytes>16*1024||!event.data||typeof event.data!=='object'||Array.isArray(event.data)||event.data.nonce!==activeExtensionNonce)return;
  const now=Date.now();
  if(now-extensionMessageWindow>=60000){extensionMessageWindow=now;extensionMessageCount=0}
  extensionMessageCount++;
  if(extensionMessageCount>20){$('extension-runtime-status').textContent='Extension messages paused: request limit exceeded.';return}
  const msg=event.data;
- if(msg.type==='cosmic:extension:ready'&&msg.version===1){
+ if(msg.type==='cosmic:extension:ready'&&msg.version===1&&msg.nonce===activeExtensionNonce){
   $('extension-runtime-status').textContent='Sandbox running. Capabilities are limited to this manifest and each request is checked.';
   return;
  }
- if(msg.type!=='cosmic:extension:request'||msg.version!==1||typeof msg.id!=='string'||! /^[A-Za-z0-9_.:-]{1,64}$/.test(msg.id))return;
+ if(msg.type!=='cosmic:extension:request'||msg.version!==1||msg.nonce!==activeExtensionNonce||typeof msg.id!=='string'||! /^[A-Za-z0-9_.:-]{1,64}$/.test(msg.id))return;
  const capability=msg.capability;
  if(typeof capability!=='string'||!ext.permissions.includes(capability)||!EXT_CAPABILITIES.has(capability)){
   postExtensionResponse(msg.id,false,'capability-not-granted');return;
@@ -326,16 +380,18 @@ function startExtension(input,confirmRun=false){
  activeExtension=ext;extensionMessageWindow=Date.now();extensionMessageCount=0;
  const frame=document.createElement('iframe');
  frame.title='Sandboxed Cosmic extension: '+ext.name;
- frame.setAttribute('sandbox','allow-scripts allow-same-origin');
+ frame.setAttribute('sandbox','allow-scripts');
  frame.setAttribute('referrerpolicy','no-referrer');
  frame.setAttribute('loading','eager');
  frame.setAttribute('allow','');
  frame.style.cssText='display:block;width:100%;height:360px;border:1px solid var(--line);border-radius:12px;background:#fff';
  frame.addEventListener('load',()=>{
   if(frame!==activeExtensionFrame||!activeExtension)return;
-  // The entry is forced to a different origin, allowing exact origin verification.
-  // Target the configured origin so redirects to a different origin get no host message.
-  try{frame.contentWindow.postMessage({type:'cosmic:host:init',version:1,extension:{name:ext.name,version:ext.version},capabilities:ext.permissions},new URL(ext.entry).origin)}catch(_){}
+  // sandbox="allow-scripts" gives the child an opaque origin ("null"), which
+  // cannot access Cosmic even if the URL redirects to a Cosmic origin.
+  // A fresh random channel token is rotated on every child navigation/load.
+  activeExtensionNonce=crypto.randomUUID();
+  try{frame.contentWindow.postMessage({type:'cosmic:host:init',version:1,nonce:activeExtensionNonce,extension:{name:ext.name,version:ext.version},capabilities:ext.permissions},'*')}catch(_){}
  });
  activeExtensionFrame=frame;$('extension-frame-host').replaceChildren(frame);
  $('extension-runtime-panel').hidden=false;$('extension-runtime-title').textContent=ext.name;
@@ -357,6 +413,7 @@ $('run-extension').onclick=()=>{const ext=buildExtensionManifest();if(!ext)retur
 $('stop-extension').onclick=()=>stopExtension();
 $('download-manifest').onclick=()=>{const ext=buildExtensionManifest();if(ext)download('cosmic-extension-manifest.json',ext)};
 renderInstalledExtensions();
+loadExtensionCatalog();
 const PERM='cosmicGamePermissionsV1';
 $('save-permissions').onclick=()=>{const name=$('permission-game').value.trim();if(!name)return status('permission-status','Enter a game name or ID.',true);const all=read(PERM,{});all[name]={fullscreen:$('perm-fullscreen').checked,autoplay:$('perm-autoplay').checked,clipboard:$('perm-clipboard').checked,gamepad:$('perm-gamepad').checked,updatedAt:new Date().toISOString()};write(PERM,all);$('permission-preview').textContent=JSON.stringify(all[name],null,2);status('permission-status','Profile saved. Cosmic applies these supported permissions the next time the named game launches.')};
 $('show-permissions').onclick=()=>$('permission-preview').textContent=JSON.stringify(read(PERM,{}),null,2);

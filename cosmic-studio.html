@@ -32,6 +32,23 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(_){return d}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 function download(name,data,type='application/json'){const blob=new Blob([typeof data==='string'?data:JSON.stringify(data,null,2)],{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function status(id,msg,bad=false){const el=$(id);if(el){el.textContent=msg;el.style.color=bad?'var(--bad)':'var(--mint)'}}
+function cloudAccount(){return read('cosmicCloudAccountV1',{})||{}}
+async function apiRequest(path,options={}){
+ const method=options.method||'GET',auth=options.auth||'account',headers={'Content-Type':'application/json'};
+ if(options.token&&auth==='admin')headers.Authorization='Bearer '+options.token;
+ else if(auth==='admin'){const token=options.token||sessionStorage.getItem('cosmicStudioAdminToken')||'';if(!token)throw Error('Admin session required.');headers.Authorization='Bearer '+token;}
+ else if(auth==='account'){const p=cloudAccount();if(!p.username||!p.account_token)throw Error('Log in to a Cosmic Cloud account first.');headers.Authorization='Bearer '+p.account_token;headers['X-Cosmic-Username']=p.username;}
+ let body=options.body;
+ if(body!==undefined&&typeof body!=='string')body=JSON.stringify(body);
+ const response=await fetch(API+path,{method,headers,body,cache:'no-store'});
+ const contentType=response.headers.get('content-type')||'';let data={};
+ if(contentType.toLowerCase().includes('application/json')){try{data=await response.json()}catch(_){throw Error('Cosmic Cloud returned invalid JSON.')}}else if(response.ok)throw Error('Cosmic Cloud returned an unexpected response.');
+ if(!response.ok||data?.ok===false){
+   const messages={unauthorized:'Your session is no longer valid. Log in again.', 'submission-rate-limit':'Submission limit reached. Try again tomorrow.','review-rate-limit':'Report limit reached. Try again later.','duplicate-source':'That source is already in the review queue or catalog.','lockfile-too-large':'The source snapshot is too large to store.','confirmation-mismatch':'The typed username did not match.','invalid-credentials':'Password was incorrect.','server-not-configured':'The admin service is not configured.'};
+   throw Error(messages[data.error]||data.error||('Cosmic Cloud request failed ('+response.status+').'));
+ }
+ return data;
+}
 let localGames=[],lockfile=null,recording=null,stream=null,chunks=[],recorder=null,gamepadNeutral=[0,0];
 async function initGames(){try{const r=await fetch(BASE+'pages/lessons/games.json',{cache:'no-store'});if(!r.ok)throw Error('Registry request failed');localGames=await r.json();const sel=$('pack-game');sel.innerHTML='';localGames.filter(g=>g.path&&/^pages\/lessons\//.test(g.path)).forEach(g=>{const o=document.createElement('option');o.value=g.path;o.textContent=g.name;sel.appendChild(o)});if(!sel.options.length)sel.innerHTML='<option value="">No eligible local games found</option>';renderPacks()}catch(e){$('pack-game').innerHTML='<option value="">Game registry unavailable</option>';status('pack-status',e.message,true)}}
 const PACK_KEY='cosmicOfflinePackManifestV1',PACK_CACHE='cosmic-offline-packs-v1';
@@ -48,11 +65,103 @@ function finishRecordingUI(){$('start-record').disabled=false;$('stop-record').d
 $('stop-record').onclick=()=>{if(recorder?.state==='recording')recorder.stop();finishRecordingUI()};
 $('screenshot').onclick=()=>status('capture-status','Browser security prevents a normal webpage from silently screenshotting its own tab. Use your OS/browser screenshot shortcut; recording is available above.');
 const SUB='cosmicSubmissionDraftsV1',REV='cosmicPlayReportDraftsV1';
-function renderDrafts(){const subs=read(SUB,[]),revs=read(REV,[]);$('submission-list').innerHTML=subs.map((x,i)=>'<div class="item"><strong>'+esc(x.name)+'</strong><small>'+esc(x.url)+' · Local draft</small><p>'+esc(x.notes)+'</p><button data-del-sub="'+i+'">Delete draft</button></div>').join('')||'<div class="item muted">No submission drafts saved.</div>';$('review-list').innerHTML=revs.map((x,i)=>'<div class="item"><strong>'+esc(x.game)+' · '+x.rating+'/5</strong><small>'+esc(x.result)+' · Local report · '+esc(x.date.slice(0,10))+'</small><p>'+esc(x.text)+'</p><button data-del-rev="'+i+'">Delete report</button></div>').join('')||'<div class="item muted">No play reports saved.</div>';$('submission-list').querySelectorAll('[data-del-sub]').forEach(b=>b.onclick=()=>{const a=read(SUB,[]);a.splice(+b.dataset.delSub,1);write(SUB,a);renderDrafts()});$('review-list').querySelectorAll('[data-del-rev]').forEach(b=>b.onclick=()=>{const a=read(REV,[]);a.splice(+b.dataset.delRev,1);write(REV,a);renderDrafts()})}
-$('save-submission').onclick=()=>{const name=$('submit-name').value.trim(),url=$('submit-url').value.trim(),notes=$('submit-notes').value.trim();if(!name||!url)return status('submission-status','Name and source URL are required.',true);try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))throw Error();}catch(_){return status('submission-status','Enter a valid HTTP or HTTPS source URL.',true)}const a=read(SUB,[]);if(a.some(x=>x.url===url))return status('submission-status','That source URL is already in your local drafts.',true);a.unshift({name,url,notes,createdAt:new Date().toISOString(),status:'draft'});write(SUB,a);renderDrafts();status('submission-status','Draft saved on this device. It has not been submitted to Cosmic administrators.')};
-$('export-submissions').onclick=()=>download('cosmic-submission-drafts.json',read(SUB,[]));
-$('save-review').onclick=()=>{const game=$('review-game').value.trim();if(!game)return status('review-status','Enter a game name.',true);const a=read(REV,[]),result=$('review-result').value;a.unshift({game,rating:+$('review-rating').value,result,text:$('review-text').value.trim(),date:new Date().toISOString()});write(REV,a);renderDrafts();status('review-status','Report saved locally. It is not a public rating or verified community report.')};
-$('export-reviews').onclick=()=>download('cosmic-play-reports.json',read(REV,[]));
+function renderDrafts(){
+ const subs=read(SUB,[]),revs=read(REV,[]);
+ $('submission-list').innerHTML=subs.map((x,i)=>'<div class="item"><strong>'+esc(x.name)+'</strong><small>'+esc(x.url)+' · Local draft</small><p>'+esc(x.notes)+'</p><button data-del-sub="'+i+'">Delete draft</button></div>').join('')||'<div class="item muted">No local submission drafts.</div>';
+ $('review-list').innerHTML=revs.map((x,i)=>'<div class="item"><strong>'+esc(x.game)+' · '+x.rating+'/5</strong><small>'+esc(x.result)+' · Local draft · '+esc(String(x.date||'').slice(0,10))+'</small><p>'+esc(x.text)+'</p><button data-del-rev="'+i+'">Delete report</button></div>').join('')||'<div class="item muted">No local report drafts.</div>';
+ $('submission-list').querySelectorAll('[data-del-sub]').forEach(b=>b.onclick=()=>{const a=read(SUB,[]);a.splice(+b.dataset.delSub,1);write(SUB,a);renderDrafts()});
+ $('review-list').querySelectorAll('[data-del-rev]').forEach(b=>b.onclick=()=>{const a=read(REV,[]);a.splice(+b.dataset.delRev,1);write(REV,a);renderDrafts()});
+}
+function renderServerSubmissions(items){
+ $('server-submission-list').innerHTML=items.map(x=>'<div class="item"><strong>'+esc(x.name)+' <span class="badge">'+esc(x.kind)+' · '+esc(x.status)+'</span></strong><small>'+esc(x.source_url)+' · '+esc(new Date(Number(x.created_at)||Date.now()).toLocaleDateString())+'</small><p>'+esc(x.notes||'')+'</p>'+(x.review_note?'<small>Moderator note: '+esc(x.review_note)+'</small>':'')+'</div>').join('')||'<div class="item muted">No server submissions yet.</div>';
+}
+async function loadSubmissions(){
+ const d=await apiRequest('/api/community/submissions');
+ renderServerSubmissions(d.submissions||[]);
+ status('submission-status','Loaded '+(d.submissions||[]).length+' server submission(s). New submissions wait for moderator review.');
+}
+$('save-submission-local').onclick=()=>{
+ const name=$('submit-name').value.trim(),url=$('submit-url').value.trim(),notes=$('submit-notes').value.trim();
+ if(!name||!url)return status('submission-status','Name and source URL are required.',true);
+ try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))throw Error()}catch(_){return status('submission-status','Enter a valid HTTP or HTTPS source URL.',true)}
+ const a=read(SUB,[]);if(a.some(x=>x.url===url))return status('submission-status','That source URL is already in your local drafts.',true);
+ a.unshift({name,url,notes,kind:$('submit-kind').value,createdAt:new Date().toISOString(),status:'draft'});write(SUB,a);renderDrafts();status('submission-status','Draft saved locally only. Use Submit for review to send it to Cosmic Cloud.');
+};
+$('save-submission').onclick=async()=>{
+ const name=$('submit-name').value.trim(),source_url=$('submit-url').value.trim(),notes=$('submit-notes').value.trim(),kind=$('submit-kind').value;
+ if(!name||!source_url)return status('submission-status','Name and source URL are required.',true);
+ const b=$('save-submission');b.disabled=true;
+ try{const d=await apiRequest('/api/community/submissions',{method:'POST',body:{name,source_url,notes,kind}});status('submission-status','Submitted to Cosmic Cloud. Status: '+d.submission.status+'. Code is not executed; a moderator must review it.');await loadSubmissions();}
+ catch(e){status('submission-status',e.message,true)}
+ finally{b.disabled=false}
+};
+$('load-submissions').onclick=()=>loadSubmissions().catch(e=>status('submission-status',e.message,true));
+$('export-submissions').onclick=async()=>{try{const d=await apiRequest('/api/community/submissions');download('cosmic-submission-export.json',{exportedAt:new Date().toISOString(),localDrafts:read(SUB,[]),serverSubmissions:d.submissions||[]})}catch(e){download('cosmic-submission-drafts.json',read(SUB,[]));status('submission-status',e.message+' Exported local drafts only.',true)}};
+$('save-review-local').onclick=()=>{
+ const game=$('review-game').value.trim();if(!game)return status('review-status','Enter a game name.',true);
+ const a=read(REV,[]);a.unshift({game,rating:+$('review-rating').value,result:$('review-result').value,text:$('review-text').value.trim(),date:new Date().toISOString()});write(REV,a);renderDrafts();status('review-status','Report saved locally only. Submit it to have it reviewed for public display.');
+};
+$('save-review').onclick=async()=>{
+ const game=$('review-game').value.trim();if(!game)return status('review-status','Enter a game name.',true);
+ const b=$('save-review');b.disabled=true;
+ try{const d=await apiRequest('/api/community/reviews',{method:'POST',body:{game,rating:+$('review-rating').value,result:$('review-result').value,text:$('review-text').value.trim()}});status('review-status',d.message||'Report submitted for moderator review.');}
+ catch(e){status('review-status',e.message,true)}
+ finally{b.disabled=false}
+};
+$('load-public-reviews').onclick=async()=>{
+ const game=$('review-game').value.trim();if(!game)return status('review-status','Enter a game name first.',true);
+ try{const d=await apiRequest('/api/community/reviews?game='+encodeURIComponent(game),{auth:'none'});$('public-review-list').innerHTML=(d.reviews||[]).map(x=>'<div class="item"><strong>'+esc(x.game_name)+' · '+esc(x.rating)+'/5</strong><small>'+esc(x.username)+' · '+esc(x.result)+' · '+esc(new Date(Number(x.created_at)||Date.now()).toLocaleDateString())+'</small><p>'+esc(x.text||'')+'</p></div>').join('')||'<div class="item muted">No approved community reviews for this game yet.</div>';status('review-status','Approved reports: '+d.count+(d.average_rating?' · Average '+d.average_rating.toFixed(1)+'/5':'')+'.');}
+ catch(e){status('review-status',e.message,true)}
+};
+$('export-reviews').onclick=async()=>{try{const cloud=await apiRequest('/api/accounts/data');download('cosmic-play-reports.json',{exportedAt:new Date().toISOString(),localDrafts:read(REV,[]),serverReviews:cloud.reviews||[]})}catch(e){download('cosmic-play-reports.json',read(REV,[]));status('review-status',e.message+' Exported local drafts only.',true)}};
+async function buildLockfile(){
+ const u=await fetch(BASE+'pages/lessons/ugs-games.json',{cache:'no-store'}).then(r=>r.ok?r.json():[]);
+ const all=[...localGames,...(Array.isArray(u)?u:[])];
+ lockfile={schemaVersion:1,generatedAt:new Date().toISOString(),note:'Audit manifest only. Mutable branches are not immutable pins; missing revisions are not guessed.',games:all.map(g=>({name:g.name,path:g.path,source:g.source||(/^https?:/i.test(g.path||'')?'external':'Cosmic-local'),revision:g.revision||g.commit||null,source_path:g.source_path||null,mutableExternal:/^https?:/i.test(g.path||'')&&!/@[a-f0-9]{7,40}(?:\/|$)/i.test(g.path||'')}))};
+ $('lock-preview').textContent=JSON.stringify({schemaVersion:lockfile.schemaVersion,generatedAt:lockfile.generatedAt,total:all.length,unpinned:lockfile.games.filter(g=>g.mutableExternal).length,sample:lockfile.games.slice(0,8)},null,2);
+ status('lock-status','Audited '+all.length+' local and UGS entries. Unpinned sources are flagged, not changed automatically.');
+ return lockfile;
+}
+$('build-lockfile').onclick=()=>buildLockfile().catch(e=>status('lock-status',e.message,true));
+$('download-lockfile').onclick=async()=>{try{if(!lockfile)await buildLockfile();if(lockfile)download('cosmic-game-source-lockfile.json',lockfile)}catch(e){status('lock-status',e.message,true)}};
+$('track-lockfile').onclick=async()=>{
+ const b=$('track-lockfile');b.disabled=true;
+ try{if(!lockfile)await buildLockfile();const label=prompt('Label this source audit:', 'Source audit '+new Date().toISOString().slice(0,10));if(label===null)return;const d=await apiRequest('/api/source-lockfiles',{method:'POST',body:{label,lockfile}});status('lock-status','Saved Cloud source snapshot ('+d.games+' entries; '+d.mutableSources+' mutable sources). Pending moderator review; live game code was not changed.');await loadLockfiles();}
+ catch(e){status('lock-status',e.message,true)}
+ finally{b.disabled=false}
+};
+async function loadLockfiles(){
+ const d=await apiRequest('/api/source-lockfiles');
+ const list=$('lockfile-history');
+ list.innerHTML=(d.lockfiles||[]).map(x=>'<div class="item"><strong>'+esc(x.label)+' <span class="badge">'+esc(x.status)+'</span></strong><small>'+esc(new Date(Number(x.created_at)||Date.now()).toLocaleString())+(x.parent_id?' · based on '+esc(x.parent_id):'')+'</small><div class="row"><button data-lock-view="'+esc(x.id)+'">View</button><button data-lock-rollback="'+esc(x.id)+'">Create rollback proposal</button></div><p class="muted">'+esc(x.review_note||'Audit snapshot only; not a live deployment.')+'</p></div>').join('')||'<div class="item muted">No cloud snapshots tracked.</div>';
+ list.querySelectorAll('[data-lock-view]').forEach(b=>b.onclick=async()=>{try{const d=await apiRequest('/api/source-lockfiles?id='+encodeURIComponent(b.dataset.lockView));lockfile=d.record.lockfile;$('lock-preview').textContent=JSON.stringify({label:d.record.label,status:d.record.status,created_at:d.record.created_at,total:lockfile.games?.length,mutableSources:lockfile.games?.filter(g=>g.mutableExternal).length,sample:lockfile.games?.slice(0,8)},null,2);status('lock-status','Loaded tracked source snapshot. The active catalog is unchanged.')}catch(e){status('lock-status',e.message,true)}});
+ list.querySelectorAll('[data-lock-rollback]').forEach(b=>b.onclick=async()=>{if(!confirm('Create a rollback proposal from this snapshot? This will not alter live game code.'))return;try{const d=await apiRequest('/api/source-lockfiles',{method:'POST',body:{action:'rollback',id:b.dataset.lockRollback}});status('lock-status',d.message);await loadLockfiles()}catch(e){status('lock-status',e.message,true)}});
+}
+$('load-lockfiles').onclick=()=>loadLockfiles().catch(e=>status('lock-status',e.message,true));
+function currentUser(){try{return localStorage.getItem('cosmicCurrentUserV1')||''}catch(_){return ''}}
+if(currentUser()==='TheDevilAngel')$('load-admin-queue').hidden=false;
+async function getAdminToken(){
+ let token='';try{token=sessionStorage.getItem('cosmicStudioAdminToken')||''}catch(_){}
+ if(token)return token;
+ const password=prompt('Enter the Cosmic administrator password to open the moderation queue.');
+ if(password===null)throw Error('Admin login cancelled.');
+ const d=await apiRequest('/api/admin/session',{method:'POST',auth:'none',body:{username:'TheDevilAngel',password}});
+ token=d.token;sessionStorage.setItem('cosmicStudioAdminToken',token);return token;
+}
+function renderAdminQueue(data,token){
+ const items=[];
+ for(const x of data.submissions||[])items.push({type:'submission',id:x.id,title:x.name,owner:x.username,desc:x.kind+' · '+x.source_url+'\n'+x.notes,created_at:x.created_at});
+ for(const x of data.reviews||[])items.push({type:'review',id:x.game_key,game_key:x.game_key,username:x.username,title:x.game_name,owner:x.username,desc:x.rating+'/5 · '+x.result+'\n'+x.text,created_at:x.created_at});
+ for(const x of data.source_lockfiles||[])items.push({type:'source_lockfile',id:x.id,title:x.label,owner:x.username,desc:'Source snapshot for review. Approval does not deploy source changes.',created_at:x.created_at});
+ const list=$('admin-queue-list');
+ list.innerHTML=items.map(x=>'<div class="item"><strong>'+esc(x.title)+' <span class="badge">'+esc(x.type)+'</span></strong><small>'+esc(x.owner)+' · '+esc(new Date(Number(x.created_at)||Date.now()).toLocaleString())+'</small><p style="white-space:pre-wrap">'+esc(x.desc||'')+'</p><div class="row"><button data-moderate="approved" data-type="'+esc(x.type)+'" data-id="'+esc(x.id)+'" data-game="'+esc(x.game_key||'')+'" data-user="'+esc(x.username||'')+'">Approve</button><button data-moderate="rejected" data-type="'+esc(x.type)+'" data-id="'+esc(x.id)+'" data-game="'+esc(x.game_key||'')+'" data-user="'+esc(x.username||'')+'">Reject</button></div></div>').join('')||'<div class="item muted">No pending moderation items.</div>';
+ list.querySelectorAll('[data-moderate]').forEach(b=>b.onclick=async()=>{const note=prompt('Optional moderator note:','')||'';try{await apiRequest('/api/admin/community/moderate',{method:'POST',auth:'admin',token,body:{type:b.dataset.type,id:b.dataset.id,game_key:b.dataset.game,username:b.dataset.user,status:b.dataset.moderate,note}});status('submission-status','Moderation decision saved.');await loadAdminQueue()}catch(e){status('submission-status',e.message,true)}});
+}
+async function loadAdminQueue(){
+ const token=await getAdminToken();const data=await apiRequest('/api/admin/community/queue',{auth:'admin',token});renderAdminQueue(data,token);status('submission-status','Admin queue loaded. Approval only changes review status; it does not execute or deploy submitted code.');
+}
+$('load-admin-queue').onclick=()=>loadAdminQueue().catch(e=>status('submission-status',e.message,true));
+renderDrafts();
 let manifest=null;
 $('make-manifest').onclick=()=>{let url=$('ext-url').value.trim();try{const u=new URL(url);if(u.protocol!=='https:')throw Error('HTTPS is required');}catch(e){return status('ext-status',e.message||'Enter a valid HTTPS URL.',true)}manifest={manifestVersion:1,name:$('ext-name').value.trim()||'Unnamed extension',version:'0.1.0',entry:url,permissions:['cosmic.profile.read','cosmic.navigation.request'],isolation:{mode:'iframe',sandbox:'allow-scripts',sameOrigin:false},enabledByDefault:false,reviewRequired:true};$('manifest-preview').textContent=JSON.stringify(manifest,null,2);status('ext-status','Manifest drafted. Extensions are not installed or executed by this page.')};
 $('download-manifest').onclick=()=>{if(!manifest)$('make-manifest').click();if(manifest)download('cosmic-extension-manifest.json',manifest)};

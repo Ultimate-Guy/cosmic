@@ -88,6 +88,10 @@ The iframe origin is checked for every message and outbound messages use the exa
 This example is for an extension hosted on a different HTTPS origin. It records the host origin from the initialization event and sends only explicit requests; it cannot grant itself extra capabilities.
 
 ```js
+const trustedCosmicOrigins = new Set([
+  "https://ultimate-guy.github.io",
+  "https://cosmicv2.v75ultimate.workers.dev"
+]);
 let hostOrigin = null;
 let requestNumber = 0;
 const pending = new Map();
@@ -96,6 +100,7 @@ window.addEventListener("message", event => {
   if (event.source !== window.parent) return;
 
   if (event.data?.type === "cosmic:host:init" && event.data.version === 1) {
+    if (!trustedCosmicOrigins.has(event.origin)) return;
     hostOrigin = event.origin;
     window.parent.postMessage(
       { type: "cosmic:extension:ready", version: 1 },
@@ -104,7 +109,7 @@ window.addEventListener("message", event => {
     return;
   }
 
-  if (event.origin !== hostOrigin) return;
+  if (!hostOrigin || event.origin !== hostOrigin) return;
   const msg = event.data;
   if (msg?.type !== "cosmic:host:response" || msg.version !== 1) return;
   const resolve = pending.get(msg.id);

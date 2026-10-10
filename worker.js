@@ -350,6 +350,14 @@ class UsernameRegistry {
     return this.json({ok:true,id,status:'pending',games:safeGames.length,mutableSources:safeGames.filter(game=>game.mutableExternal).length,message:'Source snapshot saved for administrator review. It is not deployed automatically.'},201);
   }
 
+  async activeUgsRevision() {
+    const row = await this.state.storage.sql.exec(
+      'SELECT value FROM site_state WHERE key = ?', 'cosmic_ugs_active_revision'
+    ).toArray()[0];
+    const revision = /^[a-f0-9]{40}$/i.test(String(row?.value||'')) ? String(row.value) : COSMIC_UGS_DEFAULT_REVISION;
+    return this.json({ok:true,revision,updated_at:row?.value?Number(row.updated_at||0):null,default_revision:COSMIC_UGS_DEFAULT_REVISION});
+  }
+
   async checkUgsUpstream(request) {
     const auth = await this.authenticatedAccount(request);
     if (!auth) return this.json({ok:false,error:'unauthorized'},401);
@@ -1133,6 +1141,7 @@ class UsernameRegistry {
     if (url.pathname === '/community/submissions' && ['GET','POST'].includes(request.method)) return this.communitySubmissions(request);
     if (url.pathname === '/community/reviews' && ['GET','POST'].includes(request.method)) return this.communityReviews(request);
     if (url.pathname === '/source-lockfiles' && ['GET','POST'].includes(request.method)) return this.sourceLockfiles(request);
+    if (url.pathname === '/active-ugs-revision' && request.method === 'GET') return this.activeUgsRevision();
     if (url.pathname === '/source-lockfiles/check-upstream' && request.method === 'GET') return this.checkUgsUpstream(request);
     if (url.pathname === '/account-data' && request.method === 'GET') return this.accountDataExport(request);
     if (url.pathname === '/revoke-sessions' && request.method === 'POST') return this.revokeAccountSessions(request);
@@ -1153,6 +1162,7 @@ class UsernameRegistry {
   }
 }
 
+const COSMIC_UGS_DEFAULT_REVISION = 'c728ba7fc5d4392a615d0ee3ea79fd11f5f94f43';
 const COSMIC_DEPLOYMENT_COMMIT = '__COSMIC_DEPLOYMENT_COMMIT__';
 const COSMIC_DEPLOYMENT_TIMESTAMP = '__COSMIC_DEPLOYMENT_TIMESTAMP__';
 
@@ -1585,15 +1595,27 @@ async function serveUgsRepoAsset(request) {
     'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/' + revision + '/', null);
 }
 
-async function serveUgs(request) {
+async function serveUgs(request, env) {
   const url = new URL(request.url);
   const match = url.pathname.match(/^\/ugs\/(.+)$/);
   if (!match) return null;
   const parts = decodeSafeUgsPath(match[1]);
   if (!parts || parts.length !== 1) return ugsError('Invalid UGS path.');
   const requestedRef = url.searchParams.get('ref') || 'main';
-  const revision = requestedRef === 'main' ? 'main' : /^[a-f0-9]{40}$/i.test(requestedRef) ? requestedRef : '';
-  if (!revision) return ugsError('Invalid UGS revision. Use main or a full 40-character commit SHA.');
+  let revision = '';
+  if (requestedRef === 'active') {
+    try {
+      const registry = env?.USERNAME_REGISTRY;
+      const response = registry ? await registry.get(registry.idFromName('global')).fetch(new Request('https://internal/active-ugs-revision')) : null;
+      const data = response?.ok ? await response.json() : null;
+      revision = /^[a-f0-9]{40}$/i.test(String(data?.revision||'')) ? String(data.revision) : COSMIC_UGS_DEFAULT_REVISION;
+    } catch (_) { revision = COSMIC_UGS_DEFAULT_REVISION; }
+  } else if (requestedRef === 'main') {
+    revision = 'main';
+  } else if (/^[a-f0-9]{40}$/i.test(requestedRef)) {
+    revision = requestedRef;
+  }
+  if (!revision) return ugsError('Invalid UGS revision. Use active, main, or a full 40-character commit SHA.');
   const upstreamUrl = new URL('https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/' + revision + '/UGS-Files/' + encodeURIComponent(parts[0]));
   const upstream = await fetch(upstreamUrl.href, {
     headers: {'User-Agent':'Cosmic-UGS-Runtime','Accept':'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'},
@@ -1776,6 +1798,10 @@ export default {
     if (url.pathname === '/api/community/submissions') return forwardRegistryPath(request, env, '/community/submissions');
     if (url.pathname === '/api/community/reviews') return forwardRegistryPath(request, env, '/community/reviews');
     if (url.pathname === '/api/source-lockfiles') return forwardRegistryPath(request, env, '/source-lockfiles');
+    if (url.pathname === '/api/source-lockfiles/active-revision') {
+      if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/active-ugs-revision');
+    }
     if (url.pathname === '/api/source-lockfiles/check-upstream') {
       if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
       return forwardRegistryPath(request, env, '/source-lockfiles/check-upstream');
@@ -1873,7 +1899,7 @@ export default {
         if (asset) return asset;
       }
       if (url.pathname.startsWith('/ugs/')) {
-        const ugs = await serveUgs(request);
+        const ugs = await serveUgs(request, env);
         if (ugs) return ugs;
       }
       const hub = await serveHub(request, env);

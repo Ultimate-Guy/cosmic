@@ -1000,6 +1000,13 @@ class UsernameRegistry {
     }
     if (url.pathname === '/login' && request.method === 'POST') return this.accountLogin(request);
     if (url.pathname === '/password' && request.method === 'POST') return this.accountPassword(request);
+    if (url.pathname === '/community/submissions' && ['GET','POST'].includes(request.method)) return this.communitySubmissions(request);
+    if (url.pathname === '/community/reviews' && ['GET','POST'].includes(request.method)) return this.communityReviews(request);
+    if (url.pathname === '/source-lockfiles' && ['GET','POST'].includes(request.method)) return this.sourceLockfiles(request);
+    if (url.pathname === '/account-data' && request.method === 'GET') return this.accountDataExport(request);
+    if (url.pathname === '/revoke-sessions' && request.method === 'POST') return this.revokeAccountSessions(request);
+    if (url.pathname === '/delete-account' && request.method === 'POST') return this.deleteAccount(request);
+    if (url.pathname === '/admin/community' && ['GET','POST'].includes(request.method)) return this.adminCommunity(request);
     if (url.pathname === '/profile' && request.method === 'GET') return this.cloudProfile(request);
     if (url.pathname === '/profile' && request.method === 'POST') return this.cloudProfileWrite(request);
     if (url.pathname === '/events' && request.method === 'GET') return this.eventState(request);
@@ -1033,7 +1040,7 @@ function corsHeaders(request) {
   const origin = request.headers.get('Origin');
   const h = new Headers({
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Cosmic-Username',
     'Cache-Control': 'no-store'
   });
   if (origin && ALLOWED_ORIGINS.has(origin)) {
@@ -1231,6 +1238,15 @@ async function isMaintenanceMode(env) {
   } catch (_) {
     return false;
   }
+}
+
+async function forwardRegistryPath(request, env, path) {
+  const url = new URL(request.url);
+  const target = new URL(path, request.url);
+  target.search = url.search;
+  const id = env.USERNAME_REGISTRY.idFromName('global');
+  const response = await env.USERNAME_REGISTRY.get(id).fetch(new Request(target, request));
+  return forwardJsonResponse(request, response);
 }
 
 async function handleMaintenanceBypass(request, env) {
@@ -1610,6 +1626,27 @@ export default {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
     if (url.pathname === '/api/admin/session') return handleAdminSession(request, env);
+    if (url.pathname === '/api/community/submissions') return forwardRegistryPath(request, env, '/community/submissions');
+    if (url.pathname === '/api/community/reviews') return forwardRegistryPath(request, env, '/community/reviews');
+    if (url.pathname === '/api/source-lockfiles') return forwardRegistryPath(request, env, '/source-lockfiles');
+    if (url.pathname === '/api/accounts/data') {
+      if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/account-data');
+    }
+    if (url.pathname === '/api/accounts/revoke-sessions') {
+      if (request.method !== 'POST') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/revoke-sessions');
+    }
+    if (url.pathname === '/api/accounts/delete') {
+      if (request.method !== 'POST') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/delete-account');
+    }
+    if (url.pathname === '/api/admin/community/queue' || url.pathname === '/api/admin/community/moderate') {
+      if (!(await verifyAdminSession(request, env))) return jsonResponse(request,{ok:false,error:'unauthorized'},401);
+      if (url.pathname.endsWith('/queue') && request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      if (url.pathname.endsWith('/moderate') && request.method !== 'POST') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/admin/community');
+    }
     if (url.pathname === '/api/admin/accounts' || url.pathname === '/api/admin/account') return handleAdminAccounts(request, env);
     if (url.pathname === '/api/site-state') return handleSiteState(request, env);
     if (url.pathname === '/api/admin/site-state') return handleAdminSiteState(request, env);

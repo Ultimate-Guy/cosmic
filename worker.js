@@ -355,7 +355,7 @@ class UsernameRegistry {
       'SELECT value FROM site_state WHERE key = ?', 'cosmic_ugs_active_revision'
     ).toArray()[0];
     const revision = /^[a-f0-9]{40}$/i.test(String(row?.value||'')) ? String(row.value) : COSMIC_UGS_DEFAULT_REVISION;
-    return this.json({ok:true,revision,updated_at:row?.value?Number(row.updated_at||0):null,default_revision:COSMIC_UGS_DEFAULT_REVISION});
+    return this.json({ok:true,revision,is_default:!row?.value,default_revision:COSMIC_UGS_DEFAULT_REVISION});
   }
 
   async checkUgsUpstream(request) {
@@ -1699,7 +1699,7 @@ async function serveUgs(request, env) {
     html = html.replace(/(cdn\.jsdelivr\.net\/gh\/Ultimate-Guy\/cosmicgames)@main\//gi, '$1@' + revision + '/');
   }
   if (!/<base\b/i.test(html) && /<head\b/i.test(html)) {
-    const base = '<base href="https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/' + revision + '/UGS-Files/">';
+    const base = '<base href="' + url.origin + '/ugs-repo/' + revision + '/UGS-Files/">';
     html = html.replace(/<head\b[^>]*>/i, match => match + base);
   }
 

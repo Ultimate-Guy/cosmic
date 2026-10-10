@@ -1719,6 +1719,10 @@ export default {
       if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
       return forwardRegistryPath(request, env, '/account-data');
     }
+    if (url.pathname === '/api/accounts/sessions') {
+      if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/sessions');
+    }
     if (url.pathname === '/api/accounts/revoke-sessions') {
       if (request.method !== 'POST') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
       return forwardRegistryPath(request, env, '/revoke-sessions');

@@ -219,8 +219,61 @@ class UsernameRegistry {
     return Number(row?.count || 0) <= limit;
   }
 
+  validateCommunityExtensionManifest(manifest, name, sourceUrl) {
+    if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest) || manifest.manifestVersion !== 1) {
+      return {ok:false,error:'invalid-extension-manifest'};
+    }
+    const extensionName = typeof manifest.name === 'string' ? manifest.name.trim() : '';
+    const version = typeof manifest.version === 'string' ? manifest.version.trim() : '';
+    const entryText = typeof manifest.entry === 'string' ? manifest.entry.trim() : '';
+    let entry;
+    try { entry = new URL(entryText); } catch (_) { return {ok:false,error:'invalid-extension-entry'}; }
+    if (!extensionName || extensionName.length > 80 || extensionName !== name) return {ok:false,error:'extension-name-mismatch'};
+    if (!/^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/.test(version)) return {ok:false,error:'invalid-extension-version'};
+    if (entry.protocol !== 'https:' || entry.username || entry.password || entry.href !== sourceUrl) return {ok:false,error:'invalid-extension-entry'};
+    const cosmicOrigins = new Set(['https://ultimate-guy.github.io','https://cosmicv2.v75ultimate.workers.dev']);
+    if (cosmicOrigins.has(entry.origin)) return {ok:false,error:'extension-must-use-external-origin'};
+    if (!Array.isArray(manifest.permissions) || manifest.permissions.length > 2) return {ok:false,error:'invalid-extension-permissions'};
+    const allowed = new Set(['cosmic.profile.read','cosmic.navigation.request']);
+    const permissions = [...new Set(manifest.permissions)];
+    if (permissions.length !== manifest.permissions.length || permissions.some(x => !allowed.has(x))) {
+      return {ok:false,error:'invalid-extension-permissions'};
+    }
+    if (!manifest.isolation || manifest.isolation.mode !== 'iframe' ||
+        manifest.isolation.sandbox !== 'allow-scripts' || manifest.isolation.sameOrigin !== false ||
+        manifest.enabledByDefault !== false || manifest.reviewRequired !== true) {
+      return {ok:false,error:'unsafe-extension-isolation'};
+    }
+    const normalized = {
+      manifestVersion:1, name:extensionName, version, entry:entry.href, permissions,
+      isolation:{mode:'iframe',sandbox:'allow-scripts',sameOrigin:false},
+      enabledByDefault:false, reviewRequired:true
+    };
+    return {ok:true,manifest:normalized};
+  }
+
   async communitySubmissions(request) {
     if (request.method === 'GET') {
+      const url = new URL(request.url);
+      if (url.searchParams.get('catalog') === 'extensions') {
+        const rows = await this.state.storage.sql.exec(
+          "SELECT id, name, source_url, notes, created_at, reviewed_at FROM community_submissions WHERE kind = 'extension' AND status = 'approved' ORDER BY reviewed_at DESC LIMIT 100"
+        ).toArray();
+        const extensions = [];
+        for (const row of rows) {
+          let candidate;
+          try { candidate = JSON.parse(row.notes || '{}'); } catch (_) { continue; }
+          const checked = this.validateCommunityExtensionManifest(candidate, row.name, row.source_url);
+          if (!checked.ok) continue;
+          extensions.push({
+            id:row.id, name:checked.manifest.name, version:checked.manifest.version,
+            entry:checked.manifest.entry, permissions:checked.manifest.permissions,
+            manifest:checked.manifest, submitted_at:row.created_at,
+            reviewed_at:row.reviewed_at, audit_status:'moderator-approved-metadata-code-not-audited'
+          });
+        }
+        return this.json({ok:true,extensions,review_policy:'Metadata is moderated. Third-party code is not independently audited or executed by the catalog.'});
+      }
       const auth = await this.authenticatedAccount(request);
       if (!auth) return this.json({ok:false,error:'unauthorized'},401);
       const rows = await this.state.storage.sql.exec(
@@ -235,7 +288,7 @@ class UsernameRegistry {
     const body = requestData.value;
     const auth = await this.authenticatedAccount(request, body);
     if (!auth) return this.json({ok:false,error:'unauthorized'},401);
-    const kind = body.kind === 'app' ? 'app' : body.kind === 'game' ? 'game' : '';
+    const kind = body.kind === 'app' ? 'app' : body.kind === 'game' ? 'game' : body.kind === 'extension' ? 'extension' : '';
     const name = typeof body.name === 'string' ? body.name.trim().slice(0,80) : '';
     const sourceUrl = typeof body.source_url === 'string' ? body.source_url.trim().slice(0,500) : '';
     const notes = typeof body.notes === 'string' ? body.notes.trim().slice(0,1200) : '';
@@ -243,6 +296,18 @@ class UsernameRegistry {
     let parsed;
     try { parsed = new URL(sourceUrl); } catch (_) { return this.json({ok:false,error:'invalid-source-url'},400); }
     if (!['http:','https:'].includes(parsed.protocol) || parsed.username || parsed.password) return this.json({ok:false,error:'invalid-source-url'},400);
+    if (kind === 'extension') {
+      if (parsed.protocol !== 'https:') return this.json({ok:false,error:'extension-requires-https'},400);
+      let proposed;
+      try { proposed = JSON.parse(notes); } catch (_) { return this.json({ok:false,error:'invalid-extension-manifest'},400); }
+      const checked = this.validateCommunityExtensionManifest(proposed, name, parsed.href);
+      if (!checked.ok) return this.json({ok:false,error:checked.error},400);
+      // Store only the normalized, bounded manifest metadata. The catalog never fetches
+      // or executes entry code during validation or moderation.
+      if (new TextEncoder().encode(JSON.stringify(checked.manifest)).byteLength > 8 * 1024) {
+        return this.json({ok:false,error:'extension-manifest-too-large'},413);
+      }
+    }
     const duplicateKey = (parsed.origin + parsed.pathname + parsed.search).slice(0,600);
     const now = Date.now();
     const recent = await this.state.storage.sql.exec(

@@ -23,6 +23,8 @@ const invariants = [
   [worker, "url.searchParams.get('catalog') === 'extensions'", 'moderated public catalog route'],
   [worker, "url.pathname === '/api/extensions/source-audit'", 'source-audit Worker route'],
   [worker, 'source-commit-not-found', 'immutable commit verification'],
+  [worker, 'body.source_reviewed!==true', 'manual source review acknowledgement'],
+  [worker, 'source_commit_confirmation', 'pinned commit confirmation on approval'],
   [worker, 'Heuristic static analysis only', 'source scan limitations disclosure'],
   [shell, 'id="touch-controls"', 'on-screen touch interface'],
   [shell, "frame.contentWindow.location.origin===location.origin", 'same-origin-only touch injection'],

@@ -26,7 +26,13 @@ self.addEventListener('fetch', event => {
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(new Request(event.request, { cache: 'no-store' }))
-        .catch(() => caches.match(OFFLINE_URL))
+        .catch(async () => {
+          // Prefer an explicitly installed offline game entry before the
+          // generic offline page. This makes the Studio's opt-in pack cache
+          // useful for same-origin game navigations while offline.
+          const cachedEntry = await caches.match(event.request);
+          return cachedEntry || caches.match(OFFLINE_URL);
+        })
     );
     return;
   }

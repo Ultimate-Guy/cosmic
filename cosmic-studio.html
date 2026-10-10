@@ -223,6 +223,8 @@ function validateExtensionManifest(input){
  const permissions=[...new Set(input.permissions)];
  if(permissions.length!==input.permissions.length||permissions.some(x=>!EXT_CAPABILITIES.has(x)))throw Error('The manifest requests an unsupported or duplicate capability.');
  if(input.isolation?.mode!=='iframe'||input.isolation?.sandbox!=='allow-scripts'||input.isolation?.sameOrigin!==false)throw Error('The manifest must use the strict opaque-origin sandbox settings.');
+ if(input.enabledByDefault===true)throw Error('Extensions cannot request automatic enablement.');
+ if(input.reviewRequired===false)throw Error('Extension catalog publication must remain review-gated.');
  return {manifestVersion:1,name,version,entry:entry.href,permissions,isolation:{mode:'iframe',sandbox:'allow-scripts',sameOrigin:false},enabledByDefault:false,reviewRequired:true};
 }
 function buildExtensionManifest(){

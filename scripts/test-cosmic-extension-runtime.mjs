@@ -8,11 +8,15 @@ if (start < 0 || end < 0) throw new Error('Could not locate the Studio manifest 
 
 const validator = html.slice(start, end);
 for (const invariant of [
-  "sandbox:'allow-scripts allow-same-origin'",
-  "frame.setAttribute('sandbox','allow-scripts allow-same-origin')",
-  "if(event.origin!==expectedOrigin)return;",
-  "new URL(activeExtension.entry).origin",
-  "if(entry.origin===location.origin)"
+  "sandbox:'allow-scripts'",
+  "frame.setAttribute('sandbox','allow-scripts')",
+  "event.origin!=='null'",
+  "event.data.nonce!==activeExtensionNonce",
+  "activeExtensionNonce=crypto.randomUUID()",
+  "if(entry.origin===location.origin)",
+  "auditGithubExtensionSource",
+  "'/api/extensions/source-audit'",
+  "'catalog' === 'extensions'"
 ]) {
   if (!html.includes(invariant)) throw new Error('Missing extension runtime security invariant: ' + invariant);
 }
@@ -40,7 +44,7 @@ const base = {
   permissions: ['cosmic.profile.read'],
   isolation: {
     mode: 'iframe',
-    sandbox: 'allow-scripts allow-same-origin',
+    sandbox: 'allow-scripts',
     sameOrigin: false
   }
 };
@@ -63,4 +67,8 @@ mustReject('duplicate capability', { permissions: ['cosmic.profile.read', 'cosmi
 mustReject('loosened sandbox', {
   isolation: { mode: 'iframe', sandbox: 'allow-scripts allow-top-navigation', sameOrigin: false }
 });
-console.log('Cosmic extension manifest tests passed (7 acceptance/rejection cases).');
+mustReject('same-origin sandbox grant', {
+  isolation: { mode: 'iframe', sandbox: 'allow-scripts allow-same-origin', sameOrigin: false }
+});
+mustReject('automatic extension enablement', { enabledByDefault: true });
+console.log('Cosmic extension manifest tests passed (9 acceptance/rejection cases plus runtime source invariants).');

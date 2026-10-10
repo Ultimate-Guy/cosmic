@@ -1170,6 +1170,26 @@ async function serveUgs(request) {
 
   let html = await upstream.text();
 
+  // Thief Puzzle's upstream file puts its game scripts in the implied HEAD
+  // and ends with an empty <body>, so the game interface starts before a real
+  // body exists. Normalize only this known malformed source wrapper.
+  if (parts[0].toLowerCase() === 'thiefpuzzle.html') {
+    html = html.replace(/<!doctype\\s+html[^>]*>/i, '<!doctype html><html lang="en"><head>');
+    html = html.replace(
+      /<script\\s+src=["']gameSnacks-game-interface\\.js["'][^>]*>/i,
+      '</head><body>  let html = await upstream.text();
+
+  // Some UGS catalog entries are Google Gadget XML modules containing the'
+    );
+    html = html.replace(
+      /alert\\(["']The Menu\\/Back Buttons Do Not Work and The Game Does Not Save as of now - Greeni["']\\);/i,
+      "console.info('Thief Puzzle upstream note: menu/back and save may be unavailable.');"
+    );
+    html = html.replace(/<body>\\s*$/i, '');
+    html = html.replace(/\\s*<\\/body>\\s*<\\/html>\\s*$/i, '');
+    html += '</body></html>';
+  }
+
   // Some UGS catalog entries are Google Gadget XML modules containing the
   // actual HTML inside CDATA (or nested inside a <Module> wrapper). Serving
   // the wrapper as text/html produces a blank iframe instead of the game.

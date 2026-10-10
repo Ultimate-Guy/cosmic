@@ -284,7 +284,7 @@ async function loadExtensionCatalog(){
    const actions=document.createElement('div');actions.className='row';
    const link=document.createElement('a');link.href=item.entry;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Open entry page';link.addEventListener('click',e=>{if(!confirm('Open the extension publisher’s external entry URL? Cosmic has not independently audited its code.'))e.preventDefault()});
    const sourceLink=document.createElement('a');
-   if(item.source_repository&&item.source_commit){sourceLink.href=String(item.source_repository).replace(/\\/+$/,'')+'/commit/'+encodeURIComponent(item.source_commit);sourceLink.target='_blank';sourceLink.rel='noopener noreferrer';sourceLink.textContent='Review pinned source';}
+   if(item.source_repository&&item.source_commit){sourceLink.href=String(item.source_repository).replace(/\/+$/,'')+'/commit/'+encodeURIComponent(item.source_commit);sourceLink.target='_blank';sourceLink.rel='noopener noreferrer';sourceLink.textContent='Review pinned source';}
    const use=document.createElement('button');use.type='button';use.textContent='Review manifest';use.addEventListener('click',()=>{
     try{
      const m=validateExtensionManifest(item.manifest);

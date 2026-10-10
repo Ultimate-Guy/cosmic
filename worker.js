@@ -122,6 +122,266 @@ class UsernameRegistry {
     await this.state.storage.sql.exec('INSERT INTO profiles (username,value,updated_at) VALUES (?,?,?) ON CONFLICT(username) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at',key,value,Date.now());
     return this.json({ok:true,profile:JSON.parse(value)});
   }
+  async authenticatedAccount(request, body = {}) {
+    const url = new URL(request.url);
+    const username = String(body.username || request.headers.get('X-Cosmic-Username') || url.searchParams.get('username') || '').trim();
+    const authorization = request.headers.get('Authorization') || '';
+    const bearer = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+    const token = String(body.account_token || bearer || '').trim();
+    if (!username || !token) return null;
+    const key = username.toLowerCase();
+    const account = await this.state.storage.sql.exec(
+      'SELECT username, account_token, password_salt, password_hash, created_at FROM accounts WHERE username = ?', key
+    ).toArray()[0];
+    if (!account || account.account_token !== token) return null;
+    return { key, account };
+  }
+
+  async communitySubmissions(request) {
+    if (request.method === 'GET') {
+      const auth = await this.authenticatedAccount(request);
+      if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+      const rows = await this.state.storage.sql.exec(
+        'SELECT id, kind, name, source_url, notes, status, created_at, updated_at, reviewed_at, reviewer, review_note FROM community_submissions WHERE username = ? ORDER BY created_at DESC LIMIT 100',
+        auth.key
+      ).toArray();
+      return this.json({ok:true,submissions:rows});
+    }
+    if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
+    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const auth = await this.authenticatedAccount(request, body);
+    if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+    const kind = body.kind === 'app' ? 'app' : body.kind === 'game' ? 'game' : '';
+    const name = typeof body.name === 'string' ? body.name.trim().slice(0,80) : '';
+    const sourceUrl = typeof body.source_url === 'string' ? body.source_url.trim().slice(0,500) : '';
+    const notes = typeof body.notes === 'string' ? body.notes.trim().slice(0,1200) : '';
+    if (!kind || !name || !sourceUrl) return this.json({ok:false,error:'missing-fields'},400);
+    let parsed;
+    try { parsed = new URL(sourceUrl); } catch (_) { return this.json({ok:false,error:'invalid-source-url'},400); }
+    if (!['http:','https:'].includes(parsed.protocol) || parsed.username || parsed.password) return this.json({ok:false,error:'invalid-source-url'},400);
+    const duplicateKey = (parsed.origin + parsed.pathname + parsed.search).slice(0,600);
+    const now = Date.now();
+    const recent = await this.state.storage.sql.exec(
+      "SELECT COUNT(*) AS count FROM community_submissions WHERE username = ? AND created_at > ?", auth.key, now - 86400000
+    ).toArray()[0];
+    if (Number(recent?.count || 0) >= 8) return this.json({ok:false,error:'submission-rate-limit'},429);
+    const duplicate = await this.state.storage.sql.exec(
+      "SELECT id, status FROM community_submissions WHERE url_key = ? AND status IN ('pending','approved') LIMIT 1", duplicateKey
+    ).toArray()[0];
+    if (duplicate) return this.json({ok:false,error:'duplicate-source',status:duplicate.status},409);
+    const id = crypto.randomUUID();
+    await this.state.storage.sql.exec(
+      'INSERT INTO community_submissions (id, username, kind, name, source_url, url_key, notes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      id, auth.key, kind, name, parsed.href, duplicateKey, notes, 'pending', now, now
+    );
+    return this.json({ok:true,submission:{id,kind,name,source_url:parsed.href,notes,status:'pending',created_at:now}},201);
+  }
+
+  async communityReviews(request) {
+    const url = new URL(request.url);
+    if (request.method === 'GET') {
+      const gameName = String(url.searchParams.get('game') || '').trim().slice(0,100);
+      const gameKey = gameName.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,100);
+      if (!gameKey) return this.json({ok:false,error:'game-required'},400);
+      const rows = await this.state.storage.sql.exec(
+        "SELECT username, game_name, rating, result, text, created_at FROM community_reviews WHERE game_key = ? AND status = 'approved' ORDER BY created_at DESC LIMIT 50",
+        gameKey
+      ).toArray();
+      const average = rows.length ? rows.reduce((sum,row)=>sum+Number(row.rating||0),0)/rows.length : null;
+      return this.json({ok:true,game:gameName,count:rows.length,average_rating:average,reviews:rows});
+    }
+    if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
+    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const auth = await this.authenticatedAccount(request, body);
+    if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+    const gameName = typeof body.game === 'string' ? body.game.trim().slice(0,100) : '';
+    const gameKey = gameName.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,100);
+    const rating = Number(body.rating);
+    const result = ['worked','partial','broken'].includes(body.result) ? body.result : '';
+    const reviewText = typeof body.text === 'string' ? body.text.trim().slice(0,1000) : '';
+    if (!gameName || !gameKey || !Number.isInteger(rating) || rating < 1 || rating > 5 || !result) {
+      return this.json({ok:false,error:'invalid-review'},400);
+    }
+    const now = Date.now();
+    const recent = await this.state.storage.sql.exec(
+      'SELECT COUNT(*) AS count FROM community_reviews WHERE username = ? AND created_at > ?', auth.key, now - 86400000
+    ).toArray()[0];
+    const existing = await this.state.storage.sql.exec(
+      'SELECT created_at FROM community_reviews WHERE game_key = ? AND username = ?', gameKey, auth.key
+    ).toArray()[0];
+    if (!existing && Number(recent?.count || 0) >= 30) return this.json({ok:false,error:'review-rate-limit'},429);
+    await this.state.storage.sql.exec(
+      "INSERT INTO community_reviews (game_key, username, game_name, rating, result, text, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?) ON CONFLICT(game_key, username) DO UPDATE SET game_name=excluded.game_name,rating=excluded.rating,result=excluded.result,text=excluded.text,status='pending',updated_at=excluded.updated_at,reviewed_at=NULL,reviewer='',review_note=''",
+      gameKey, auth.key, gameName, rating, result, reviewText, now, now
+    );
+    return this.json({ok:true,status:'pending',message:'Report submitted for review before it appears publicly.'},201);
+  }
+
+  async sourceLockfiles(request) {
+    if (request.method === 'GET') {
+      const auth = await this.authenticatedAccount(request);
+      if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+      const url = new URL(request.url);
+      const id = String(url.searchParams.get('id') || '').trim();
+      if (id) {
+        const row = await this.state.storage.sql.exec(
+          'SELECT id, username, label, status, value, parent_id, created_at, reviewed_at, reviewer, review_note FROM source_lockfiles WHERE id = ? AND username = ?', id, auth.key
+        ).toArray()[0];
+        if (!row) return this.json({ok:false,error:'not-found'},404);
+        let lockfile={}; try { lockfile=JSON.parse(row.value)||{}; } catch (_) {}
+        return this.json({ok:true,record:{...row,value:undefined,lockfile}});
+      }
+      const rows = await this.state.storage.sql.exec(
+        'SELECT id, label, status, parent_id, created_at, reviewed_at, reviewer, review_note FROM source_lockfiles WHERE username = ? ORDER BY created_at DESC LIMIT 5',
+        auth.key
+      ).toArray();
+      return this.json({ok:true,lockfiles:rows});
+    }
+    if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
+    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const auth = await this.authenticatedAccount(request, body);
+    if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+    const now=Date.now();
+    if (body.action === 'rollback') {
+      const id=String(body.id||'').trim();
+      const parent=await this.state.storage.sql.exec(
+        'SELECT id, label, value FROM source_lockfiles WHERE id = ? AND username = ?', id, auth.key
+      ).toArray()[0];
+      if (!parent) return this.json({ok:false,error:'not-found'},404);
+      const newId=crypto.randomUUID();
+      const label=('Restore draft: '+String(parent.label||'source snapshot')).slice(0,100);
+      await this.state.storage.sql.exec(
+        "INSERT INTO source_lockfiles (id, username, label, status, value, parent_id, created_at) VALUES (?, ?, ?, 'pending', ?, ?, ?)",
+        newId, auth.key, label, parent.value, parent.id, now
+      );
+      return this.json({ok:true,id:newId,status:'pending',message:'A rollback proposal was created. It does not change the live catalog; deployment still requires an approved source update.'},201);
+    }
+    const input=body.lockfile;
+    if (!input || !Array.isArray(input.games) || input.games.length < 1 || input.games.length > 3000) {
+      return this.json({ok:false,error:'invalid-lockfile'},400);
+    }
+    const safeGames=input.games.map(game=>({
+      name:String(game?.name||'').slice(0,100),
+      path:String(game?.path||'').slice(0,1000),
+      source:String(game?.source||'').slice(0,40),
+      revision:String(game?.revision||'').slice(0,100),
+      source_path:String(game?.source_path||'').slice(0,500),
+      mutableExternal:!!game?.mutableExternal
+    })).filter(game=>game.name && game.path);
+    if (!safeGames.length) return this.json({ok:false,error:'empty-lockfile'},400);
+    const value=JSON.stringify({schemaVersion:1,generatedAt:String(input.generatedAt||new Date(now).toISOString()),games:safeGames});
+    if (new TextEncoder().encode(value).length > 900000) return this.json({ok:false,error:'lockfile-too-large'},413);
+    const label=String(body.label||('Source audit '+new Date(now).toISOString().slice(0,10))).trim().slice(0,100)||'Source audit';
+    const parentId=String(body.parent_id||'').trim()||null;
+    if (parentId) {
+      const parent=await this.state.storage.sql.exec(
+        'SELECT id FROM source_lockfiles WHERE id = ? AND username = ?', parentId, auth.key
+      ).toArray()[0];
+      if (!parent) return this.json({ok:false,error:'invalid-parent'},400);
+    }
+    const id=crypto.randomUUID();
+    await this.state.storage.sql.exec(
+      "INSERT INTO source_lockfiles (id, username, label, status, value, parent_id, created_at) VALUES (?, ?, ?, 'pending', ?, ?, ?)",
+      id, auth.key, label, value, parentId, now
+    );
+    const oldRows=await this.state.storage.sql.exec(
+      'SELECT id FROM source_lockfiles WHERE username = ? ORDER BY created_at DESC LIMIT 100 OFFSET 5', auth.key
+    ).toArray();
+    for (const row of oldRows) await this.state.storage.sql.exec('DELETE FROM source_lockfiles WHERE id = ? AND username = ?',row.id,auth.key);
+    return this.json({ok:true,id,status:'pending',games:safeGames.length,mutableSources:safeGames.filter(game=>game.mutableExternal).length,message:'Source snapshot saved for administrator review. It is not deployed automatically.'},201);
+  }
+
+  async accountDataExport(request) {
+    const auth=await this.authenticatedAccount(request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    const profileRow=await this.state.storage.sql.exec('SELECT value, updated_at FROM profiles WHERE username = ?',auth.key).toArray()[0];
+    const activity=await this.state.storage.sql.exec('SELECT game_name, opens, last_opened FROM activity WHERE username = ? ORDER BY last_opened DESC LIMIT 500',auth.key).toArray();
+    const submissions=await this.state.storage.sql.exec('SELECT id, kind, name, source_url, notes, status, created_at, updated_at, reviewed_at, review_note FROM community_submissions WHERE username = ? ORDER BY created_at DESC LIMIT 100',auth.key).toArray();
+    const reviews=await this.state.storage.sql.exec('SELECT game_name, rating, result, text, status, created_at, updated_at, reviewed_at, review_note FROM community_reviews WHERE username = ? ORDER BY updated_at DESC LIMIT 200',auth.key).toArray();
+    const locks=await this.state.storage.sql.exec('SELECT id, label, status, parent_id, created_at, reviewed_at, review_note, value FROM source_lockfiles WHERE username = ? ORDER BY created_at DESC LIMIT 5',auth.key).toArray();
+    let profile={};try{profile=JSON.parse(profileRow?.value||'{}')||{}}catch(_){}
+    const scrub=value=>{
+      if(Array.isArray(value))return value.map(scrub);
+      if(value&&typeof value==='object'){
+        const clean={};
+        for(const [key,item] of Object.entries(value)){
+          if(/(?:account.?token|password|secret|authorization|session.?token)/i.test(key))continue;
+          clean[key]=scrub(item);
+        }
+        return clean;
+      }
+      return value;
+    };
+    return this.json({ok:true,exported_at:new Date().toISOString(),account:{username:auth.account.username,created_at:auth.account.created_at},profile:scrub(profile),profile_updated_at:profileRow?.updated_at||null,activity,submissions,reviews,source_lockfiles:locks.map(row=>({...row,lockfile:(()=>{try{return JSON.parse(row.value)}catch(_){return {}}})(),value:undefined}))});
+  }
+
+  async revokeAccountSessions(request) {
+    let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
+    const auth=await this.authenticatedAccount(request,body);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    const token=crypto.randomUUID();
+    await this.state.storage.sql.exec('UPDATE accounts SET account_token = ? WHERE username = ?',token,auth.key);
+    return this.json({ok:true,username:auth.account.username,account_token:token,message:'All other devices were signed out. Update this device with the new token.'});
+  }
+
+  async deleteAccount(request) {
+    let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
+    const auth=await this.authenticatedAccount(request,body);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    if(String(body.confirm_username||'').trim().toLowerCase()!==auth.key)return this.json({ok:false,error:'confirmation-mismatch'},400);
+    if(auth.account.password_hash) {
+      const password=typeof body.password==='string'?body.password:'';
+      if(!password||!auth.account.password_salt||await this.passwordHash(password,auth.account.password_salt)!==auth.account.password_hash) {
+        return this.json({ok:false,error:'invalid-credentials'},401);
+      }
+    }
+    for(const table of ['activity','profiles','community_submissions','community_reviews','source_lockfiles']) {
+      await this.state.storage.sql.exec('DELETE FROM '+table+' WHERE username = ?',auth.key);
+    }
+    await this.state.storage.sql.exec('DELETE FROM accounts WHERE username = ?',auth.key);
+    await this.state.storage.sql.exec('DELETE FROM usernames WHERE username = ?',auth.key);
+    return this.json({ok:true,deleted:true,message:'Account and stored Cosmic Cloud records were deleted.'});
+  }
+
+  async adminCommunity(request) {
+    if(request.method==='GET') {
+      const submissions=await this.state.storage.sql.exec(
+        "SELECT id, username, kind, name, source_url, notes, status, created_at FROM community_submissions WHERE status='pending' ORDER BY created_at ASC LIMIT 100"
+      ).toArray();
+      const reviews=await this.state.storage.sql.exec(
+        "SELECT game_key, username, game_name, rating, result, text, status, created_at FROM community_reviews WHERE status='pending' ORDER BY created_at ASC LIMIT 100"
+      ).toArray();
+      const lockfiles=await this.state.storage.sql.exec(
+        "SELECT id, username, label, status, parent_id, created_at FROM source_lockfiles WHERE status='pending' ORDER BY created_at ASC LIMIT 50"
+      ).toArray();
+      return this.json({ok:true,submissions,reviews,source_lockfiles:lockfiles});
+    }
+    if(request.method!=='POST')return this.json({ok:false,error:'method-not-allowed'},405);
+    let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
+    const type=String(body.type||'');
+    const status=body.status==='approved'?'approved':body.status==='rejected'?'rejected':'';
+    const id=String(body.id||'').trim();
+    const note=typeof body.note==='string'?body.note.trim().slice(0,500):'';
+    if(!status||!id)return this.json({ok:false,error:'missing-fields'},400);
+    const now=Date.now(),reviewer='TheDevilAngel';
+    let result;
+    if(type==='submission') result=await this.state.storage.sql.exec(
+      'UPDATE community_submissions SET status=?, updated_at=?, reviewed_at=?, reviewer=?, review_note=? WHERE id=?',status,now,now,reviewer,note,id
+    );
+    else if(type==='review') {
+      const gameKey=String(body.game_key||'').trim().slice(0,100);
+      const username=String(body.username||'').trim().toLowerCase();
+      if(!gameKey||!username)return this.json({ok:false,error:'missing-review-key'},400);
+      result=await this.state.storage.sql.exec(
+        'UPDATE community_reviews SET status=?, updated_at=?, reviewed_at=?, reviewer=?, review_note=? WHERE game_key=? AND username=?',status,now,now,reviewer,note,gameKey,username
+      );
+    } else if(type==='source_lockfile') result=await this.state.storage.sql.exec(
+      'UPDATE source_lockfiles SET status=?, reviewed_at=?, reviewer=?, review_note=? WHERE id=?',status,now,reviewer,note,id
+    );
+    else return this.json({ok:false,error:'invalid-type'},400);
+    return this.json({ok:true,status,reviewed:result?.rowsWritten??null});
+  }
+
   async eventWrite(request) {
     let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
     const event=body?.event&&typeof body.event==='object'?body.event:null;if(!event)return this.json({ok:false,error:'missing-event'},400);

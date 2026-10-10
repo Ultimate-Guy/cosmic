@@ -219,6 +219,106 @@ class UsernameRegistry {
     return Number(row?.count || 0) <= limit;
   }
 
+  async auditGithubExtensionSource(repositoryUrl, commitSha) {
+    const sha=String(commitSha||'').trim().toLowerCase();
+    if(!/^[a-f0-9]{40}$/.test(sha)) return {ok:false,error:'invalid-source-commit'};
+    let repo;
+    try { repo=new URL(String(repositoryUrl||'')); } catch (_) { return {ok:false,error:'invalid-source-repository'}; }
+    if(repo.protocol!=='https:'||repo.hostname!=='github.com'||repo.username||repo.password||repo.search||repo.hash) {
+      return {ok:false,error:'source-repository-must-be-github'};
+    }
+    const parts=repo.pathname.split('/').filter(Boolean);
+    if(parts.length!==2||! /^[A-Za-z0-9_.-]{1,39}$/.test(parts[0])||! /^[A-Za-z0-9_.-]{1,100}$/.test(parts[1])) {
+      return {ok:false,error:'invalid-source-repository'};
+    }
+    const owner=parts[0],name=parts[1].replace(/\.git$/i,'');
+    const headers={'Accept':'application/vnd.github+json','User-Agent':'Cosmic-Extension-Static-Audit/1.0'};
+    let commitResponse,treeResponse;
+    try {
+      commitResponse=await fetch('https://api.github.com/repos/'+owner+'/'+name+'/commits/'+sha,{headers,cf:{cacheTtl:300}});
+    } catch (_) { return {ok:false,error:'github-source-unavailable'}; }
+    if(!commitResponse.ok) return {ok:false,error:'source-commit-not-found'};
+    let commitData;try{commitData=await commitResponse.json()}catch(_){return {ok:false,error:'invalid-github-commit-response'};}
+    if(String(commitData.sha||'').toLowerCase()!==sha) return {ok:false,error:'source-commit-mismatch'};
+    try {
+      treeResponse=await fetch('https://api.github.com/repos/'+owner+'/'+name+'/git/trees/'+sha+'?recursive=1',{headers,cf:{cacheTtl:300}});
+    } catch (_) { return {ok:false,error:'github-source-tree-unavailable'}; }
+    if(!treeResponse.ok) return {ok:false,error:'source-tree-not-found'};
+    let treeData;try{treeData=await treeResponse.json()}catch(_){return {ok:false,error:'invalid-github-tree-response'};}
+    if(!Array.isArray(treeData.tree)||treeData.tree.length>10000) return {ok:false,error:'source-tree-too-large'};
+    const eligible=treeData.tree.filter(file=>file.type==='blob'&&typeof file.path==='string'&&
+      /\.(?:js|mjs|cjs|ts|tsx|jsx|html|htm|json|css|wasm)$/i.test(file.path)&&
+      !/(?:^|\/)(?:node_modules|vendor|dist|build|\.git)(?:\/|$)/i.test(file.path)&&
+      !/(?:\.min\.[^.]+|\.map)$/i.test(file.path))
+      .sort((a,b)=>{
+        const rank=p=>/\.(?:js|mjs|cjs|ts|tsx|jsx|html|htm)$/i.test(p)?0:/\.json$/i.test(p)?1:2;
+        return rank(a.path)-rank(b.path)||a.path.localeCompare(b.path);
+      });
+    if(!eligible.length) return {ok:false,error:'no-scannable-source-files'};
+    const selected=eligible.slice(0,24);
+    const findings=[],scannedFiles=[];
+    let bytesScanned=0,filesSkipped=eligible.length-selected.length;
+    const rules=[
+      {code:'dynamic-code-execution',severity:'high',pattern:/\beval\s*\(|\bnew\s+Function\s*\(/i,summary:'Dynamic string-to-code execution pattern found.'},
+      {code:'cookie-access',severity:'high',pattern:/\bdocument\s*\.\s*cookie\b/i,summary:'Browser cookie access pattern found.'},
+      {code:'credential-like-data-in-network-call',severity:'high',pattern:/(?:fetch|sendBeacon|XMLHttpRequest)\s*\([^\n]{0,240}(?:password|account_token|access_token|secret|credential)/i,summary:'Network call near credential-like data; inspect the surrounding code.'},
+      {code:'dynamic-script-loader',severity:'medium',pattern:/createElement\s*\(\s*['"]script['"]\s*\)|\.src\s*=\s*['"]https?:/i,summary:'Dynamic or remote script loading pattern found.'},
+      {code:'wildcard-message-target',severity:'medium',pattern:/postMessage\s*\([^;]{0,500},\s*['"]\*['"]\s*\)/i,summary:'Wildcard postMessage target found; inspect data boundaries.'},
+      {code:'obfuscation-helper',severity:'low',pattern:/\batob\s*\(|String\s*\.\s*fromCharCode\s*\(|\\x[0-9a-f]{2}/i,summary:'A common encoding/obfuscation helper was found; this can be legitimate.'},
+      {code:'network-capability',severity:'info',pattern:/\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\s*\(/i,summary:'Network access pattern found; inspect destinations and transferred data.'}
+    ];
+    for(let offset=0;offset<selected.length;offset+=4) {
+      const batch=selected.slice(offset,offset+4);
+      const results=await Promise.all(batch.map(async file=>{
+        const safePath=file.path.split('/').map(encodeURIComponent).join('/');
+        try {
+          const response=await fetch('https://raw.githubusercontent.com/'+owner+'/'+name+'/'+sha+'/'+safePath,{headers:{'User-Agent':'Cosmic-Extension-Static-Audit/1.0'},cf:{cacheTtl:300}});
+          if(!response.ok) return {path:file.path,error:'source-file-unavailable'};
+          const declared=Number(response.headers.get('Content-Length')||0);
+          if(declared>120000) return {path:file.path,error:'source-file-too-large'};
+          const text=await response.text();
+          const bytes=new TextEncoder().encode(text).byteLength;
+          if(bytes>120000) return {path:file.path,error:'source-file-too-large'};
+          return {path:file.path,text,bytes};
+        } catch (_) { return {path:file.path,error:'source-file-unavailable'}; }
+      }));
+      for(const file of results) {
+        if(file.error){filesSkipped++;continue;}
+        bytesScanned+=file.bytes;scannedFiles.push(file.path);
+        if(bytesScanned>1500000) return {ok:false,error:'source-audit-size-limit'};
+        for(const rule of rules) {
+          if(rule.pattern.test(file.text)) findings.push({file:file.path,code:rule.code,severity:rule.severity,summary:rule.summary});
+          rule.pattern.lastIndex=0;
+          if(findings.length>=80) break;
+        }
+      }
+    }
+    const high=findings.filter(x=>x.severity==='high').length;
+    const medium=findings.filter(x=>x.severity==='medium').length;
+    return {ok:true,report:{
+      schemaVersion:1,scanner:'Cosmic Static Source Signals v1',auditedAt:Date.now(),
+      repository:'https://github.com/'+owner+'/'+name,commit:sha,commitVerified:true,
+      scannedFiles:scannedFiles.length,filesSkipped,bytesScanned,
+      findings,findingsBySeverity:{
+        high,medium,low:findings.filter(x=>x.severity==='low').length,
+        info:findings.filter(x=>x.severity==='info').length
+      },
+      result:high?'manual-review-required-high-risk-signals':medium?'manual-review-required-signals':'manual-review-required-no-configured-high-risk-signals',
+      disclaimer:'Heuristic static analysis only. It can miss malicious behavior and produce false positives; it is not an independent human security audit or proof that code is safe.'
+    }};
+  }
+
+  async extensionSourceAudit(request) {
+    const auth=await this.authenticatedAccount(request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    if(!(await this.consumeRateLimit('extension-source-audit:'+auth.key,5,60*60*1000))) {
+      return this.json({ok:false,error:'rate-limited',message:'Source audit limit reached. Try again in about an hour.'},429);
+    }
+    const url=new URL(request.url);
+    const result=await this.auditGithubExtensionSource(url.searchParams.get('repository')||'',url.searchParams.get('commit')||'');
+    return result.ok?this.json({ok:true,report:result.report}):this.json({ok:false,error:result.error},400);
+  }
+
   validateCommunityExtensionManifest(manifest, name, sourceUrl) {
     if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest) || manifest.manifestVersion !== 1) {
       return {ok:false,error:'invalid-extension-manifest'};
@@ -261,15 +361,19 @@ class UsernameRegistry {
         ).toArray();
         const extensions = [];
         for (const row of rows) {
-          let candidate;
-          try { candidate = JSON.parse(row.notes || '{}'); } catch (_) { continue; }
+          let envelope;
+          try { envelope = JSON.parse(row.notes || '{}'); } catch (_) { continue; }
+          const candidate=envelope.manifest||envelope;
           const checked = this.validateCommunityExtensionManifest(candidate, row.name, row.source_url);
           if (!checked.ok) continue;
+          const source=envelope.source&&typeof envelope.source==='object'?envelope.source:{};
+          const audit=source.audit&&typeof source.audit==='object'?source.audit:null;
           extensions.push({
             id:row.id, name:checked.manifest.name, version:checked.manifest.version,
             entry:checked.manifest.entry, permissions:checked.manifest.permissions,
-            manifest:checked.manifest, submitted_at:row.created_at,
-            reviewed_at:row.reviewed_at, audit_status:'moderator-approved-metadata-code-not-audited'
+            manifest:checked.manifest, source_repository:source.repository||null,
+            source_commit:source.commit||null, source_audit:audit, submitted_at:row.created_at,
+            reviewed_at:row.reviewed_at, audit_status:'moderator-approved-metadata-static-scan-advisory-not-code-audited'
           });
         }
         return this.json({ok:true,extensions,review_policy:'Metadata is moderated. Third-party code is not independently audited or executed by the catalog.'});
@@ -296,15 +400,24 @@ class UsernameRegistry {
     let parsed;
     try { parsed = new URL(sourceUrl); } catch (_) { return this.json({ok:false,error:'invalid-source-url'},400); }
     if (!['http:','https:'].includes(parsed.protocol) || parsed.username || parsed.password) return this.json({ok:false,error:'invalid-source-url'},400);
+    let extensionEnvelope=null;
     if (kind === 'extension') {
       if (parsed.protocol !== 'https:') return this.json({ok:false,error:'extension-requires-https'},400);
       let proposed;
       try { proposed = JSON.parse(notes); } catch (_) { return this.json({ok:false,error:'invalid-extension-manifest'},400); }
       const checked = this.validateCommunityExtensionManifest(proposed, name, parsed.href);
       if (!checked.ok) return this.json({ok:false,error:checked.error},400);
-      // Store only the normalized, bounded manifest metadata. The catalog never fetches
-      // or executes entry code during validation or moderation.
-      if (new TextEncoder().encode(JSON.stringify(checked.manifest)).byteLength > 8 * 1024) {
+      const sourceRepository=typeof body.source_repository==='string'?body.source_repository.trim():'';
+      const sourceCommit=typeof body.source_commit==='string'?body.source_commit.trim().toLowerCase():'';
+      if (!sourceRepository || !/^[a-f0-9]{40}$/.test(sourceCommit)) {
+        return this.json({ok:false,error:'pinned-github-source-required',message:'An extension catalog submission must include a public GitHub repository and a full 40-character commit SHA.'},400);
+      }
+      const audit=await this.auditGithubExtensionSource(sourceRepository,sourceCommit);
+      if(!audit.ok)return this.json({ok:false,error:audit.error,message:'The pinned source could not be verified and scanned.'},400);
+      extensionEnvelope={manifest:checked.manifest,source:{repository:audit.report.repository,commit:audit.report.commit,audit:audit.report}};
+      // The catalog stores bounded manifest metadata and a heuristic scan report.
+      // It never executes code, and a scan never substitutes for moderator review.
+      if (new TextEncoder().encode(JSON.stringify(extensionEnvelope)).byteLength > 20 * 1024) {
         return this.json({ok:false,error:'extension-manifest-too-large'},413);
       }
     }
@@ -321,9 +434,9 @@ class UsernameRegistry {
     const id = crypto.randomUUID();
     await this.state.storage.sql.exec(
       'INSERT INTO community_submissions (id, username, kind, name, source_url, url_key, notes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      id, auth.key, kind, name, parsed.href, duplicateKey, notes, 'pending', now, now
+      id, auth.key, kind, name, parsed.href, duplicateKey, kind==='extension'?JSON.stringify(extensionEnvelope):notes, 'pending', now, now
     );
-    return this.json({ok:true,submission:{id,kind,name,source_url:parsed.href,notes,status:'pending',created_at:now}},201);
+    return this.json({ok:true,submission:{id,kind,name,source_url:parsed.href,status:'pending',created_at:now},...(kind==='extension'?{source_audit:extensionEnvelope.source.audit}:{} )},201);
   }
 
   async communityReviews(request) {
@@ -1277,6 +1390,7 @@ class UsernameRegistry {
     if (url.pathname === '/password' && request.method === 'POST') return this.accountPassword(request);
     if (url.pathname === '/sessions' && request.method === 'GET') return this.accountSessions(request);
     if (url.pathname === '/community/submissions' && ['GET','POST'].includes(request.method)) return this.communitySubmissions(request);
+    if (url.pathname === '/extension-source-audit' && request.method === 'GET') return this.extensionSourceAudit(request);
     if (url.pathname === '/community/reviews' && ['GET','POST'].includes(request.method)) return this.communityReviews(request);
     if (url.pathname === '/source-lockfiles' && ['GET','POST'].includes(request.method)) return this.sourceLockfiles(request);
     if (url.pathname === '/active-ugs-revision' && request.method === 'GET') return this.activeUgsRevision();
@@ -1934,6 +2048,10 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
     if (url.pathname === '/api/admin/session') return handleAdminSession(request, env);
     if (url.pathname === '/api/community/submissions') return forwardRegistryPath(request, env, '/community/submissions');
+    if (url.pathname === '/api/extensions/source-audit') {
+      if(request.method!=='GET')return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request,env,'/extension-source-audit');
+    }
     if (url.pathname === '/api/community/reviews') return forwardRegistryPath(request, env, '/community/reviews');
     if (url.pathname === '/api/source-lockfiles') return forwardRegistryPath(request, env, '/source-lockfiles');
     if (url.pathname === '/api/source-lockfiles/active-revision') {

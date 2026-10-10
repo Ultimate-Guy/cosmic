@@ -173,20 +173,31 @@ async function getAdminToken(){
 function renderAdminQueue(data,token){
  const items=[];
  for(const x of data.submissions||[]){
-  let desc=x.kind+' · '+x.source_url+'\n'+(x.notes||'');
+  let desc=x.kind+' · '+x.source_url+'\n'+(x.notes||''),sourceCommit='';
   if(x.kind==='extension'){
    let envelope={};try{envelope=JSON.parse(x.notes||'{}')}catch(_){}
    const source=envelope.source||{},audit=source.audit||{},counts=audit.findingsBySeverity||{};
+   sourceCommit=String(source.commit||'');
    const findings=(audit.findings||[]).slice(0,16).map(f=>'- ['+f.severity+'] '+f.code+' in '+f.file+': '+f.summary).join('\n');
    desc='EXTENSION LISTING — REVIEW BEFORE APPROVING\nEntry: '+x.source_url+'\nPinned source: '+(source.repository||'missing repository')+' @ '+(source.commit||'missing commit')+'\nStatic scanner: '+(audit.scanner||'missing report')+' · '+(audit.scannedFiles||0)+' file(s) scanned · '+(audit.bytesScanned||0)+' bytes\nSignals: high '+(counts.high||0)+', medium '+(counts.medium||0)+', low '+(counts.low||0)+', info '+(counts.info||0)+'\n'+(findings||'No configured static patterns flagged in scanned files.')+'\nWARNING: heuristic static scan only; this is not a human security audit and cannot prove code safe. Verify the pinned source and requested capabilities independently.\nManifest: '+JSON.stringify(envelope.manifest||{},null,2);
   }
-  items.push({type:'submission',id:x.id,title:x.name,owner:x.username,desc,created_at:x.created_at});
+  items.push({type:'submission',kind:x.kind,source_commit:sourceCommit,id:x.id,title:x.name,owner:x.username,desc,created_at:x.created_at});
  }
  for(const x of data.reviews||[])items.push({type:'review',id:x.game_key,game_key:x.game_key,username:x.username,title:x.game_name,owner:x.username,desc:x.rating+'/5 · '+x.result+'\n'+x.text,created_at:x.created_at});
  for(const x of data.source_lockfiles||[])items.push({type:'source_lockfile',id:x.id,title:x.label,owner:x.username,desc:'Source snapshot for review. Approval does not deploy source changes.',created_at:x.created_at});
  const list=$('admin-queue-list');
- list.innerHTML=items.map(x=>'<div class="item"><strong>'+esc(x.title)+' <span class="badge">'+esc(x.type)+'</span></strong><small>'+esc(x.owner)+' · '+esc(new Date(Number(x.created_at)||Date.now()).toLocaleString())+'</small><p style="white-space:pre-wrap">'+esc(x.desc||'')+'</p><div class="row"><button data-moderate="approved" data-type="'+esc(x.type)+'" data-id="'+esc(x.id)+'" data-game="'+esc(x.game_key||'')+'" data-user="'+esc(x.username||'')+'">Approve</button><button data-moderate="rejected" data-type="'+esc(x.type)+'" data-id="'+esc(x.id)+'" data-game="'+esc(x.game_key||'')+'" data-user="'+esc(x.username||'')+'">Reject</button></div></div>').join('')||'<div class="item muted">No pending moderation items.</div>';
- list.querySelectorAll('[data-moderate]').forEach(b=>b.onclick=async()=>{const note=prompt('Optional moderator note:','')||'';try{await apiRequest('/api/admin/community/moderate',{method:'POST',auth:'admin',token,body:{type:b.dataset.type,id:b.dataset.id,game_key:b.dataset.game,username:b.dataset.user,status:b.dataset.moderate,note}});status('submission-status','Moderation decision saved.');await loadAdminQueue()}catch(e){status('submission-status',e.message,true)}});
+ list.innerHTML=items.map(x=>'<div class="item"><strong>'+esc(x.title)+' <span class="badge">'+esc(x.kind==='extension'?'extension submission':x.type)+'</span></strong><small>'+esc(x.owner)+' · '+esc(new Date(Number(x.created_at)||Date.now()).toLocaleString())+'</small><p style="white-space:pre-wrap">'+esc(x.desc||'')+'</p><div class="row"><button data-moderate="approved" data-type="'+esc(x.type)+'" data-kind="'+esc(x.kind||'')+'" data-commit="'+esc(x.source_commit||'')+'" data-id="'+esc(x.id)+'" data-game="'+esc(x.game_key||'')+'" data-user="'+esc(x.username||'')+'">Approve</button><button data-moderate="rejected" data-type="'+esc(x.type)+'" data-kind="'+esc(x.kind||'')+'" data-commit="'+esc(x.source_commit||'')+'" data-id="'+esc(x.id)+'" data-game="'+esc(x.game_key||'')+'" data-user="'+esc(x.username||'')+'">Reject</button></div></div>').join('')||'<div class="item muted">No pending moderation items.</div>';
+ list.querySelectorAll('[data-moderate]').forEach(b=>b.onclick=async()=>{
+  let note=prompt('Moderator note:', '')||'',source_reviewed=false,source_commit_confirmation='';
+  if(b.dataset.kind==='extension'&&b.dataset.moderate==='approved'){
+   if(!confirm('Only approve after manually reviewing the exact pinned source and requested capabilities. The static scan is not a security guarantee. Continue?'))return;
+   source_commit_confirmation=prompt('Paste the complete pinned 40-character source commit SHA to confirm which code you reviewed:','')||'';
+   if(source_commit_confirmation.trim().toLowerCase()!==(b.dataset.commit||'').toLowerCase())return status('submission-status','Pinned commit confirmation did not match. Nothing was approved.',true);
+   if(note.trim().length<20)return status('submission-status','Add a moderator note (at least 20 characters) describing what you checked before approving.',true);
+   source_reviewed=true;
+  }
+  try{await apiRequest('/api/admin/community/moderate',{method:'POST',auth:'admin',token,body:{type:b.dataset.type,id:b.dataset.id,game_key:b.dataset.game,username:b.dataset.user,status:b.dataset.moderate,note,source_reviewed,source_commit_confirmation}});status('submission-status','Moderation decision saved.');await loadAdminQueue()}catch(e){status('submission-status',e.message,true)}
+ });
 }
 async function loadAdminQueue(){
  const token=await getAdminToken();const data=await apiRequest('/api/admin/community/queue',{auth:'admin',token});renderAdminQueue(data,token);status('submission-status','Admin queue loaded. Approval only changes review status; it does not execute or deploy submitted code.');

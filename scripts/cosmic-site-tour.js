@@ -4,7 +4,7 @@
   const STATE_KEY=VERSION+'State';
   const SESSION_KEY=VERSION+'Session';
   const MAX_OPENS=2;
-  const WEEKLY_VERSION='2026-10-06-8-features';
+  const WEEKLY_VERSION='2026-10-09-cosmic-platform-tour-v1';
   const WEEKLY_STATE_KEY='cosmicWeeklyTourState';
   const base=location.hostname.endsWith('.github.io')?'/cosmic/':'/';
 
@@ -35,15 +35,15 @@
   }
 
   const weeklySteps=[
-    {page:'command',selector:'#cc-root',title:'What’s New This Week',text:'This is Cosmic’s weekly update tour. It keeps existing users up to date with the newest features without replacing the normal first-time tour.'},
-    {page:'command',selector:'#cc-root',title:'Cosmic Spaces',text:'Spaces lets Cosmic treat Games, Apps, YouTube, and other surfaces as a workspace instead of making every surface replace the previous one.'},
-    {page:'command',selector:'#cc-root',title:'Cosmic Cloud Profiles',text:'Cloud Profiles make your account useful across devices: favorites, recent games, missions, settings, playlists, statistics, capsules, dashboard customization, and update state can sync.'},
-    {page:'command',selector:'#cc-root',title:'Cosmic Foundry',text:'Foundry is the safer developer import pipeline: scan a source, detect its entry and assets, normalize it, wrap it, validate it, preview it, and only then create a registry entry.'},
-    {page:'command',selector:'#cc-root',title:'Compatibility Engine',text:'The Compatibility Engine gives individual games runtime adapters for legacy paths, scripts, resizing, focus, service workers, asset rewriting, and launch fallbacks.'},
-    {page:'command',selector:'#cc-root',title:'Deployment Shield',text:'Deployment Shield is a hard pre-publish gate that checks the registry, assets, core pages, mirrors, shell, and representative game launches before a build can publish.'},
-    {page:'command',selector:'#cc-root',title:'Cosmic Arcade Network',text:'Arcade Network adds real server-backed events with schedules, progress, leaderboards, featured games, badges, announcements, countdowns, and admin controls.'},
-    {page:'command',selector:'#cc-root',title:'Cosmic Game Rooms',text:'Game Rooms let people share a room with a join code, shared queues, room status, announcements, and host controls. You can always leave a room from its room panel.'},
-    {page:'command',selector:'#cc-root',title:'Cosmic Universal Runtime',text:'The Universal Runtime gives games, apps, YouTube, external pages, media, and future Cosmic services one common launch model for controls, permissions, history, fullscreen, recovery, and analytics.'}
+    {page:'command',selector:'#cosmic-weekly-highlights',title:'What’s New in the Cosmic Platform',text:'This is the weekly tour launcher inside Cosmic itself. It stays visible on the Command Center, and earlier feature highlights are kept in the archive below.'},
+    {page:'command',selector:'.cc-top',title:'Cosmic Spaces',text:'The Command Center is Cosmic’s shared starting point for Games, Apps, YouTube, Settings, and more. These platform areas are reachable from this top bar.'},
+    {page:'command',selector:'#cc-continue',title:'Cosmic Cloud Profiles',text:'Cosmic remembers recent activity and pinned items here. Cloud Profiles extend account features across supported Cosmic surfaces.'},
+    {page:'command',selector:'.cc-feature',title:'Cosmic Foundry',text:'Foundry is Cosmic’s developer import pipeline: inspect a source and its assets, prepare a wrapped entry, validate it, and preview before adding it.'},
+    {page:'command',selector:'.cc-news',title:'Compatibility Engine',text:'Cosmic’s Updates panel keeps news and feature notes visible. Compatibility work helps older games deal with legacy paths, scripts, resizing, and launch differences.'},
+    {page:'command',selector:'.cc-actions',title:'Deployment Shield',text:'The navigation area takes you to the major Cosmic surfaces. Deployment Shield checks the build and representative game launches before a release is published.'},
+    {page:'command',selector:'.cc-quick',title:'Cosmic Arcade Network',text:'Quick Actions surface recurring activities such as Warp and Missions. The Arcade Network adds scheduled events, progress, leaderboards, featured games, and badges.'},
+    {page:'command',selector:'.cc-layout .cc-panel',title:'Cosmic Game Rooms',text:'Explore the platform panels and tools from here. Game Rooms support shared queues, join codes, room status, announcements, and host controls.'},
+    {page:'command',selector:'.cc-shell',title:'Cosmic Universal Runtime',text:'Cosmic’s runtime brings game launches, controls, permissions, fullscreen, recovery, and activity tracking under a common platform model.'}
   ];
 
   const steps=[
@@ -249,26 +249,87 @@
     });
   }
 
+  const weeklyHighlights=weeklySteps.map(step=>({title:step.title,text:step.text}));
+  const previousWeeklyHighlights=[
+    {title:'Cosmic Spaces',text:'The Command Center connects Cosmic Games, Apps, YouTube, Settings, and the other platform surfaces.'},
+    {title:'Cosmic Cloud Profiles',text:'Supported profile data can include favorites, recent games, missions, playlists, statistics, settings, and dashboards.'},
+    {title:'Cosmic Foundry',text:'Inspect, normalize, wrap, validate, and preview game sources before importing them.'},
+    {title:'Compatibility Engine',text:'Runtime adapters help legacy games handle paths, scripts, resize, focus, and launch differences.'},
+    {title:'Deployment Shield',text:'Pre-publish checks inspect core files, registries, mirrors, shell behavior, and representative launches.'},
+    {title:'Cosmic Arcade Network',text:'Scheduled events, progress, leaderboards, featured games, announcements, and badges.'},
+    {title:'Cosmic Game Rooms',text:'Rooms support join codes, shared queues, room status, announcements, and host controls.'},
+    {title:'Cosmic Universal Runtime',text:'A shared launch model for controls, permissions, fullscreen, recovery, and activity tracking.'}
+  ];
+
+  function weeklyHistory(){
+    try{
+      const stored=JSON.parse(localStorage.getItem(WEEKLY_STATE_KEY)||'null')||{};
+      let history=Array.isArray(stored.history)?stored.history:[];
+      if(!history.some(entry=>entry.version==='2026-10-06-8-features')){
+        history.unshift({version:'2026-10-06-8-features',week:'2026-10-06',title:'Previous weekly feature tour',highlights:previousWeeklyHighlights});
+      }
+      if(!history.some(entry=>entry.version===WEEKLY_VERSION)){
+        history.unshift({version:WEEKLY_VERSION,week:weekKey,title:'Cosmic Platform Tour',highlights:weeklyHighlights});
+      }
+      history=history.slice(0,12);
+      const updated={...stored,version:stored.version||WEEKLY_VERSION,week:stored.week||weekKey,history};
+      localStorage.setItem(WEEKLY_STATE_KEY,JSON.stringify(updated));
+      return history;
+    }catch(_){return [{version:WEEKLY_VERSION,week:weekKey,title:'Cosmic Platform Tour',highlights:weeklyHighlights}]}
+  }
+
+  function mountWeeklyPanel(){
+    if(!isCommandCenter||isCloakShell)return;
+    const shell=document.querySelector('#cc-root .cc-shell');
+    const main=shell?.querySelector('main.cc-layout');
+    if(!shell||!main||document.getElementById('cosmic-weekly-highlights'))return false;
+    weeklyHistory();
+    const panel=document.createElement('section');
+    panel.id='cosmic-weekly-highlights';
+    panel.setAttribute('aria-labelledby','cosmic-weekly-title');
+    panel.style.cssText='display:flex;flex-direction:column;gap:12px;margin:0 auto 14px;width:min(1400px,calc(100% - 24px));padding:clamp(16px,2.3vw,24px);border:2px solid rgba(45,204,255,.8);border-radius:18px;background:radial-gradient(ellipse at 0 0,rgba(45,204,255,.2),transparent 58%),linear-gradient(135deg,rgba(7,25,37,.99),rgba(9,18,33,.99));box-shadow:0 0 0 4px rgba(45,204,255,.12),0 18px 46px rgba(0,0,0,.32);position:relative;z-index:30;';
+    panel.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap"><div style="min-width:220px;flex:1"><span style="font-size:11px;letter-spacing:.16em;font-weight:900;color:#2dccff">COSMIC PLATFORM · FEATURE GUIDE</span><h2 id="cosmic-weekly-title" style="margin:6px 0;font-size:clamp(20px,3vw,28px);color:#f3fcff">What’s new in Cosmic</h2><p style="margin:0;color:#b8d0db;line-height:1.5">Explore platform features with a guided tour. This panel stays here, and previous weekly highlights remain available below.</p></div><button id="cosmic-weekly-tour-open" type="button" style="border:0;border-radius:12px;padding:13px 18px;background:#2dccff;color:#031721;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 0 24px rgba(45,204,255,.22)">✦ Start platform tour</button></div><details id="cosmic-weekly-history" style="border-top:1px solid rgba(45,204,255,.25);padding-top:10px"><summary style="cursor:pointer;color:#8fe8ff;font-weight:800">Previous highlights · kept for later</summary><div id="cosmic-weekly-history-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px;margin-top:12px"></div></details>';
+    const history=weeklyHistory();
+    const list=panel.querySelector('#cosmic-weekly-history-list');
+    list.innerHTML=history.map(entry=>'<article style="padding:12px;border:1px solid rgba(45,204,255,.25);border-radius:12px;background:rgba(1,10,17,.45)"><b style="display:block;color:#eafaff;margin-bottom:8px">'+escapeHtml(entry.title||entry.version)+'</b><span style="display:block;color:#7196a7;font-size:11px;margin-bottom:8px">'+escapeHtml(entry.week||'Previous release')+'</span><ul style="margin:0;padding-left:18px;color:#bfd3dc;font-size:12px;line-height:1.55">'+(entry.highlights||[]).map(h=>'<li><b>'+escapeHtml(h.title)+'</b> — '+escapeHtml(h.text)+'</li>').join('')+'</ul></article>').join('');
+    main.parentNode.insertBefore(panel,main);
+    panel.querySelector('#cosmic-weekly-tour-open').addEventListener('click',()=>startWeeklyTour(true));
+    return true;
+  }
+
+  function escapeHtml(value){
+    return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
   function addWeeklyLauncher(){
-    if(!isCommandCenter||isCloakShell||document.getElementById('cosmic-weekly-tour-launcher'))return;
-    const host=document.createElement('div');host.id='cosmic-weekly-tour-launcher';
-    host.style.cssText='position:fixed;right:18px;bottom:18px;z-index:2147483000;display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid #2dccff;border-radius:12px;background:rgba(4,15,23,.96);box-shadow:0 12px 40px #0008;font:12px system-ui;color:#dff8ff;';
-    host.innerHTML='<span><b>✦ What’s New</b><br><small>This week in Cosmic</small></span><button id="cosmic-weekly-tour-open" style="border:1px solid #2dccff;border-radius:8px;padding:7px 10px;background:#2dccff;color:#031721;font-weight:800;cursor:pointer">Tour</button>';
-    document.body.appendChild(host);
-    host.querySelector('#cosmic-weekly-tour-open').onclick=()=>startWeeklyTour(true);
+    if(!isCommandCenter||isCloakShell)return;
+    if(mountWeeklyPanel())return;
+    if(!window.__COSMIC_WEEKLY_PANEL_OBSERVER__){
+      window.__COSMIC_WEEKLY_PANEL_OBSERVER__=true;
+      const observer=new MutationObserver(()=>{
+        if(mountWeeklyPanel())observer.disconnect();
+      });
+      observer.observe(document.getElementById('cc-root')||document.body,{childList:true,subtree:true});
+    }
   }
 
   function startWeeklyTour(manual=false){
     if(weeklyAlreadyShown&&!manual)return;
-    const weekly={active:true,step:0,version:WEEKLY_VERSION,week:weekKey};
-    try{localStorage.setItem(WEEKLY_STATE_KEY,JSON.stringify(weekly))}catch(_){}
-    const originalSteps=steps;
-    steps.length=0; weeklySteps.forEach(s=>steps.push(s));
+    const history=weeklyHistory();
+    const stored=(()=>{try{return JSON.parse(localStorage.getItem(WEEKLY_STATE_KEY)||'null')||{}}catch(_){return {}}})();
+    stored.active=true;stored.step=0;stored.currentVersion=WEEKLY_VERSION;stored.week=weekKey;stored.startedAt=Date.now();stored.history=history;
+    try{localStorage.setItem(WEEKLY_STATE_KEY,JSON.stringify(stored))}catch(_){}
     state.active=true;state.mode='weekly';state.step=0;state.opens=Math.max(state.opens,MAX_OPENS);
+    saveState(state);
     setTimeout(position,250);
-    window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(position,80)});
-    window.addEventListener('scroll',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(position,80)},{passive:true});
+    if(!window.__COSMIC_WEEKLY_TOUR_RESIZE_BOUND__){
+      window.__COSMIC_WEEKLY_TOUR_RESIZE_BOUND__=true;
+      window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(position,80)});
+      window.addEventListener('scroll',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(position,80)},{passive:true});
+    }
   }
+
+
 
   function start(){
     if(state.mode==='weekly')return;

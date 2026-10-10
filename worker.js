@@ -182,13 +182,23 @@ class UsernameRegistry {
     if (request.method === 'GET') {
       const gameName = String(url.searchParams.get('game') || '').trim().slice(0,100);
       const gameKey = gameName.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,100);
+      if (url.searchParams.get('mine') === '1') {
+        const auth = await this.authenticatedAccount(request);
+        if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+        const mine = await this.state.storage.sql.exec(
+          'SELECT game_key, game_name, rating, result, text, status, created_at, updated_at, reviewed_at, review_note FROM community_reviews WHERE username = ? ORDER BY updated_at DESC LIMIT 100',
+          auth.key
+        ).toArray();
+        return this.json({ok:true,reviews:mine});
+      }
       if (!gameKey) return this.json({ok:false,error:'game-required'},400);
       const rows = await this.state.storage.sql.exec(
         "SELECT username, game_name, rating, result, text, created_at FROM community_reviews WHERE game_key = ? AND status = 'approved' ORDER BY created_at DESC LIMIT 50",
         gameKey
       ).toArray();
       const average = rows.length ? rows.reduce((sum,row)=>sum+Number(row.rating||0),0)/rows.length : null;
-      return this.json({ok:true,game:gameName,count:rows.length,average_rating:average,reviews:rows});
+      const publicReviews = rows.map(row=>({...row,username:String(row.username||'Player').slice(0,1)+'***'}));
+      return this.json({ok:true,game:gameName,count:rows.length,average_rating:average,reviews:publicReviews});
     }
     if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
     let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
@@ -995,8 +1005,10 @@ class UsernameRegistry {
       let body;
       try { body = await request.json(); } catch { return this.json({ ok: false, error: 'invalid-json' }, 400); }
       const username = typeof body?.username === 'string' ? body.username.trim() : '';
+      const password = typeof body?.password === 'string' ? body.password : '';
       if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) return this.json({ ok: false, error: 'invalid-username' }, 400);
-      return this.reserve(username);
+      if (password && password.length < 6) return this.json({ ok: false, error: 'weak-password' }, 400);
+      return this.reserve(username, password);
     }
     if (url.pathname === '/login' && request.method === 'POST') return this.accountLogin(request);
     if (url.pathname === '/password' && request.method === 'POST') return this.accountPassword(request);

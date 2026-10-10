@@ -17,6 +17,27 @@ class UsernameRegistry {
       await this.state.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS site_state (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
       );
+      await this.state.storage.sql.exec(
+        "CREATE TABLE IF NOT EXISTS community_submissions (id TEXT PRIMARY KEY, username TEXT NOT NULL, kind TEXT NOT NULL, name TEXT NOT NULL, source_url TEXT NOT NULL, url_key TEXT NOT NULL, notes TEXT NOT NULL DEFAULT '', status TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, reviewed_at INTEGER, reviewer TEXT NOT NULL DEFAULT '', review_note TEXT NOT NULL DEFAULT '')"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE INDEX IF NOT EXISTS community_submissions_status_created ON community_submissions(status, created_at)"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE INDEX IF NOT EXISTS community_submissions_owner_created ON community_submissions(username, created_at)"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE TABLE IF NOT EXISTS community_reviews (game_key TEXT NOT NULL, username TEXT NOT NULL, game_name TEXT NOT NULL, rating INTEGER NOT NULL, result TEXT NOT NULL, text TEXT NOT NULL DEFAULT '', status TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, reviewed_at INTEGER, reviewer TEXT NOT NULL DEFAULT '', review_note TEXT NOT NULL DEFAULT '', PRIMARY KEY(game_key, username))"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE INDEX IF NOT EXISTS community_reviews_status_created ON community_reviews(status, created_at)"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE TABLE IF NOT EXISTS source_lockfiles (id TEXT PRIMARY KEY, username TEXT NOT NULL, label TEXT NOT NULL, status TEXT NOT NULL, value TEXT NOT NULL, parent_id TEXT, created_at INTEGER NOT NULL, reviewed_at INTEGER, reviewer TEXT NOT NULL DEFAULT '', review_note TEXT NOT NULL DEFAULT '')"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE INDEX IF NOT EXISTS source_lockfiles_owner_created ON source_lockfiles(username, created_at)"
+      );
     });
   }
 

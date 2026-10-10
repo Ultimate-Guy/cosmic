@@ -1,0 +1,109 @@
+name: Cosmic PR release checks
+
+on:
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-worker:
+    name: Static integrity, JavaScript syntax, and Wrangler dry run
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out proposed changes
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate registries and Deployment Shield
+        run: |
+          set -euo pipefail
+          python3 scripts/deployment-shield.py .
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          local = json.loads(Path('pages/lessons/games.json').read_text())
+          ugs = json.loads(Path('pages/lessons/ugs-games.json').read_text())
+          assert len(local) > 0 and len(ugs) > 0
+          norm = lambda x: re.sub(r'[^a-z0-9]', '', str(x or '').casefold())
+          assert len({norm(x.get('name')) for x in local}) == len(local), 'duplicate local game names'
+          assert len({norm(x.get('name')) for x in ugs}) == len(ugs), 'duplicate UGS game names'
+          local_names = {norm(x.get('name')) for x in local}
+          assert not any(norm(x.get('name')) in local_names for x in ugs), 'UGS duplicates a local Cosmic game'
+          blocked = {'games', 'npm', 'esm', 'codeorgugs', 'unpkg'}
+          assert not any(norm(x.get('name')) in blocked for x in ugs), 'blocked placeholder remains in UGS registry'
+          revisions = {str(x.get('revision', '')) for x in ugs if x.get('source') == 'UGS'}
+          assert revisions and all(re.fullmatch(r'[a-f0-9]{40}', x, re.I) for x in revisions), 'UGS source revision is not immutable'
+          print(f'Registries PASS: local={len(local)}, UGS={len(ugs)}, total={len(local)+len(ugs)}, pinned revisions={len(revisions)}')
+          PY
+
+      - name: Check JavaScript syntax
+        run: |
+          set -euo pipefail
+          node --check worker.js
+          node --check sw.js
+          node --check scripts/cosmic-required-account.js
+          node --check scripts/moderator.js
+          node --check scripts/validate-game-iframes.mjs
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Scripts(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.in_script = False
+                  self.external = False
+                  self.current = []
+                  self.items = []
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() == 'script':
+                      self.in_script = True
+                      self.external = any(k.lower() == 'src' for k, _ in attrs)
+                      self.current = []
+              def handle_data(self, data):
+                  if self.in_script and not self.external:
+                      self.current.append(data)
+              def handle_endtag(self, tag):
+                  if tag.lower() == 'script' and self.in_script:
+                      source = ''.join(self.current)
+                      if source.strip(): self.items.append(source)
+                      self.in_script = False
+                      self.external = False
+          files = ['cosmic-studio.html', 'pages/lessons/game-shell.html', 'pages/lessons/lessons.html']
+          count = 0
+          for name in files:
+              parser = Scripts()
+              parser.feed(Path(name).read_text(encoding='utf-8'))
+              for source in parser.items:
+                  count += 1
+                  Path(f'/tmp/cosmic-inline-{count}.js').write_text(source, encoding='utf-8')
+          print(f'Extracted {count} inline script(s) from critical HTML pages.')
+          PY
+          for file in /tmp/cosmic-inline-*.js; do node --check "$file"; done
+
+      - name: Verify offline cache isolation and API wiring
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          sw = Path('sw.js').read_text()
+          studio = Path('cosmic-studio.html').read_text()
+          worker = Path('worker.js').read_text()
+          assert "key.startsWith('cosmic-shell-') && key !== CACHE" in sw, 'activation must prune only Cosmic shell caches'
+          assert 'cosmic-offline-packs-v1' in studio, 'offline pack cache missing'
+          for route in ['/api/community/submissions','/api/community/reviews','/api/source-lockfiles','/api/admin/community/queue','/api/accounts/data','/api/accounts/revoke-sessions','/api/accounts/delete']:
+              assert route in studio, f'Studio route missing: {route}'
+              assert route in worker, f'Worker route missing: {route}'
+          assert 'readLimitedJson' in worker and 'consumeRateLimit' in worker, 'server request caps or rate limits missing'
+          print('Offline cache policy and Studio/Worker endpoint wiring passed.')
+          PY
+
+      - name: Wrangler bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --config wrangler.jsonc

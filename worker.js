@@ -350,6 +350,50 @@ class UsernameRegistry {
     return this.json({ok:true,id,status:'pending',games:safeGames.length,mutableSources:safeGames.filter(game=>game.mutableExternal).length,message:'Source snapshot saved for administrator review. It is not deployed automatically.'},201);
   }
 
+  async checkUgsUpstream(request) {
+    const auth = await this.authenticatedAccount(request);
+    if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+    const url = new URL(request.url);
+    const revision = String(url.searchParams.get('revision') || '').trim();
+    if (!/^[a-f0-9]{40}$/i.test(revision)) return this.json({ok:false,error:'invalid-revision'},400);
+    let response;
+    try {
+      response = await fetch('https://api.github.com/repos/Ultimate-Guy/cosmicgames/compare/' + revision + '...main', {
+        headers: {'Accept':'application/vnd.github+json','User-Agent':'Cosmic-Source-Lockfile-Checker/1.0'},
+        cf: {cacheTtl:300,cacheEverything:true}
+      });
+    } catch (_) {
+      return this.json({ok:false,error:'upstream-unavailable'},502);
+    }
+    if (!response.ok) {
+      return this.json({ok:false,error:response.status===404?'revision-not-found':'upstream-check-failed',upstream_status:response.status},502);
+    }
+    const data = await response.json();
+    const commits = Array.isArray(data.commits) ? data.commits : [];
+    const latestRevision = commits.length ? commits[commits.length-1].sha : revision;
+    const files = Array.isArray(data.files) ? data.files : [];
+    const gameFiles = files.filter(file => String(file.filename||'').startsWith('UGS-Files/'));
+    return this.json({
+      ok:true,
+      repository:'Ultimate-Guy/cosmicgames',
+      base_revision:revision,
+      latest_revision:latestRevision,
+      status:data.status||'unknown',
+      ahead_by:Number(data.ahead_by||0),
+      behind_by:Number(data.behind_by||0),
+      changed_file_count:files.length,
+      ugs_file_count:gameFiles.length,
+      truncated:!!data.files_truncated,
+      changed_files:gameFiles.slice(0,100).map(file=>({
+        path:String(file.filename||'').slice(0,300),
+        status:String(file.status||'modified'),
+        additions:Number(file.additions||0),
+        deletions:Number(file.deletions||0),
+        changes:Number(file.changes||0)
+      }))
+    });
+  }
+
   async accountDataExport(request) {
     const auth=await this.authenticatedAccount(request);
     if(!auth)return this.json({ok:false,error:'unauthorized'},401);
@@ -1089,6 +1133,7 @@ class UsernameRegistry {
     if (url.pathname === '/community/submissions' && ['GET','POST'].includes(request.method)) return this.communitySubmissions(request);
     if (url.pathname === '/community/reviews' && ['GET','POST'].includes(request.method)) return this.communityReviews(request);
     if (url.pathname === '/source-lockfiles' && ['GET','POST'].includes(request.method)) return this.sourceLockfiles(request);
+    if (url.pathname === '/source-lockfiles/check-upstream' && request.method === 'GET') return this.checkUgsUpstream(request);
     if (url.pathname === '/account-data' && request.method === 'GET') return this.accountDataExport(request);
     if (url.pathname === '/revoke-sessions' && request.method === 'POST') return this.revokeAccountSessions(request);
     if (url.pathname === '/delete-account' && request.method === 'POST') return this.deleteAccount(request);
@@ -1731,6 +1776,10 @@ export default {
     if (url.pathname === '/api/community/submissions') return forwardRegistryPath(request, env, '/community/submissions');
     if (url.pathname === '/api/community/reviews') return forwardRegistryPath(request, env, '/community/reviews');
     if (url.pathname === '/api/source-lockfiles') return forwardRegistryPath(request, env, '/source-lockfiles');
+    if (url.pathname === '/api/source-lockfiles/check-upstream') {
+      if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/source-lockfiles/check-upstream');
+    }
     if (url.pathname === '/api/accounts/data') {
       if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
       return forwardRegistryPath(request, env, '/account-data');

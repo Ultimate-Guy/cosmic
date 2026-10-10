@@ -219,7 +219,7 @@ class UsernameRegistry {
     return Number(row?.count || 0) <= limit;
   }
 
-  async auditGithubExtensionSource(repositoryUrl, commitSha) {
+  async auditGithubExtensionSource(repositoryUrl, commitSha, entryUrl) {
     const sha=String(commitSha||'').trim().toLowerCase();
     if(!/^[a-f0-9]{40}$/.test(sha)) return {ok:false,error:'invalid-source-commit'};
     let repo;
@@ -232,6 +232,21 @@ class UsernameRegistry {
       return {ok:false,error:'invalid-source-repository'};
     }
     const owner=parts[0],name=parts[1].replace(/\.git$/i,'');
+    let entry,entryPath,entryMatch;
+    try { entry=new URL(String(entryUrl||'')); } catch (_) { return {ok:false,error:'pinned-jsdelivr-entry-required'}; }
+    if(entry.protocol!=='https:'||entry.hostname!=='cdn.jsdelivr.net'||entry.username||entry.password||entry.search||entry.hash) {
+      return {ok:false,error:'pinned-jsdelivr-entry-required',message:'Catalog entries must use a query-free jsDelivr URL pinned to the audited GitHub commit.'};
+    }
+    entryMatch=entry.pathname.match(/^\/gh\/([^/]+)\/([^/]+)@([a-f0-9]{40})\/(.+)$/i);
+    if(!entryMatch) return {ok:false,error:'pinned-jsdelivr-entry-required'};
+    let entryOwner,entryRepo;
+    try { entryOwner=decodeURIComponent(entryMatch[1]);entryRepo=decodeURIComponent(entryMatch[2]);entryPath=decodeURIComponent(entryMatch[4]); }
+    catch (_) { return {ok:false,error:'invalid-pinned-entry-path'}; }
+    if(entryOwner.toLowerCase()!==owner.toLowerCase()||entryRepo.replace(/\.git$/i,'').toLowerCase()!==name.toLowerCase()||
+       entryMatch[3].toLowerCase()!==sha||! /\.html?$/i.test(entryPath)||
+       entryPath.split('/').some(part=>!part||part==='.'||part==='..')) {
+      return {ok:false,error:'extension-entry-not-pinned-to-audited-source'};
+    }
     const headers={'Accept':'application/vnd.github+json','User-Agent':'Cosmic-Extension-Static-Audit/1.0'};
     let commitResponse,treeResponse;
     try {
@@ -257,8 +272,9 @@ class UsernameRegistry {
         const rank=p=>/\.(?:js|mjs|cjs|ts|tsx|jsx|html|htm)$/i.test(p)?0:/\.json$/i.test(p)?1:2;
         return rank(a.path)-rank(b.path)||a.path.localeCompare(b.path);
       });
-    if(!eligible.length) return {ok:false,error:'no-scannable-source-files'};
-    const selected=eligible.slice(0,24);
+    const entryFile=eligible.find(file=>file.path===entryPath);
+    if(!entryFile) return {ok:false,error:'extension-entry-not-found-in-source-commit'};
+    const selected=[entryFile,...eligible.filter(file=>file.path!==entryPath).slice(0,23)];
     const findings=[],scannedFiles=[];
     let bytesScanned=0,filesSkipped=eligible.length-selected.length;
     const rules=[
@@ -301,6 +317,7 @@ class UsernameRegistry {
     return {ok:true,report:{
       schemaVersion:1,scanner:'Cosmic Static Source Signals v1',auditedAt:Date.now(),
       repository:'https://github.com/'+owner+'/'+name,commit:sha,commitVerified:true,
+      entryUrl:entry.href,entryPath,
       scannedFiles:scannedFiles.length,filesSkipped,bytesScanned,
       findings,findingsBySeverity:{
         high,medium,low:findings.filter(x=>x.severity==='low').length,
@@ -318,7 +335,7 @@ class UsernameRegistry {
       return this.json({ok:false,error:'rate-limited',message:'Source audit limit reached. Try again in about an hour.'},429);
     }
     const url=new URL(request.url);
-    const result=await this.auditGithubExtensionSource(url.searchParams.get('repository')||'',url.searchParams.get('commit')||'');
+    const result=await this.auditGithubExtensionSource(url.searchParams.get('repository')||'',url.searchParams.get('commit')||'',url.searchParams.get('entry')||'');
     return result.ok?this.json({ok:true,report:result.report}):this.json({ok:false,error:result.error},400);
   }
 
@@ -418,7 +435,7 @@ class UsernameRegistry {
       if(!(await this.consumeRateLimit('extension-source-audit:'+auth.key,5,60*60*1000))) {
         return this.json({ok:false,error:'rate-limited',message:'Extension source scan limit reached. Try again in about an hour.'},429);
       }
-      const audit=await this.auditGithubExtensionSource(sourceRepository,sourceCommit);
+      const audit=await this.auditGithubExtensionSource(sourceRepository,sourceCommit,parsed.href);
       if(!audit.ok)return this.json({ok:false,error:audit.error,message:'The pinned source could not be verified and scanned.'},400);
       extensionEnvelope={manifest:checked.manifest,source:{repository:audit.report.repository,commit:audit.report.commit,audit:audit.report}};
       // The catalog stores bounded manifest metadata and a heuristic scan report.

@@ -209,7 +209,7 @@ function buildExtensionManifest(){
  const permissions=[];
  if($('ext-perm-profile').checked)permissions.push('cosmic.profile.read');
  if($('ext-perm-navigation').checked)permissions.push('cosmic.navigation.request');
- try{manifest=validateExtensionManifest({manifestVersion:1,name,version:'0.1.0',entry:url.href,permissions,isolation:{mode:'iframe',sandbox:'allow-scripts',sameOrigin:false}})}
+ try{manifest=validateExtensionManifest({manifestVersion:1,name,version:'0.1.0',entry:url.href,permissions,isolation:{mode:'iframe',sandbox:'allow-scripts allow-same-origin',sameOrigin:false}})}
  catch(e){status('ext-status',e.message,true);return null}
  $('manifest-preview').textContent=JSON.stringify(manifest,null,2);
  status('ext-status','Manifest validated. Review the URL and permissions before saving or running.');

@@ -113,6 +113,12 @@ jobs:
           PY
           for file in /tmp/cosmic-inline-*.js; do node --check "$file"; done
 
+      - name: Test extension manifest validation and origin isolation
+        run: |
+          set -euo pipefail
+          node --check scripts/test-cosmic-extension-runtime.mjs
+          node scripts/test-cosmic-extension-runtime.mjs
+
       - name: Verify offline cache isolation and API wiring
         run: |
           python3 - <<'PY'

@@ -1,14 +1,15 @@
-# Cosmic Extension SDK (v1 runtime)
+# Cosmic Extension SDK (v1 runtime and moderated catalog)
 
-Cosmic Studio provides an **opt-in, sandboxed extension runner** for user-supplied HTTPS entry URLs. It is a small, local-first runtime—not a public extension store. Saving a manifest only saves metadata in this browser; it does not publish the extension or enable it automatically.
+Cosmic Studio includes an **opt-in extension runner** and a small moderated metadata catalog. The catalog does not host or execute submitted code. Saving a manifest is local to the current browser, and running an extension always requires explicit confirmation.
 
-## Goals and boundaries
+## Security model
 
-- Extensions must be started by a user and remain disabled until explicitly launched.
-- The entry URL must use HTTPS, have no embedded credentials, and be on a **different origin from Cosmic**.
-- Extension code executes only inside a sandboxed iframe, never by evaluating it in Cosmic's page.
-- A manifest can request only the explicit capabilities below. The parent validates each request, limits message size and rate, and does not give the extension direct access to Cosmic's DOM, local storage, account token, password, administrator API, arbitrary filesystem, or game source.
-- Extensions are local-only for now. There is no reviewed public distribution catalog, content-digest pinning, automatic updates, or extension-owned data cleanup feature.
+- Extensions run in an iframe with `sandbox="allow-scripts"` only. Cosmic does not grant `allow-same-origin`, top navigation, pop-ups, forms, downloads, clipboard, or other iframe permissions.
+- This strict sandbox gives the child an opaque origin, visible to the parent as `event.origin === "null"`. Since the host cannot pin a meaningful child origin for a sandboxed frame, every message is bound to the exact iframe Window and a fresh random nonce created on each load. The nonce is rotated after navigation. It is a channel-binding control, not a code trust signal.
+- The manifest entry must be HTTPS, must not contain URL credentials, and must not use Cosmic's own origin.
+- Only the two capabilities below are accepted. The parent checks the requested capability against the manifest, limits incoming messages to 16 KiB and 20 messages per minute, and returns no raw account token, password, or direct DOM/storage access.
+- A navigation request is shown to the user and opens a separate tab only after a user click. The extension cannot automatically navigate Cosmic.
+- Use only third-party code you trust. Iframe sandboxing limits integration privileges; it does not make malicious code safe from harming its own page, sending network requests from its own origin, or displaying deceptive content.
 
 ## Manifest v1
 
@@ -16,15 +17,15 @@ Cosmic Studio provides an **opt-in, sandboxed extension runner** for user-suppli
 {
   "manifestVersion": 1,
   "name": "Example Cosmic Extension",
-  "version": "0.1.0",
-  "entry": "https://example.com/extension.html",
+  "version": "1.0.0",
+  "entry": "https://extensions.example/extension.html",
   "permissions": [
     "cosmic.profile.read",
     "cosmic.navigation.request"
   ],
   "isolation": {
     "mode": "iframe",
-    "sandbox": "allow-scripts allow-same-origin",
+    "sandbox": "allow-scripts",
     "sameOrigin": false
   },
   "enabledByDefault": false,
@@ -32,60 +33,46 @@ Cosmic Studio provides an **opt-in, sandboxed extension runner** for user-suppli
 }
 ```
 
-`sameOrigin: false` means the extension entry must **not share Cosmic's origin**. The iframe retains the configured external origin so the host can check `MessageEvent.origin` and pin `postMessage` target origins. Since the extension origin differs from Cosmic's origin, it cannot access Cosmic's DOM or storage. The sandbox does not grant top-navigation, pop-up, form, download, or clipboard permissions.
-
-Names are limited to 80 characters, versions use a numeric `major.minor.patch` format (optionally followed by prerelease/build text), entry URLs are limited to 2,048 characters, and only the two known capabilities are accepted. Unknown, duplicate, or unrequested capabilities are rejected.
+Names are 1–80 characters. Versions use numeric `major.minor.patch` formatting, with optional prerelease/build text. Entry URLs are limited to 2,048 characters. Unknown or duplicate permissions are rejected, and extensions cannot enable themselves by setting `enabledByDefault`.
 
 ## Host message protocol
 
-All messages use JSON-compatible objects and protocol version `1`. The host sends an initialization message to the exact configured HTTPS origin when the iframe loads:
+After each frame load, Cosmic sends an initialization message with a fresh unguessable nonce. Because the iframe is strictly sandboxed, the target origin must be `"*"`; the exact iframe Window and nonce are checked on subsequent messages.
 
 ```json
 {
   "type": "cosmic:host:init",
   "version": 1,
-  "extension": { "name": "Example Cosmic Extension", "version": "0.1.0" },
+  "nonce": "fresh-random-channel-token",
+  "extension": { "name": "Example Cosmic Extension", "version": "1.0.0" },
   "capabilities": ["cosmic.profile.read", "cosmic.navigation.request"]
 }
 ```
 
-An extension asks for a capability with a unique request ID:
+To request a capability, include the received nonce:
 
 ```json
 {
   "type": "cosmic:extension:request",
   "version": 1,
+  "nonce": "fresh-random-channel-token",
   "id": "request-1",
   "capability": "cosmic.profile.read",
   "payload": {}
 }
 ```
 
-The host responds to the same iframe window and configured origin:
+Successful and failed replies use `type: "cosmic:host:response"`, protocol `version: 1`, the same `nonce`, and the matching `id`. Responses include either `ok: true` and `data`, or `ok: false` and a short `error` string. Old messages from previous iframe loads are rejected because their nonce is no longer current.
 
-```json
-{
-  "type": "cosmic:host:response",
-  "version": 1,
-  "id": "request-1",
-  "ok": true,
-  "data": { "username": "player", "profile": {} }
-}
-```
+## Available capabilities
 
-Error replies use `ok: false` and a short `error` string. The host ignores messages from other windows or origins, malformed messages, payloads over 16 KiB, unknown capabilities, and requests above the 20-message-per-minute host limit. A runtime reload resets that in-memory rate counter.
+**`cosmic.profile.read`** returns a username if one is available in this browser and a small allowlist of text fields from the locally cached profile. It does not fetch private cloud profile data or return account tokens/password material.
 
-### Available capabilities
+**`cosmic.navigation.request`** accepts only a credential-free HTTPS URL. Cosmic displays the destination and waits for the user to approve or reject it.
 
-**`cosmic.profile.read`** returns the signed-in username (if present) plus an allowlisted set of small text fields from the profile cached in this browser. It does not fetch a cloud profile and never returns account tokens or password material.
+## Example extension-side client
 
-**`cosmic.navigation.request`** requires `payload.url` to be a credential-free HTTPS URL. Cosmic displays a prompt showing the target; only a user pressing **Open link** opens it in another tab. The extension cannot automatically redirect the parent page.
-
-The iframe origin is checked for every message and outbound messages use the exact configured origin, so a redirect to a different origin cannot use the host bridge. The iframe is tied to its runtime instance, and Stop removes it and clears any pending navigation prompt.
-
-## Example client snippet
-
-This example is for an extension hosted on a different HTTPS origin. It records the host origin from the initialization event and sends only explicit requests; it cannot grant itself extra capabilities.
+An extension should allowlist Cosmic's parent origins, retain the nonce from the first valid host initialization, and include it with every request. Replace the list with the exact Cosmic deployment origins you expect to embed the extension from.
 
 ```js
 const trustedCosmicOrigins = new Set([
@@ -93,6 +80,7 @@ const trustedCosmicOrigins = new Set([
   "https://cosmicv2.v75ultimate.workers.dev"
 ]);
 let hostOrigin = null;
+let channelNonce = null;
 let requestNumber = 0;
 const pending = new Map();
 
@@ -100,18 +88,24 @@ window.addEventListener("message", event => {
   if (event.source !== window.parent) return;
 
   if (event.data?.type === "cosmic:host:init" && event.data.version === 1) {
-    if (!trustedCosmicOrigins.has(event.origin)) return;
+    if (!trustedCosmicOrigins.has(event.origin) ||
+        typeof event.data.nonce !== "string" ||
+        event.data.nonce.length < 32) return;
     hostOrigin = event.origin;
-    window.parent.postMessage(
-      { type: "cosmic:extension:ready", version: 1 },
-      hostOrigin
-    );
+    channelNonce = event.data.nonce;
+    window.parent.postMessage({
+      type: "cosmic:extension:ready",
+      version: 1,
+      nonce: channelNonce
+    }, hostOrigin);
     return;
   }
 
   if (!hostOrigin || event.origin !== hostOrigin) return;
   const msg = event.data;
-  if (msg?.type !== "cosmic:host:response" || msg.version !== 1) return;
+  if (msg?.type !== "cosmic:host:response" ||
+      msg.version !== 1 ||
+      msg.nonce !== channelNonce) return;
   const resolve = pending.get(msg.id);
   if (!resolve) return;
   pending.delete(msg.id);
@@ -119,26 +113,39 @@ window.addEventListener("message", event => {
 });
 
 function requestCapability(capability, payload = {}) {
-  if (!hostOrigin) return Promise.reject(new Error("Cosmic host is not ready."));
+  if (!hostOrigin || !channelNonce) {
+    return Promise.reject(new Error("Cosmic host is not ready."));
+  }
   const id = "extension-" + (++requestNumber);
   return new Promise(resolve => {
     pending.set(id, resolve);
     window.parent.postMessage({
-      type: "cosmic:extension:request", version: 1, id, capability, payload
+      type: "cosmic:extension:request",
+      version: 1,
+      nonce: channelNonce,
+      id,
+      capability,
+      payload
     }, hostOrigin);
   });
 }
 
-// Example: requestCapability("cosmic.profile.read").then(console.log);
-// For navigation: requestCapability("cosmic.navigation.request", { url: "https://example.com/" });
+// Example:
+// requestCapability("cosmic.profile.read").then(console.log);
+// requestCapability("cosmic.navigation.request", {url: "https://example.com/"});
 ```
 
-Extensions should also implement request timeouts, handle `ok: false`, and avoid asking for unnecessary capabilities.
+Implement request timeouts and handle `ok: false`. Do not request capabilities the extension doesn't need.
 
-## Known limits
+## Community catalog and pinned-source static scan
 
-- This is not an extension store and does not run a public review pipeline.
-- The runner validates requested permissions but does not independently audit third-party code. Run only extensions whose publisher and URL you trust.
-- Navigation requires a user click on each request; there is no background navigation.
-- There is no content digest verification or automatic update mechanism yet.
-- Game Source Lockfiles, community moderation, account tools, and offline packs are separate Studio features; extension code does not receive privileged access to them.
+An extension catalog submission requires a public GitHub source repository, a full immutable 40-character commit SHA, and a query-free entry URL in the form `https://cdn.jsdelivr.net/gh/owner/repo@<commit-sha>/path/to/entry.html`. Cosmic verifies that the repository and commit in the entry URL match the audited GitHub source, confirms the exact HTML entry exists at that commit, and scans that entry file first plus a bounded selection of other source files. The code is never run by the scanner. The scanner looks for signals such as dynamic code execution, cookie access, suspicious credential-adjacent network calls, dynamic script loading, wildcard messaging, common obfuscation helpers, and network-capability use.
+
+The report includes the verified repository/commit, scanned file counts, file size limits, and any configured findings. It is heuristic, can miss malicious behavior, and can flag legitimate patterns. **A clean report is not a guarantee of safety and is not an independent human security audit.** Each listing remains pending until a Cosmic moderator reviews its metadata/source report. To approve an extension, the moderator must explicitly acknowledge a manual source review, enter the exact pinned commit SHA, and write a review note; the API rejects an approval that omits these checks. A moderator-approved listing still displays that the code is not independently audited. The catalog never downloads an entry page just to render its metadata, never executes a submission during moderation, and never auto-runs a catalog item.
+
+## Current limits
+
+- There is no automated public release pipeline, signed publisher identity, content-digest pinning, or automatic updating of extensions.
+- The metadata catalog requires a pinned GitHub source snapshot for review. The runtime entry URL can still change unless the extension publisher serves versioned immutable assets.
+- Cosmic's static source scan is advisory only. Treat extension code as untrusted even when its catalog metadata has been approved.
+- The Controller & Touch Hub is separate: on-screen touch key injection is enabled only when the game iframe is same-origin and accessible to Cosmic. Cross-origin games cannot be safely controlled by synthetic DOM keyboard events from the parent.

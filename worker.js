@@ -44,6 +44,9 @@ class UsernameRegistry {
       await this.state.storage.sql.exec(
         "CREATE INDEX IF NOT EXISTS source_lockfiles_owner_created ON source_lockfiles(username, created_at)"
       );
+      await this.state.storage.sql.exec(
+        "CREATE TABLE IF NOT EXISTS api_rate_limits (bucket TEXT PRIMARY KEY, window_start INTEGER NOT NULL, count INTEGER NOT NULL)"
+      );
     });
   }
 
@@ -186,6 +189,36 @@ class UsernameRegistry {
     return this.accountForToken(username,token,request);
   }
 
+  async readLimitedJson(request, maxBytes) {
+    const declared = Number(request.headers.get('Content-Length') || 0);
+    if (Number.isFinite(declared) && declared > maxBytes) {
+      return {ok:false, error:'request-too-large', status:413};
+    }
+    let raw;
+    try { raw = await request.text(); }
+    catch (_) { return {ok:false, error:'invalid-json', status:400}; }
+    if (new TextEncoder().encode(raw).byteLength > maxBytes) {
+      return {ok:false, error:'request-too-large', status:413};
+    }
+    try { return {ok:true, value:JSON.parse(raw)}; }
+    catch (_) { return {ok:false, error:'invalid-json', status:400}; }
+  }
+
+  async consumeRateLimit(bucket, limit, windowMs) {
+    const now = Date.now();
+    await this.state.storage.sql.exec(
+      'INSERT INTO api_rate_limits (bucket, window_start, count) VALUES (?, ?, 1) ' +
+      'ON CONFLICT(bucket) DO UPDATE SET ' +
+      'window_start = CASE WHEN api_rate_limits.window_start + ? <= ? THEN ? ELSE api_rate_limits.window_start END, ' +
+      'count = CASE WHEN api_rate_limits.window_start + ? <= ? THEN 1 ELSE api_rate_limits.count + 1 END',
+      bucket, now, windowMs, now, now, windowMs, now
+    );
+    const row = await this.state.storage.sql.exec(
+      'SELECT count FROM api_rate_limits WHERE bucket = ?', bucket
+    ).toArray()[0];
+    return Number(row?.count || 0) <= limit;
+  }
+
   async communitySubmissions(request) {
     if (request.method === 'GET') {
       const auth = await this.authenticatedAccount(request);
@@ -197,7 +230,9 @@ class UsernameRegistry {
       return this.json({ok:true,submissions:rows});
     }
     if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
-    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const parsed = await this.readLimitedJson(request, 16 * 1024);
+    if (!parsed.ok) return this.json({ok:false,error:parsed.error},parsed.status);
+    const body = parsed.value;
     const auth = await this.authenticatedAccount(request, body);
     if (!auth) return this.json({ok:false,error:'unauthorized'},401);
     const kind = body.kind === 'app' ? 'app' : body.kind === 'game' ? 'game' : '';
@@ -250,7 +285,9 @@ class UsernameRegistry {
       return this.json({ok:true,game:gameName,count:rows.length,average_rating:average,reviews:publicReviews});
     }
     if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
-    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const parsed = await this.readLimitedJson(request, 12 * 1024);
+    if (!parsed.ok) return this.json({ok:false,error:parsed.error},parsed.status);
+    const body = parsed.value;
     const auth = await this.authenticatedAccount(request, body);
     if (!auth) return this.json({ok:false,error:'unauthorized'},401);
     const gameName = typeof body.game === 'string' ? body.game.trim().slice(0,100) : '';
@@ -297,9 +334,14 @@ class UsernameRegistry {
       return this.json({ok:true,lockfiles:rows});
     }
     if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
-    let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
+    const parsed = await this.readLimitedJson(request, 1024 * 1024);
+    if (!parsed.ok) return this.json({ok:false,error:parsed.error},parsed.status);
+    const body = parsed.value;
     const auth = await this.authenticatedAccount(request, body);
     if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+    if (!(await this.consumeRateLimit('source-lockfile:'+auth.key, 6, 24 * 60 * 60 * 1000))) {
+      return this.json({ok:false,error:'rate-limited',message:'Source snapshot limit reached. Try again tomorrow.'},429);
+    }
     const now=Date.now();
     if (body.action === 'rollback') {
       const id=String(body.id||'').trim();
@@ -361,6 +403,9 @@ class UsernameRegistry {
   async checkUgsUpstream(request) {
     const auth = await this.authenticatedAccount(request);
     if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+    if (!(await this.consumeRateLimit('source-check:'+auth.key, 12, 60 * 60 * 1000))) {
+      return this.json({ok:false,error:'rate-limited',message:'Upstream check limit reached. Try again in about an hour.'},429);
+    }
     const url = new URL(request.url);
     const revision = String(url.searchParams.get('revision') || '').trim();
     if (!/^[a-f0-9]{40}$/i.test(revision)) return this.json({ok:false,error:'invalid-revision'},400);
@@ -494,7 +539,9 @@ class UsernameRegistry {
       return this.json({ok:true,submissions,reviews,source_lockfiles:lockfiles});
     }
     if(request.method!=='POST')return this.json({ok:false,error:'method-not-allowed'},405);
-    let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
+    const parsed=await this.readLimitedJson(request, 16 * 1024);
+    if(!parsed.ok)return this.json({ok:false,error:parsed.error},parsed.status);
+    const body=parsed.value;
     const type=String(body.type||'');
     const status=body.status==='approved'?'approved':body.status==='rejected'?'rejected':'';
     const id=String(body.id||'').trim();

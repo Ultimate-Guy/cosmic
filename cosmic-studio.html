@@ -172,7 +172,16 @@ async function getAdminToken(){
 }
 function renderAdminQueue(data,token){
  const items=[];
- for(const x of data.submissions||[])items.push({type:'submission',id:x.id,title:x.name,owner:x.username,desc:x.kind+' · '+x.source_url+'\n'+x.notes,created_at:x.created_at});
+ for(const x of data.submissions||[]){
+  let desc=x.kind+' · '+x.source_url+'\n'+(x.notes||'');
+  if(x.kind==='extension'){
+   let envelope={};try{envelope=JSON.parse(x.notes||'{}')}catch(_){}
+   const source=envelope.source||{},audit=source.audit||{},counts=audit.findingsBySeverity||{};
+   const findings=(audit.findings||[]).slice(0,16).map(f=>'- ['+f.severity+'] '+f.code+' in '+f.file+': '+f.summary).join('\n');
+   desc='EXTENSION LISTING — REVIEW BEFORE APPROVING\nEntry: '+x.source_url+'\nPinned source: '+(source.repository||'missing repository')+' @ '+(source.commit||'missing commit')+'\nStatic scanner: '+(audit.scanner||'missing report')+' · '+(audit.scannedFiles||0)+' file(s) scanned · '+(audit.bytesScanned||0)+' bytes\nSignals: high '+(counts.high||0)+', medium '+(counts.medium||0)+', low '+(counts.low||0)+', info '+(counts.info||0)+'\n'+(findings||'No configured static patterns flagged in scanned files.')+'\nWARNING: heuristic static scan only; this is not a human security audit and cannot prove code safe. Verify the pinned source and requested capabilities independently.\nManifest: '+JSON.stringify(envelope.manifest||{},null,2);
+  }
+  items.push({type:'submission',id:x.id,title:x.name,owner:x.username,desc,created_at:x.created_at});
+ }
  for(const x of data.reviews||[])items.push({type:'review',id:x.game_key,game_key:x.game_key,username:x.username,title:x.game_name,owner:x.username,desc:x.rating+'/5 · '+x.result+'\n'+x.text,created_at:x.created_at});
  for(const x of data.source_lockfiles||[])items.push({type:'source_lockfile',id:x.id,title:x.label,owner:x.username,desc:'Source snapshot for review. Approval does not deploy source changes.',created_at:x.created_at});
  const list=$('admin-queue-list');

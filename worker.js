@@ -9,6 +9,12 @@ class UsernameRegistry {
         'CREATE TABLE IF NOT EXISTS accounts (username TEXT PRIMARY KEY, created_at INTEGER NOT NULL, account_token TEXT NOT NULL)'
       );
       await this.state.storage.sql.exec(
+        "CREATE TABLE IF NOT EXISTS account_sessions (id TEXT PRIMARY KEY, username TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, device_label TEXT NOT NULL DEFAULT 'Web browser', user_agent TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL, last_seen_at INTEGER NOT NULL, revoked_at INTEGER)"
+      );
+      await this.state.storage.sql.exec(
+        'CREATE INDEX IF NOT EXISTS account_sessions_owner_created ON account_sessions(username, created_at)'
+      );
+      await this.state.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS activity (username TEXT NOT NULL, game_key TEXT NOT NULL, game_name TEXT NOT NULL, opens INTEGER NOT NULL DEFAULT 0, last_opened INTEGER NOT NULL, PRIMARY KEY (username, game_key))'
       );
       await this.state.storage.sql.exec('CREATE TABLE IF NOT EXISTS profiles (username TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL)');
@@ -16,6 +22,30 @@ class UsernameRegistry {
       try { await this.state.storage.sql.exec('ALTER TABLE accounts ADD COLUMN password_hash TEXT'); } catch (_) {}
       await this.state.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS site_state (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
+      );
+      await this.state.storage.sql.exec(
+        "CREATE TABLE IF NOT EXISTS community_submissions (id TEXT PRIMARY KEY, username TEXT NOT NULL, kind TEXT NOT NULL, name TEXT NOT NULL, source_url TEXT NOT NULL, url_key TEXT NOT NULL, notes TEXT NOT NULL DEFAULT '', status TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, reviewed_at INTEGER, reviewer TEXT NOT NULL DEFAULT '', review_note TEXT NOT NULL DEFAULT '')"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE INDEX IF NOT EXISTS community_submissions_status_created ON community_submissions(status, created_at)"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE INDEX IF NOT EXISTS community_submissions_owner_created ON community_submissions(username, created_at)"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE TABLE IF NOT EXISTS community_reviews (game_key TEXT NOT NULL, username TEXT NOT NULL, game_name TEXT NOT NULL, rating INTEGER NOT NULL, result TEXT NOT NULL, text TEXT NOT NULL DEFAULT '', status TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, reviewed_at INTEGER, reviewer TEXT NOT NULL DEFAULT '', review_note TEXT NOT NULL DEFAULT '', PRIMARY KEY(game_key, username))"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE INDEX IF NOT EXISTS community_reviews_status_created ON community_reviews(status, created_at)"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE TABLE IF NOT EXISTS source_lockfiles (id TEXT PRIMARY KEY, username TEXT NOT NULL, label TEXT NOT NULL, status TEXT NOT NULL, value TEXT NOT NULL, parent_id TEXT, created_at INTEGER NOT NULL, reviewed_at INTEGER, reviewer TEXT NOT NULL DEFAULT '', review_note TEXT NOT NULL DEFAULT '')"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE INDEX IF NOT EXISTS source_lockfiles_owner_created ON source_lockfiles(username, created_at)"
+      );
+      await this.state.storage.sql.exec(
+        "CREATE TABLE IF NOT EXISTS api_rate_limits (bucket TEXT PRIMARY KEY, window_start INTEGER NOT NULL, count INTEGER NOT NULL)"
       );
     });
   }
@@ -31,6 +61,49 @@ class UsernameRegistry {
     const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
     const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode(salt),iterations:120000,hash:'SHA-256'},key,256);
     return Array.from(new Uint8Array(bits)).map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+
+  async hashSessionToken(token) {
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token)));
+    return Array.from(digest).map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+
+  async createAccountSession(usernameKey, token, request, label='Web browser') {
+    const id = crypto.randomUUID();
+    const now = Date.now();
+    const userAgent = String(request?.headers?.get('User-Agent') || '').slice(0,240);
+    await this.state.storage.sql.exec(
+      'INSERT INTO account_sessions (id, username, token_hash, device_label, user_agent, created_at, last_seen_at, revoked_at) VALUES (?, ?, ?, ?, ?, ?, ?, NULL)',
+      id, usernameKey, await this.hashSessionToken(token), String(label).slice(0,80), userAgent, now, now
+    );
+    return {id, device_label:String(label).slice(0,80), user_agent:userAgent, created_at:now, last_seen_at:now, revoked_at:null};
+  }
+
+  async accountForToken(username, token, request=null) {
+    const key = String(username || '').trim().toLowerCase();
+    if (!key || !token) return null;
+    const account = await this.state.storage.sql.exec(
+      'SELECT username, account_token, password_salt, password_hash, created_at FROM accounts WHERE username = ?', key
+    ).toArray()[0];
+    if (!account) return null;
+    const hash = await this.hashSessionToken(token);
+    let session = await this.state.storage.sql.exec(
+      'SELECT id, username, device_label, user_agent, created_at, last_seen_at, revoked_at FROM account_sessions WHERE username = ? AND token_hash = ?',
+      key, hash
+    ).toArray()[0];
+    if (session?.revoked_at) return null;
+    if (!session) {
+      // Migrate existing pre-session accounts on first authenticated use.
+      // A previously revoked token has a persistent row and therefore cannot
+      // be re-created through this legacy migration path.
+      if (account.account_token !== token) return null;
+      session = await this.createAccountSession(key, token, request, 'Migrated Cosmic session');
+    } else {
+      const now = Date.now();
+      await this.state.storage.sql.exec('UPDATE account_sessions SET last_seen_at = ? WHERE id = ?', now, session.id);
+      session.last_seen_at = now;
+    }
+    return {key, account, session};
   }
   async reserve(username, password='') {
     const key = username.toLowerCase();
@@ -49,6 +122,7 @@ class UsernameRegistry {
     await this.state.storage.sql.exec(
       'INSERT INTO accounts (username, created_at, account_token, password_salt, password_hash) VALUES (?, ?, ?, ?, ?)', key, now, token, salt, passwordHash
     );
+    await this.createAccountSession(key, token, null, 'Account created');
     return this.json({ ok: true, username, account_token: token });
   }
 
@@ -60,17 +134,20 @@ class UsernameRegistry {
     if(!account)return this.json({ok:false,error:'invalid-credentials'},401);
     if(!account.password_hash||!account.password_salt)return this.json({ok:false,error:'cloud-login-not-enabled'},409);
     if(await this.passwordHash(password,account.password_salt)!==account.password_hash)return this.json({ok:false,error:'invalid-credentials'},401);
-    return this.json({ok:true,username:account.username,account_token:account.account_token});
+    const sessionToken=crypto.randomUUID();
+    const session=await this.createAccountSession(key,sessionToken,request,'Login session');
+    return this.json({ok:true,username:account.username,account_token:sessionToken,session:{id:session.id,device_label:session.device_label,created_at:session.created_at,last_seen_at:session.last_seen_at}});
   }
   async accountPassword(request) {
     let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
     const username=typeof body?.username==='string'?body.username.trim():''; const token=typeof body?.account_token==='string'?body.account_token:''; const password=typeof body?.password==='string'?body.password:'';
     if(!username||!token||password.length<6)return this.json({ok:false,error:'missing-fields'},400);
-    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).toArray()[0];
-    if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
+    const auth=await this.accountForToken(username,token,request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
     const salt=crypto.randomUUID(); const hash=await this.passwordHash(password,salt);
-    await this.state.storage.sql.exec('UPDATE accounts SET password_salt=?, password_hash=? WHERE username=?',salt,hash,key);
-    return this.json({ok:true});
+    await this.state.storage.sql.exec('UPDATE accounts SET password_salt=?, password_hash=? WHERE username=?',salt,hash,auth.key);
+    await this.state.storage.sql.exec('UPDATE account_sessions SET revoked_at = ? WHERE username = ? AND id <> ? AND revoked_at IS NULL',Date.now(),auth.key,auth.session.id);
+    return this.json({ok:true,sessions_revoked:true});
   }
   async cloudProfile(request) {
     let username='', token='';
@@ -84,8 +161,9 @@ class UsernameRegistry {
       token=typeof body?.account_token==='string'?body.account_token:'';
     }
     if(!username||!token)return this.json({ok:false,error:'missing-fields'},400);
-    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).toArray()[0];
-    if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
+    const auth=await this.accountForToken(username,token,request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    const key=auth.key;
     const profile=await this.state.storage.sql.exec('SELECT value FROM profiles WHERE username = ?',key).toArray()[0];
     let value={};
     if(profile?.value){try{value=JSON.parse(profile.value)||{}}catch(_){value={};}}
@@ -95,12 +173,425 @@ class UsernameRegistry {
     let body; try { body=await request.json(); } catch { return this.json({ok:false,error:'invalid-json'},400); }
     const username=typeof body?.username==='string'?body.username.trim():''; const token=typeof body?.account_token==='string'?body.account_token:'';
     if(!username||!token)return this.json({ok:false,error:'missing-fields'},400);
-    const key=username.toLowerCase(); const account=await this.state.storage.sql.exec('SELECT account_token FROM accounts WHERE username = ?',key).toArray()[0];
-    if(!account||account.account_token!==token)return this.json({ok:false,error:'unauthorized'},401);
+    const auth=await this.accountForToken(username,token,request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    const key=auth.key;
     const value=body?.profile&&typeof body.profile==='object'?JSON.stringify(body.profile):'{}';
     await this.state.storage.sql.exec('INSERT INTO profiles (username,value,updated_at) VALUES (?,?,?) ON CONFLICT(username) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at',key,value,Date.now());
     return this.json({ok:true,profile:JSON.parse(value)});
   }
+  async authenticatedAccount(request, body = {}) {
+    const url = new URL(request.url);
+    const username = String(body.username || request.headers.get('X-Cosmic-Username') || url.searchParams.get('username') || '').trim();
+    const authorization = request.headers.get('Authorization') || '';
+    const bearer = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+    const token = String(body.account_token || bearer || '').trim();
+    return this.accountForToken(username,token,request);
+  }
+
+  async readLimitedJson(request, maxBytes) {
+    const declared = Number(request.headers.get('Content-Length') || 0);
+    if (Number.isFinite(declared) && declared > maxBytes) {
+      return {ok:false, error:'request-too-large', status:413};
+    }
+    let raw;
+    try { raw = await request.text(); }
+    catch (_) { return {ok:false, error:'invalid-json', status:400}; }
+    if (new TextEncoder().encode(raw).byteLength > maxBytes) {
+      return {ok:false, error:'request-too-large', status:413};
+    }
+    try { return {ok:true, value:JSON.parse(raw)}; }
+    catch (_) { return {ok:false, error:'invalid-json', status:400}; }
+  }
+
+  async consumeRateLimit(bucket, limit, windowMs) {
+    const now = Date.now();
+    await this.state.storage.sql.exec(
+      'INSERT INTO api_rate_limits (bucket, window_start, count) VALUES (?, ?, 1) ' +
+      'ON CONFLICT(bucket) DO UPDATE SET ' +
+      'window_start = CASE WHEN api_rate_limits.window_start + ? <= ? THEN ? ELSE api_rate_limits.window_start END, ' +
+      'count = CASE WHEN api_rate_limits.window_start + ? <= ? THEN 1 ELSE api_rate_limits.count + 1 END',
+      bucket, now, windowMs, now, now, windowMs, now
+    );
+    const row = await this.state.storage.sql.exec(
+      'SELECT count FROM api_rate_limits WHERE bucket = ?', bucket
+    ).toArray()[0];
+    return Number(row?.count || 0) <= limit;
+  }
+
+  async communitySubmissions(request) {
+    if (request.method === 'GET') {
+      const auth = await this.authenticatedAccount(request);
+      if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+      const rows = await this.state.storage.sql.exec(
+        'SELECT id, kind, name, source_url, notes, status, created_at, updated_at, reviewed_at, reviewer, review_note FROM community_submissions WHERE username = ? ORDER BY created_at DESC LIMIT 100',
+        auth.key
+      ).toArray();
+      return this.json({ok:true,submissions:rows});
+    }
+    if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
+    const requestData = await this.readLimitedJson(request, 16 * 1024);
+    if (!requestData.ok) return this.json({ok:false,error:requestData.error},requestData.status);
+    const body = requestData.value;
+    const auth = await this.authenticatedAccount(request, body);
+    if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+    const kind = body.kind === 'app' ? 'app' : body.kind === 'game' ? 'game' : '';
+    const name = typeof body.name === 'string' ? body.name.trim().slice(0,80) : '';
+    const sourceUrl = typeof body.source_url === 'string' ? body.source_url.trim().slice(0,500) : '';
+    const notes = typeof body.notes === 'string' ? body.notes.trim().slice(0,1200) : '';
+    if (!kind || !name || !sourceUrl) return this.json({ok:false,error:'missing-fields'},400);
+    let parsed;
+    try { parsed = new URL(sourceUrl); } catch (_) { return this.json({ok:false,error:'invalid-source-url'},400); }
+    if (!['http:','https:'].includes(parsed.protocol) || parsed.username || parsed.password) return this.json({ok:false,error:'invalid-source-url'},400);
+    const duplicateKey = (parsed.origin + parsed.pathname + parsed.search).slice(0,600);
+    const now = Date.now();
+    const recent = await this.state.storage.sql.exec(
+      "SELECT COUNT(*) AS count FROM community_submissions WHERE username = ? AND created_at > ?", auth.key, now - 86400000
+    ).toArray()[0];
+    if (Number(recent?.count || 0) >= 8) return this.json({ok:false,error:'submission-rate-limit'},429);
+    const duplicate = await this.state.storage.sql.exec(
+      "SELECT id, status FROM community_submissions WHERE url_key = ? AND status IN ('pending','approved') LIMIT 1", duplicateKey
+    ).toArray()[0];
+    if (duplicate) return this.json({ok:false,error:'duplicate-source',status:duplicate.status},409);
+    const id = crypto.randomUUID();
+    await this.state.storage.sql.exec(
+      'INSERT INTO community_submissions (id, username, kind, name, source_url, url_key, notes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      id, auth.key, kind, name, parsed.href, duplicateKey, notes, 'pending', now, now
+    );
+    return this.json({ok:true,submission:{id,kind,name,source_url:parsed.href,notes,status:'pending',created_at:now}},201);
+  }
+
+  async communityReviews(request) {
+    const url = new URL(request.url);
+    if (request.method === 'GET') {
+      const gameName = String(url.searchParams.get('game') || '').trim().slice(0,100);
+      const gameKey = gameName.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,100);
+      if (url.searchParams.get('mine') === '1') {
+        const auth = await this.authenticatedAccount(request);
+        if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+        const mine = await this.state.storage.sql.exec(
+          'SELECT game_key, game_name, rating, result, text, status, created_at, updated_at, reviewed_at, review_note FROM community_reviews WHERE username = ? ORDER BY updated_at DESC LIMIT 100',
+          auth.key
+        ).toArray();
+        return this.json({ok:true,reviews:mine});
+      }
+      if (!gameKey) return this.json({ok:false,error:'game-required'},400);
+      const rows = await this.state.storage.sql.exec(
+        "SELECT username, game_name, rating, result, text, created_at FROM community_reviews WHERE game_key = ? AND status = 'approved' ORDER BY created_at DESC LIMIT 50",
+        gameKey
+      ).toArray();
+      const average = rows.length ? rows.reduce((sum,row)=>sum+Number(row.rating||0),0)/rows.length : null;
+      const publicReviews = rows.map(row=>({...row,username:String(row.username||'Player').slice(0,1)+'***'}));
+      return this.json({ok:true,game:gameName,count:rows.length,average_rating:average,reviews:publicReviews});
+    }
+    if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
+    const parsed = await this.readLimitedJson(request, 12 * 1024);
+    if (!parsed.ok) return this.json({ok:false,error:parsed.error},parsed.status);
+    const body = parsed.value;
+    const auth = await this.authenticatedAccount(request, body);
+    if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+    const gameName = typeof body.game === 'string' ? body.game.trim().slice(0,100) : '';
+    const gameKey = gameName.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,100);
+    const rating = Number(body.rating);
+    const result = ['worked','partial','broken'].includes(body.result) ? body.result : '';
+    const reviewText = typeof body.text === 'string' ? body.text.trim().slice(0,1000) : '';
+    if (!gameName || !gameKey || !Number.isInteger(rating) || rating < 1 || rating > 5 || !result) {
+      return this.json({ok:false,error:'invalid-review'},400);
+    }
+    const now = Date.now();
+    const recent = await this.state.storage.sql.exec(
+      'SELECT COUNT(*) AS count FROM community_reviews WHERE username = ? AND created_at > ?', auth.key, now - 86400000
+    ).toArray()[0];
+    const existing = await this.state.storage.sql.exec(
+      'SELECT created_at FROM community_reviews WHERE game_key = ? AND username = ?', gameKey, auth.key
+    ).toArray()[0];
+    if (!existing && Number(recent?.count || 0) >= 30) return this.json({ok:false,error:'review-rate-limit'},429);
+    await this.state.storage.sql.exec(
+      "INSERT INTO community_reviews (game_key, username, game_name, rating, result, text, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?) ON CONFLICT(game_key, username) DO UPDATE SET game_name=excluded.game_name,rating=excluded.rating,result=excluded.result,text=excluded.text,status='pending',updated_at=excluded.updated_at,reviewed_at=NULL,reviewer='',review_note=''",
+      gameKey, auth.key, gameName, rating, result, reviewText, now, now
+    );
+    return this.json({ok:true,status:'pending',message:'Report submitted for review before it appears publicly.'},201);
+  }
+
+  async sourceLockfiles(request) {
+    if (request.method === 'GET') {
+      const auth = await this.authenticatedAccount(request);
+      if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+      const url = new URL(request.url);
+      const id = String(url.searchParams.get('id') || '').trim();
+      if (id) {
+        const row = await this.state.storage.sql.exec(
+          'SELECT id, username, label, status, value, parent_id, created_at, reviewed_at, reviewer, review_note FROM source_lockfiles WHERE id = ? AND username = ?', id, auth.key
+        ).toArray()[0];
+        if (!row) return this.json({ok:false,error:'not-found'},404);
+        let lockfile={}; try { lockfile=JSON.parse(row.value)||{}; } catch (_) {}
+        return this.json({ok:true,record:{...row,value:undefined,lockfile}});
+      }
+      const rows = await this.state.storage.sql.exec(
+        'SELECT id, label, status, parent_id, created_at, reviewed_at, reviewer, review_note FROM source_lockfiles WHERE username = ? ORDER BY created_at DESC LIMIT 5',
+        auth.key
+      ).toArray();
+      return this.json({ok:true,lockfiles:rows});
+    }
+    if (request.method !== 'POST') return this.json({ok:false,error:'method-not-allowed'},405);
+    const parsed = await this.readLimitedJson(request, 1024 * 1024);
+    if (!parsed.ok) return this.json({ok:false,error:parsed.error},parsed.status);
+    const body = parsed.value;
+    const auth = await this.authenticatedAccount(request, body);
+    if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+    if (!(await this.consumeRateLimit('source-lockfile:'+auth.key, 6, 24 * 60 * 60 * 1000))) {
+      return this.json({ok:false,error:'rate-limited',message:'Source snapshot limit reached. Try again tomorrow.'},429);
+    }
+    const now=Date.now();
+    if (body.action === 'rollback') {
+      const id=String(body.id||'').trim();
+      const parent=await this.state.storage.sql.exec(
+        'SELECT id, label, value FROM source_lockfiles WHERE id = ? AND username = ?', id, auth.key
+      ).toArray()[0];
+      if (!parent) return this.json({ok:false,error:'not-found'},404);
+      const newId=crypto.randomUUID();
+      const label=('Restore draft: '+String(parent.label||'source snapshot')).slice(0,100);
+      await this.state.storage.sql.exec(
+        "INSERT INTO source_lockfiles (id, username, label, status, value, parent_id, created_at) VALUES (?, ?, ?, 'pending', ?, ?, ?)",
+        newId, auth.key, label, parent.value, parent.id, now
+      );
+      return this.json({ok:true,id:newId,status:'pending',message:'A rollback proposal was created. It does not change the live catalog; deployment still requires an approved source update.'},201);
+    }
+    const input=body.lockfile;
+    if (!input || !Array.isArray(input.games) || input.games.length < 1 || input.games.length > 3000) {
+      return this.json({ok:false,error:'invalid-lockfile'},400);
+    }
+    const safeGames=input.games.map(game=>({
+      name:String(game?.name||'').slice(0,100),
+      path:String(game?.path||'').slice(0,1000),
+      source:String(game?.source||'').slice(0,40),
+      revision:String(game?.revision||'').slice(0,100),
+      source_path:String(game?.source_path||'').slice(0,500),
+      mutableExternal:!!game?.mutableExternal
+    })).filter(game=>game.name && game.path);
+    if (!safeGames.length) return this.json({ok:false,error:'empty-lockfile'},400);
+    const value=JSON.stringify({schemaVersion:1,generatedAt:String(input.generatedAt||new Date(now).toISOString()),games:safeGames});
+    if (new TextEncoder().encode(value).length > 900000) return this.json({ok:false,error:'lockfile-too-large'},413);
+    const label=String(body.label||('Source audit '+new Date(now).toISOString().slice(0,10))).trim().slice(0,100)||'Source audit';
+    const parentId=String(body.parent_id||'').trim()||null;
+    if (parentId) {
+      const parent=await this.state.storage.sql.exec(
+        'SELECT id FROM source_lockfiles WHERE id = ? AND username = ?', parentId, auth.key
+      ).toArray()[0];
+      if (!parent) return this.json({ok:false,error:'invalid-parent'},400);
+    }
+    const id=crypto.randomUUID();
+    await this.state.storage.sql.exec(
+      "INSERT INTO source_lockfiles (id, username, label, status, value, parent_id, created_at) VALUES (?, ?, ?, 'pending', ?, ?, ?)",
+      id, auth.key, label, value, parentId, now
+    );
+    const oldRows=await this.state.storage.sql.exec(
+      'SELECT id FROM source_lockfiles WHERE username = ? ORDER BY created_at DESC LIMIT 100 OFFSET 5', auth.key
+    ).toArray();
+    for (const row of oldRows) await this.state.storage.sql.exec('DELETE FROM source_lockfiles WHERE id = ? AND username = ?',row.id,auth.key);
+    return this.json({ok:true,id,status:'pending',games:safeGames.length,mutableSources:safeGames.filter(game=>game.mutableExternal).length,message:'Source snapshot saved for administrator review. It is not deployed automatically.'},201);
+  }
+
+  async activeUgsRevision() {
+    const row = await this.state.storage.sql.exec(
+      'SELECT value FROM site_state WHERE key = ?', 'cosmic_ugs_active_revision'
+    ).toArray()[0];
+    const revision = /^[a-f0-9]{40}$/i.test(String(row?.value||'')) ? String(row.value) : COSMIC_UGS_DEFAULT_REVISION;
+    return this.json({ok:true,revision,is_default:!row?.value,default_revision:COSMIC_UGS_DEFAULT_REVISION});
+  }
+
+  async checkUgsUpstream(request) {
+    const auth = await this.authenticatedAccount(request);
+    if (!auth) return this.json({ok:false,error:'unauthorized'},401);
+    if (!(await this.consumeRateLimit('source-check:'+auth.key, 12, 60 * 60 * 1000))) {
+      return this.json({ok:false,error:'rate-limited',message:'Upstream check limit reached. Try again in about an hour.'},429);
+    }
+    const url = new URL(request.url);
+    const revision = String(url.searchParams.get('revision') || '').trim();
+    if (!/^[a-f0-9]{40}$/i.test(revision)) return this.json({ok:false,error:'invalid-revision'},400);
+    let response;
+    try {
+      response = await fetch('https://api.github.com/repos/Ultimate-Guy/cosmicgames/compare/' + revision + '...main', {
+        headers: {'Accept':'application/vnd.github+json','User-Agent':'Cosmic-Source-Lockfile-Checker/1.0'},
+        cf: {cacheTtl:300,cacheEverything:true}
+      });
+    } catch (_) {
+      return this.json({ok:false,error:'upstream-unavailable'},502);
+    }
+    if (!response.ok) {
+      return this.json({ok:false,error:response.status===404?'revision-not-found':'upstream-check-failed',upstream_status:response.status},502);
+    }
+    const data = await response.json();
+    const commits = Array.isArray(data.commits) ? data.commits : [];
+    const latestRevision = commits.length ? commits[commits.length-1].sha : revision;
+    const files = Array.isArray(data.files) ? data.files : [];
+    const gameFiles = files.filter(file => String(file.filename||'').startsWith('UGS-Files/'));
+    return this.json({
+      ok:true,
+      repository:'Ultimate-Guy/cosmicgames',
+      base_revision:revision,
+      latest_revision:latestRevision,
+      status:data.status||'unknown',
+      ahead_by:Number(data.ahead_by||0),
+      behind_by:Number(data.behind_by||0),
+      changed_file_count:files.length,
+      ugs_file_count:gameFiles.length,
+      truncated:!!data.files_truncated,
+      changed_files:gameFiles.slice(0,100).map(file=>({
+        path:String(file.filename||'').slice(0,300),
+        status:String(file.status||'modified'),
+        additions:Number(file.additions||0),
+        deletions:Number(file.deletions||0),
+        changes:Number(file.changes||0)
+      }))
+    });
+  }
+
+  async accountDataExport(request) {
+    const auth=await this.authenticatedAccount(request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    const profileRow=await this.state.storage.sql.exec('SELECT value, updated_at FROM profiles WHERE username = ?',auth.key).toArray()[0];
+    const activity=await this.state.storage.sql.exec('SELECT game_name, opens, last_opened FROM activity WHERE username = ? ORDER BY last_opened DESC LIMIT 500',auth.key).toArray();
+    const submissions=await this.state.storage.sql.exec('SELECT id, kind, name, source_url, notes, status, created_at, updated_at, reviewed_at, review_note FROM community_submissions WHERE username = ? ORDER BY created_at DESC LIMIT 100',auth.key).toArray();
+    const reviews=await this.state.storage.sql.exec('SELECT game_name, rating, result, text, status, created_at, updated_at, reviewed_at, review_note FROM community_reviews WHERE username = ? ORDER BY updated_at DESC LIMIT 200',auth.key).toArray();
+    const locks=await this.state.storage.sql.exec('SELECT id, label, status, parent_id, created_at, reviewed_at, review_note, value FROM source_lockfiles WHERE username = ? ORDER BY created_at DESC LIMIT 5',auth.key).toArray();
+    let profile={};try{profile=JSON.parse(profileRow?.value||'{}')||{}}catch(_){}
+    const scrub=value=>{
+      if(Array.isArray(value))return value.map(scrub);
+      if(value&&typeof value==='object'){
+        const clean={};
+        for(const [key,item] of Object.entries(value)){
+          if(/(?:account.?token|password|secret|authorization|session.?token)/i.test(key))continue;
+          clean[key]=scrub(item);
+        }
+        return clean;
+      }
+      return value;
+    };
+    return this.json({ok:true,exported_at:new Date().toISOString(),account:{username:auth.account.username,created_at:auth.account.created_at},profile:scrub(profile),profile_updated_at:profileRow?.updated_at||null,activity,submissions,reviews,source_lockfiles:locks.map(row=>({...row,lockfile:(()=>{try{return JSON.parse(row.value)}catch(_){return {}}})(),value:undefined}))});
+  }
+
+  async accountSessions(request) {
+    const auth=await this.authenticatedAccount(request);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    const rows=await this.state.storage.sql.exec(
+      'SELECT id, device_label, user_agent, created_at, last_seen_at, revoked_at FROM account_sessions WHERE username = ? ORDER BY created_at DESC LIMIT 30',
+      auth.key
+    ).toArray();
+    return this.json({ok:true,current_session_id:auth.session.id,sessions:rows.map(row=>({...row,current:row.id===auth.session.id}))});
+  }
+
+  async revokeAccountSessions(request) {
+    let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
+    const auth=await this.authenticatedAccount(request,body);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    const now=Date.now();
+    const sessionId=String(body.session_id||'').trim();
+    if(sessionId){
+      if(sessionId===auth.session.id)return this.json({ok:false,error:'cannot-revoke-current-session'},400);
+      const result=await this.state.storage.sql.exec(
+        'UPDATE account_sessions SET revoked_at = ? WHERE id = ? AND username = ? AND revoked_at IS NULL',
+        now,sessionId,auth.key
+      );
+      return this.json({ok:true,revoked:Number(result?.rowsWritten||0)>0,message:'Session revoked.'});
+    }
+    await this.state.storage.sql.exec(
+      'UPDATE account_sessions SET revoked_at = ? WHERE username = ? AND id <> ? AND revoked_at IS NULL',
+      now,auth.key,auth.session.id
+    );
+    const sessions=await this.state.storage.sql.exec(
+      'SELECT id, device_label, created_at, last_seen_at, revoked_at FROM account_sessions WHERE username = ? ORDER BY created_at DESC LIMIT 30',
+      auth.key
+    ).toArray();
+    return this.json({ok:true,username:auth.account.username,current_session_id:auth.session.id,sessions,message:'All other active sessions were revoked.'});
+  }
+
+  async deleteAccount(request) {
+    let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
+    const auth=await this.authenticatedAccount(request,body);
+    if(!auth)return this.json({ok:false,error:'unauthorized'},401);
+    if(String(body.confirm_username||'').trim().toLowerCase()!==auth.key)return this.json({ok:false,error:'confirmation-mismatch'},400);
+    if(auth.account.password_hash) {
+      const password=typeof body.password==='string'?body.password:'';
+      if(!password||!auth.account.password_salt||await this.passwordHash(password,auth.account.password_salt)!==auth.account.password_hash) {
+        return this.json({ok:false,error:'invalid-credentials'},401);
+      }
+    }
+    for(const table of ['activity','profiles','community_submissions','community_reviews','source_lockfiles','account_sessions']) {
+      await this.state.storage.sql.exec('DELETE FROM '+table+' WHERE username = ?',auth.key);
+    }
+    await this.state.storage.sql.exec('DELETE FROM accounts WHERE username = ?',auth.key);
+    await this.state.storage.sql.exec('DELETE FROM usernames WHERE username = ?',auth.key);
+    return this.json({ok:true,deleted:true,message:'Account and stored Cosmic Cloud records were deleted.'});
+  }
+
+  async adminCommunity(request) {
+    if(request.method==='GET') {
+      const submissions=await this.state.storage.sql.exec(
+        "SELECT id, username, kind, name, source_url, notes, status, created_at FROM community_submissions WHERE status='pending' ORDER BY created_at ASC LIMIT 100"
+      ).toArray();
+      const reviews=await this.state.storage.sql.exec(
+        "SELECT game_key, username, game_name, rating, result, text, status, created_at FROM community_reviews WHERE status='pending' ORDER BY created_at ASC LIMIT 100"
+      ).toArray();
+      const lockfiles=await this.state.storage.sql.exec(
+        "SELECT id, username, label, status, parent_id, created_at FROM source_lockfiles WHERE status='pending' ORDER BY created_at ASC LIMIT 50"
+      ).toArray();
+      return this.json({ok:true,submissions,reviews,source_lockfiles:lockfiles});
+    }
+    if(request.method!=='POST')return this.json({ok:false,error:'method-not-allowed'},405);
+    const parsed=await this.readLimitedJson(request, 16 * 1024);
+    if(!parsed.ok)return this.json({ok:false,error:parsed.error},parsed.status);
+    const body=parsed.value;
+    const type=String(body.type||'');
+    const status=body.status==='approved'?'approved':body.status==='rejected'?'rejected':'';
+    const id=String(body.id||'').trim();
+    const note=typeof body.note==='string'?body.note.trim().slice(0,500):'';
+    if(!status||!id)return this.json({ok:false,error:'missing-fields'},400);
+    const now=Date.now(),reviewer='TheDevilAngel';
+    let result;
+    if(type==='submission') result=await this.state.storage.sql.exec(
+      'UPDATE community_submissions SET status=?, updated_at=?, reviewed_at=?, reviewer=?, review_note=? WHERE id=?',status,now,now,reviewer,note,id
+    );
+    else if(type==='review') {
+      const gameKey=String(body.game_key||'').trim().slice(0,100);
+      const username=String(body.username||'').trim().toLowerCase();
+      if(!gameKey||!username)return this.json({ok:false,error:'missing-review-key'},400);
+      result=await this.state.storage.sql.exec(
+        'UPDATE community_reviews SET status=?, updated_at=?, reviewed_at=?, reviewer=?, review_note=? WHERE game_key=? AND username=?',status,now,now,reviewer,note,gameKey,username
+      );
+    } else if(type==='source_lockfile') {
+      let revisionToActivate='';
+      if(status==='approved') {
+        const row=await this.state.storage.sql.exec(
+          'SELECT value FROM source_lockfiles WHERE id = ?',id
+        ).toArray()[0];
+        if(!row) return this.json({ok:false,error:'source-snapshot-not-found'},404);
+        let snapshot={};try{snapshot=JSON.parse(row.value)||{}}catch(_){}
+        const revisions=[...new Set((Array.isArray(snapshot.games)?snapshot.games:[])
+          .filter(game=>game.source==='UGS'||String(game.source_path||'').startsWith('UGS-Files/'))
+          .map(game=>String(game.revision||''))
+          .filter(value=>/^[a-f0-9]{40}$/i.test(value)))];
+        if(revisions.length!==1) return this.json({ok:false,error:'source-revision-ambiguous',message:'An approved UGS source snapshot must contain exactly one valid pinned cosmicgames commit.'},400);
+        const verify=await fetch('https://api.github.com/repos/Ultimate-Guy/cosmicgames/commits/'+revisions[0],{
+          headers:{'Accept':'application/vnd.github+json','User-Agent':'Cosmic-Source-Lockfile-Approval/1.0'},
+          cf:{cacheTtl:300,cacheEverything:true}
+        });
+        if(!verify.ok) return this.json({ok:false,error:'source-revision-not-found',message:'The pinned revision could not be verified in Ultimate-Guy/cosmicgames.'},400);
+        revisionToActivate=revisions[0];
+      }
+      result=await this.state.storage.sql.exec(
+        'UPDATE source_lockfiles SET status=?, reviewed_at=?, reviewer=?, review_note=? WHERE id=?',status,now,reviewer,note,id
+      );
+      if(status==='approved'&&revisionToActivate) {
+        await this.state.storage.sql.exec(
+          'INSERT INTO site_state (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',
+          'cosmic_ugs_active_revision',revisionToActivate
+        );
+      }
+    } else return this.json({ok:false,error:'invalid-type'},400);
+    return this.json({ok:true,status,reviewed:result?.rowsWritten??null,active_ugs_revision:type==='source_lockfile'&&status==='approved'?revisionToActivate||null:undefined});
+  }
+
   async eventWrite(request) {
     let body;try{body=await request.json()}catch{return this.json({ok:false,error:'invalid-json'},400)}
     const event=body?.event&&typeof body.event==='object'?body.event:null;if(!event)return this.json({ok:false,error:'missing-event'},400);
@@ -158,11 +649,9 @@ class UsernameRegistry {
     const gameName = typeof body?.game_name === 'string' ? body.game_name.trim().slice(0, 120) : '';
     if (!username || !token || !gameName) return this.json({ ok: false, error: 'missing-fields' }, 400);
 
-    const key = username.toLowerCase();
-    const account = await this.state.storage.sql.exec(
-      'SELECT username, account_token FROM accounts WHERE username = ?', key
-    ).toArray()[0];
-    if (!account || account.account_token !== token) return this.json({ ok: false, error: 'unauthorized' }, 401);
+    const auth = await this.accountForToken(username, token, request);
+    if (!auth) return this.json({ ok: false, error: 'unauthorized' }, 401);
+    const key = auth.key;
 
     const gameKey = gameName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 120) || 'game';
     const now = Date.now();
@@ -714,11 +1203,23 @@ class UsernameRegistry {
       let body;
       try { body = await request.json(); } catch { return this.json({ ok: false, error: 'invalid-json' }, 400); }
       const username = typeof body?.username === 'string' ? body.username.trim() : '';
+      const password = typeof body?.password === 'string' ? body.password : '';
       if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) return this.json({ ok: false, error: 'invalid-username' }, 400);
-      return this.reserve(username);
+      if (password && password.length < 6) return this.json({ ok: false, error: 'weak-password' }, 400);
+      return this.reserve(username, password);
     }
     if (url.pathname === '/login' && request.method === 'POST') return this.accountLogin(request);
     if (url.pathname === '/password' && request.method === 'POST') return this.accountPassword(request);
+    if (url.pathname === '/sessions' && request.method === 'GET') return this.accountSessions(request);
+    if (url.pathname === '/community/submissions' && ['GET','POST'].includes(request.method)) return this.communitySubmissions(request);
+    if (url.pathname === '/community/reviews' && ['GET','POST'].includes(request.method)) return this.communityReviews(request);
+    if (url.pathname === '/source-lockfiles' && ['GET','POST'].includes(request.method)) return this.sourceLockfiles(request);
+    if (url.pathname === '/active-ugs-revision' && request.method === 'GET') return this.activeUgsRevision();
+    if (url.pathname === '/source-lockfiles/check-upstream' && request.method === 'GET') return this.checkUgsUpstream(request);
+    if (url.pathname === '/account-data' && request.method === 'GET') return this.accountDataExport(request);
+    if (url.pathname === '/revoke-sessions' && request.method === 'POST') return this.revokeAccountSessions(request);
+    if (url.pathname === '/delete-account' && request.method === 'POST') return this.deleteAccount(request);
+    if (url.pathname === '/admin/community' && ['GET','POST'].includes(request.method)) return this.adminCommunity(request);
     if (url.pathname === '/profile' && request.method === 'GET') return this.cloudProfile(request);
     if (url.pathname === '/profile' && request.method === 'POST') return this.cloudProfileWrite(request);
     if (url.pathname === '/events' && request.method === 'GET') return this.eventState(request);
@@ -734,6 +1235,7 @@ class UsernameRegistry {
   }
 }
 
+const COSMIC_UGS_DEFAULT_REVISION = 'c728ba7fc5d4392a615d0ee3ea79fd11f5f94f43';
 const COSMIC_DEPLOYMENT_COMMIT = '__COSMIC_DEPLOYMENT_COMMIT__';
 const COSMIC_DEPLOYMENT_TIMESTAMP = '__COSMIC_DEPLOYMENT_TIMESTAMP__';
 
@@ -752,7 +1254,7 @@ function corsHeaders(request) {
   const origin = request.headers.get('Origin');
   const h = new Headers({
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Cosmic-Username',
     'Cache-Control': 'no-store'
   });
   if (origin && ALLOWED_ORIGINS.has(origin)) {
@@ -952,6 +1454,15 @@ async function isMaintenanceMode(env) {
   }
 }
 
+async function forwardRegistryPath(request, env, path) {
+  const url = new URL(request.url);
+  const target = new URL(path, request.url);
+  target.search = url.search;
+  const id = env.USERNAME_REGISTRY.idFromName('global');
+  const response = await env.USERNAME_REGISTRY.get(id).fetch(new Request(target, request));
+  return forwardJsonResponse(request, response);
+}
+
 async function handleMaintenanceBypass(request, env) {
   const authorization = request.headers.get('Authorization') || '';
   return await verifyAdminSession(new Request(request.url, { headers: { Authorization: authorization } }), env);
@@ -1100,7 +1611,8 @@ function decodeSafeUgsPath(encodedPath, allowedRoot) {
 function rewriteUgsTextAsset(text, origin) {
   return text
     .replace(/(?:https?:)?\/\/(?:cdn|fastly|gcore)\.jsdelivr\.net\//gi, origin + '/ugs-cdn/')
-    .replace(/https?:\/\/raw\.githubusercontent\.com\/Ultimate-Guy\/cosmicgames\/main\//gi, origin + '/ugs-repo/');
+    .replace(/https:\/\/raw\.githubusercontent\.com\/Ultimate-Guy\/cosmicgames\/(main|[a-f0-9]{40})\//gi,
+      (_, revision) => origin + '/ugs-repo/' + revision + '/');
 }
 
 function encodeUgsPathPart(value) {
@@ -1143,17 +1655,41 @@ async function serveUgsCdn(request) {
 }
 
 async function serveUgsRepoAsset(request) {
-  return proxyUgsAsset(request, '/ugs-repo/', 'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/', 'UGS-Files');
+  const url = new URL(request.url);
+  const prefix = '/ugs-repo/';
+  if (!url.pathname.startsWith(prefix)) return null;
+  const parts = decodeSafeUgsPath(url.pathname.slice(prefix.length));
+  if (!parts || parts.length < 2) return ugsError('Invalid UGS repository asset path.');
+  const revision = parts[0] === 'main' || /^[a-f0-9]{40}$/i.test(parts[0]) ? parts.shift() : 'main';
+  if (parts[0] !== 'UGS-Files') return ugsError('UGS repository paths must stay inside UGS-Files.');
+  const normalizedUrl = new URL(url.href);
+  normalizedUrl.pathname = prefix + parts.map(encodeUgsPathPart).join('/');
+  return proxyUgsAsset(new Request(normalizedUrl.href, request), prefix,
+    'https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/' + revision + '/', null);
 }
 
-async function serveUgs(request) {
+async function serveUgs(request, env) {
   const url = new URL(request.url);
   const match = url.pathname.match(/^\/ugs\/(.+)$/);
   if (!match) return null;
   const parts = decodeSafeUgsPath(match[1]);
   if (!parts || parts.length !== 1) return ugsError('Invalid UGS path.');
-  const upstreamUrl = new URL('https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/' + encodeURIComponent(parts[0]));
-  upstreamUrl.search = url.search;
+  const requestedRef = url.searchParams.get('ref') || 'main';
+  let revision = '';
+  if (requestedRef === 'active') {
+    try {
+      const registry = env?.USERNAME_REGISTRY;
+      const response = registry ? await registry.get(registry.idFromName('global')).fetch(new Request('https://internal/active-ugs-revision')) : null;
+      const data = response?.ok ? await response.json() : null;
+      revision = /^[a-f0-9]{40}$/i.test(String(data?.revision||'')) ? String(data.revision) : COSMIC_UGS_DEFAULT_REVISION;
+    } catch (_) { revision = COSMIC_UGS_DEFAULT_REVISION; }
+  } else if (requestedRef === 'main') {
+    revision = 'main';
+  } else if (/^[a-f0-9]{40}$/i.test(requestedRef)) {
+    revision = requestedRef;
+  }
+  if (!revision) return ugsError('Invalid UGS revision. Use active, main, or a full 40-character commit SHA.');
+  const upstreamUrl = new URL('https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/' + revision + '/UGS-Files/' + encodeURIComponent(parts[0]));
   const upstream = await fetch(upstreamUrl.href, {
     headers: {'User-Agent':'Cosmic-UGS-Runtime','Accept':'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'},
     cf: {cacheTtl:3600,cacheEverything:true}
@@ -1206,8 +1742,11 @@ async function serveUgs(request) {
   // Keep the original upstream base URL. Rewriting all nested CDN assets
   // through the Worker changed package paths and broke games that worked
   // when loaded directly from jsDelivr.
+  if (revision !== 'main') {
+    html = html.replace(/(cdn\.jsdelivr\.net\/gh\/Ultimate-Guy\/cosmicgames)@main\//gi, '$1@' + revision + '/');
+  }
   if (!/<base\b/i.test(html) && /<head\b/i.test(html)) {
-    const base = '<base href="https://raw.githubusercontent.com/Ultimate-Guy/cosmicgames/main/UGS-Files/">';
+    const base = '<base href="' + url.origin + '/ugs-repo/' + revision + '/UGS-Files/">';
     html = html.replace(/<head\b[^>]*>/i, match => match + base);
   }
 
@@ -1329,6 +1868,39 @@ export default {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request) });
     if (url.pathname === '/api/admin/session') return handleAdminSession(request, env);
+    if (url.pathname === '/api/community/submissions') return forwardRegistryPath(request, env, '/community/submissions');
+    if (url.pathname === '/api/community/reviews') return forwardRegistryPath(request, env, '/community/reviews');
+    if (url.pathname === '/api/source-lockfiles') return forwardRegistryPath(request, env, '/source-lockfiles');
+    if (url.pathname === '/api/source-lockfiles/active-revision') {
+      if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/active-ugs-revision');
+    }
+    if (url.pathname === '/api/source-lockfiles/check-upstream') {
+      if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/source-lockfiles/check-upstream');
+    }
+    if (url.pathname === '/api/accounts/data') {
+      if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/account-data');
+    }
+    if (url.pathname === '/api/accounts/sessions') {
+      if (request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/sessions');
+    }
+    if (url.pathname === '/api/accounts/revoke-sessions') {
+      if (request.method !== 'POST') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/revoke-sessions');
+    }
+    if (url.pathname === '/api/accounts/delete') {
+      if (request.method !== 'POST') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/delete-account');
+    }
+    if (url.pathname === '/api/admin/community/queue' || url.pathname === '/api/admin/community/moderate') {
+      if (!(await verifyAdminSession(request, env))) return jsonResponse(request,{ok:false,error:'unauthorized'},401);
+      if (url.pathname.endsWith('/queue') && request.method !== 'GET') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      if (url.pathname.endsWith('/moderate') && request.method !== 'POST') return jsonResponse(request,{ok:false,error:'method-not-allowed'},405);
+      return forwardRegistryPath(request, env, '/admin/community');
+    }
     if (url.pathname === '/api/admin/accounts' || url.pathname === '/api/admin/account') return handleAdminAccounts(request, env);
     if (url.pathname === '/api/site-state') return handleSiteState(request, env);
     if (url.pathname === '/api/admin/site-state') return handleAdminSiteState(request, env);
@@ -1400,7 +1972,7 @@ export default {
         if (asset) return asset;
       }
       if (url.pathname.startsWith('/ugs/')) {
-        const ugs = await serveUgs(request);
+        const ugs = await serveUgs(request, env);
         if (ugs) return ugs;
       }
       const hub = await serveHub(request, env);

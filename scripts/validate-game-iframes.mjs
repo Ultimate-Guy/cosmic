@@ -78,7 +78,7 @@ function browserTargetUrl(game) {
 
 function shellUrl(game) {
   const target = browserTargetUrl(game);
-  return GAME_ORIGIN.replace(/\/+$/, '') + '/pages/lessons/game-shell.html?game=' + encodeURIComponent(target) + '&shell=ugs-direct-v3';
+  return GAME_ORIGIN.replace(/\/+$/, '') + '/pages/lessons/game-shell.html?game=' + encodeURIComponent(target) + '&shell=ugs-direct-v4&name=' + encodeURIComponent(game.name || '');
 }
 
 function sampleGames(games) {
